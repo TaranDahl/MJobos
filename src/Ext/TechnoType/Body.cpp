@@ -326,6 +326,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
 	//this->Spawner_RecycleFLH.Read(exINI, pSection, "Spawner.FLH");
 	//this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
+	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -704,6 +705,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Spawner_RecycleAnim)
 		//.Process(this->Spawner_RecycleFLH)
 		//.Process(this->Spawner_RecycleOnTurret)
+		.Process(this->FiringByPassMovingCheck)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

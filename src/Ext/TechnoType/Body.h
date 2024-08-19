@@ -266,6 +266,8 @@ public:
 		std::vector<std::vector<CoordStruct>> DeployedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> EliteDeployedWeaponBurstFLHs;
 
+		Valueable<bool> FiringByPassMovingCheck;
+
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
 			, UIDescription {}
@@ -478,6 +480,7 @@ public:
 			, Spawner_RecycleAnim { nullptr }
 			//, Spawner_RecycleFLH { {0,0,0} }
 			//, Spawner_RecycleOnTurret { false }
+			, FiringByPassMovingCheck { false }
 		{ }
 
 		virtual ~ExtData() = default;
