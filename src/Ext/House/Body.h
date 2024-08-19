@@ -36,6 +36,7 @@ public:
 		BuildingClass* Factory_AircraftType;
 
 		CDTimerClass CombatAlertTimer;
+		CDTimerClass AIFireSaleDelayTimer;
 
 		//Read from INI
 		bool RepairBaseNodes[3];
@@ -59,6 +60,7 @@ public:
 			, LastBuiltNavalVehicleType { -1 }
 			, ProducingNavalUnitTypeIndex { -1 }
 			, CombatAlertTimer {}
+			, AIFireSaleDelayTimer {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);
