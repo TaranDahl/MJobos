@@ -396,3 +396,32 @@ DEFINE_HOOK(0x4511D6, BuildingClass_AnimationAI_SellBuildup, 0x7)
 
 	return pTypeExt->SellBuildupLength == pThis->Animation.Value ? Continue : Skip;
 }
+
+// no idea why this explode.
+DEFINE_HOOK(0x47CA01, CellClass_CanThisExistHere_AmphibiousBuilding, 0xA)
+{
+	enum { Buildable = 0x47CA70, Unbuildable = 0x47C6D1, NotAmphibious = 0 };
+
+	//GET_STACK(BuildingTypeClass*, pBuildingType, STACK_OFFSET(0x18, 0x8));
+	//GET(CellClass*, pThis, EDI);
+	//static constexpr reference<char, 0x89EA60u, 400u> const someArray {};
+	//static constexpr reference<int, 0xAA0738> const someInt {};
+
+	//Debug::LogAndMessage("Here\n");
+	//int tileIdx = pThis->IsoTileTypeIndex;
+	//Debug::LogAndMessage("%d\n", tileIdx);
+	//Debug::LogAndMessage("%d\n", pThis->LandType);
+	//Debug::LogAndMessage("%d\n", pBuildingType->Strength);
+	if (false)
+	{
+		if (true//someArray[36 * (int)pThis->LandType] // land check
+			|| true)//tileIdx >= someInt && tileIdx <= someInt + 14) // naval check
+			return Buildable;
+		else
+			return Unbuildable;
+	}
+	else
+	{
+		return NotAmphibious;
+	}
+}
