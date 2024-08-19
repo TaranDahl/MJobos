@@ -35,6 +35,8 @@ public:
 		BuildingClass* Factory_NavyType;
 		BuildingClass* Factory_AircraftType;
 
+		CDTimerClass CombatAlertTimer;
+
 		//Read from INI
 		bool RepairBaseNodes[3];
 
@@ -56,6 +58,7 @@ public:
 			, RepairBaseNodes { false,false,false }
 			, LastBuiltNavalVehicleType { -1 }
 			, ProducingNavalUnitTypeIndex { -1 }
+			, CombatAlertTimer {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);

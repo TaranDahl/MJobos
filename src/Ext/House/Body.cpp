@@ -532,6 +532,7 @@ void HouseExt::ExtData::Serialize(T& Stm)
 		.Process(this->RepairBaseNodes)
 		.Process(this->LastBuiltNavalVehicleType)
 		.Process(this->ProducingNavalUnitTypeIndex)
+		.Process(this->CombatAlertTimer)
 		;
 }
 
