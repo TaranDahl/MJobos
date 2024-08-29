@@ -148,6 +148,9 @@ public:
 		ValueableVector<AttachEffectTypeClass*> SuppressReflectDamage_Types;
 
 		Nullable<bool> CombatAlert_Suppress;
+		Valueable<bool> AffectsOnFloor;
+		Valueable<bool> AffectsInAir;
+		Valueable<bool> CellSpread_Cylinder;
 
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
@@ -316,6 +319,10 @@ public:
 			, RemainingAnimCreationInterval { 0 }
 			, PossibleCellSpreadDetonate {false}
 			, DamageAreaTarget {}
+
+			, AffectsOnFloor { true }
+			, AffectsInAir { true }
+			, CellSpread_Cylinder { false }
 		{ }
 
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
