@@ -1,6 +1,7 @@
-#include <AircraftClass.h>
 #include "Body.h"
 
+#include <AircraftClass.h>
+#include <EventClass.h>
 #include <ScenarioClass.h>
 #include <TunnelLocomotionClass.h>
 
@@ -595,3 +596,69 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 
 	return aresProcess();
 }
+
+#pragma region KeepTargetOnMove
+
+// Do not explicitly reset target for KeepTargetOnMove vehicles when issued move command.
+DEFINE_HOOK(0x4C7462, EventClass_Execute_KeepTargetOnMove, 0x5)
+{
+	enum { SkipGameCode = 0x4C74C0 };
+
+	GET(EventClass*, pThis, ESI);
+	GET(TechnoClass*, pTechno, EDI);
+	GET(AbstractClass*, pTarget, EBX);
+
+	if (pTechno->WhatAmI() != AbstractType::Unit)
+		return 0;
+
+	auto const mission = static_cast<Mission>(pThis->MegaMission.Mission);
+	auto const pExt = TechnoExt::ExtMap.Find(pTechno);
+
+	if ((mission == Mission::Move)
+		&& TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType())->KeepTargetOnMove
+		&& pTechno->Target && !pTarget)
+	{
+		auto const pDestination = pThis->MegaMission.Destination.As_Abstract();
+		pTechno->SetDestination(pDestination, true);
+
+		pExt->KeepTargetOnMove = true;
+
+		return SkipGameCode;
+	}
+
+	pExt->KeepTargetOnMove = false;
+
+	return 0;
+}
+
+// Reset the target if beyond weapon range.
+// This was originally in UnitClass::Mission_Move() but because that
+// is only checked every ~15 frames, it can cause responsiveness issues.
+DEFINE_HOOK(0x736480, UnitClass_AI_KeepTargetOnMove, 0x6)
+{
+	GET(UnitClass*, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+
+	if (pTypeExt->KeepTargetOnMove && pThis->Target
+		&& pThis->CurrentMission == Mission::Move && TechnoExt::ExtMap.Find(pThis)->KeepTargetOnMove)
+	{
+		int weaponIndex = pThis->SelectWeapon(pThis->Target);
+
+		if (auto const pWeapon = pThis->GetWeapon(weaponIndex)->WeaponType)
+		{
+			int extraDistance = static_cast<int>(pTypeExt->KeepTargetOnMove_ExtraDistance.Get());
+			int range = pWeapon->Range;
+			pWeapon->Range += extraDistance; // Temporarily adjust weapon range based on the extra distance.
+
+			if (!pThis->IsCloseEnough(pThis->Target, weaponIndex))
+				pThis->SetTarget(nullptr);
+
+			pWeapon->Range = range;
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
