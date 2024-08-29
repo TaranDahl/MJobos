@@ -10,3 +10,4 @@
     Infantry firing while moving #1341
     Terror drone return fix #1342
     Two skirmish AI behavior dehardcoded and a minor improvement #1350
+    More checks for DamageArea #1334
