@@ -244,6 +244,10 @@ public:
 		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
 		//Valueable<CoordStruct> Spawner_RecycleFLH;
 		//Valueable<bool> Spawner_RecycleOnTurret;
+		Nullable<int> AINormalTargetingDelay;
+		Nullable<int> PlayerNormalTargetingDelay;
+		Nullable<int> AIGuardAreaTargetingDelay;
+		Nullable<int> PlayerGuardAreaTargetingDelay;
 
 		struct LaserTrailDataEntry
 		{
@@ -489,6 +493,10 @@ public:
 			//, Spawner_RecycleFLH { {0,0,0} }
 			//, Spawner_RecycleOnTurret { false }
 			, FiringByPassMovingCheck { false }
+			, AINormalTargetingDelay {}
+			, PlayerNormalTargetingDelay {}
+			, AIGuardAreaTargetingDelay {}
+			, PlayerGuardAreaTargetingDelay {}
 		{ }
 
 		virtual ~ExtData() = default;

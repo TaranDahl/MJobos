@@ -171,6 +171,11 @@ public:
 
 		Valueable<bool> CylinderRangefinding;
 
+		Nullable<int> AINormalTargetingDelay;
+		Nullable<int> PlayerNormalTargetingDelay;
+		Nullable<int> AIGuardAreaTargetingDelay;
+		Nullable<int> PlayerGuardAreaTargetingDelay;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -299,6 +304,10 @@ public:
 			, CylinderRangefinding { false }
 			, BuildingWaypoint { false }
 			, AircraftWaypoint { false }
+			, AINormalTargetingDelay {}
+			, PlayerNormalTargetingDelay {}
+			, AIGuardAreaTargetingDelay {}
+			, PlayerGuardAreaTargetingDelay {}
 		{ }
 
 		virtual ~ExtData() = default;
