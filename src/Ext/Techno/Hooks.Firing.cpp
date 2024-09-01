@@ -585,6 +585,52 @@ DEFINE_HOOK(0x6FF4CC, TechnoClass_FireAt_ToggleLaserWeaponIndex, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK_AGAIN(0x6FE71C, TechnoClass_Fire_BallisticScatterPhobos, 0x6);
+DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
+{
+	GET_STACK(BulletTypeClass*, pProjectile, 0x68);
+	GET(TechnoClass*, pThis, ESI);
+	GET_BASE(AbstractClass*, pTarget, 0x8);
+	GET_STACK(WeaponTypeClass*, pWeapon, STACK_OFFSET(0xB0, -0x70));
+
+	auto pExt = BulletTypeExt::ExtMap.Find(pProjectile);
+
+	bool shouldScatter = ScenarioClass::Instance->Random.RandomRanged(0, 100) <= pExt->BallisticScatter_Chance * 100;
+
+	if (!shouldScatter)
+	{
+		R->EAX(0);
+		return 0;
+	}
+
+	// defaults for !FlakScatter || Inviso
+	int globalScatter = RulesClass::Instance->BallisticScatter;
+	int min = pExt->BallisticScatter_Min.Get(Leptons(globalScatter / 2));
+	int max = pExt->BallisticScatter_Max.Get(Leptons(globalScatter));
+
+	if (pExt->BallisticScatter_IncreaseByRange)
+	{
+		int minInMinRange = pExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
+		int minInMaxRange = pExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
+		int maxInMinRange = pExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
+		int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
+		int minRange = pExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+		int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+		int deltaRange = maxRange - minRange;
+		int deltaRangeReal = (pTarget->GetCoords() - pThis->GetCoords()).Magnitude() - minRange;
+		double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
+		if (rangePercent < 0)
+			rangePercent = 0;
+		min = minInMinRange + rangePercent * (minInMaxRange - minInMinRange);
+		max = maxInMinRange + rangePercent * (maxInMaxRange - maxInMinRange);
+	}
+
+	int scatter = ScenarioClass::Instance->Random.RandomRanged(min, max);
+
+	R->EAX(scatter);
+	return 0;
+}
+
 #pragma endregion
 
 #pragma region TechnoClass_GetFLH

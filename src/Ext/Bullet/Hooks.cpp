@@ -398,11 +398,40 @@ DEFINE_HOOK(0x4687F8, BulletClass_Unlimbo_FlakScatter, 0x6)
 	{
 		if (auto const pTypeExt = BulletTypeExt::ExtMap.Find(pThis->Type))
 		{
+			if (!(ScenarioClass::Instance->Random.RandomRanged(0, 100) <= pTypeExt->BallisticScatter_Chance * 100))
+			{
+				R->EAX(0);
+				return 0;
+			}
+
 			int defaultValue = RulesClass::Instance->BallisticScatter;
 			int min = pTypeExt->BallisticScatter_Min.Get(Leptons(0));
 			int max = pTypeExt->BallisticScatter_Max.Get(Leptons(defaultValue));
+			int result;
 
-			int result = (int)((mult * ScenarioClass::Instance->Random.RandomRanged(2 * min, 2 * max)) / pThis->WeaponType->Range);
+			if (pTypeExt->BallisticScatter_IncreaseByRange)
+			{
+				auto pWeapon = pThis->WeaponType;
+				int minInMinRange = pTypeExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
+				int minInMaxRange = pTypeExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
+				int maxInMinRange = pTypeExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
+				int maxInMaxRange = pTypeExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
+				int minRange = pTypeExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+				int maxRange = pTypeExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+				int deltaRange = maxRange - minRange;
+				int deltaRangeReal = mult - minRange;
+				double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
+				if (rangePercent < 0)
+					rangePercent = 0;
+				min = minInMinRange + rangePercent * (minInMaxRange - minInMinRange);
+				max = maxInMinRange + rangePercent * (maxInMaxRange - maxInMinRange);
+				result = ScenarioClass::Instance->Random.RandomRanged(min, max);
+			}
+			else
+			{
+				result = (int)((mult * ScenarioClass::Instance->Random.RandomRanged(2 * min, 2 * max)) / pThis->WeaponType->Range);
+			}
+
 			R->EAX(result);
 		}
 	}

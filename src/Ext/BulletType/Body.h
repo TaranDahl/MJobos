@@ -46,6 +46,15 @@ public:
 		Valueable<bool> Arcing_AllowElevationInaccuracy;
 		Valueable<WeaponTypeClass*> ReturnWeapon;
 
+		Valueable<bool> BallisticScatter_IncreaseByRange;
+		Nullable<Leptons> BallisticScatter_MinRange;
+		Nullable<Leptons> BallisticScatter_MaxRange;
+		Nullable<Leptons> BallisticScatter_Min_InMinRange;
+		Nullable<Leptons> BallisticScatter_Min_InMaxRange;
+		Nullable<Leptons> BallisticScatter_Max_InMinRange;
+		Nullable<Leptons> BallisticScatter_Max_InMaxRange;
+		Valueable<double> BallisticScatter_Chance;
+
 		// Ares 0.7
 		Nullable<Leptons> BallisticScatter_Min;
 		Nullable<Leptons> BallisticScatter_Max;
@@ -73,6 +82,14 @@ public:
 			, AAOnly { false }
 			, Arcing_AllowElevationInaccuracy { true }
 			, ReturnWeapon {}
+			, BallisticScatter_IncreaseByRange { false }
+			, BallisticScatter_MinRange {}
+			, BallisticScatter_MaxRange {}
+			, BallisticScatter_Min_InMinRange {}
+			, BallisticScatter_Min_InMaxRange {}
+			, BallisticScatter_Max_InMinRange {}
+			, BallisticScatter_Max_InMaxRange {}
+			, BallisticScatter_Chance { 1.0 }
 		{ }
 
 		virtual ~ExtData() = default;
