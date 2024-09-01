@@ -276,6 +276,7 @@ public:
 		std::vector<std::vector<CoordStruct>> EliteDeployedWeaponBurstFLHs;
 
 		Valueable<bool> FiringByPassMovingCheck;
+		Valueable<bool> SkipCrushSlowdown;
 
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
@@ -499,6 +500,7 @@ public:
 			, AIGuardAreaTargetingDelay {}
 			, PlayerGuardAreaTargetingDelay {}
 			, KeepWarping { false }
+			, SkipCrushSlowdown { false }
 		{ }
 
 		virtual ~ExtData() = default;

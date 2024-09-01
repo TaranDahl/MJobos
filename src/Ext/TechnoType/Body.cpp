@@ -337,6 +337,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 
 	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
+	this->SkipCrushSlowdown.Read(exINI, pSection, "SkipCrushSlowdown");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -725,6 +726,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIGuardAreaTargetingDelay)
 		.Process(this->PlayerGuardAreaTargetingDelay)
 		.Process(this->KeepWarping)
+		.Process(this->SkipCrushSlowdown)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
