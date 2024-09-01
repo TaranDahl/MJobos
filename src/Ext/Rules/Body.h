@@ -186,6 +186,9 @@ public:
 
 		Valueable<bool> PlayerAutoRepair;
 
+		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
+		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -324,6 +327,8 @@ public:
 			, AIAttackIronCurtain { false }
 			, PlayerReturnFire_Smarter { false }
 			, PlayerAutoRepair { false }
+			, EVA_WeCaptureABuilding {}
+			, EVA_OurBuildingIsCaptured {}
 		{ }
 
 		virtual ~ExtData() = default;
