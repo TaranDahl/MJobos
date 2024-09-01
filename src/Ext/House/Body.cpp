@@ -727,6 +727,10 @@ DEFINE_HOOK(0x4F6532, HouseClass_CTOR, 0x5)
 	GET(HouseClass*, pItem, EAX);
 
 	HouseExt::ExtMap.TryAllocate(pItem);
+
+	if (RulesExt::Global()->EnablePowerSurplus)
+		pItem->PowerSurplus = RulesClass::Instance->PowerSurplus;
+
 	return 0;
 }
 
@@ -735,6 +739,7 @@ DEFINE_HOOK(0x4F7371, HouseClass_DTOR, 0x6)
 	GET(HouseClass*, pItem, ESI);
 
 	HouseExt::ExtMap.Remove(pItem);
+
 	return 0;
 }
 
@@ -752,12 +757,14 @@ DEFINE_HOOK(0x503040, HouseClass_SaveLoad_Prefix, 0x5)
 DEFINE_HOOK(0x504069, HouseClass_Load_Suffix, 0x7)
 {
 	HouseExt::ExtMap.LoadStatic();
+
 	return 0;
 }
 
 DEFINE_HOOK(0x5046DE, HouseClass_Save_Suffix, 0x7)
 {
 	HouseExt::ExtMap.SaveStatic();
+
 	return 0;
 }
 
