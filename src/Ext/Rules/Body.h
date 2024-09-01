@@ -184,6 +184,8 @@ public:
 		Valueable<bool> AIAttackIronCurtain;
 		Valueable<bool> PlayerReturnFire_Smarter;
 
+		Valueable<bool> PlayerAutoRepair;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -321,6 +323,7 @@ public:
 			, PlayerAttackIronCurtain { true }
 			, AIAttackIronCurtain { false }
 			, PlayerReturnFire_Smarter { false }
+			, PlayerAutoRepair { false }
 		{ }
 
 		virtual ~ExtData() = default;

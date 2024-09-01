@@ -221,6 +221,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerAttackIronCurtain.Read(exINI, GameStrings::General, "PlayerAttackIronCurtain");
 	this->AIAttackIronCurtain.Read(exINI, GameStrings::General, "AIAttackIronCurtain");
 	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
+	this->PlayerAutoRepair.Read(exINI, GameStrings::General, "PlayerAutoRepair");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -420,6 +421,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerAttackIronCurtain)
 		.Process(this->AIAttackIronCurtain)
 		.Process(this->PlayerReturnFire_Smarter)
+		.Process(this->PlayerAutoRepair)
 		;
 }
 

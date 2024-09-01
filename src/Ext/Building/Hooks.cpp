@@ -504,3 +504,21 @@ DEFINE_HOOK(0x449149, BuildingClass_Captured_FactoryPlant2, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
+{
+	GET(BuildingClass*, pThis, ECX);
+
+	auto const pOwner = pThis->Owner;
+	auto const mission = pThis->CurrentMission;
+
+	if (pThis->Health < pThis->GetTechnoType()->Strength
+		&& pThis->Type->ClickRepairable
+		&& mission != Mission::Construction && mission != Mission::Selling
+		&& (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman()) && RulesExt::Global()->PlayerAutoRepair)
+	{
+		pThis->IsBeingRepaired = true;
+	}
+
+	return 0;
+}
