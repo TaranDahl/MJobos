@@ -178,6 +178,8 @@ public:
 
 		Valueable<bool> StopPlanningOnEnter;
 
+		Valueable<bool> StrafingTargetScatter;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -311,6 +313,7 @@ public:
 			, AIGuardAreaTargetingDelay {}
 			, PlayerGuardAreaTargetingDelay {}
 			, StopPlanningOnEnter { true }
+			, StrafingTargetScatter { true }
 		{ }
 
 		virtual ~ExtData() = default;

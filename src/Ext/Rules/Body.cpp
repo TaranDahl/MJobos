@@ -217,6 +217,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AIGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "AIGuardAreaTargetingDelay");
 	this->PlayerGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "PlayerGuardAreaTargetingDelay");
 	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
+	this->StrafingTargetScatter.Read(exINI, GameStrings::General, "StrafingTargetScatter");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -412,6 +413,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIGuardAreaTargetingDelay)
 		.Process(this->PlayerGuardAreaTargetingDelay)
 		.Process(this->StopPlanningOnEnter)
+		.Process(this->StrafingTargetScatter)
 		;
 }
 
