@@ -218,6 +218,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "PlayerGuardAreaTargetingDelay");
 	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 	this->StrafingTargetScatter.Read(exINI, GameStrings::General, "StrafingTargetScatter");
+	this->PlayerAttackIronCurtain.Read(exINI, GameStrings::General, "PlayerAttackIronCurtain");
+	this->AIAttackIronCurtain.Read(exINI, GameStrings::General, "AIAttackIronCurtain");
+	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -414,6 +417,9 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerGuardAreaTargetingDelay)
 		.Process(this->StopPlanningOnEnter)
 		.Process(this->StrafingTargetScatter)
+		.Process(this->PlayerAttackIronCurtain)
+		.Process(this->AIAttackIronCurtain)
+		.Process(this->PlayerReturnFire_Smarter)
 		;
 }
 

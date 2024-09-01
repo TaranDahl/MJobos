@@ -1,5 +1,6 @@
 #include "Body.h"
 
+#include <Ext/WeaponType/Body.h>
 #include <SpawnManagerClass.h>
 #include <Ext/WeaponType/Body.h>
 
@@ -400,3 +401,55 @@ DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint2, 
 //	R->ESP(false);
 //	return 0;
 //}
+DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
+{
+	enum { SkipReturnFire = 0x702B47, NotSkip = 0 };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	auto pOwner = pThis->Owner;
+
+	if (!(pOwner->IsHumanPlayer || pOwner->IsInPlayerControl) || !RulesExt::Global()->PlayerReturnFire_Smarter)
+		return NotSkip;
+
+	auto pTarget = pThis->Target;
+
+	if (pTarget)
+		return SkipReturnFire;
+
+	auto mission = pThis->CurrentMission;
+	auto pThisFoot = abstract_cast<FootClass*>(pThis);
+	bool isJJMoving = pThisFoot != 0 ? pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now() : 0; // I have really no idea about how to check this perfectly.
+	bool isMoving = pThisFoot != 0 ? isJJMoving || (mission == Mission::Move && pThisFoot->GetHeight() <= 0) : 0;
+
+	if (isMoving)
+		return SkipReturnFire;
+	else
+		return NotSkip;
+}
+
+DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
+{
+	enum { CantFire = 0x6FC86A, GoOtherChecks = 0x6FC24D };
+
+	GET(TechnoClass*, pThis, ESI);
+	GET(ObjectClass*, pTarget, EBP);
+	GET_STACK(int, wpIdx, STACK_OFFSET(0x20, 0x8));
+
+	auto const pRules = RulesExt::Global();
+	auto pOwner = pThis->Owner;
+
+	if (!pTarget->IsIronCurtained())
+		return GoOtherChecks;
+
+	auto pWpExt = WeaponTypeExt::ExtMap.Find(pThis->GetWeapon(wpIdx)->WeaponType);
+	bool isPlayer = pOwner->IsHumanPlayer || pOwner->IsInPlayerControl;
+	bool isHealing = pThis->CombatDamage(wpIdx) < 0;
+
+	if (isPlayer ? pRules->PlayerAttackIronCurtain : pRules->AIAttackIronCurtain)
+		return GoOtherChecks;
+	else if (pWpExt && pWpExt->AttackIronCurtain.Get(isHealing))
+		return GoOtherChecks;
+	else
+		return CantFire;
+}

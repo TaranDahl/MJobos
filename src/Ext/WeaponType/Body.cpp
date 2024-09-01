@@ -113,6 +113,7 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AttachEffect_IgnoreFromSameSource.Read(exINI, pSection, "AttachEffect.IgnoreFromSameSource");
 	this->KickOutPassengers.Read(exINI, pSection, "KickOutPassengers");
 	this->CylinderRangefinding.Read(exINI, pSection, "CylinderRangefinding");
+	this->AttackIronCurtain.Read(exINI, pSection, "AttackIronCurtain");
 }
 
 template <typename T>
@@ -156,6 +157,7 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AttachEffect_IgnoreFromSameSource)
 		.Process(this->KickOutPassengers)
 		.Process(this->CylinderRangefinding)
+		.Process(this->AttackIronCurtain)
 		;
 };
 

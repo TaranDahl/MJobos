@@ -58,6 +58,7 @@ public:
 		Valueable<bool> AttachEffect_IgnoreFromSameSource;
 		Valueable<bool> KickOutPassengers;
 		Nullable<bool> CylinderRangefinding;
+		Nullable<bool> AttackIronCurtain;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
 			, DiskLaser_Radius { DiskLaserClass::Radius }
@@ -97,6 +98,7 @@ public:
 			, AttachEffect_IgnoreFromSameSource { false }
 			, KickOutPassengers { true }
 			, CylinderRangefinding {}
+			, AttackIronCurtain {}
 		{ }
 
 		int GetBurstDelay(int burstIndex) const;
