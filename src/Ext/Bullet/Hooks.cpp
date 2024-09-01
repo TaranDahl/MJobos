@@ -421,8 +421,13 @@ DEFINE_HOOK(0x4687F8, BulletClass_Unlimbo_FlakScatter, 0x6)
 				int deltaRange = maxRange - minRange;
 				int deltaRangeReal = mult - minRange;
 				double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
+
 				if (rangePercent < 0)
 					rangePercent = 0;
+
+				if (rangePercent > 1)
+					rangePercent = 1;
+
 				min = minInMinRange + rangePercent * (minInMaxRange - minInMinRange);
 				max = maxInMinRange + rangePercent * (maxInMaxRange - maxInMinRange);
 				result = ScenarioClass::Instance->Random.RandomRanged(min, max);
