@@ -353,6 +353,7 @@ DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter1, 0x6)
 
 	GET(int, planResult, ESI);
 
+	Debug::LogAndMessage("Hook1\n");
 	if (planResult == 0 && !RulesExt::Global()->StopPlanningOnEnter)
 		return SkipDeselect;
 	else
@@ -363,16 +364,18 @@ DEFINE_HOOK(0x637479, UnknownClass_PlanWaypoint_DisableMessage1, 0x5)
 {
 	enum { SkipMessage = 0x63748A, DoNotSkip = 0 };
 
+	Debug::LogAndMessage("Hook2\n");
 	if (!RulesExt::Global()->StopPlanningOnEnter)
 		return SkipMessage;
 	else
 		return DoNotSkip;
 }
 
-DEFINE_HOOK(0x637491, UnknownClass_PlanWaypoint_DisableMessage2, 0x5)
+DEFINE_HOOK(0x63748A, UnknownClass_PlanWaypoint_DisableMessage2, 0x7)
 {
 	enum { SkipMessage = 0x637524, DoNotSkip = 0 };
 
+	Debug::LogAndMessage("Hook3\n");
 	if (!RulesExt::Global()->StopPlanningOnEnter)
 		return SkipMessage;
 	else
@@ -381,12 +384,23 @@ DEFINE_HOOK(0x637491, UnknownClass_PlanWaypoint_DisableMessage2, 0x5)
 
 DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint2, 0x5)
 {
-	enum { SkipDeselect = 0x638D8D, DoNotSkip = 0 };
+	enum { SkipDeselect = 0x638D8D, JZAddress = 0x638D82, NZAddress = 0x638D78 };
 
+	GET(int, action, EAX)
+
+	Debug::LogAndMessage("Hook4\n");
 	if (!RulesExt::Global()->StopPlanningOnEnter)
+	{
 		return SkipDeselect;
+	}
+	else if (action == 7)
+	{
+		return JZAddress;
+	}
 	else
-		return DoNotSkip;
+	{
+		return NZAddress;
+	}
 }
 
 // 航味麻酱: No idea about why these did not works. Not important though. Here is the assembly:
