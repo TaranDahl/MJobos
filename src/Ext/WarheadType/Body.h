@@ -150,6 +150,9 @@ public:
 		Nullable<bool> CombatAlert_Suppress;
 		Valueable<bool> AffectsOnFloor;
 		Valueable<bool> AffectsInAir;
+		Valueable<bool> AffectsUnderground;
+		Valueable<bool> PlayAnimUnderground;
+		Valueable<bool> PlayAnimAboveSurface;
 		Valueable<bool> CellSpread_Cylinder;
 
 		// Ares tags
@@ -318,10 +321,13 @@ public:
 			, Reflected { false }
 			, RemainingAnimCreationInterval { 0 }
 			, PossibleCellSpreadDetonate {false}
-			, DamageAreaTarget {}
 
+			, DamageAreaTarget {}
 			, AffectsOnFloor { true }
 			, AffectsInAir { true }
+			, AffectsUnderground { false }
+			, PlayAnimUnderground { true }
+			, PlayAnimAboveSurface { false }
 			, CellSpread_Cylinder { false }
 		{ }
 

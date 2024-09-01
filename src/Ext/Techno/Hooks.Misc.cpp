@@ -1,4 +1,5 @@
 #include "Body.h"
+#include "Ext/BulletType/Body.h"
 
 #include <Ext/WeaponType/Body.h>
 #include <SpawnManagerClass.h>
@@ -494,4 +495,22 @@ DEFINE_HOOK(0x709A43, TechnoClass_EnterIdleMode_TemporalLetGo, 0x7)
 		return LetGo;
 	else
 		return SkipLetGo;
+}
+
+DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
+{
+	enum { FireIsOK = 0x700246, FireIsNotOK = 0x70056C };
+
+	GET(ObjectClass*, pObject, EDI);
+	GET(TechnoClass*, pThis, ESI);
+	GET(int, wpIdx, EAX);
+
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : 0;
+	bool isSurfaced = pObject->IsSurfaced();
+
+	if (!isSurfaced && (!pProjExt || !pProjExt->AU))
+		return FireIsNotOK;
+
+	return FireIsOK;
 }

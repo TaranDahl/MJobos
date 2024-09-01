@@ -54,6 +54,7 @@ public:
 		Nullable<Leptons> BallisticScatter_Max_InMinRange;
 		Nullable<Leptons> BallisticScatter_Max_InMaxRange;
 		Valueable<double> BallisticScatter_Chance;
+		Valueable<bool> AU;
 
 		// Ares 0.7
 		Nullable<Leptons> BallisticScatter_Min;
@@ -90,6 +91,7 @@ public:
 			, BallisticScatter_Max_InMinRange {}
 			, BallisticScatter_Max_InMaxRange {}
 			, BallisticScatter_Chance { 1.0 }
+			, AU { false }
 		{ }
 
 		virtual ~ExtData() = default;
