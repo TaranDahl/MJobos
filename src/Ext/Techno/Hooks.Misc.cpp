@@ -207,3 +207,16 @@ DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
 
 	return ret;
 }
+
+bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
+{
+	return RulesExt::Global()->BuildingWaypoint;
+}
+
+bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
+{
+	return RulesExt::Global()->AircraftWaypoint;
+}
+
+DEFINE_JUMP(VTABLE, 0x7E4610, GET_OFFSET(BuildingTypeClass_CanUseWaypoint))
+DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))

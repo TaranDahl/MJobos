@@ -180,6 +180,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DropPodTrailer = droppod_trailer.Get(AnimTypeClass::Find("SMOKEY"));// Ares convention
 	this->PodImage = FileSystem::LoadSHPFile("POD.SHP");
 
+	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
+	this->AircraftWaypoint.Read(exINI, GameStrings::General, "AircraftWaypoint");
+
 	this->Buildings_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Buildings.DefaultDigitalDisplayTypes");
 	this->Infantry_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Infantry.DefaultDigitalDisplayTypes");
 	this->Vehicles_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Vehicles.DefaultDigitalDisplayTypes");
@@ -380,6 +383,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PodImage)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
+		.Process(this->AircraftWaypoint)
+		.Process(this->BuildingWaypoint)
 		.Process(this->UseFixedVoxelLighting)
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_IgnoreBuilding)

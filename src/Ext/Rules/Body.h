@@ -150,6 +150,8 @@ public:
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
+		Valueable<bool> BuildingWaypoint;
+		Valueable<bool> AircraftWaypoint;
 
 		Valueable<bool> CombatAlert;
 		Valueable<bool> CombatAlert_IgnoreBuilding;
@@ -295,6 +297,8 @@ public:
 			, RepairBaseNodes {}
 			, MCVRedeploysInCampaign { false }
 			, CylinderRangefinding { false }
+			, BuildingWaypoint { false }
+			, AircraftWaypoint { false }
 		{ }
 
 		virtual ~ExtData() = default;
