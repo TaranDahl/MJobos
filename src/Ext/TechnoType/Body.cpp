@@ -336,6 +336,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	//this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
 	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 
+	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
+
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
 
@@ -722,6 +724,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerNormalTargetingDelay)
 		.Process(this->AIGuardAreaTargetingDelay)
 		.Process(this->PlayerGuardAreaTargetingDelay)
+		.Process(this->KeepWarping)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

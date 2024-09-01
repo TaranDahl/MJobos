@@ -248,6 +248,7 @@ public:
 		Nullable<int> PlayerNormalTargetingDelay;
 		Nullable<int> AIGuardAreaTargetingDelay;
 		Nullable<int> PlayerGuardAreaTargetingDelay;
+		Valueable<bool> KeepWarping;
 
 		struct LaserTrailDataEntry
 		{
@@ -497,6 +498,7 @@ public:
 			, PlayerNormalTargetingDelay {}
 			, AIGuardAreaTargetingDelay {}
 			, PlayerGuardAreaTargetingDelay {}
+			, KeepWarping { false }
 		{ }
 
 		virtual ~ExtData() = default;
