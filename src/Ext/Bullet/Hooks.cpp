@@ -422,11 +422,7 @@ DEFINE_HOOK(0x4687F8, BulletClass_Unlimbo_FlakScatter, 0x6)
 				int deltaRangeReal = mult - minRange;
 				double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
 
-				if (rangePercent < 0)
-					rangePercent = 0;
-
-				if (rangePercent > 1)
-					rangePercent = 1;
+				rangePercent = Math::clamp(rangePercent, 0, 1);
 
 				min = minInMinRange + rangePercent * (minInMaxRange - minInMinRange);
 				max = maxInMinRange + rangePercent * (maxInMaxRange - maxInMinRange);
