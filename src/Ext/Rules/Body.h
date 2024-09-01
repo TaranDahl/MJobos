@@ -167,6 +167,8 @@ public:
 		ValueableVector<bool> RepairBaseNodes;
 		Valueable<bool> MCVRedeploysInCampaign;
 
+		Valueable<bool> CylinderRangefinding;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -292,6 +294,7 @@ public:
 			, AIAllToHunt { true }
 			, RepairBaseNodes {}
 			, MCVRedeploysInCampaign { false }
+			, CylinderRangefinding { false }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -208,6 +208,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AIAllToHunt.Read(exINI, GameStrings::General, "AIAllToHunt");
 	this->RepairBaseNodes.Read(exINI, GameStrings::General, "RepairBaseNodes");
 	this->MCVRedeploysInCampaign.Read(exINI, GameStrings::General, "MCVRedeploysInCampaign");
+	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -395,6 +396,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIAllToHunt)
 		.Process(this->RepairBaseNodes)
 		.Process(this->MCVRedeploysInCampaign)
+		.Process(this->CylinderRangefinding)
 		;
 }
 

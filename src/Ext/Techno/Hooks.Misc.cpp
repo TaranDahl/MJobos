@@ -1,6 +1,7 @@
 #include "Body.h"
 
 #include <SpawnManagerClass.h>
+#include <Ext/WeaponType/Body.h>
 
 DEFINE_HOOK(0x6B0B9C, SlaveManagerClass_Killed_DecideOwner, 0x6)
 {
@@ -178,4 +179,31 @@ DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
 		return SkipRegroup;
 	else
 		return DoNotSkipRegroup;
+}
+
+DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
+{
+	enum { ret = 0x6F789A };
+
+	GET(WeaponTypeClass* const, pWeaponType, EDI);
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeaponType);
+	bool cylinder = RulesExt::Global()->CylinderRangefinding;
+
+	if (pWeaponExt)
+	{
+		cylinder = pWeaponExt->CylinderRangefinding.Get(cylinder);
+	}
+
+	if (cylinder)
+	{
+		R->AL(true);
+	}
+	else
+	{
+		R->AL(pThis->IsInAir()); // vanilla check
+	}
+
+	return ret;
 }
