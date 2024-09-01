@@ -176,6 +176,8 @@ public:
 		Nullable<int> AIGuardAreaTargetingDelay;
 		Nullable<int> PlayerGuardAreaTargetingDelay;
 
+		Valueable<bool> StopPlanningOnEnter;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -308,6 +310,7 @@ public:
 			, PlayerNormalTargetingDelay {}
 			, AIGuardAreaTargetingDelay {}
 			, PlayerGuardAreaTargetingDelay {}
+			, StopPlanningOnEnter { true }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -280,3 +280,50 @@ DEFINE_HOOK(0x70989C, TechnoClass_TargetAndEstimateDamage_ScanDelayNormal, 0x6)
 
 	return 0;
 }
+
+//DEFINE_HOOK(0x63A4D4, UnknownClass_PlanWaypoint_ContinuePlanningWaypoint1, 0x7)
+//{
+//	return 0x63A573;
+//}
+
+DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter1, 0x6)
+{
+	enum { SkipDeselect = 0x637468, DoNotSkip = 0 };
+
+	GET(int, planResult, ESI);
+
+	if (planResult == 0 && !RulesExt::Global()->StopPlanningOnEnter)
+		return SkipDeselect;
+	else
+		return DoNotSkip;
+}
+
+DEFINE_HOOK(0x637479, UnknownClass_PlanWaypoint_DisableMessage1, 0x5)
+{
+	enum { SkipMessage = 0x63748A, DoNotSkip = 0 };
+
+	if (!RulesExt::Global()->StopPlanningOnEnter)
+		return SkipMessage;
+	else
+		return DoNotSkip;
+}
+
+DEFINE_HOOK(0x637491, UnknownClass_PlanWaypoint_DisableMessage2, 0x5)
+{
+	enum { SkipMessage = 0x637524, DoNotSkip = 0 };
+
+	if (!RulesExt::Global()->StopPlanningOnEnter)
+		return SkipMessage;
+	else
+		return DoNotSkip;
+}
+
+DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint2, 0x5)
+{
+	enum { SkipDeselect = 0x638D8D, DoNotSkip = 0 };
+
+	if (!RulesExt::Global()->StopPlanningOnEnter)
+		return SkipDeselect;
+	else
+		return DoNotSkip;
+}
