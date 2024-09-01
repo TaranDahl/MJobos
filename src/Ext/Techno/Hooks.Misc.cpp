@@ -206,6 +206,8 @@ DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
 	{
 		R->AL(pThis->IsInAir()); // vanilla check
 	}
+
+	return ret;
 }
 
 DEFINE_HOOK(0x41847E, AircraftClass_MissionAttack_ScatterCell1, 0x6)
