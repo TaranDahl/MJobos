@@ -342,65 +342,33 @@ DEFINE_HOOK(0x70989C, TechnoClass_TargetAndEstimateDamage_ScanDelayNormal, 0x6)
 	return 0;
 }
 
-//DEFINE_HOOK(0x63A4D4, UnknownClass_PlanWaypoint_ContinuePlanningWaypoint1, 0x7)
-//{
-//	return 0x63A573;
-//}
-
-DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter1, 0x6)
+DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter, 0x6)
 {
-	enum { SkipDeselect = 0x637468, DoNotSkip = 0 };
+	enum { SkipDeselect = 0x637468 };
 
 	GET(int, planResult, ESI);
 
-	Debug::LogAndMessage("Hook1\n");
-	if (planResult == 0 && !RulesExt::Global()->StopPlanningOnEnter)
+	return (!planResult && !RulesExt::Global()->StopPlanningOnEnter) ? SkipDeselect : 0;
+}
+
+DEFINE_HOOK(0x637479, UnknownClass_PlanWaypoint_DisableMessage, 0x5)
+{
+	enum { SkipMessage = 0x637524 };
+	return (!RulesExt::Global()->StopPlanningOnEnter) ? SkipMessage : 0;
+}
+
+DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint, 0x5)
+{
+	enum { SkipDeselect = 0x638D8D, Deselect = 0x638D82 };
+
+	GET(Action, action, EAX);
+
+	if (!RulesExt::Global()->StopPlanningOnEnter)
 		return SkipDeselect;
-	else
-		return DoNotSkip;
-}
+	else if (action == Action::Select || action == Action::ToggleSelect || action == Action::Capture)
+		return Deselect;
 
-DEFINE_HOOK(0x637479, UnknownClass_PlanWaypoint_DisableMessage1, 0x5)
-{
-	enum { SkipMessage = 0x63748A, DoNotSkip = 0 };
-
-	Debug::LogAndMessage("Hook2\n");
-	if (!RulesExt::Global()->StopPlanningOnEnter)
-		return SkipMessage;
-	else
-		return DoNotSkip;
-}
-
-DEFINE_HOOK(0x63748A, UnknownClass_PlanWaypoint_DisableMessage2, 0x7)
-{
-	enum { SkipMessage = 0x637524, DoNotSkip = 0 };
-
-	Debug::LogAndMessage("Hook3\n");
-	if (!RulesExt::Global()->StopPlanningOnEnter)
-		return SkipMessage;
-	else
-		return DoNotSkip;
-}
-
-DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint2, 0x5)
-{
-	enum { SkipDeselect = 0x638D8D, JZAddress = 0x638D82, NZAddress = 0x638D78 };
-
-	GET(int, action, EAX)
-
-	Debug::LogAndMessage("Hook4\n");
-	if (!RulesExt::Global()->StopPlanningOnEnter)
-	{
-		return SkipDeselect;
-	}
-	else if (action == 7)
-	{
-		return JZAddress;
-	}
-	else
-	{
-		return NZAddress;
-	}
+	return SkipDeselect;
 }
 
 // 航味麻酱: No idea about why these did not works. Not important though. Here is the assembly:
