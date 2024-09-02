@@ -530,3 +530,31 @@ DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
 
 	return FireIsOK;
 }
+
+// This is a fix to KeepWarping.
+// But I think it has no difference with vanilla behavior, so no check for KeepWarping.
+DEFINE_HOOK(0x4C7643, EventClass_RespondToEvent_StopTemporal, 0x6)
+{
+	GET(TechnoClass*, pTechno, ESI);
+
+	auto const pTemporal = pTechno->TemporalImUsing;
+
+	if (pTemporal && pTemporal->Target)
+		pTemporal->LetGo();
+
+	return 0;
+}
+
+DEFINE_HOOK(0x71A7A8, TemporalClass_Update_CheckRange, 0x6)
+{
+	enum { DontCheckRange = 0x71A84E, CheckRange = 0x71A7B4 };
+
+	GET(TechnoClass*, pTechno, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+
+	if (pTechno->InOpenToppedTransport || (pTypeExt && pTypeExt->KeepWarping))
+		return CheckRange;
+
+	return DontCheckRange;
+}

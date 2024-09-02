@@ -249,6 +249,7 @@ public:
 		Nullable<int> AIGuardAreaTargetingDelay;
 		Nullable<int> PlayerGuardAreaTargetingDelay;
 		Valueable<bool> KeepWarping;
+		Nullable<int> KeepWarping_Distance;
 
 		struct LaserTrailDataEntry
 		{
@@ -500,6 +501,7 @@ public:
 			, AIGuardAreaTargetingDelay {}
 			, PlayerGuardAreaTargetingDelay {}
 			, KeepWarping { false }
+			, KeepWarping_Distance {}
 			, SkipCrushSlowdown { false }
 		{ }
 
