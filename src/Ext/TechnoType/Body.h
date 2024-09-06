@@ -255,6 +255,7 @@ public:
 		Nullable<double> GuardModeGuardRangeMultiplier;
 		Nullable<Leptons> GuardModeGuardRangeAddend;
 		Nullable<Leptons> GuardStationaryStray;
+		Valueable<bool> Engineer_CanAutoFire;
 
 		struct LaserTrailDataEntry
 		{
@@ -513,6 +514,7 @@ public:
 			, GuardModeGuardRangeMultiplier {}
 			, GuardModeGuardRangeAddend {}
 			, GuardStationaryStray {}
+			, Engineer_CanAutoFire { false }
 		{ }
 
 		virtual ~ExtData() = default;

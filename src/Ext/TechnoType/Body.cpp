@@ -345,6 +345,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->GuardModeGuardRangeMultiplier.Read(exINI, pSection, "GuardModeGuardRangeMultiplier");
 	this->GuardModeGuardRangeAddend.Read(exINI, pSection, "GuardModeGuardRangeAddend");
 	this->GuardStationaryStray.Read(exINI, pSection, "GuardStationaryStray");
+	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -740,6 +741,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->GuardModeGuardRangeMultiplier)
 		.Process(this->GuardModeGuardRangeAddend)
 		.Process(this->GuardStationaryStray)
+		.Process(this->Engineer_CanAutoFire)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
