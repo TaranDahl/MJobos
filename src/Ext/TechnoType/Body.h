@@ -258,6 +258,8 @@ public:
 		Valueable<bool> Engineer_CanAutoFire;
 		Valueable<bool> BunkerableAnyWay;
 		Valueable<bool> Harvester_CanGuardArea;
+		Valueable<int> FlightClimb;
+		Valueable<int> FlightCrash;
 
 		struct LaserTrailDataEntry
 		{
@@ -530,6 +532,8 @@ public:
 			, DiggingSpeed { 19 }
 			, DigOutSpeed { -1 }
 			, DigEndROT { -1 }
+			, FlightClimb { -1 }
+			, FlightCrash { -1 }
 		{ }
 
 		virtual ~ExtData() = default;
