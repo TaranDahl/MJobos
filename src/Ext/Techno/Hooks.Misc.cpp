@@ -596,3 +596,17 @@ DEFINE_HOOK(0x707F08, TechnoClass_GetGuardRange_AreaGuardRange, 0x5)
 
 	return ret;
 }
+
+DEFINE_HOOK(0x70FB73, FootClass_IsBunkerableNow_Dehardcode, 0x6)
+{
+	enum { SkipVanillaChecks = 0x70FBAF, DoVanillaChecks = 0 };
+
+	GET(TechnoTypeClass*, pType, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+	if (pTypeExt && pTypeExt->BunkerableAnyWay)
+		return SkipVanillaChecks;
+
+	return DoVanillaChecks;
+}
