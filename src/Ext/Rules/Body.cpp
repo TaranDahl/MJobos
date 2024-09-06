@@ -224,6 +224,11 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerAutoRepair.Read(exINI, GameStrings::General, "PlayerAutoRepair");
 	this->EVA_WeCaptureABuilding.Read(exINI, GameStrings::AudioVisual, "EVA.WeCaptureABuilding");
 	this->EVA_OurBuildingIsCaptured.Read(exINI, GameStrings::AudioVisual, "EVA.OurBuildingIsCaptured");
+	this->GuardModePursuit.Read(exINI, GameStrings::General, "GuardModePursuit");
+	this->GuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "GuardModeGuardRangeMultiplier");
+	this->GuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "GuardModeGuardRangeAddend");
+	this->GuardModeGuardRangeMax.Read(exINI, GameStrings::General, "GuardModeGuardRangeMax");
+	this->GuardStationaryStray.Read(exINI, GameStrings::General, "GuardStationaryStray");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -426,6 +431,11 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerAutoRepair)
 		.Process(this->EVA_WeCaptureABuilding)
 		.Process(this->EVA_OurBuildingIsCaptured)
+		.Process(this->GuardModePursuit)
+		.Process(this->GuardModeGuardRangeMultiplier)
+		.Process(this->GuardModeGuardRangeAddend)
+		.Process(this->GuardModeGuardRangeMax)
+		.Process(this->GuardStationaryStray)
 		;
 }
 

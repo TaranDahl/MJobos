@@ -189,6 +189,12 @@ public:
 		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
 		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
 
+		Valueable<bool> GuardModePursuit;
+		Valueable<double> GuardModeGuardRangeMultiplier;
+		Valueable<Leptons> GuardModeGuardRangeAddend;
+		Valueable<Leptons> GuardModeGuardRangeMax;
+		Valueable<Leptons> GuardStationaryStray;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -329,6 +335,11 @@ public:
 			, PlayerAutoRepair { false }
 			, EVA_WeCaptureABuilding {}
 			, EVA_OurBuildingIsCaptured {}
+			, GuardModePursuit { true }
+			, GuardModeGuardRangeMultiplier { 2.0 }
+			, GuardModeGuardRangeAddend { Leptons(0) }
+			, GuardModeGuardRangeMax { Leptons(4096) }
+			, GuardStationaryStray { Leptons(-256) }
 		{ }
 
 		virtual ~ExtData() = default;

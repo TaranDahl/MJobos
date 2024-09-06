@@ -210,6 +210,19 @@ DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
 	return ret;
 }
 
+DEFINE_HOOK(0x4D6E83, FootClass_MissionAreaGuard_FollowStray, 0x6)
+{
+	enum { ret = 0x4D6E8F };
+
+	GET(FootClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	int range = pTypeExt ? pTypeExt->GuardModeStray.Get(Leptons(RulesClass::Instance()->GuardModeStray)) : RulesClass::Instance()->GuardModeStray;
+	R->EDI(range);
+
+	return ret;
+}
+
 DEFINE_HOOK(0x41847E, AircraftClass_MissionAttack_ScatterCell1, 0x6)
 {
 	enum { SkipScatter = 0x4184C2, Scatter = 0 };
@@ -525,4 +538,61 @@ DEFINE_HOOK(0x71A7A8, TemporalClass_Update_CheckRange, 0x6)
 		return CheckRange;
 
 	return DontCheckRange;
+}
+
+DEFINE_HOOK(0x4D6E97, FootClass_MissionAreaGuard_Pursuit, 0x6)
+{
+	enum { KeepTarget = 0x4D6ED1, RemoveTarget = 0x4D6EB3 };
+
+	GET(FootClass* const, pThis, ESI);
+	GET(int const, stray, EDI);
+	GET(AbstractClass* const, pFocus, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	bool pursuit = pTypeExt ? pTypeExt->GuardModePursuit.Get(RulesExt::Global()->GuardModePursuit) : true;
+	int range = stray;
+
+	if ((pFocus->AbstractFlags & AbstractFlags::Foot) == AbstractFlags::None && pTypeExt)
+	{
+		Leptons stationaryStray = pTypeExt->GuardStationaryStray.Get(RulesExt::Global()->GuardStationaryStray);
+
+		if (stationaryStray != Leptons(-256))
+		{
+			range = stationaryStray;
+		}
+	}
+
+	if (pursuit)
+	{
+		if (!pThis->IsFiring && !pThis->Destination && pThis->DistanceFrom(pFocus) > range)
+			return RemoveTarget;
+	}
+	else
+	{
+		if (pThis->DistanceFrom(pFocus) > range)
+			return RemoveTarget;
+	}
+
+	return KeepTarget;
+}
+
+DEFINE_HOOK(0x707F08, TechnoClass_GetGuardRange_AreaGuardRange, 0x5)
+{
+	enum { ret = 0x707E70 };
+
+	GET(Leptons, guardRange, EAX);
+	GET(int, code, EDI);
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pRulesExt = RulesExt::Global();
+	double multiplier = pTypeExt ? pTypeExt->GuardModeGuardRangeMultiplier.Get(pRulesExt->GuardModeGuardRangeMultiplier) : pRulesExt->GuardModeGuardRangeMultiplier;
+	Leptons addend = pTypeExt ? pTypeExt->GuardModeGuardRangeAddend.Get(pRulesExt->GuardModeGuardRangeAddend) : pRulesExt->GuardModeGuardRangeAddend;
+	Leptons areaGuardRange = Leptons((int)guardRange * multiplier + (int)addend);
+	Leptons min = Leptons((code == 2) ? 1792 : 0);
+	Leptons max = RulesExt::Global()->GuardModeGuardRangeMax;
+	areaGuardRange = Math::clamp(areaGuardRange, min, max);
+	R->EAX(areaGuardRange);
+
+	return ret;
 }

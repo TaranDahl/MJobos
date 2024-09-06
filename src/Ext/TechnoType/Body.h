@@ -250,6 +250,11 @@ public:
 		Nullable<int> PlayerGuardAreaTargetingDelay;
 		Valueable<bool> KeepWarping;
 		Nullable<int> KeepWarping_Distance;
+		Nullable<bool> GuardModePursuit;
+		Nullable<Leptons> GuardModeStray;
+		Nullable<double> GuardModeGuardRangeMultiplier;
+		Nullable<Leptons> GuardModeGuardRangeAddend;
+		Nullable<Leptons> GuardStationaryStray;
 
 		struct LaserTrailDataEntry
 		{
@@ -503,6 +508,11 @@ public:
 			, KeepWarping { false }
 			, KeepWarping_Distance {}
 			, SkipCrushSlowdown { false }
+			, GuardModePursuit {}
+			, GuardModeStray {}
+			, GuardModeGuardRangeMultiplier {}
+			, GuardModeGuardRangeAddend {}
+			, GuardStationaryStray {}
 		{ }
 
 		virtual ~ExtData() = default;
