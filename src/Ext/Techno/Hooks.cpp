@@ -428,7 +428,7 @@ DEFINE_HOOK(0x728E5F, TunnelLocomotionClass_Process_RestoreAnims, 0x7)
 	return 0;
 }
 
-#pragma region SubterraneanHeight
+#pragma region Subterranean
 
 DEFINE_HOOK(0x728F89, TunnelLocomotionClass_Process_SubterraneanHeight1, 0x5)
 {
@@ -470,7 +470,16 @@ DEFINE_HOOK(0x728FF2, TunnelLocomotionClass_Process_SubterraneanHeight3, 0x6)
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType());
 	int subtHeight = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
-	height -= heightOffset;
+	int newOffset = heightOffset;
+	int digInSpeed = pTypeExt->DigInSpeed;
+
+	if (digInSpeed > 0)
+	{
+		double multiplier = TechnoExt::GetCurrentSpeedMultiplier((FootClass*)pLinkedTo);
+		newOffset = (int)(digInSpeed * multiplier);
+	}
+
+	height -= newOffset;
 
 	if (height < subtHeight)
 		height = subtHeight;
@@ -489,6 +498,99 @@ DEFINE_HOOK(0x7295E2, TunnelLocomotionClass_ProcessStateDigging_SubterraneanHeig
 	height = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
 
 	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x7295C5, TunnelLocomotionClass_ProcessDigging_DiggingSpeed, 0x9)
+{
+	enum { Move = 0x7298C7, ShouldStop = 0x7295CE };
+
+	GET(int, deltaRange, EAX);
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+
+	auto const pTechno = pThis->LinkedTo;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+	double multiplier = TechnoExt::GetCurrentSpeedMultiplier(pTechno);
+	double speed = multiplier * (pTypeExt ? pTypeExt->DiggingSpeed : 19);
+
+	if (deltaRange >= speed + 1)
+	{
+		CoordStruct currentCrd = pTechno->Location;
+		CoordStruct targetCrd = pThis->Coords;
+		int newCrdX = (int)(currentCrd.X + speed * (targetCrd.X - currentCrd.X) / (double)deltaRange);
+		int newCrdY = (int)(currentCrd.Y + speed * (targetCrd.Y - currentCrd.Y) / (double)deltaRange);
+		R->EAX(newCrdX);
+		R->EDX(newCrdY);
+		R->EDI(currentCrd.Z);
+		return Move;
+	}
+
+	return ShouldStop;
+}
+
+DEFINE_HOOK(0x7292BF, TunnelLocomotionClass_ProcessPreDigIn_DigStartROT, 0x6)
+{
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+	GET(int, time, EAX);
+
+	auto const pTechno = pThis->LinkedTo;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+	int newTime = time;
+
+	if (pTypeExt)
+	{
+		int rot = pTypeExt->DigStartROT;
+
+		if (rot > 0)
+			newTime = (int)(64 / (double)rot);
+	}
+
+	R->EAX(newTime);
+	return 0;
+}
+
+DEFINE_HOOK(0x729A65, TunnelLocomotionClass_ProcessPreDigOut_DigEndROT, 0x6)
+{
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+	GET(int, time, EAX);
+
+	auto const pTechno = pThis->LinkedTo;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+	int newTime = time;
+
+	if (pTypeExt)
+	{
+		int rot = pTypeExt->DigEndROT;
+
+		if (rot > 0)
+			newTime = (int)(64 / (double)rot);
+	}
+
+	R->EAX(newTime);
+	return 0;
+}
+
+DEFINE_HOOK(0x729969, TunnelLocomotionClass_ProcessPreDigOut_DigOutSpeed, 0x6)
+{
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+	GET(int, speed, EAX);
+
+	auto const pTechno = pThis->LinkedTo;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+	int newSpeed = speed;
+
+	if (pTypeExt)
+	{
+		int digOutSpeed = pTypeExt->DigOutSpeed;
+
+		if (digOutSpeed > 0)
+		{
+			double multiplier = TechnoExt::GetCurrentSpeedMultiplier(pTechno);
+			newSpeed = (int)(digOutSpeed * multiplier);
+		}
+	}
+
+	R->EAX(newSpeed);
+	return 0;
 }
 
 #pragma endregion

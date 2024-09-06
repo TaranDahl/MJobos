@@ -286,6 +286,11 @@ public:
 
 		Valueable<bool> FiringByPassMovingCheck;
 		Valueable<bool> SkipCrushSlowdown;
+		Valueable<int> DigStartROT;
+		Valueable<int> DigInSpeed;
+		Valueable<int> DiggingSpeed;
+		Valueable<int> DigOutSpeed;
+		Valueable<int> DigEndROT;
 
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
@@ -519,6 +524,12 @@ public:
 			, Engineer_CanAutoFire { false }
 			, BunkerableAnyWay { false }
 			, Harvester_CanGuardArea { false }
+
+			, DigStartROT { -1 }
+			, DigInSpeed { -1 }
+			, DiggingSpeed { 19 }
+			, DigOutSpeed { -1 }
+			, DigEndROT { -1 }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -348,6 +348,11 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
 	this->BunkerableAnyWay.Read(exINI, pSection, "BunkerableAnyWay");
 	this->Harvester_CanGuardArea.Read(exINI, pSection, "Harvester.CanGuardArea");
+	this->DigStartROT.Read(exINI, pSection, "DigStartROT");
+	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
+	this->DiggingSpeed.Read(exINI, pSection, "DiggingSpeed");
+	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
+	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -746,6 +751,11 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Engineer_CanAutoFire)
 		.Process(this->BunkerableAnyWay)
 		.Process(this->Harvester_CanGuardArea)
+		.Process(this->DigStartROT)
+		.Process(this->DigInSpeed)
+		.Process(this->DiggingSpeed)
+		.Process(this->DigOutSpeed)
+		.Process(this->DigEndROT)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
