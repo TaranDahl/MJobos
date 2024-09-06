@@ -17,6 +17,12 @@
     Targeting Optimizations #1364
 
 ## 未提交PR的分支
+    FlyLocoCustomization
+    TunnelLocoCustomization
+    MinerAreaGuard
+    BunkerableWithoutTurret
+    EngineerRelatedDehardcode
+    GuardModeStrayCustomization
     ContinueWaypointPlanningOnEnter
     Aircraft&Scatter
     ImproveAutoTargeting
@@ -25,8 +31,8 @@
     CrushBugFix
     CapturedEvaCustomization
     ProjScatterEnhancement
-    
-# 计划编写的自制功能
+
+# 计划编写的功能
 
     Shrapnel支持对空
     technotypes和overlaytypes的IsPassable、CanBeBuiltOn
