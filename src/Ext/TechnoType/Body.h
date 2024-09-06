@@ -257,6 +257,7 @@ public:
 		Nullable<Leptons> GuardStationaryStray;
 		Valueable<bool> Engineer_CanAutoFire;
 		Valueable<bool> BunkerableAnyWay;
+		Valueable<bool> Harvester_CanGuardArea;
 
 		struct LaserTrailDataEntry
 		{
@@ -517,6 +518,7 @@ public:
 			, GuardStationaryStray {}
 			, Engineer_CanAutoFire { false }
 			, BunkerableAnyWay { false }
+			, Harvester_CanGuardArea { false }
 		{ }
 
 		virtual ~ExtData() = default;

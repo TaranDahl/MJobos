@@ -610,3 +610,17 @@ DEFINE_HOOK(0x70FB73, FootClass_IsBunkerableNow_Dehardcode, 0x6)
 
 	return DoVanillaChecks;
 }
+
+DEFINE_HOOK(0x4D6D34, FootClass_MissionAreaGuard_Miner, 0x5)
+{
+	enum { GoHarvest = 0, GoGuardArea = 0x4D6D69 };
+
+	GET(FootClass*, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt && pTypeExt->Harvester_CanGuardArea)
+		return GoGuardArea;
+
+	return GoHarvest;
+}
