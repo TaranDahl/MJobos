@@ -662,3 +662,7 @@ DEFINE_HOOK(0x736480, UnitClass_AI_KeepTargetOnMove, 0x6)
 }
 
 #pragma endregion
+
+// TunnelLocomotionClass_IsToHaveShadow, skip shadow on all but idle.
+// TODO: Investigate if it is possible to fix the shadows not tilting on the burrowing etc. states.
+DEFINE_JUMP(LJMP, 0x72A070, 0x72A07F);
