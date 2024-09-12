@@ -387,3 +387,41 @@ DEFINE_JUMP(CALL, 0x63B100, GET_OFFSET(Fake_HouseIsAlliedWith));
 DEFINE_JUMP(CALL, 0x63B17F, GET_OFFSET(Fake_HouseIsAlliedWith));
 DEFINE_JUMP(CALL, 0x63B1BA, GET_OFFSET(Fake_HouseIsAlliedWith));
 DEFINE_JUMP(CALL, 0x63B2CE, GET_OFFSET(Fake_HouseIsAlliedWith));
+
+DEFINE_HOOK(0x6ABC60, SidebarClass_GetObjectTabIdx_SWCameoTab, 0x5)
+{
+	enum { IsInfRet = 0x6ABCBF, IsSuperRet = 0x6ABC9A, NotInfRet = 0x6ABC65 };
+	GET(AbstractType, abs, ECX);
+	GET(int, idx, EDX);
+
+	if (!(abs == AbstractType::Special || abs == AbstractType::Super || abs == AbstractType::SuperWeaponType))
+		return abs == AbstractType::Infantry ? IsInfRet : NotInfRet;
+
+	auto pSWExt = SWTypeExt::ExtMap.Find(SuperWeaponTypeClass::Array->GetItem(idx));
+
+	if (!pSWExt)
+		return abs == AbstractType::Infantry ? IsInfRet : NotInfRet;
+
+	R->EAX(pSWExt->CameoTabIdx);
+
+	return IsSuperRet;
+}
+
+DEFINE_HOOK(0x6A6339, SidebarClass_AddCameo_SWCameoTab, 0x7)
+{
+	GET(AbstractType, abs, ESI);
+	GET_STACK(int, idx, STACK_OFFSET(0x14, 0x8));
+
+	if (!(abs == AbstractType::Special || abs == AbstractType::Super || abs == AbstractType::SuperWeaponType))
+		return 0;
+
+	auto pSWExt = SWTypeExt::ExtMap.Find(SuperWeaponTypeClass::Array->GetItem(idx));
+
+	if (!pSWExt)
+		return 0;
+
+	R->EBP(idx);
+	R->Stack(STACK_OFFSET(0x14, 0x4), pSWExt->CameoTabIdx);
+
+	return 0x6A63B7;
+}
