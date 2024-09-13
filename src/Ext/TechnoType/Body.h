@@ -260,6 +260,8 @@ public:
 		Valueable<bool> Harvester_CanGuardArea;
 		Valueable<int> FlightClimb;
 		Valueable<int> FlightCrash;
+		Nullable<bool> ExplodeOnDestroy;
+		Nullable<bool> FireDeathWeaponOnCrushed;
 
 		struct LaserTrailDataEntry
 		{
@@ -534,6 +536,8 @@ public:
 			, DigEndROT { -1 }
 			, FlightClimb { -1 }
 			, FlightCrash { -1 }
+			, ExplodeOnDestroy { }
+			, FireDeathWeaponOnCrushed { }
 		{ }
 
 		virtual ~ExtData() = default;

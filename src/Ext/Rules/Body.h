@@ -195,6 +195,11 @@ public:
 		Valueable<Leptons> GuardModeGuardRangeMax;
 		Valueable<Leptons> GuardStationaryStray;
 
+		Valueable<bool> UseGlobalDeathWeaponDamage;
+		Valueable<bool> NonVehExplodeOnDestroy;
+		Valueable<bool> FireDeathWeaponOnCrushed;
+		Valueable<bool> CrushBuildingOnAnyCell;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -340,6 +345,10 @@ public:
 			, GuardModeGuardRangeAddend { Leptons(0) }
 			, GuardModeGuardRangeMax { Leptons(4096) }
 			, GuardStationaryStray { Leptons(-256) }
+			, UseGlobalDeathWeaponDamage { false }
+			, NonVehExplodeOnDestroy { false }
+			, FireDeathWeaponOnCrushed { false }
+			, CrushBuildingOnAnyCell { false }
 		{ }
 
 		virtual ~ExtData() = default;

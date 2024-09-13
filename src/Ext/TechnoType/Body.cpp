@@ -355,6 +355,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
 	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
 	this->FlightCrash.Read(exINI, pSection, "FlightCrash");
+	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
+	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -760,6 +762,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DigEndROT)
 		.Process(this->FlightClimb)
 		.Process(this->FlightCrash)
+		.Process(this->ExplodeOnDestroy)
+		.Process(this->FireDeathWeaponOnCrushed)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
