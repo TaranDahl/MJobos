@@ -156,6 +156,11 @@ public:
 		Valueable<bool> PlayAnimUnderground;
 		Valueable<bool> PlayAnimAboveSurface;
 		Valueable<bool> CellSpread_Cylinder;
+		Valueable<bool> LightChanging;
+		Valueable<int> SetAmbientLight;
+		Valueable<int> SetAmbientRed;
+		Valueable<int> SetAmbientGreen;
+		Valueable<int> SetAmbientBlue;
 
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
@@ -333,6 +338,12 @@ public:
 			, PlayAnimUnderground { true }
 			, PlayAnimAboveSurface { false }
 			, CellSpread_Cylinder { false }
+
+			, LightChanging { false }
+			, SetAmbientLight { -1 }
+			, SetAmbientRed { -1 }
+			, SetAmbientGreen { -1 }
+			, SetAmbientBlue { -1 }
 		{ }
 
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);

@@ -157,6 +157,42 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 				this->DetonateOnOneUnit(pHouse, this->DamageAreaTarget, pOwner, bulletWasIntercepted);
 		}
 	}
+
+	if (this->LightChanging)
+	{
+
+		if (this->SetAmbientLight >= 0)
+		{
+			ScenarioClass::Instance->AmbientOriginal = this->SetAmbientLight;
+
+			if (!LightningStorm::Active)
+			{
+				ScenarioClass::Instance->AmbientCurrent = this->SetAmbientLight;
+				ScenarioClass::Instance->AmbientTarget = ScenarioClass::Instance->AmbientOriginal;
+			}
+		}
+
+		if (this->SetAmbientRed >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * this->SetAmbientRed, 10 * ScenarioClass::Instance->NormalLighting.Tint.Green, 10 * ScenarioClass::Instance->NormalLighting.Tint.Blue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Red = this->SetAmbientRed;
+		}
+
+		if (this->SetAmbientGreen >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * ScenarioClass::Instance->NormalLighting.Tint.Red, 10 * this->SetAmbientGreen, 10 * ScenarioClass::Instance->NormalLighting.Tint.Blue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Green = this->SetAmbientGreen;
+		}
+
+
+		if (this->SetAmbientBlue >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * ScenarioClass::Instance->NormalLighting.Tint.Red, 10 * ScenarioClass::Instance->NormalLighting.Tint.Green, 10 * this->SetAmbientBlue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Blue = this->SetAmbientBlue;
+		}
+
+		ScenarioClass::Instance->UpdateLighting();
+	}
 }
 
 void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner, bool bulletWasIntercepted)

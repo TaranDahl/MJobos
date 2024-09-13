@@ -174,6 +174,11 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->PenetratesForceShield.Read(exINI, pSection, "PenetratesForceShield");
 	this->Rocker_AmplitudeMultiplier.Read(exINI, pSection, "Rocker.AmplitudeMultiplier");
 	this->Rocker_AmplitudeOverride.Read(exINI, pSection, "Rocker.AmplitudeOverride");
+	this->LightChanging.Read(exINI, pSection, "LightChanging");
+	this->SetAmbientLight.Read(exINI, pSection, "SetAmbientLight");
+	this->SetAmbientRed.Read(exINI, pSection, "SetAmbientRed");
+	this->SetAmbientGreen.Read(exINI, pSection, "SetAmbientGreen");
+	this->SetAmbientBlue.Read(exINI, pSection, "SetAmbientBlue");
 
 	// Crits
 	this->Crit_Chance.Read(exINI, pSection, "Crit.Chance");
@@ -398,6 +403,11 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->PenetratesForceShield)
 		.Process(this->Rocker_AmplitudeMultiplier)
 		.Process(this->Rocker_AmplitudeOverride)
+		.Process(this->LightChanging)
+		.Process(this->SetAmbientLight)
+		.Process(this->SetAmbientRed)
+		.Process(this->SetAmbientGreen)
+		.Process(this->SetAmbientBlue)
 
 		.Process(this->Crit_Chance)
 		.Process(this->Crit_ApplyChancePerTarget)
