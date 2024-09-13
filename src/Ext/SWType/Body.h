@@ -70,6 +70,8 @@ public:
 		Valueable<bool> UseWeeds_StorageTimer;
 		Valueable<double> UseWeeds_ReadinessAnimationPercentage;
 
+		Valueable<int> CameoTabIdx;
+
 		ExtData(SuperWeaponTypeClass* OwnerObject) : Extension<SuperWeaponTypeClass>(OwnerObject)
 			, Money_Amount { 0 }
 			, SW_Inhibitors {}
@@ -111,6 +113,7 @@ public:
 			, UseWeeds_Amount { RulesClass::Instance->WeedCapacity }
 			, UseWeeds_StorageTimer { false }
 			, UseWeeds_ReadinessAnimationPercentage { 0.9 }
+			, CameoTabIdx { 1 }
 		{ }
 
 		// Ares 0.A functions

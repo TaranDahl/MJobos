@@ -51,6 +51,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UseWeeds_Amount)
 		.Process(this->UseWeeds_StorageTimer)
 		.Process(this->UseWeeds_ReadinessAnimationPercentage)
+		.Process(this->CameoTabIdx)
 		;
 }
 
@@ -95,6 +96,7 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_Next_RollChances.Read(exINI, pSection, "SW.Next.RollChances");
 
 	this->ShowTimer_Priority.Read(exINI, pSection, "ShowTimer.Priority");
+	this->CameoTabIdx.Read(exINI, pSection, "CameoTabIdx");
 
 	char tempBuffer[32];
 	// LimboDelivery.RandomWeights
