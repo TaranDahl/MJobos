@@ -31,6 +31,9 @@
     CrushBugFix
     CapturedEvaCustomization
     ProjScatterEnhancement
+    TintChangeWH
+    CrushDeathEnhancement
+    SWCameoOnOtherTabs
 
 # 计划编写的功能
 
