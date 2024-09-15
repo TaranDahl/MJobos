@@ -791,6 +791,7 @@ DEFINE_HOOK(0x738687, UnitClass_PlayDestroyAnim_SetContext, 0x6)
 	return 0x73868D;
 }
 
+// Replace pThis->Type with pThis->GetTechnoType(), to make UnitClass::PlayDestroyAnim (aka UnitClass::Explode()) work for other kinds of technoclass.
 DEFINE_HOOK_AGAIN(0x738822, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
 DEFINE_HOOK_AGAIN(0x7387C4, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
 DEFINE_HOOK(0x7386AC, UnitClass_PlayDestroyAnim_Generalize1, 0x6)
@@ -814,15 +815,18 @@ DEFINE_HOOK(0x746D61, UnitClass_Destroy_ToggleAnim, 0x7)
 	R->ESI(pThis);
 
 	if (pTypeExt->ExplodeOnDestroy.Get(pThis->WhatAmI() == AbstractType::Unit || RulesExt::Global()->NonVehExplodeOnDestroy))
-		((UnitClass*)pThis)->Explode();
+		((UnitClass*)pThis)->Explode(); // This will work as we have already make it able to work for other technos.
 
 	return 0x746D68;
 }
 
+// Make all kind of technoclass' use UnitClass::Destroy.
+// The difference between UnitClass::Destroy and TechnoClass::Destroy is that the UnitClass one calls PlayDestroyAnim.
 DEFINE_JUMP(VTABLE, 0x7EB1C8, 0x746D60);
 DEFINE_JUMP(VTABLE, 0x7E402C, 0x746D60);
 DEFINE_JUMP(VTABLE, 0x7E2414, 0x746D60);
 
+// Simply fire the DeathWeapon.
 DEFINE_HOOK(0x7418D4, UnitClass_CrushCell_FireDeathWeapon, 0x6)
 {
 	GET(ObjectClass*, pThis, ESI);
@@ -992,7 +996,8 @@ DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
 	{
 		if (auto const pBuilding = CrushBuildingOnAnyCell::pCell->GetBuilding())
 		{
-			if (pBuilding->IsCrushable(pThis))
+			//ObjectClass::IsCrushable(TechnoClass* pCrusher)
+			if (reinterpret_cast<bool(__thiscall*)(ObjectClass*, TechnoClass*)>(0x5F6CD0)(pBuilding, pThis))
 			{
 				R->AL(true);
 				VocClass::PlayAt(pBuilding->GetTechnoType()->CrushSound, pThis->Location, 0);
