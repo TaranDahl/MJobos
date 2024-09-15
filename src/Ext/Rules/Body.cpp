@@ -233,6 +233,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
 	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
+	this->RallyPointOnTechno.Read(exINI, GameStrings::General, "RallyPointOnTechno");
+	this->RallyPointForceMove.Read(exINI, GameStrings::General, "RallyPointForceMove");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -444,6 +446,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->NonVehExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
 		.Process(this->CrushBuildingOnAnyCell)
+		.Process(this->RallyPointOnTechno)
+		.Process(this->RallyPointForceMove)
 		;
 }
 

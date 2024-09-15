@@ -841,6 +841,120 @@ DEFINE_HOOK(0x7418D4, UnitClass_CrushCell_FireDeathWeapon, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x44368D, BuildingClass_ObjectClickedAction_RallyPoint, 0x7)
+{
+	enum { OnTechno = 0x44363C, OnCell = 0 };
+
+	return RulesExt::Global()->RallyPointOnTechno ? OnTechno : OnCell;
+}
+
+DEFINE_HOOK(0x4473F4, BuildingClass_MouseOverObject_JustHasRallyPoint, 0x6)
+{
+	enum { JustRally = 0x447413, VanillaCheck = 0 };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : VanillaCheck;
+}
+
+DEFINE_HOOK(0x447413, BuildingClass_MouseOverObject_RallyPointForceMove, 0x5)
+{
+	enum { AlwaysAlt = 0x44744E, VanillaCheck = 0 };
+
+	return RulesExt::Global()->RallyPointForceMove ? AlwaysAlt : VanillaCheck;
+}
+
+DEFINE_HOOK(0x70000E, TechnoClass_MouseOverObject_RallyPointForceMove, 0x5)
+{
+	enum { AlwaysAlt = 0x700038, VanillaCheck = 0 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	if (pThis->WhatAmI() == AbstractType::Building && RulesExt::Global()->RallyPointForceMove)
+	{
+		auto const pType = abstract_cast<BuildingClass*>(pThis)->Type;
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+		bool HasRallyPoint = (pTypeExt ? pTypeExt->JustHasRallyPoint : false) || pType->Factory == AbstractType::UnitType || pType->Factory == AbstractType::InfantryType || pType->Factory == AbstractType::AircraftType;
+		return HasRallyPoint ? AlwaysAlt : VanillaCheck;
+	}
+
+	return VanillaCheck;
+}
+
+DEFINE_HOOK(0x44748E, BuildingClass_MouseOverObject_JustHasRallyPointAircraft, 0x6)
+{
+	enum { JustRally = 0x44749D, VanillaCheck = 0 };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : VanillaCheck;
+}
+
+DEFINE_HOOK(0x447674, BuildingClass_MouseOverCell_JustHasRallyPoint, 0x6)
+{
+	enum { JustRally = 0x447683, VanillaCheck = 0 };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : VanillaCheck;
+}
+
+DEFINE_HOOK(0x447643, BuildingClass_MouseOverCell_RallyPointForceMove, 0x5)
+{
+	enum { AlwaysAlt = 0x447674, VanillaCheck = 0 };
+
+	return RulesExt::Global()->RallyPointForceMove ? AlwaysAlt : VanillaCheck;
+}
+
+DEFINE_HOOK(0x700B28, TechnoClass_MouseOverCell_RallyPointForceMove, 0x6)
+{
+	enum { AlwaysAlt = 0x700B30, VanillaCheck = 0 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	if (pThis->WhatAmI() == AbstractType::Building && RulesExt::Global()->RallyPointForceMove)
+	{
+		auto const pType = abstract_cast<BuildingClass*>(pThis)->Type;
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+		bool HasRallyPoint = (pTypeExt ? pTypeExt->JustHasRallyPoint : false) || pType->Factory == AbstractType::UnitType || pType->Factory == AbstractType::InfantryType || pType->Factory == AbstractType::AircraftType;
+		return HasRallyPoint ? AlwaysAlt : VanillaCheck;
+	}
+
+	return VanillaCheck;
+}
+
+DEFINE_HOOK(0x455DA0, BuildingClass_IsUnitFactory_JustHasRallyPoint, 0x6)
+{
+	enum { ret = 0x455DCC, VanillaCheck = 0 };
+
+	GET(BuildingClass* const, pThis, ECX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? ret : VanillaCheck;
+}
+/*
+* TODO : make the product follow the focus
+DEFINE_HOOK(0x44499C, TEST2, 0x5)
+{
+	GET(BuildingClass*, pThis, ESI);
+	GET(FootClass*, pProduct, EDI);
+
+	if (pThis->Focus && (pThis->Focus->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+	{
+		auto const pFocus = abstract_cast<ObjectClass*>(pThis->Focus);
+		pProduct->ClickedMission(Mission::Area_Guard, pFocus, nullptr, nullptr);
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x70D703, TechnoClass_FireDeathWeapon_UseGlobalDeathWeaponDamage, 0xA)
 {
 	enum { ReplaceDamage = 0x70D724, DontReplace = 0 };
@@ -893,3 +1007,8 @@ DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
 
 	return 0;
 }
+DEFINE_HOOK(0x444CA3, TEST3, 0x6)
+{
+	return 0x444D11;
+}
+*/

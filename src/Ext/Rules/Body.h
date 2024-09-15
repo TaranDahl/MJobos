@@ -200,6 +200,9 @@ public:
 		Valueable<bool> FireDeathWeaponOnCrushed;
 		Valueable<bool> CrushBuildingOnAnyCell;
 
+		Valueable<bool> RallyPointOnTechno;
+		Valueable<bool> RallyPointForceMove;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -349,6 +352,8 @@ public:
 			, NonVehExplodeOnDestroy { false }
 			, FireDeathWeaponOnCrushed { false }
 			, CrushBuildingOnAnyCell { false }
+			, RallyPointOnTechno { false }
+			, RallyPointForceMove { false }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -262,6 +262,7 @@ public:
 		Valueable<int> FlightCrash;
 		Nullable<bool> ExplodeOnDestroy;
 		Nullable<bool> FireDeathWeaponOnCrushed;
+		Valueable<bool> JustHasRallyPoint;
 
 		struct LaserTrailDataEntry
 		{
@@ -538,6 +539,7 @@ public:
 			, FlightCrash { -1 }
 			, ExplodeOnDestroy { }
 			, FireDeathWeaponOnCrushed { }
+			, JustHasRallyPoint { false }
 		{ }
 
 		virtual ~ExtData() = default;
