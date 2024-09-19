@@ -263,6 +263,7 @@ public:
 		Nullable<bool> ExplodeOnDestroy;
 		Nullable<bool> FireDeathWeaponOnCrushed;
 		Valueable<bool> JustHasRallyPoint;
+		Nullable<CoordStruct> ExitCoord;
 
 		struct LaserTrailDataEntry
 		{
@@ -540,6 +541,7 @@ public:
 			, ExplodeOnDestroy { }
 			, FireDeathWeaponOnCrushed { }
 			, JustHasRallyPoint { false }
+			, ExitCoord { }
 		{ }
 
 		virtual ~ExtData() = default;

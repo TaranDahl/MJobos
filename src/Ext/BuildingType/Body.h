@@ -68,6 +68,9 @@ public:
 		ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
 		ValueableVector<TechnoTypeClass*> FactoryPlant_DisallowTypes;
 
+		Valueable<bool> JustHasRallyPoint;
+		Nullable<CoordStruct> JumpjetExitCoord;
+
 		ExtData(BuildingTypeClass* OwnerObject) : Extension<BuildingTypeClass>(OwnerObject)
 			, PowersUp_Owner { AffectedHouse::Owner }
 			, PowersUp_Buildings {}
@@ -108,6 +111,8 @@ public:
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
+			, JustHasRallyPoint { false }
+			, JumpjetExitCoord { }
 		{ }
 
 		// Ares 0.A functions

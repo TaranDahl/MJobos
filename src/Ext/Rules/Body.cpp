@@ -235,6 +235,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
 	this->RallyPointOnTechno.Read(exINI, GameStrings::General, "RallyPointOnTechno");
 	this->RallyPointForceMove.Read(exINI, GameStrings::General, "RallyPointForceMove");
+	this->RallyPointAreaGuard.Read(exINI, GameStrings::General, "RallyPointAreaGuard");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -448,6 +449,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CrushBuildingOnAnyCell)
 		.Process(this->RallyPointOnTechno)
 		.Process(this->RallyPointForceMove)
+		.Process(this->RallyPointAreaGuard)
 		;
 }
 
