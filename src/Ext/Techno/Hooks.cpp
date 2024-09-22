@@ -845,6 +845,25 @@ DEFINE_HOOK(0x7418D4, UnitClass_CrushCell_FireDeathWeapon, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
+{
+	enum { SkipGameCode = 0x51B255 };
+
+	GET(InfantryClass*, pThis, ESI);
+	GET(AbstractClass*, pTarget, EBX);
+
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (!pTarget && pExt->SkipTargetChangeResetSequence)
+	{
+		pThis->IsFiring = false;
+		pExt->SkipTargetChangeResetSequence = false;
+		return SkipGameCode;
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x44368D, BuildingClass_ObjectClickedAction_RallyPoint, 0x7)
 {
 	enum { OnTechno = 0x44363C, OnCell = 0 };
