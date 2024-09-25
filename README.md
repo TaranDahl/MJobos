@@ -34,6 +34,7 @@
     TintChangeWH
     CrushDeathEnhancement
     SWCameoOnOtherTabs
+    RallyPointEnhancement
 
 # 计划编写的功能
 
