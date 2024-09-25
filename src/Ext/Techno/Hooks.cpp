@@ -982,7 +982,6 @@ DEFINE_HOOK(0x444CA3, BuildingClass_KickOutUnit_RallyPointAreaGuard1, 0x6)
 }
 
 // Vehicle but without BuildingClass::Unload calling, e.g. the building has WeaponsFactory = no set.
-// Currently I have no idea about how to deal with the normally unloaded vehicles.
 // Also fix the bug that WeaponsFactory = no will make the product ignore the rally point.
 // Also fix the bug that WeaponsFactory = no will make the Jumpjet product park on the ground.
 DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
@@ -1147,6 +1146,24 @@ DEFINE_HOOK(0x443EB8, BuildingClass_KickOutUnit_RallyPointAreaGuard5, 0x5)
 	{
 		pProduct->SetFocus(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
+		return SkipQueueMove;
+	}
+
+	return NotSkip;
+}
+
+// For unloaded units.
+DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
+{
+	enum { SkipQueueMove = 0x73AAC1, NotSkip = 0 };
+
+	GET(UnitClass*, pThis, EBP);
+	GET(AbstractClass*, pFocus, EAX);
+
+	if (RulesExt::Global()->RallyPointAreaGuard)
+	{
+		pThis->SetFocus(pFocus);
+		pThis->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
 
