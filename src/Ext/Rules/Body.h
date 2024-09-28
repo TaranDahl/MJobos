@@ -214,6 +214,9 @@ public:
 		ValueableVector<bool> RepairBaseNodes;
 		Valueable<bool> MCVRedeploysInCampaign;
 
+		Valueable<bool> PlayerDestroyWalls;
+		Valueable<bool> DestroyOwnerlessWalls;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -368,6 +371,8 @@ public:
 			, RallyPointOnTechno { false }
 			, RallyPointForceMove { false }
 			, RallyPointAreaGuard { false }
+			, PlayerDestroyWalls { false }
+			, DestroyOwnerlessWalls { false }
 		{ }
 
 		virtual ~ExtData() = default;

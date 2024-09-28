@@ -1161,3 +1161,42 @@ DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
 
 	return (pTypeExt && pTypeExt->AnimDontDelayBurst && pThis->CurrentBurstIndex != 0) ? JustFire : VanillaCheck;
 }
+
+DEFINE_HOOK(0x6F8C18, TechnoClass_ScanToAttackWall_PlayerDestroyWall, 0x6)
+{
+	enum { SkipIsAIChecks = 0x6F8C52, VanillaCheck = 0 };
+
+	if (RulesExt::Global()->PlayerDestroyWalls)
+		return SkipIsAIChecks;
+
+	return VanillaCheck;
+}
+
+DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
+{
+	enum { GoOtherChecks = 0x6F8D58, NotOkToFire = 0x6F8DE3 };
+
+	GET(int, OwnerIdx, EAX);
+	GET(TechnoClass*, pThis, ESI);
+
+	auto const pOwner = OwnerIdx != -1 ? HouseClass::Array->Items[OwnerIdx] : 0;
+	bool isAllied = pOwner && pOwner->IsAlliedWith(pThis->Owner);
+
+	if (RulesExt::Global()->DestroyOwnerlessWalls)
+	{
+		bool isOwnerless = !pOwner ||
+			pOwner == HouseClass::FindSpecial() ||
+			pOwner == HouseClass::FindCivilianSide() ||
+			pOwner == HouseClass::FindNeutral();
+
+		if (!isOwnerless && isAllied)
+			return NotOkToFire;
+	}
+	else
+	{
+		if (isAllied)
+			return NotOkToFire;
+	}
+
+	return GoOtherChecks;
+}
