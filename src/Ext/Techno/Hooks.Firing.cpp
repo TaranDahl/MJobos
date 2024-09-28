@@ -684,6 +684,24 @@ DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x6FF7EF, TechnoClass_Fire_LimboLaunchRecord, 0xA)
+{
+	enum { ret = 0x6FF7F9 };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET_STACK(BulletClass* const, pBullet, STACK_OFFSET(0xB0, -0x74));
+
+	if (!pThis->InLimbo)
+	{
+		auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
+		pBulletExt->LimboedLauncher = pThis;
+		pBulletExt->LimboedDir = pThis->PrimaryFacing.Current().GetDir();
+	}
+
+	pThis->Limbo();
+	return ret;
+}
+
 #pragma endregion
 
 #pragma region TechnoClass_GetFLH

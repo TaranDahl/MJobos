@@ -993,3 +993,10 @@ DEFINE_HOOK(0x5B11DD, MechLocomotionClass_ProcessMoving_SlowdownDistance, 0x9)
 
 	return distance >= pLinkedTo->GetCurrentSpeed() ? KeepMoving : CloseEnough;
 }
+
+// ReselectIfLimboed only works if the target is infantry.
+// Why did you do this, WW?
+DEFINE_HOOK(0x6FF78F, TechnoClass_Fire_ReselectIfLimboedCheck, 0x5)
+{
+	return 0x6FF79C;
+}

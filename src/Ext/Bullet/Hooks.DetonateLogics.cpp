@@ -297,12 +297,12 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 	GET(BulletClass*, pThis, ESI);
 	GET_BASE(CoordStruct*, coords, 0x8);
 
-	// Extra warheads
 	if (pThis->WeaponType)
 	{
 		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pThis->WeaponType);
 		int defaultDamage = pThis->WeaponType->Damage;
 
+		// Extra warheads
 		for (size_t i = 0; i < pWeaponExt->ExtraWarheads.size(); i++)
 		{
 			auto const pWH = pWeaponExt->ExtraWarheads[i];
@@ -341,6 +341,58 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 				{
 					auto const pWHExt = WarheadTypeExt::ExtMap.Find(pWH);
 					pWHExt->DamageAreaWithTarget(*coords, damage, pThis->Owner, pWH, true, pOwner, abstract_cast<TechnoClass*>(pThis->Target));
+				}
+			}
+		}
+
+		// Unlimbo the launcher
+		if (!pThis->WH->Parasite && pWeaponExt->UnlimboDetonate)
+		{
+			auto const pExt = BulletExt::ExtMap.Find(pThis);
+			auto const pFirer = pExt->LimboedLauncher;
+			bool unlimboResult;
+
+			if (pFirer)
+			{
+				if (pWeaponExt->UnlimboDetonate_Force)
+				{
+					++Unsorted::IKnowWhatImDoing;
+					unlimboResult = pFirer->Unlimbo(*coords, pExt->LimboedDir);
+					--Unsorted::IKnowWhatImDoing;
+				}
+				else
+				{
+					auto const pFirerType = pFirer->GetTechnoType();
+					auto pCell = MapClass::Instance->GetCellAt(*coords);
+					bool isBridge = pCell->ContainsBridge() && pCell->GetFloorHeight({ 0,0 }) + CellClass::BridgeHeight;
+
+					auto nCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(*coords),
+						pFirerType->SpeedType, -1, pFirerType->MovementZone, isBridge, 1, 1, false,
+						false, false, isBridge, CellStruct::Empty, false, false);
+
+					pCell = MapClass::Instance->TryGetCellAt(nCell);
+					auto location = pCell->GetCoords();
+					unlimboResult = pFirer->Unlimbo(location, pExt->LimboedDir);
+				}
+
+				if (unlimboResult)
+				{
+					if (pFirer->unknown_bool_432 // ShouldBeReselectOnUnlimbo
+						&& pFirer->Owner->IsControlledByCurrentPlayer())
+					{
+						pFirer->unknown_bool_432 = false;
+						pFirer->Select();
+					}
+
+					if (pFirer->OldTeam)
+						pFirer->OldTeam->AddMember((FootClass*)pFirer, 0);
+
+					pFirer->UpdateSight(0, 0, 0, 0, 0);
+				}
+				else
+				{
+					pFirer->Health = 0;
+					pFirer->UnInit();
 				}
 			}
 		}
