@@ -359,6 +359,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 
 	this->ExitCoord.Read(exINI, pSection, "ExitCoord");
+	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -768,6 +769,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->FireDeathWeaponOnCrushed)
 		.Process(this->JustHasRallyPoint)
 		.Process(this->ExitCoord)
+		.Process(this->MissileSpawnUseOtherFLHs)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

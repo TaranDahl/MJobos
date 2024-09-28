@@ -289,6 +289,7 @@ public:
 		std::vector<std::vector<CoordStruct>> EliteCrouchedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> DeployedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> EliteDeployedWeaponBurstFLHs;
+		Valueable<bool> MissileSpawnUseOtherFLHs;
 
 		Valueable<bool> FiringByPassMovingCheck;
 		Valueable<bool> SkipCrushSlowdown;
@@ -542,6 +543,7 @@ public:
 			, FireDeathWeaponOnCrushed { }
 			, JustHasRallyPoint { false }
 			, ExitCoord { }
+			, MissileSpawnUseOtherFLHs { false }
 		{ }
 
 		virtual ~ExtData() = default;
