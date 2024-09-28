@@ -1150,3 +1150,14 @@ DEFINE_HOOK(0x7413C2, UnitClass_Fire_SkipROFError, 0x8)
 
 	return DontFire;
 }
+
+DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
+{
+	enum { JustFire = 0x44B6C4, VanillaCheck = 0 };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->AnimDontDelayBurst && pThis->CurrentBurstIndex != 0) ? JustFire : VanillaCheck;
+}
