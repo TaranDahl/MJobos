@@ -60,6 +60,7 @@ public:
 		Valueable<bool> KickOutPassengers;
 		Nullable<bool> CylinderRangefinding;
 		Nullable<bool> AttackIronCurtain;
+		Valueable<bool> BurstDelayForceZero;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
 			, DiskLaser_Radius { DiskLaserClass::Radius }
@@ -101,6 +102,7 @@ public:
 			, KickOutPassengers { true }
 			, CylinderRangefinding {}
 			, AttackIronCurtain {}
+			, BurstDelayForceZero { false }
 		{ }
 
 		int GetBurstDelay(int burstIndex) const;

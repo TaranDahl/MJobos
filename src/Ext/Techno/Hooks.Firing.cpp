@@ -1066,3 +1066,69 @@ DEFINE_HOOK(0x6F8BB2, TechnoClass_TryAutoTargetObject_Engineer2, 0x6)
 	R->AL(pThis->IsEngineer() && !(pTypeExt && pTypeExt->Engineer_CanAutoFire));
 	return ret;
 }
+
+DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstDelayForceZero, 0x5)
+{
+	enum { SkipVanillaFire = 0x520A57, DontSkip = 0 };
+
+	GET(InfantryClass* const, pThis, EBP);
+	GET(int, wpIdx, ESI);
+	GET(AbstractClass* const, pTarget, EAX);
+
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+
+	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->BurstDelayForceZero)
+	{
+		for (int i = 0; i != pWeapon->Burst; i++)
+			pThis->Fire(pTarget, wpIdx);
+
+		return SkipVanillaFire;
+	}
+
+	return DontSkip;
+}
+
+namespace BurstDelayForceZero
+{
+	bool isProcessing;
+}
+
+DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstDelayForceZero, 0x6)
+{
+	enum { SkipVanillaFire = 0x737063, DontSkip = 0 };
+
+	GET(UnitClass* const, pThis, ESI);
+	GET(int, wpIdx, EDI);
+	GET(AbstractClass* const, pTarget, EAX);
+
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+
+	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->BurstDelayForceZero)
+	{
+		for (int i = 0; i != pWeapon->Burst; i++)
+		{
+			BurstDelayForceZero::isProcessing = true;
+			pThis->Fire(pTarget, wpIdx);
+		}
+
+		BurstDelayForceZero::isProcessing = false;
+		return SkipVanillaFire;
+	}
+
+	return DontSkip;
+}
+
+// Units check fire error again in the Fire vfunc.
+DEFINE_HOOK(0x7413C2, UnitClass_Fire_SkipROFError, 0x8)
+{
+	enum { Fire = 0x7413CA, DontFire = 0x74147B };
+
+	GET(FireError, err, EAX);
+
+	if (err == FireError::OK || err == FireError::REARM && BurstDelayForceZero::isProcessing)
+		return Fire;
+
+	return DontFire;
+}

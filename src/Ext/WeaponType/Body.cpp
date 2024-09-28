@@ -115,6 +115,7 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->KickOutPassengers.Read(exINI, pSection, "KickOutPassengers");
 	this->CylinderRangefinding.Read(exINI, pSection, "CylinderRangefinding");
 	this->AttackIronCurtain.Read(exINI, pSection, "AttackIronCurtain");
+	this->BurstDelayForceZero.Read(exINI, pSection, "BurstDelayForceZero");
 }
 
 template <typename T>
@@ -160,6 +161,7 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->KickOutPassengers)
 		.Process(this->CylinderRangefinding)
 		.Process(this->AttackIronCurtain)
+		.Process(this->BurstDelayForceZero)
 		;
 };
 
