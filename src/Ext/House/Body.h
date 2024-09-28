@@ -38,6 +38,7 @@ public:
 		CDTimerClass CombatAlertTimer;
 		CDTimerClass AIFireSaleDelayTimer;
 		CDTimerClass AISuperWeaponDelayTimer;
+		CDTimerClass AIFireSaleDelayTimer;
 
 		//Read from INI
 		bool RepairBaseNodes[3];
@@ -79,6 +80,7 @@ public:
 			, NumWarFactories_NonMFB { 0 }
 			, NumConYards_NonMFB { 0 }
 			, NumShipyards_NonMFB { 0 }
+			, AIFireSaleDelayTimer {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);

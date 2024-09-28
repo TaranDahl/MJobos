@@ -658,6 +658,7 @@ void HouseExt::ExtData::Serialize(T& Stm)
 		.Process(this->NumWarFactories_NonMFB)
 		.Process(this->NumConYards_NonMFB)
 		.Process(this->NumShipyards_NonMFB)
+		.Process(this->AIFireSaleDelayTimer)
 		;
 }
 

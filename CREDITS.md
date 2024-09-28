@@ -21,6 +21,7 @@ This page lists all the individual contributions to the project by their author.
   - Non-ASCII input fix
   - Building Placement Preview Adjustment
   - Check for Changelog/Documentation/Credits in Pull Requests
+  - Docs dark theme switcher
   - Fix position and layer of info tip and reveal production cameo on selected building
   - Fix a glitch related to incorrect target setting for missiles
   - Ability to disable shadow for debris & meteor animations
@@ -241,6 +242,7 @@ This page lists all the individual contributions to the project by their author.
   - Allowed and disallowed types for `FactoryPlant`
   - Forbidding parallel AI queues for specific TechnoTypes
   - Nonprovocative Warheads
+  - Customizing effect of level lighting on air units
 - **Morton (MortonPL)**:
   - `XDrawOffset` for animations
   - Shield passthrough & absorption
@@ -328,6 +330,7 @@ This page lists all the individual contributions to the project by their author.
    - Jumpjet crash speed fix when crashing onto building
    - Disguised units not using the correct palette if target has custom palette bugfix
    - Tunnel/Walk/Mech locomotor being stuck when moving too fast bugfix
+   - Assign Super Weapon cameo to any sidebar tab
 - **Apollo** - Translucent SHP drawing patches
 - **ststl**
    - Customizable ShowTimer priority of superweapons
@@ -360,7 +363,10 @@ This page lists all the individual contributions to the project by their author.
   - Build limit group enhancement
   - Customizable rocker amplitude
 - **handama** - AI script action to jump back to previous script
-- **航味麻酱** - Raise alert when technos are taking damage
+- **TaranDahl (航味麻酱)**
+  - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
+  - Skirmish AI "gather when MCV deploy" behavior dehardcode
+  - Global value of `RepairBaseNodes` and `MCVRedeploys`
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
   - unfinished RadTypes code
@@ -389,4 +395,3 @@ This page lists all the individual contributions to the project by their author.
 - **Damfoos** - extensive and thorough testing
 - **Dmitry Volkov** - extensive and thorough testing
 - **Rise of the East community** - extensive playtesting of in-dev features
-- **航味麻酱** - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller

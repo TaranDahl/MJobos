@@ -147,6 +147,9 @@ public:
 		Valueable<AnimTypeClass*> Promote_VeteranAnimation;
 		Valueable<AnimTypeClass*> Promote_EliteAnimation;
 
+		Valueable<double> AircraftLevelLightMultiplier;
+		Valueable<double> JumpjetLevelLightMultiplier;
+
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
@@ -203,6 +206,13 @@ public:
 		Valueable<bool> RallyPointOnTechno;
 		Valueable<bool> RallyPointForceMove;
 		Valueable<bool> RallyPointAreaGuard;
+
+		Valueable<bool> GatherWhenMCVDeploy;
+		Valueable<bool> AIFireSale;
+		Valueable<int> AIFireSaleDelay;
+		Valueable<bool> AIAllToHunt;
+		ValueableVector<bool> RepairBaseNodes;
+		Valueable<bool> MCVRedeploysInCampaign;
 
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -323,6 +333,8 @@ public:
 			, CombatAlert_UseFeedbackVoice { true }
 			, CombatAlert_UseAttackVoice { true }
 			, CombatAlert_UseEVA { true }
+			, AircraftLevelLightMultiplier { 1.0 }
+			, JumpjetLevelLightMultiplier { 0.0 }
 			, GatherWhenMCVDeploy { true }
 			, AIFireSale { true }
 			, AIFireSaleDelay { 0 }
