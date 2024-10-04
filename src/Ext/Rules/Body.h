@@ -165,12 +165,6 @@ public:
 		Valueable<bool> CombatAlert_UseFeedbackVoice;
 		Valueable<bool> CombatAlert_UseAttackVoice;
 		Valueable<bool> CombatAlert_UseEVA;
-		Valueable<bool> GatherWhenMCVDeploy;
-		Valueable<bool> AIFireSale;
-		Valueable<int> AIFireSaleDelay;
-		Valueable<bool> AIAllToHunt;
-		ValueableVector<bool> RepairBaseNodes;
-		Valueable<bool> MCVRedeploysInCampaign;
 
 		Valueable<bool> CylinderRangefinding;
 
@@ -211,8 +205,7 @@ public:
 		Valueable<bool> AIFireSale;
 		Valueable<int> AIFireSaleDelay;
 		Valueable<bool> AIAllToHunt;
-		ValueableVector<bool> RepairBaseNodes;
-		Valueable<bool> MCVRedeploysInCampaign;
+		Valueable<bool> RepairBaseNodes;
 
 		Valueable<bool> PlayerDestroyWalls;
 		Valueable<bool> DestroyOwnerlessWalls;
@@ -342,8 +335,6 @@ public:
 			, AIFireSale { true }
 			, AIFireSaleDelay { 0 }
 			, AIAllToHunt { true }
-			, RepairBaseNodes {}
-			, MCVRedeploysInCampaign { false }
 			, CylinderRangefinding { false }
 			, BuildingWaypoint { false }
 			, AircraftWaypoint { false }
@@ -373,6 +364,7 @@ public:
 			, RallyPointAreaGuard { false }
 			, PlayerDestroyWalls { false }
 			, DestroyOwnerlessWalls { false }
+			, RepairBaseNodes { false }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -27,8 +27,8 @@ class PhobosTrajectoryType
 {
 public:
 	PhobosTrajectoryType(noinit_t) { }
-	PhobosTrajectoryType(TrajectoryFlag flag) : Flag { flag }
-	{}
+	PhobosTrajectoryType(TrajectoryFlag flag) : Flag { flag }, Trajectory_Speed { 100.0 }
+	{ }
 
 	virtual ~PhobosTrajectoryType() noexcept = default;
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
@@ -36,22 +36,32 @@ public:
 
 	virtual void Read(CCINIClass* const pINI, const char* pSection) = 0;
 	virtual PhobosTrajectory* CreateInstance() const = 0;
-	static void CreateType(PhobosTrajectoryType*& pType, CCINIClass* const pINI, const char* pSection, const char* pKey);
-
-	static PhobosTrajectoryType* LoadFromStream(PhobosStreamReader& Stm);
-	static void WriteToStream(PhobosStreamWriter& Stm, PhobosTrajectoryType* pType);
-	static PhobosTrajectoryType* ProcessFromStream(PhobosStreamReader& Stm, PhobosTrajectoryType* pType);
-	static PhobosTrajectoryType* ProcessFromStream(PhobosStreamWriter& Stm, PhobosTrajectoryType* pType);
 
 	TrajectoryFlag Flag;
+	Valueable<double> Trajectory_Speed;
 };
+
+class TrajectoryTypePointer
+{
+	std::unique_ptr<PhobosTrajectoryType> _ptr {};
+public:
+	explicit TrajectoryTypePointer(TrajectoryFlag flag);
+	explicit TrajectoryTypePointer() { }
+	void LoadFromINI(CCINIClass* pINI, const char* pSection);
+	bool Load(PhobosStreamReader& stm, bool registerForChange);
+	bool Save(PhobosStreamWriter& stm) const;
+	[[nodiscard]] PhobosTrajectoryType* operator->() const noexcept { return _ptr.get(); }
+	[[nodiscard]] PhobosTrajectoryType* get() const noexcept { return _ptr.get(); }
+	explicit operator bool() const noexcept { return _ptr.get() != nullptr; }
+};
+
 
 class PhobosTrajectory
 {
 public:
 	PhobosTrajectory(noinit_t) { }
-	PhobosTrajectory(TrajectoryFlag flag) : Flag { flag }
-	{}
+	PhobosTrajectory(TrajectoryFlag flag, double speed = 100.0) : Flag { flag }, Speed { speed }
+	{ }
 
 	virtual ~PhobosTrajectory() noexcept = default;
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
@@ -64,19 +74,13 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) = 0;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) = 0;
 
-	template<typename T = PhobosTrajectoryType>
-	T* GetTrajectoryType(BulletClass* pBullet) const
-	{
-		return static_cast<T*>(BulletTypeExt::ExtMap.Find(pBullet->Type)->TrajectoryType);
-	}
-	double GetTrajectorySpeed(BulletClass* pBullet) const;
-
 	static PhobosTrajectory* LoadFromStream(PhobosStreamReader& Stm);
 	static void WriteToStream(PhobosStreamWriter& Stm, PhobosTrajectory* pTraj);
 	static PhobosTrajectory* ProcessFromStream(PhobosStreamReader& Stm, PhobosTrajectory* pTraj);
 	static PhobosTrajectory* ProcessFromStream(PhobosStreamWriter& Stm, PhobosTrajectory* pTraj);
 
-	TrajectoryFlag Flag { TrajectoryFlag::Invalid };
+	TrajectoryFlag Flag;
+	double Speed;
 };
 
 /*
