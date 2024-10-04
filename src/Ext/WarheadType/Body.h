@@ -161,6 +161,7 @@ public:
 		Valueable<int> SetAmbientRed;
 		Valueable<int> SetAmbientGreen;
 		Valueable<int> SetAmbientBlue;
+		Valueable<bool> ReduceTiberium;
 
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
@@ -343,6 +344,8 @@ public:
 			, SetAmbientRed { -1 }
 			, SetAmbientGreen { -1 }
 			, SetAmbientBlue { -1 }
+
+			, ReduceTiberium { false }
 		{ }
 
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
