@@ -896,68 +896,81 @@ DEFINE_JUMP(CALL6, 0x6F8DD2, GET_OFFSET(TechnoClass_EvaluateCellGetWeaponRangeWr
 
 #pragma endregion
 
-DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstDelayForceZero, 0x5)
+
+#pragma region NoBurstDelay
+
+DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 {
-	enum { SkipVanillaFire = 0x520A57, DontSkip = 0 };
+	enum { SkipVanillaFire = 0x520A57 };
 
 	GET(InfantryClass* const, pThis, EBP);
-	GET(int, wpIdx, ESI);
+	GET(const int, wpIdx, ESI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
-	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-
-	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->BurstDelayForceZero)
+	if (const WeaponTypeClass* const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
-		for (int i = 0; i != pWeapon->Burst; i++)
-			pThis->Fire(pTarget, wpIdx);
+		if (pWeapon->Burst > 1)
+		{
+			if (const WeaponTypeExt::ExtData* const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			{
+				if (pWeaponExt->Burst_NoDelay)
+				{
+					for (int i = 1; pThis->Fire(pTarget, wpIdx) && i != pWeapon->Burst; ++i)
+					{
+						const int rof = pThis->RearmTimer.TimeLeft;
+						pThis->RearmTimer.Start(0);
 
-		return SkipVanillaFire;
+						if (pThis->GetFireError(pTarget, wpIdx, true) != FireError::OK)
+						{
+							pThis->RearmTimer.Start(rof);
+							break;
+						}
+					}
+
+					return SkipVanillaFire;
+				}
+			}
+		}
 	}
 
-	return DontSkip;
+	return 0;
 }
 
-namespace BurstDelayForceZero
+DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 {
-	bool isProcessing;
-}
-
-DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstDelayForceZero, 0x6)
-{
-	enum { SkipVanillaFire = 0x737063, DontSkip = 0 };
+	enum { SkipVanillaFire = 0x737063 };
 
 	GET(UnitClass* const, pThis, ESI);
-	GET(int, wpIdx, EDI);
+	GET(const int, wpIdx, EDI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
-	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-
-	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->BurstDelayForceZero)
+	if (const WeaponTypeClass* const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
-		for (int i = 0; i != pWeapon->Burst; i++)
+		if (pWeapon->Burst > 1)
 		{
-			BurstDelayForceZero::isProcessing = true;
-			pThis->Fire(pTarget, wpIdx);
-		}
+			if (const WeaponTypeExt::ExtData* const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			{
+				if (pWeaponExt->Burst_NoDelay)
+				{
+					for (int i = 1; pThis->Fire(pTarget, wpIdx) && i != pWeapon->Burst; ++i)
+					{
+						const int rof = pThis->RearmTimer.TimeLeft;
+						pThis->RearmTimer.Start(0);
 
-		BurstDelayForceZero::isProcessing = false;
-		return SkipVanillaFire;
+						if (pThis->GetFireError(pTarget, wpIdx, true) != FireError::OK)
+						{
+							pThis->RearmTimer.Start(rof);
+							break;
+						}
+					}
+
+					return SkipVanillaFire;
+				}
+			}
+		}
 	}
 
-	return DontSkip;
+	return 0;
 }
 
-// Units check fire error again in the Fire vfunc.
-DEFINE_HOOK(0x7413C2, UnitClass_Fire_SkipROFError, 0x8)
-{
-	enum { Fire = 0x7413CA, DontFire = 0x74147B };
-
-	GET(FireError, err, EAX);
-
-	if (err == FireError::OK || err == FireError::REARM && BurstDelayForceZero::isProcessing)
-		return Fire;
-
-	return DontFire;
-}
+#pragma endregion

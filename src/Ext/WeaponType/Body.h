@@ -58,7 +58,7 @@ public:
 		Valueable<bool> AttachEffect_CheckOnFirer;
 		Valueable<bool> AttachEffect_IgnoreFromSameSource;
 		Valueable<bool> KickOutPassengers;
-		Valueable<bool> BurstDelayForceZero;
+		Valueable<bool> Burst_NoDelay;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
 			, DiskLaser_Radius { DiskLaserClass::Radius }
@@ -98,7 +98,7 @@ public:
 			, AttachEffect_CheckOnFirer { false }
 			, AttachEffect_IgnoreFromSameSource { false }
 			, KickOutPassengers { true }
-			, BurstDelayForceZero { false }
+			, Burst_NoDelay { false }
 		{ }
 
 		int GetBurstDelay(int burstIndex) const;
