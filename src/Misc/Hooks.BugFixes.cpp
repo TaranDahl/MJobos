@@ -1002,3 +1002,27 @@ DEFINE_HOOK(0x6FF78F, TechnoClass_Fire_ReselectIfLimboedCheck, 0x5)
 }
 
 DEFINE_JUMP(LJMP, 0x517FF5, 0x518016); // Warhead with InfDeath=9 versus infantry in air
+
+// Jumpjet infantry will no longer acts stupid when assigned a attack mission.
+DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
+{
+	enum { VanillaCode = 0, FuncRet = 0x51B1D7 };
+
+	GET(InfantryClass* const, pThis, EBP);
+	GET(AbstractClass* const, pDest, EBX);
+
+	if (pThis->Type->BalloonHover && !pDest)
+	{
+		auto const pDestNow = pThis->Destination;
+		auto const pTarget = pThis->Target;
+		auto const JJLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor);
+
+		if (pDestNow && JJLoco && pTarget)
+		{
+			pThis->ForceMission(Mission::Attack);
+			return FuncRet;
+		}
+	}
+
+	return VanillaCode;
+}
