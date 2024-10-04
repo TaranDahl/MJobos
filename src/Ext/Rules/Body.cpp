@@ -240,6 +240,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerDestroyWalls.Read(exINI, GameStrings::General, "PlayerDestroyWalls");
 	this->DestroyOwnerlessWalls.Read(exINI, GameStrings::General, "DestroyOwnerlessWalls");
 	this->RepairBaseNodes.Read(exINI, GameStrings::Basic, "RepairBaseNodes");
+	this->AIAngerOnAlly.Read(exINI, GameStrings::General, "AIAngerOnAlly");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -457,6 +458,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->RallyPointAreaGuard)
 		.Process(this->PlayerDestroyWalls)
 		.Process(this->DestroyOwnerlessWalls)
+		.Process(this->AIAngerOnAlly)
 		;
 }
 

@@ -206,6 +206,7 @@ public:
 		Valueable<int> AIFireSaleDelay;
 		Valueable<bool> AIAllToHunt;
 		Valueable<bool> RepairBaseNodes;
+		Valueable<bool> AIAngerOnAlly;
 
 		Valueable<bool> PlayerDestroyWalls;
 		Valueable<bool> DestroyOwnerlessWalls;
@@ -365,6 +366,7 @@ public:
 			, PlayerDestroyWalls { false }
 			, DestroyOwnerlessWalls { false }
 			, RepairBaseNodes { false }
+			, AIAngerOnAlly { true }
 		{ }
 
 		virtual ~ExtData() = default;
