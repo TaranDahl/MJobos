@@ -915,16 +915,18 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 			{
 				if (pWeaponExt->Burst_NoDelay)
 				{
-					for (int i = 1; pThis->Fire(pTarget, wpIdx) && i != pWeapon->Burst; ++i)
+					if (pThis->Fire(pTarget, wpIdx))
 					{
-						const int rof = pThis->RearmTimer.TimeLeft;
+						int rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
 
-						if (pThis->GetFireError(pTarget, wpIdx, true) != FireError::OK)
+						for (int i = 1; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 						{
-							pThis->RearmTimer.Start(rof);
-							break;
+							rof = pThis->RearmTimer.TimeLeft;
+							pThis->RearmTimer.Start(0);
 						}
+
+						pThis->RearmTimer.Start(rof);
 					}
 
 					return SkipVanillaFire;
@@ -952,16 +954,18 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 			{
 				if (pWeaponExt->Burst_NoDelay)
 				{
-					for (int i = 1; pThis->Fire(pTarget, wpIdx) && i != pWeapon->Burst; ++i)
+					if (pThis->Fire(pTarget, wpIdx))
 					{
-						const int rof = pThis->RearmTimer.TimeLeft;
+						int rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
 
-						if (pThis->GetFireError(pTarget, wpIdx, true) != FireError::OK)
+						for (int i = 1; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 						{
-							pThis->RearmTimer.Start(rof);
-							break;
+							rof = pThis->RearmTimer.TimeLeft;
+							pThis->RearmTimer.Start(0);
 						}
+
+						pThis->RearmTimer.Start(rof);
 					}
 
 					return SkipVanillaFire;
