@@ -1219,3 +1219,31 @@ DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
 
 	return GoOtherChecks;
 }
+
+namespace DoTurnOnRearm
+{
+	bool hasTurned = false;
+}
+
+DEFINE_HOOK(0x737063, UnitClass_UpdateFiring_DoTurnOnRearm, 0x6)
+{
+	enum { DoTurn = 0x736F78 };
+
+	GET(FireError, err, EBP);
+
+	if (err == FireError::REARM)
+	{
+		if (!DoTurnOnRearm::hasTurned)
+		{
+			DoTurnOnRearm::hasTurned = true;
+			return DoTurn;
+		}
+		else
+		{
+			DoTurnOnRearm::hasTurned = false;
+			return 0;
+		}
+	}
+
+	return 0;
+}
