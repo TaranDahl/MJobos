@@ -340,11 +340,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->KeepWarping_Distance.Read(exINI, pSection, "KeepWarping.Distance");
 	this->SkipCrushSlowdown.Read(exINI, pSection, "SkipCrushSlowdown");
 
-	this->GuardModePursuit.Read(exINI, pSection, "GuardModePursuit");
-	this->GuardModeStray.Read(exINI, pSection, "GuardModeStray");
-	this->GuardModeGuardRangeMultiplier.Read(exINI, pSection, "GuardModeGuardRangeMultiplier");
-	this->GuardModeGuardRangeAddend.Read(exINI, pSection, "GuardModeGuardRangeAddend");
-	this->GuardStationaryStray.Read(exINI, pSection, "GuardStationaryStray");
 	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
 	this->BunkerableAnyWay.Read(exINI, pSection, "BunkerableAnyWay");
 	this->Harvester_CanGuardArea.Read(exINI, pSection, "Harvester.CanGuardArea");
@@ -360,6 +355,16 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ExitCoord.Read(exINI, pSection, "ExitCoord");
 	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
+	this->PlayerGuardModePursuit.Read(exINI, pSection, "PlayerGuardModePursuit");
+	this->PlayerGuardModeStray.Read(exINI, pSection, "PlayerGuardModeStray");
+	this->PlayerGuardModeGuardRangeMultiplier.Read(exINI, pSection, "PlayerGuardModeGuardRangeMultiplier");
+	this->PlayerGuardModeGuardRangeAddend.Read(exINI, pSection, "PlayerGuardModeGuardRangeAddend");
+	this->PlayerGuardStationaryStray.Read(exINI, pSection, "PlayerGuardStationaryStray");
+	this->AIGuardModePursuit.Read(exINI, pSection, "AIGuardModePursuit");
+	this->AIGuardModeStray.Read(exINI, pSection, "AIGuardModeStray");
+	this->AIGuardModeGuardRangeMultiplier.Read(exINI, pSection, "AIGuardModeGuardRangeMultiplier");
+	this->AIGuardModeGuardRangeAddend.Read(exINI, pSection, "AIGuardModeGuardRangeAddend");
+	this->AIGuardStationaryStray.Read(exINI, pSection, "AIGuardStationaryStray");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -750,11 +755,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->KeepWarping)
 		.Process(this->KeepWarping_Distance)
 		.Process(this->SkipCrushSlowdown)
-		.Process(this->GuardModePursuit)
-		.Process(this->GuardModeStray)
-		.Process(this->GuardModeGuardRangeMultiplier)
-		.Process(this->GuardModeGuardRangeAddend)
-		.Process(this->GuardStationaryStray)
 		.Process(this->Engineer_CanAutoFire)
 		.Process(this->BunkerableAnyWay)
 		.Process(this->Harvester_CanGuardArea)
@@ -770,6 +770,16 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->JustHasRallyPoint)
 		.Process(this->ExitCoord)
 		.Process(this->MissileSpawnUseOtherFLHs)
+		.Process(this->PlayerGuardModePursuit)
+		.Process(this->PlayerGuardModeStray)
+		.Process(this->PlayerGuardModeGuardRangeMultiplier)
+		.Process(this->PlayerGuardModeGuardRangeAddend)
+		.Process(this->PlayerGuardStationaryStray)
+		.Process(this->AIGuardModePursuit)
+		.Process(this->AIGuardModeStray)
+		.Process(this->AIGuardModeGuardRangeMultiplier)
+		.Process(this->AIGuardModeGuardRangeAddend)
+		.Process(this->AIGuardStationaryStray)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

@@ -186,11 +186,16 @@ public:
 		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
 		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
 
-		Valueable<bool> GuardModePursuit;
-		Valueable<double> GuardModeGuardRangeMultiplier;
-		Valueable<Leptons> GuardModeGuardRangeAddend;
-		Valueable<Leptons> GuardModeGuardRangeMax;
-		Valueable<Leptons> GuardStationaryStray;
+		Valueable<bool> PlayerGuardModePursuit;
+		Valueable<double> PlayerGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Valueable<Leptons> PlayerGuardModeGuardRangeMax;
+		Valueable<Leptons> PlayerGuardStationaryStray;
+		Valueable<bool> AIGuardModePursuit;
+		Valueable<double> AIGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> AIGuardModeGuardRangeAddend;
+		Valueable<Leptons> AIGuardModeGuardRangeMax;
+		Valueable<Leptons> AIGuardStationaryStray;
 
 		Valueable<bool> UseGlobalDeathWeaponDamage;
 		Valueable<bool> NonVehExplodeOnDestroy;
@@ -351,11 +356,6 @@ public:
 			, PlayerAutoRepair { false }
 			, EVA_WeCaptureABuilding {}
 			, EVA_OurBuildingIsCaptured {}
-			, GuardModePursuit { true }
-			, GuardModeGuardRangeMultiplier { 2.0 }
-			, GuardModeGuardRangeAddend { Leptons(0) }
-			, GuardModeGuardRangeMax { Leptons(4096) }
-			, GuardStationaryStray { Leptons(-256) }
 			, UseGlobalDeathWeaponDamage { false }
 			, NonVehExplodeOnDestroy { false }
 			, FireDeathWeaponOnCrushed { false }
@@ -367,6 +367,16 @@ public:
 			, DestroyOwnerlessWalls { false }
 			, RepairBaseNodes { false }
 			, AIAngerOnAlly { true }
+			, PlayerGuardModePursuit { true }
+			, PlayerGuardModeGuardRangeMultiplier { 2.0 }
+			, PlayerGuardModeGuardRangeAddend { Leptons(0) }
+			, PlayerGuardModeGuardRangeMax { Leptons(4096) }
+			, PlayerGuardStationaryStray { Leptons(-256) }
+			, AIGuardModePursuit { true }
+			, AIGuardModeGuardRangeMultiplier { 2.0 }
+			, AIGuardModeGuardRangeAddend { Leptons(0) }
+			, AIGuardModeGuardRangeMax { Leptons(4096) }
+			, AIGuardStationaryStray { Leptons(-256) }
 		{ }
 
 		virtual ~ExtData() = default;

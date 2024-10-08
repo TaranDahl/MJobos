@@ -250,11 +250,6 @@ public:
 		Nullable<int> PlayerGuardAreaTargetingDelay;
 		Valueable<bool> KeepWarping;
 		Nullable<int> KeepWarping_Distance;
-		Nullable<bool> GuardModePursuit;
-		Nullable<Leptons> GuardModeStray;
-		Nullable<double> GuardModeGuardRangeMultiplier;
-		Nullable<Leptons> GuardModeGuardRangeAddend;
-		Nullable<Leptons> GuardStationaryStray;
 		Valueable<bool> Engineer_CanAutoFire;
 		Valueable<bool> BunkerableAnyWay;
 		Valueable<bool> Harvester_CanGuardArea;
@@ -264,6 +259,16 @@ public:
 		Nullable<bool> FireDeathWeaponOnCrushed;
 		Valueable<bool> JustHasRallyPoint;
 		Nullable<CoordStruct> ExitCoord;
+		Nullable<bool> PlayerGuardModePursuit;
+		Nullable<Leptons> PlayerGuardModeStray;
+		Nullable<double> PlayerGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Nullable<Leptons> PlayerGuardStationaryStray;
+		Nullable<bool> AIGuardModePursuit;
+		Nullable<Leptons> AIGuardModeStray;
+		Nullable<double> AIGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> AIGuardModeGuardRangeAddend;
+		Nullable<Leptons> AIGuardStationaryStray;
 
 		struct LaserTrailDataEntry
 		{
@@ -523,11 +528,6 @@ public:
 			, KeepWarping { false }
 			, KeepWarping_Distance {}
 			, SkipCrushSlowdown { false }
-			, GuardModePursuit {}
-			, GuardModeStray {}
-			, GuardModeGuardRangeMultiplier {}
-			, GuardModeGuardRangeAddend {}
-			, GuardStationaryStray {}
 			, Engineer_CanAutoFire { false }
 			, BunkerableAnyWay { false }
 			, Harvester_CanGuardArea { false }
@@ -544,6 +544,16 @@ public:
 			, JustHasRallyPoint { false }
 			, ExitCoord { }
 			, MissileSpawnUseOtherFLHs { false }
+			, PlayerGuardModePursuit {}
+			, PlayerGuardModeStray {}
+			, PlayerGuardModeGuardRangeMultiplier {}
+			, PlayerGuardModeGuardRangeAddend {}
+			, PlayerGuardStationaryStray {}
+			, AIGuardModePursuit {}
+			, AIGuardModeStray {}
+			, AIGuardModeGuardRangeMultiplier {}
+			, AIGuardModeGuardRangeAddend {}
+			, AIGuardStationaryStray {}
 		{ }
 
 		virtual ~ExtData() = default;
