@@ -31,7 +31,7 @@ public:
 		TechnoClass* LimboedLauncher;
 		DirType LimboedDir;
 
-		PhobosTrajectory* Trajectory; // TODO: why not unique_ptr
+		TrajectoryPointer Trajectory;
 
 		ExtData(BulletClass* OwnerObject) : Extension<BulletClass>(OwnerObject)
 			, TypeExtData { nullptr }

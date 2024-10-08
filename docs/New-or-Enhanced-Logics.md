@@ -8,7 +8,7 @@ This page describes all the engine features that are either new and introduced b
 
 - Similar (but not identical) to Ares' AttachEffect, but with some differences and new features. The largest difference is that here attached effects are explicitly defined types.
   - `Duration` determines how long the effect lasts for. It can be overriden by `DurationOverrides` on TechnoTypes and Warheads.
-  - `Cumulative`, if set to true, allows the same type of effect to be applied on same object multiple times, up to `Cumulative.MaxCount` number or with no limit if `Cumulative.MaxCount` is a negative number.
+  - `Cumulative`, if set to true, allows the same type of effect to be applied on same object multiple times, up to `Cumulative.MaxCount` number or with no limit if `Cumulative.MaxCount` is a negative number. If the target already has `Cumulative.MaxCount` number of the same effect applied on it, trying to attach another will refresh duration of the attached instance with shortest remaining duration.
   - `Powered` controls whether or not the effect is rendered inactive if the object it is attached to is deactivated (`PoweredUnit` or affected by EMP) or on low power. What happens to animation is controlled by `Animation.OfflineAction`.
   - `DiscardOn` accepts a list of values corresponding to conditions where the attached effect should be discarded. Defaults to `none`, meaning it is never discarded.
     - `entry`: Discard on exiting the map when entering transports or buildings etc.
@@ -17,6 +17,7 @@ This page describes all the engine features that are either new and introduced b
     - `drain`: Discard when the object is being affected by a weapon with `DrainWeapon=true`.
     - `inrange`: Discard if within weapon range from current target. Distance can be overridden via `DiscardOn.RangeOverride`.
     - `outofrange`: Discard if outside weapon range from current target. Distance can be overridden via `DiscardOn.RangeOverride`.
+    - `firing`: Discard when firing a weapon. This counts special weapons that are not actually fired such as ones with `Spawner=true` or `DrainWeapon=true`.
   - If `PenetratesIronCurtain` is not set to true, the effect is not applied on currently invulnerable objects.
     - `PenetratesForceShield` can be used to set this separately for Force Shielded objects, defaults to value of `PenetratesIronCurtain`.
   - `Animation` defines animation to play in an indefinite loop for as long as the effect is active on the object it is attached to.
@@ -422,24 +423,24 @@ Shield.InheritStateOnReplace=false          ; boolean
 
 ![image](_static/images/animToUnit.gif)
 
-- Animations can now create (or "convert" to) vehicles when they end via `CreateUnit`.
-  - `CreateUnit.Owner` determines which house will own the created VehicleType. This only works as expected if the animation has owner set.
+- Animations can now create (or "convert" to) any unit (vehicles, aircraft and infantry) when they end via `CreateUnit`. This offers more settings than `MakeInfantry` does for infantry.
+  - `CreateUnit.Owner` determines which house will own the created unit. This only works as expected if the animation has owner set.
     - Vehicle [destroy animations](Fixed-or-Improved-Logics.md#destroy-animations), animations from Warhead `AnimList/SplashList` and map trigger action `41 Play Anim At` will have the owner set correctly.
     - `CreateUnit.RemapAnim`, if set to true, will cause the animation to be drawn in unit palette and remappable to owner's team color.
-  - `CreateUnit.Mission` determines the initial mission of the created VehicleType. This can be overridden for AI players by setting `CreateUnit.AIMission`.
-  - `CreateUnit.Facing` determines the initial facing of created VehicleType.
+  - `CreateUnit.Mission` determines the initial mission of the created unit. This can be overridden for AI players by setting `CreateUnit.AIMission`.
+  - `CreateUnit.Facing` determines the initial facing of created unit.
     - `CreateUnit.RandomFacing`, if set to true, makes it so that a random facing is picked instead.
-    - `CreateUnit.InheritFacings` and `CreateUnit.InheritTurretFacings` inherit facings for vehicle body and turret respectively from the destroyed vehicle if the animation is a vehicle destroy animation. `InheritTurretFacings` does not work with jumpjet vehicles due to technical constraints.
-  - `CreateUnit.AlwaysSpawnOnGround`, if set to true, ensures the vehicle will be created on the cell at ground level even if animation is in air. If set to false, jumpjet units spawned on ground will take off automatically after being spawned regardless.
-  - `CreateUnit.SpawnParachutedInAir`, if set to true, makes it so that the vehicle is created with a parachute if it is spawned in air. Has no effect if `CreateUnit.AlwaysSpawnOnGround` is set to true.
-  - `CreateUnit.ConsiderPathfinding`, if set to true, will consider whether or not the cell where the animation is located is occupied by other objects or impassable to the vehicle being created and will attempt to find a nearby cell that is not. Otherwise the vehicle will be created at the animation's location despite these obstacles if possible.
+    - For VehicleTypes only, `CreateUnit.InheritFacings` and `CreateUnit.InheritTurretFacings` inherit facings for vehicle body and turret respectively from the destroyed vehicle if the animation is a vehicle destroy animation. `InheritTurretFacings` does not work with jumpjet vehicles due to technical constraints.
+  - `CreateUnit.AlwaysSpawnOnGround`, if set to true, ensures the unit will be created on the cell at ground level even if animation is in air. If set to false, jumpjet units spawned on ground will take off automatically after being spawned regardless.
+  - `CreateUnit.SpawnParachutedInAir`, if set to true, makes it so that the unit is created with a parachute if it is spawned in air. Has no effect if `CreateUnit.AlwaysSpawnOnGround` is set to true.
+  - `CreateUnit.ConsiderPathfinding`, if set to true, will consider whether or not the cell where the animation is located is occupied by other objects or impassable to the unit being created and will attempt to find a nearby cell that is not. Otherwise the unit will be created at the animation's location despite these obstacles if possible.
   - `CreateUnit.SpawnAnim` can be used to play another animation at created unit's location after it has appeared. This animation has same owner and invoker as the parent animation.
-  - `CreateUnit.SpawnHeight` can be set to override the animation's height when determining where to spawn the created unit. Has no effect if `CreateUnit.AlwaysSpawnOnGround` is set to true.
+  - `CreateUnit.SpawnHeight` can be set to override the animation's height when determining where to spawn the created unit if set to positive value. Has no effect if `CreateUnit.AlwaysSpawnOnGround` is set to true.
 
 In `artmd.ini`:
 ```ini
 [SOMEANIM]                             ; AnimationType
-CreateUnit=                            ; VehicleType
+CreateUnit=                            ; TechnoType
 CreateUnit.Owner=Victim                ; Owner house kind, Invoker/Killer/Victim/Civilian/Special/Neutral/Random
 CreateUnit.RemapAnim=false             ; boolean
 CreateUnit.Mission=Guard               ; MissionType
@@ -452,7 +453,7 @@ CreateUnit.AlwaysSpawnOnGround=false   ; boolean
 CreateUnit.SpawnParachutedInAir=false  ; boolean
 CreateUnit.ConsiderPathfinding=false   ; boolean
 CreateUnit.SpawnAnim=                  ; Animation
-CreareUnit.SpawnHeight=                ; integer, height in leptons
+CreareUnit.SpawnHeight=-1              ; integer, height in leptons
 ```
 
 ```{note}

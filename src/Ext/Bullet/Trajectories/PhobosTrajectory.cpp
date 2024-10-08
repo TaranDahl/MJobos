@@ -16,7 +16,7 @@ TrajectoryTypePointer::TrajectoryTypePointer(TrajectoryFlag flag)
 		_ptr = std::make_unique<StraightTrajectoryType>();
 		return;
 	case TrajectoryFlag::Bombard:
-		_ptr = std::make_unique<StraightTrajectoryType>();
+		_ptr = std::make_unique<BombardTrajectoryType>();
 		return;
 	}
 	_ptr.reset();
@@ -56,7 +56,7 @@ void TrajectoryTypePointer::LoadFromINI(CCINIClass* pINI, const char* pSection)
 	flag.Read(exINI, pSection, "Trajectory");// I assume this shit is parsed once and only once, so I keep the impl here
 	if (flag.isset())
 	{
-		if (!_ptr || _ptr->Flag != flag.Get())
+		if (!_ptr || _ptr->Flag() != flag.Get())
 			std::construct_at(this, flag.Get());
 	}
 	if (_ptr)
@@ -84,19 +84,63 @@ bool TrajectoryTypePointer::Load(PhobosStreamReader& Stm, bool RegisterForChange
 bool TrajectoryTypePointer::Save(PhobosStreamWriter& Stm) const
 {
 	auto* raw = get();
-	Stm.Process(raw);
+	Stm.Save(raw);
 	if (raw)
 	{
-		Stm.Process(raw->Flag);
+		auto rtti = raw->Flag();
+		Stm.Save(rtti);
 		return raw->Save(Stm);
 	}
 	return true;
 }
 
+bool TrajectoryPointer::Load(PhobosStreamReader& Stm, bool registerForChange)
+{
+	PhobosTrajectory* PTR = nullptr;
+	if (!Stm.Load(PTR))
+		return false;
+	TrajectoryFlag flag = TrajectoryFlag::Invalid;
+	if (PTR && Stm.Load(flag))
+	{
+		switch (flag)
+		{
+		case TrajectoryFlag::Straight:
+			_ptr = std::make_unique<StraightTrajectory>(noinit_t {});
+			break;
+		case TrajectoryFlag::Bombard:
+			_ptr = std::make_unique<BombardTrajectory>(noinit_t {});
+			break;
+		default:
+			_ptr.reset();
+			break;
+		}
+		if (_ptr.get())
+		{
+			// PhobosSwizzle::RegisterChange(PTR, _ptr.get()); // not used elsewhere yet, if anyone does then reenable this shit
+			return _ptr->Load(Stm, registerForChange);
+		}
+	}
+	return true;
+}
+
+bool TrajectoryPointer::Save(PhobosStreamWriter& Stm) const
+{
+	auto* raw = get();
+	Stm.Save(raw);
+	if (raw)
+	{
+		auto rtti = raw->Flag();
+		Stm.Save(rtti);
+		return raw->Save(Stm);
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------------ //
+
 bool PhobosTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
 	Stm
-		.Process(this->Flag)
 		.Process(this->Trajectory_Speed);
 	return true;
 }
@@ -104,77 +148,9 @@ bool PhobosTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 bool PhobosTrajectoryType::Save(PhobosStreamWriter& Stm) const
 {
 	Stm
-		.Process(this->Flag)
 		.Process(this->Trajectory_Speed);
 	return true;
 }
-
-bool PhobosTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
-{
-	Stm.Process(this->Flag, false);
-
-	return true;
-}
-
-bool PhobosTrajectory::Save(PhobosStreamWriter& Stm) const
-{
-	Stm.Process(this->Flag);
-	return true;
-}
-
-#pragma region RedoAllThesePleaseItsInFactVerySimpleJustFollowTemplateDef_h
-PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
-{
-	PhobosTrajectory* pTraj = nullptr;
-	TrajectoryFlag flag = TrajectoryFlag::Invalid;
-	Stm.Process(pTraj, false);
-
-	if (pTraj)
-	{
-		Stm.Process(flag, false);
-		auto old = pTraj;
-		switch (flag)
-		{
-		case TrajectoryFlag::Straight:
-			pTraj = new StraightTrajectory(noinit_t {});
-			break;
-		case TrajectoryFlag::Bombard:
-			pTraj = new BombardTrajectory(noinit_t {});
-			break;
-		default:
-			return nullptr;
-		}
-
-		pTraj->Flag = flag;
-		pTraj->Load(Stm, false);
-		PhobosSwizzle::RegisterChange(old, pTraj);
-	}
-
-	return pTraj;
-}
-
-void PhobosTrajectory::WriteToStream(PhobosStreamWriter& Stm, PhobosTrajectory* pTraj)
-{
-	Stm.Process(pTraj);
-	if (pTraj)
-	{
-		Stm.Process(pTraj->Flag);
-		pTraj->Save(Stm);
-	}
-}
-
-PhobosTrajectory* PhobosTrajectory::ProcessFromStream(PhobosStreamReader& Stm, PhobosTrajectory* pTraj)
-{
-	UNREFERENCED_PARAMETER(pTraj);
-	return LoadFromStream(Stm);
-}
-
-PhobosTrajectory* PhobosTrajectory::ProcessFromStream(PhobosStreamWriter& Stm, PhobosTrajectory* pTraj)
-{
-	WriteToStream(Stm, pTraj);
-	return pTraj;
-}
-#pragma endregion
 
 DEFINE_HOOK(0x4666F7, BulletClass_AI_Trajectories, 0x6)
 {
@@ -185,7 +161,7 @@ DEFINE_HOOK(0x4666F7, BulletClass_AI_Trajectories, 0x6)
 	auto const pExt = BulletExt::ExtMap.Find(pThis);
 	bool detonate = false;
 
-	if (auto pTraj = pExt->Trajectory)
+	if (auto pTraj = pExt->Trajectory.get())
 		detonate = pTraj->OnAI(pThis);
 
 	if (detonate && !pThis->SpawnNextAnim)
@@ -218,7 +194,7 @@ DEFINE_HOOK(0x467E53, BulletClass_AI_PreDetonation_Trajectories, 0x6)
 
 	auto const pExt = BulletExt::ExtMap.Find(pThis);
 
-	if (auto pTraj = pExt->Trajectory)
+	if (auto pTraj = pExt->Trajectory.get())
 		pTraj->OnAIPreDetonate(pThis);
 
 	return 0;
@@ -232,7 +208,7 @@ DEFINE_HOOK(0x46745C, BulletClass_AI_Position_Trajectories, 0x7)
 
 	auto const pExt = BulletExt::ExtMap.Find(pThis);
 
-	if (auto pTraj = pExt->Trajectory)
+	if (auto pTraj = pExt->Trajectory.get())
 		pTraj->OnAIVelocity(pThis, pSpeed, pPosition);
 
 	return 0;
@@ -246,7 +222,7 @@ DEFINE_HOOK(0x4677D3, BulletClass_AI_TargetCoordCheck_Trajectories, 0x5)
 
 	auto const pExt = BulletExt::ExtMap.Find(pThis);
 
-	if (auto pTraj = pExt->Trajectory)
+	if (auto pTraj = pExt->Trajectory.get())
 	{
 		switch (pTraj->OnAITargetCoordCheck(pThis))
 		{
@@ -276,7 +252,7 @@ DEFINE_HOOK(0x467927, BulletClass_AI_TechnoCheck_Trajectories, 0x5)
 
 	auto const pExt = BulletExt::ExtMap.Find(pThis);
 
-	if (auto pTraj = pExt->Trajectory)
+	if (auto pTraj = pExt->Trajectory.get())
 	{
 		switch (pTraj->OnAITechnoCheck(pThis, pTechno))
 		{

@@ -17,6 +17,7 @@ AttachEffectClass::AttachEffectClass()
 	, CurrentDelay { 0 }
 	, NeedsDurationRefresh { false }
 	, HasCumulativeAnim { false }
+	, ShouldBeDiscarded { false }
 {
 	this->HasInitialized = false;
 	AttachEffectClass::Array.emplace_back(this);
@@ -36,6 +37,7 @@ AttachEffectClass::AttachEffectClass(AttachEffectTypeClass* pType, TechnoClass* 
 	, IsCloaked { false }
 	, NeedsDurationRefresh { false }
 	, HasCumulativeAnim { false }
+	, ShouldBeDiscarded { false }
 {
 	this->HasInitialized = false;
 
@@ -409,6 +411,9 @@ bool AttachEffectClass::HasExpired() const
 
 bool AttachEffectClass::AllowedToBeActive() const
 {
+	if (this->ShouldBeDiscarded)
+		return false;
+
 	auto const pTechno = this->Techno;
 
 	if (auto const pFoot = abstract_cast<FootClass*>(pTechno))
@@ -624,7 +629,7 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 			currentTypeCount++;
 			match = attachEffect;
 
-			if (attachEffect->Source == pSource && attachEffect->Invoker == pInvoker)
+			if (attachEffect->Source == pSource && attachEffect->Invoker == pInvoker && (!sourceMatch || sourceMatch->Duration > attachEffect->Duration))
 				sourceMatch = attachEffect;
 		}
 	}
@@ -638,7 +643,9 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 	}
 
 	if (!pType->Cumulative && currentTypeCount > 0 && match)
+	{
 		match->RefreshDuration(durationOverride);
+	}
 	else
 	{
 		targetAEs.push_back(std::make_unique<AttachEffectClass>(pType, pTarget, pInvokerHouse, pInvoker, pSource, durationOverride, delay, initialDelay, recreationDelay));
@@ -909,6 +916,7 @@ bool AttachEffectClass::Serialize(T& Stm)
 		.Process(this->HasInitialized)
 		.Process(this->NeedsDurationRefresh)
 		.Process(this->HasCumulativeAnim)
+		.Process(this->ShouldBeDiscarded)
 		.Success();
 }
 
