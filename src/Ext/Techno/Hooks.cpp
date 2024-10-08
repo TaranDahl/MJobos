@@ -992,8 +992,10 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 	GET(BuildingClass*, pThis, ESI);
 
 	auto const pFocus = pThis->Focus;
+	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
+	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
 
-	if (RulesExt::Global()->RallyPointAreaGuard)
+	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
 	{
 		pProduct->SetFocus(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
@@ -1104,7 +1106,10 @@ DEFINE_HOOK(0x444424, BuildingClass_KickOutUnit_RallyPointAreaGuard3, 0x5)
 	GET(FootClass*, pProduct, EDI);
 	GET(AbstractClass*, pFocus, ESI);
 
-	if (RulesExt::Global()->RallyPointAreaGuard)
+	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
+	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
+
+	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
 	{
 		pProduct->SetFocus(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
@@ -1160,7 +1165,9 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 	GET(UnitClass*, pThis, EBP);
 	GET(AbstractClass*, pFocus, EAX);
 
-	if (RulesExt::Global()->RallyPointAreaGuard)
+	bool isHarvester = pThis->Type->Harvester;
+
+	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
 	{
 		pThis->SetFocus(pFocus);
 		pThis->QueueMission(Mission::Area_Guard, true);
