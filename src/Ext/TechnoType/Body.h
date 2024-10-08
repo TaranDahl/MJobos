@@ -269,6 +269,7 @@ public:
 		Nullable<double> AIGuardModeGuardRangeMultiplier;
 		Nullable<Leptons> AIGuardModeGuardRangeAddend;
 		Nullable<Leptons> AIGuardStationaryStray;
+		Nullable<bool> KeepAlive;
 
 		struct LaserTrailDataEntry
 		{
@@ -554,6 +555,7 @@ public:
 			, AIGuardModeGuardRangeMultiplier {}
 			, AIGuardModeGuardRangeAddend {}
 			, AIGuardStationaryStray {}
+			, KeepAlive { }
 		{ }
 
 		virtual ~ExtData() = default;

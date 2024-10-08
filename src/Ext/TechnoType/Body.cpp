@@ -380,6 +380,9 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoAmmoWeapon.Read(exINI, pSection, "NoAmmoWeapon");
 	this->NoAmmoAmount.Read(exINI, pSection, "NoAmmoAmount");
 
+	// Ares 3.0
+	this->KeepAlive.Read(exINI, pSection, "KeepAlive");
+
 	char tempBuffer[32];
 
 	if (this->OwnerObject()->Gunner && this->Insignia_Weapon.empty())
@@ -780,6 +783,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIGuardModeGuardRangeMultiplier)
 		.Process(this->AIGuardModeGuardRangeAddend)
 		.Process(this->AIGuardStationaryStray)
+		.Process(this->KeepAlive)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
