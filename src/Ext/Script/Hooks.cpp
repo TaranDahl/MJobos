@@ -133,7 +133,15 @@ DEFINE_HOOK(0x6ECCF3, TeamClass_UpdateScriptAction16_UsePhobosTargeting, 0x7)
 		pTeamData->TeamLeader = pLeaderUnit;
 	}
 
+	if (!pLeaderUnit)
+	{
+		return FuncRet;
+	}
+
+	auto const pLeaderUnitType = pLeaderUnit->GetTechnoType();
 	CellClass* pCell = nullptr;
+
+	// Args process
 	scriptArg = -scriptArg;
 	int TargetType = -1;
 	int targetMask = -1;
@@ -158,7 +166,13 @@ DEFINE_HOOK(0x6ECCF3, TeamClass_UpdateScriptAction16_UsePhobosTargeting, 0x7)
 	}
 
 	auto selectedTarget = ScriptExt::FindBestObject(pLeaderUnit, targetMask, calcThreatMode, pickAllies, TargetType, -1, needAttackableByLeader);
-	pCell = selectedTarget ? selectedTarget->GetCell() : nullptr;
+
+	if (selectedTarget)
+	{
+		bool isBridge = selectedTarget->IsOnBridge();
+		auto cell = MapClass::Instance->NearByLocation(selectedTarget->GetMapCoords(), pLeaderUnitType->SpeedType, -1, pLeaderUnitType->MovementZone, isBridge, 1, 1, false, false, false, isBridge, CellStruct::Empty, false, false);
+		pCell = MapClass::Instance->TryGetCellAt(cell);
+	}
 
 	if (!pCell)
 	{
