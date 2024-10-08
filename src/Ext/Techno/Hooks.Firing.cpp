@@ -914,3 +914,31 @@ DEFINE_JUMP(CALL6, 0x6F8CE3, GET_OFFSET(TechnoClass_EvaluateCellGetWeaponWrapper
 DEFINE_JUMP(CALL6, 0x6F8DD2, GET_OFFSET(TechnoClass_EvaluateCellGetWeaponRangeWrapper));
 
 #pragma endregion
+
+namespace DoTurnOnRearm
+{
+	bool hasTurned = false;
+}
+
+DEFINE_HOOK(0x737063, UnitClass_UpdateFiring_DoTurnOnRearm, 0x6)
+{
+	enum { DoTurn = 0x736F78 };
+
+	GET(FireError, err, EBP);
+
+	if (err == FireError::REARM)
+	{
+		if (!DoTurnOnRearm::hasTurned)
+		{
+			DoTurnOnRearm::hasTurned = true;
+			return DoTurn;
+		}
+		else
+		{
+			DoTurnOnRearm::hasTurned = false;
+			return 0;
+		}
+	}
+
+	return 0;
+}
