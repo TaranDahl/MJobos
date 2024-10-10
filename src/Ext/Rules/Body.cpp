@@ -247,6 +247,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AIGuardModeGuardRangeMax.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeMax");
 	this->AIGuardStationaryStray.Read(exINI, GameStrings::General, "AIGuardStationaryStray");
 
+	this->FollowTargetSelf.Read(exINI, GameStrings::General, "FollowTargetSelf");
+
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
 	for (int i = 0; i < itemsCount; ++i)
@@ -469,6 +471,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIGuardModeGuardRangeAddend)
 		.Process(this->AIGuardModeGuardRangeMax)
 		.Process(this->AIGuardStationaryStray)
+		.Process(this->FollowTargetSelf)
 		;
 }
 

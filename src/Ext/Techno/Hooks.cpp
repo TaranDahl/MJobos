@@ -1183,3 +1183,19 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 
 	return NotSkip;
 }
+
+DEFINE_HOOK(0x4D9620, FootClass_SetDestination_FollowTargetSelf, 0x5)
+{
+	enum { SkipGameCode = 0x4D962B };
+
+	GET(AbstractClass*, pDestination, ECX);
+
+	if (RulesExt::Global()->FollowTargetSelf)
+	{
+		auto crd = pDestination->GetCoords();
+		R->EAX(&crd);
+		return SkipGameCode;
+	}
+
+	return 0;
+}

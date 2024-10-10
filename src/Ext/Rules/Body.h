@@ -216,6 +216,8 @@ public:
 		Valueable<bool> PlayerDestroyWalls;
 		Valueable<bool> DestroyOwnerlessWalls;
 
+		Valueable<bool> FollowTargetSelf;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -377,6 +379,7 @@ public:
 			, AIGuardModeGuardRangeAddend { Leptons(0) }
 			, AIGuardModeGuardRangeMax { Leptons(4096) }
 			, AIGuardStationaryStray { Leptons(-256) }
+			, FollowTargetSelf { false }
 		{ }
 
 		virtual ~ExtData() = default;
