@@ -147,6 +147,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ConsideredVehicle.Read(exINI, pSection, "ConsideredVehicle");
 	this->SellBuildupLength.Read(exINI, pSection, "SellBuildupLength");
+	this->IsDestroyableObstacle.Read(exINI, pSection, "IsDestroyableObstacle");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
@@ -154,6 +155,14 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->JustHasRallyPoint.Read(exINI, pSection, "JustHasRallyPoint");
 	this->JumpjetExitCoord.Read(exINI, pSection, "JumpjetExitCoord");
 	this->AnimDontDelayBurst.Read(exArtINI, pSection, "AnimDontDelayBurst");
+	this->Units_RepairRate.Read(exINI, pSection, "Units.RepairRate");
+	this->Units_RepairStep.Read(exINI, pSection, "Units.RepairStep");
+	this->Units_RepairPercent.Read(exINI, pSection, "Units.RepairPercent");
+	this->Units_DisableRepairCost.Read(exINI, pSection, "Units.DisableRepairCost");
+
+	this->NoBuildAreaOnBuildup.Read(exINI, pSection, "NoBuildAreaOnBuildup");
+	this->Adjacent_Allowed.Read(exINI, pSection, "Adjacent.Allowed");
+	this->Adjacent_Disallowed.Read(exINI, pSection, "Adjacent.Disallowed");
 
 	if (pThis->NumberOfDocks > 0)
 	{
@@ -273,6 +282,14 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->JustHasRallyPoint)
 		.Process(this->JumpjetExitCoord)
 		.Process(this->AnimDontDelayBurst)
+		.Process(this->IsDestroyableObstacle)
+		.Process(this->Units_RepairRate)
+		.Process(this->Units_RepairStep)
+		.Process(this->Units_RepairPercent)
+		.Process(this->Units_DisableRepairCost)
+		.Process(this->NoBuildAreaOnBuildup)
+		.Process(this->Adjacent_Allowed)
+		.Process(this->Adjacent_Disallowed)
 		;
 }
 

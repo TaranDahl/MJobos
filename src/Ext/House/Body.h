@@ -55,6 +55,8 @@ public:
 		int NumConYards_NonMFB;
 		int NumShipyards_NonMFB;
 
+		std::map<SuperClass*, std::vector<SuperClass*>> SuspendedEMPulseSWs;
+
 		ExtData(HouseClass* OwnerObject) : Extension<HouseClass>(OwnerObject)
 			, PowerPlantEnhancers {}
 			, OwnedLimboDeliveredBuildings {}
@@ -79,6 +81,7 @@ public:
 			, NumWarFactories_NonMFB { 0 }
 			, NumConYards_NonMFB { 0 }
 			, NumShipyards_NonMFB { 0 }
+			, SuspendedEMPulseSWs {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);

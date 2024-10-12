@@ -62,6 +62,7 @@ public:
 		Nullable<bool> ConsideredVehicle;
 		Valueable<bool> ZShapePointMove_OnBuildup;
 		Valueable<int> SellBuildupLength;
+		Valueable<bool> IsDestroyableObstacle;
 
 		Valueable<bool> AnimDontDelayBurst;
 
@@ -72,6 +73,14 @@ public:
 
 		Valueable<bool> JustHasRallyPoint;
 		Nullable<CoordStruct> JumpjetExitCoord;
+		Nullable<double> Units_RepairRate;
+		Nullable<int> Units_RepairStep;
+		Nullable<double> Units_RepairPercent;
+		Valueable<bool> Units_DisableRepairCost;
+
+		Valueable<bool> NoBuildAreaOnBuildup;
+		ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
+		ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
 
 		ExtData(BuildingTypeClass* OwnerObject) : Extension<BuildingTypeClass>(OwnerObject)
 			, PowersUp_Owner { AffectedHouse::Owner }
@@ -116,6 +125,14 @@ public:
 			, JustHasRallyPoint { false }
 			, JumpjetExitCoord { }
 			, AnimDontDelayBurst { false }
+			, IsDestroyableObstacle { false }
+			, Units_RepairRate {}
+			, Units_RepairStep {}
+			, Units_RepairPercent {}
+			, Units_DisableRepairCost { false }
+			, NoBuildAreaOnBuildup { false }
+			, Adjacent_Allowed {}
+			, Adjacent_Disallowed {}
 		{ }
 
 		// Ares 0.A functions

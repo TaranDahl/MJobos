@@ -1026,3 +1026,21 @@ DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
 
 	return VanillaCode;
 }
+
+// Fixes docks not repairing docked aircraft unless they enter the dock first e.g just built ones.
+// Also potential edge cases with unusual docking offsets, original had a distance check for 64 leptons which is replaced with IsInAir here.
+DEFINE_HOOK(0x44985B, BuildingClass_Mission_Guard_UnitReload, 0x6)
+{
+	enum { AssignRepairMission = 0x449942 };
+
+	GET(BuildingClass*, pThis, ESI);
+	GET(TechnoClass*, pLink, EDI);
+
+	if (pThis->Type->UnitReload && pLink->WhatAmI() == AbstractType::Aircraft && !pLink->IsInAir()
+		&& pThis->SendCommand(RadioCommand::QueryMoving, pLink) == RadioCommand::AnswerPositive)
+	{
+		return AssignRepairMission;
+	}
+
+	return 0;
+}

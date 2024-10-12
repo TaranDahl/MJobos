@@ -218,6 +218,10 @@ public:
 
 		Valueable<bool> FollowTargetSelf;
 
+		Valueable<bool> WarheadParticleAlphaImageIsLightFlash;
+		Valueable<int> CombatLightDetailLevel;
+		Valueable<int> LightFlashAlphaImageDetailLevel;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -380,6 +384,9 @@ public:
 			, AIGuardModeGuardRangeMax { Leptons(4096) }
 			, AIGuardStationaryStray { Leptons(-256) }
 			, FollowTargetSelf { false }
+			, WarheadParticleAlphaImageIsLightFlash { false }
+			, CombatLightDetailLevel { 0 }
+			, LightFlashAlphaImageDetailLevel { 0 }
 		{ }
 
 		virtual ~ExtData() = default;
