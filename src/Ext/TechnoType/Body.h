@@ -266,6 +266,7 @@ public:
 		Nullable<Leptons> AIGuardModeGuardRangeAddend;
 		Nullable<Leptons> AIGuardStationaryStray;
 		Nullable<bool> KeepAlive;
+		Valueable<bool> HarvesterQuickUnloader;
 
 		struct LaserTrailDataEntry
 		{
@@ -548,6 +549,7 @@ public:
 			, AIGuardModeGuardRangeAddend {}
 			, AIGuardStationaryStray {}
 			, KeepAlive { }
+			, HarvesterQuickUnloader { false }
 		{ }
 
 		virtual ~ExtData() = default;

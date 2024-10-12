@@ -82,6 +82,8 @@ public:
 		ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
 		ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
 
+		Valueable<int> HarvesterQuickUnloadRange;
+
 		ExtData(BuildingTypeClass* OwnerObject) : Extension<BuildingTypeClass>(OwnerObject)
 			, PowersUp_Owner { AffectedHouse::Owner }
 			, PowersUp_Buildings {}
@@ -133,6 +135,7 @@ public:
 			, NoBuildAreaOnBuildup { false }
 			, Adjacent_Allowed {}
 			, Adjacent_Disallowed {}
+			, HarvesterQuickUnloadRange { 0 }
 		{ }
 
 		// Ares 0.A functions
