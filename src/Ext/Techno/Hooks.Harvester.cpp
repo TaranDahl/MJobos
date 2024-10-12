@@ -17,7 +17,7 @@ DEFINE_HOOK(0x73E730, UnitClass_MissionHarvest_HarvesterScanAfterUnload, 0x5)
 	GET(AbstractClass* const, pFocus, EAX);
 
 	// Focus is set when the harvester is fully loaded and go home.
-	if (pFocus)
+	if (pFocus && RulesExt::Global()->HarvesterScanAfterUnload)
 	{
 		CellStruct cellBuffer = { 0,0 };
 		CellStruct* pCellStru = (CellStruct*)pThis->ScanForTiberium((DWORD)&cellBuffer, RulesClass::Instance->TiberiumLongScan / 256, 0);
