@@ -915,30 +915,20 @@ DEFINE_JUMP(CALL6, 0x6F8DD2, GET_OFFSET(TechnoClass_EvaluateCellGetWeaponRangeWr
 
 #pragma endregion
 
-namespace DoTurnOnRearm
+#pragma region DoTurnOnRearm
+
+DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 {
-	bool hasTurned = false;
+	enum { NoNeedToCheck = 0x74132B, ContinueCheck = 0x7410C3 };
+
+	GET(FireError, fireError, EAX);
+
+	if (fireError == FireError::OK)
+		return ContinueCheck;
+
+	GET(UnitClass*, pThis, ESI);
+
+	return (fireError == FireError::REARM && !pThis->Type->Turret) ? ContinueCheck : NoNeedToCheck;
 }
 
-DEFINE_HOOK(0x737063, UnitClass_UpdateFiring_DoTurnOnRearm, 0x6)
-{
-	enum { DoTurn = 0x736F78 };
-
-	GET(FireError, err, EBP);
-
-	if (err == FireError::REARM)
-	{
-		if (!DoTurnOnRearm::hasTurned)
-		{
-			DoTurnOnRearm::hasTurned = true;
-			return DoTurn;
-		}
-		else
-		{
-			DoTurnOnRearm::hasTurned = false;
-			return 0;
-		}
-	}
-
-	return 0;
-}
+#pragma endregion
