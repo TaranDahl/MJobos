@@ -6,6 +6,11 @@
 #include <Ext/TechnoType/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/TEvent/Body.h>
+#include <VoxClass.h>
+#include <RadarEventClass.h>
+#include <TacticalClass.h>
+#include <Ext/House/Body.h>
+#include <ScenarioClass.h>
 
 namespace RD
 {
@@ -17,30 +22,114 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
-	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	auto const pRules = RulesExt::Global();
+	auto const pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
 
-	int nDamageLeft = *args->Damage;
-
-	if (!args->IgnoreDefenses)
+	if (pRules->CombatAlert && *args->Damage > 1 && !pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious || pWHExt->Nonprovocative))
 	{
-		if (const auto pShieldData = pExt->Shield.get())
+		do
 		{
-			if (!pShieldData->IsActive())
-				return 0;
+			const auto pHouse = pThis->Owner;
 
-			nDamageLeft = pShieldData->ReceiveDamage(args);
+			if (!pHouse || (!pThis->IsOwnedByCurrentPlayer && !pHouse->IsInPlayerControl) || !pThis->IsInPlayfield)
+				break;
 
-			if (nDamageLeft >= 0)
+			const auto pSourceHouse = args->SourceHouse;
+
+			if (pRules->CombatAlert_SuppressIfAllyDamage && pHouse->IsAlliedWith(pSourceHouse))
+				break;
+
+			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
+
+			if (pHouseExt->CombatAlertTimer.HasTimeLeft())
+				break;
+
+			const auto pType = pThis->GetTechnoType();
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+			if (!pTypeExt || !pTypeExt->CombatAlert.Get(!pType->Insignificant && !pType->Spawned))
+				break;
+
+			const auto pBuilding = pThis->WhatAmI() == AbstractType::Building ? static_cast<BuildingClass*>(pThis) : nullptr;
+
+			if (pRules->CombatAlert_IgnoreBuilding && pBuilding && !pTypeExt->CombatAlert_NotBuilding.Get(pBuilding->Type->IsVehicle()))
+				break;
+
+			const CoordStruct coordInMap = pThis->GetCoords();
+
+			if (pRules->CombatAlert_SuppressIfInScreen)
 			{
-				*args->Damage = nDamageLeft;
+				TacticalClass* const pTactical = TacticalClass::Instance;
+				const Point2D coordInScreen = pTactical->CoordsToScreen(coordInMap) - pTactical->TacticalPos;
+				const RectangleStruct screenArea = DSurface::Composite->GetRect();
 
-				if (auto pTag = pThis->AttachedTag)
-					pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
+				if (screenArea.Width >= coordInScreen.X && screenArea.Height >= coordInScreen.Y && coordInScreen.X >= 0 && coordInScreen.Y >= 0) // check if the unit is in screen
+					break;
 			}
 
-			if (nDamageLeft == 0)
-				RD::SkipLowDamageCheck = true;
+			pHouseExt->CombatAlertTimer.Start(pRules->CombatAlert_Interval);
+			RadarEventClass::Create(RadarEventType::Combat, CellClass::Coord2Cell(coordInMap));
+			int index = -1;
+
+			if (!pRules->CombatAlert_MakeAVoice) // No one want to play two sound at a time, I guess?
+				break;
+			else if (pTypeExt->CombatAlert_UseFeedbackVoice.Get(pRules->CombatAlert_UseFeedbackVoice) && pType->VoiceFeedback.Count > 0) // Use VoiceFeedback first
+				VocClass::PlayGlobal(pType->VoiceFeedback.GetItem(0), 0x2000, 1.0);
+			else if (pTypeExt->CombatAlert_UseAttackVoice.Get(pRules->CombatAlert_UseAttackVoice) && pType->VoiceAttack.Count > 0) // Use VoiceAttack then
+				VocClass::PlayGlobal(pType->VoiceAttack.GetItem(0), 0x2000, 1.0);
+			else if (pTypeExt->CombatAlert_UseEVA.Get(pRules->CombatAlert_UseEVA)) // Use Eva finally
+				index = pTypeExt->CombatAlert_EVA.Get(VoxClass::FindIndex((const char*)"EVA_UnitsInCombat"));
+
+			if (index != -1)
+				VoxClass::PlayIndex(index);
 		}
+		while (false);
+	}
+
+	if (!*args->Damage || args->IgnoreDefenses)
+		return 0;
+
+	//Calculate Damage Multiplier
+	if (pWHExt)
+	{
+		const auto pFirerHouse = pThis->Owner;
+		const auto pTargetHouse = args->SourceHouse;
+		double multiplier = 1.0;
+
+		if (!pFirerHouse || !pTargetHouse || !pFirerHouse->IsAlliedWith(pTargetHouse))
+			multiplier = pWHExt->DamageEnemiesMultiplier.Get(pRules->DamageEnemiesMultiplier);
+		else if (pFirerHouse != pTargetHouse)
+			multiplier = pWHExt->DamageAlliesMultiplier.Get(pRules->DamageAlliesMultiplier);
+		else
+			multiplier = pWHExt->DamageOwnerMultiplier.Get(pRules->DamageOwnerMultiplier);
+
+		if (multiplier != 1.0)
+		{
+			const int sgnDamage = *args->Damage > 0 ? 1 : -1;
+			const int calculateDamage = static_cast<int>(*args->Damage * multiplier);
+			*args->Damage = calculateDamage ? calculateDamage : sgnDamage;
+		}
+	}
+
+	//Shield Receive Damage
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (const auto pShieldData = pExt->Shield.get())
+	{
+		if (!pShieldData->IsActive())
+			return 0;
+
+		const int nDamageLeft = pShieldData->ReceiveDamage(args);
+		if (nDamageLeft >= 0)
+		{
+			*args->Damage = nDamageLeft;
+
+			if (auto pTag = pThis->AttachedTag)
+				pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
+		}
+
+		if (nDamageLeft == 0)
+			RD::SkipLowDamageCheck = true;
 	}
 
 	return 0;

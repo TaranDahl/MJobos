@@ -1,6 +1,8 @@
 #include <AircraftClass.h>
 #include "Body.h"
 
+#include <AircraftClass.h>
+#include <EventClass.h>
 #include <ScenarioClass.h>
 #include <TunnelLocomotionClass.h>
 
@@ -75,6 +77,8 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->CurrentShieldType = pExt->TypeExtData->ShieldType;
 	pExt->InitializeLaserTrails();
 	pExt->InitializeAttachEffects();
+	pExt->InitializeDisplayInfo();
+	pExt->InitializeUnitIdleAction();
 
 	return 0;
 }
@@ -359,6 +363,46 @@ DEFINE_HOOK(0x6F534E, TechnoClass_DrawExtras_Insignia, 0x5)
 	return SkipGameCode;
 }
 
+DEFINE_HOOK(0x6F5EE3, TechnoClass_DrawExtras_DrawAboveHealth, 0x9)
+{
+	GET(TechnoClass*, pThis, EBP);
+	GET_STACK(RectangleStruct*, pBounds, STACK_OFFSET(0x98, 0x8));
+
+	CellClass* const pCell = MapClass::Instance->TryGetCellAt(pThis->GetCenterCoords());
+
+	if ((pCell && !pCell->IsFogged() && !pCell->IsShrouded()) || pThis->IsSelected || pThis->IsMouseHovering)
+	{
+		const AbstractType absType = pThis->WhatAmI();
+
+		if (absType == AbstractType::Building)
+		{
+			BuildingClass* const pBuilding = static_cast<BuildingClass*>(pThis);
+			const Point2D basePosition = TechnoExt::GetBuildingSelectBracketPosition(pBuilding, BuildingSelectBracketPosition::Top);
+
+			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, true, false);
+			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, true, false);
+
+			HouseClass* const pOwner = pThis->Owner;
+
+			if (pOwner != HouseClass::FindSpecial() && pOwner != HouseClass::FindNeutral() && pOwner != HouseClass::FindCivilianSide())
+			{
+				TechnoExt::DrawSuperProgress(pBuilding, pBounds, basePosition);
+				TechnoExt::DrawFactoryProgress(pBuilding, pBounds, basePosition);
+			}
+		}
+		else
+		{
+			const bool isInfantry = absType == AbstractType::Infantry;
+			const Point2D basePosition = TechnoExt::GetFootSelectBracketPosition(pThis, Anchor(HorizontalPosition::Left, VerticalPosition::Top));
+
+			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, false, isInfantry);
+			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, false, isInfantry);
+		}
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x70EFE0, TechnoClass_GetMaxSpeed, 0x6)
 {
 	enum { SkipGameCode = 0x70EFF2 };
@@ -427,7 +471,7 @@ DEFINE_HOOK(0x728E5F, TunnelLocomotionClass_Process_RestoreAnims, 0x7)
 	return 0;
 }
 
-#pragma region SubterraneanHeight
+#pragma region Subterranean
 
 DEFINE_HOOK(0x728F89, TunnelLocomotionClass_Process_SubterraneanHeight1, 0x5)
 {
@@ -468,11 +512,16 @@ DEFINE_HOOK(0x728FF2, TunnelLocomotionClass_Process_SubterraneanHeight3, 0x6)
 	REF_STACK(int, height, 0x14);
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType());
-	int subtHeight = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
-	height -= heightOffset;
+	const int digInSpeed = pTypeExt->DigInSpeed;
 
-	if (height < subtHeight)
-		height = subtHeight;
+	if (digInSpeed > 0)
+		heightOffset = (int)(digInSpeed * TechnoExt::GetCurrentSpeedMultiplier((FootClass*)pLinkedTo));
+
+	height -= heightOffset;
+	const int subHeight = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
+
+	if (height < subHeight)
+		height = subHeight;
 
 	return SkipGameCode;
 }
@@ -488,6 +537,84 @@ DEFINE_HOOK(0x7295E2, TunnelLocomotionClass_ProcessStateDigging_SubterraneanHeig
 	height = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
 
 	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x7295C5, TunnelLocomotionClass_ProcessDigging_DiggingSpeed, 0x9)
+{
+	enum { Move = 0x7298C7, ShouldStop = 0x7295CE };
+
+	GET(int, deltaRange, EAX);
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+
+	auto const pTechno = pThis->LinkedTo;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+	const double speed = TechnoExt::GetCurrentSpeedMultiplier(pTechno) * (pTypeExt ? pTypeExt->DiggingSpeed : 19.0);
+
+	if (deltaRange < static_cast<int>(speed) + 1)
+		return ShouldStop;
+
+	CoordStruct currentCrd = pTechno->Location;
+	CoordStruct targetCrd = pThis->Coords;
+	int newCrdX = (int)(currentCrd.X + speed * (targetCrd.X - currentCrd.X) / (double)deltaRange);
+	int newCrdY = (int)(currentCrd.Y + speed * (targetCrd.Y - currentCrd.Y) / (double)deltaRange);
+
+	R->EAX(newCrdX);
+	R->EDX(newCrdY);
+	R->EDI(currentCrd.Z);
+	return Move;
+}
+
+DEFINE_HOOK(0x7292BF, TunnelLocomotionClass_ProcessPreDigIn_DigStartROT, 0x6)
+{
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+	GET(int, time, EAX);
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->LinkedTo->GetTechnoType()))
+	{
+		const int rot = pTypeExt->DigStartROT;
+
+		if (rot > 0)
+			time = (int)(64 / (double)rot);
+	}
+
+	R->EAX(time);
+	return 0;
+}
+
+DEFINE_HOOK(0x729A65, TunnelLocomotionClass_ProcessPreDigOut_DigEndROT, 0x6)
+{
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+	GET(int, time, EAX);
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->LinkedTo->GetTechnoType()))
+	{
+		const int rot = pTypeExt->DigEndROT;
+
+		if (rot > 0)
+			time = (int)(64 / (double)rot);
+	}
+
+	R->EAX(time);
+	return 0;
+}
+
+DEFINE_HOOK(0x729969, TunnelLocomotionClass_ProcessPreDigOut_DigOutSpeed, 0x6)
+{
+	GET(TunnelLocomotionClass* const, pThis, ESI);
+	GET(int, speed, EAX);
+
+	auto const pTechno = pThis->LinkedTo;
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType()))
+	{
+		const int digOutSpeed = pTypeExt->DigOutSpeed;
+
+		if (digOutSpeed > 0)
+			speed = (int)(digOutSpeed * TechnoExt::GetCurrentSpeedMultiplier(pTechno));
+	}
+
+	R->EAX(speed);
+	return 0;
 }
 
 #pragma endregion
@@ -596,6 +723,76 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 	return aresProcess();
 }
 
+// TunnelLocomotionClass_IsToHaveShadow, skip shadow on all but idle.
+// TODO: Investigate if it is possible to fix the shadows not tilting on the burrowing etc. states.
+DEFINE_JUMP(LJMP, 0x72A070, 0x72A07F);
+
+#pragma region KeepTargetOnMove
+
+// Do not explicitly reset target for KeepTargetOnMove vehicles when issued move command.
+DEFINE_HOOK(0x4C7462, EventClass_Execute_KeepTargetOnMove, 0x5)
+{
+	enum { SkipGameCode = 0x4C74C0 };
+
+	GET(EventClass*, pThis, ESI);
+	GET(TechnoClass*, pTechno, EDI);
+	GET(AbstractClass*, pTarget, EBX);
+
+	if (pTechno->WhatAmI() != AbstractType::Unit)
+		return 0;
+
+	auto const mission = static_cast<Mission>(pThis->MegaMission.Mission);
+	auto const pExt = TechnoExt::ExtMap.Find(pTechno);
+
+	if ((mission == Mission::Move)
+		&& TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType())->KeepTargetOnMove
+		&& pTechno->Target && !pTarget)
+	{
+		auto const pDestination = pThis->MegaMission.Destination.As_Abstract();
+		pTechno->SetDestination(pDestination, true);
+
+		pExt->KeepTargetOnMove = true;
+
+		return SkipGameCode;
+	}
+
+	pExt->KeepTargetOnMove = false;
+
+	return 0;
+}
+
+// Reset the target if beyond weapon range.
+// This was originally in UnitClass::Mission_Move() but because that
+// is only checked every ~15 frames, it can cause responsiveness issues.
+DEFINE_HOOK(0x736480, UnitClass_AI_KeepTargetOnMove, 0x6)
+{
+	GET(UnitClass*, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+
+	if (pTypeExt->KeepTargetOnMove && pThis->Target
+		&& pThis->CurrentMission == Mission::Move && TechnoExt::ExtMap.Find(pThis)->KeepTargetOnMove)
+	{
+		const int weaponIndex = pThis->SelectWeapon(pThis->Target);
+
+		if (auto const pWeapon = pThis->GetWeapon(weaponIndex)->WeaponType)
+		{
+			const int extraDistance = static_cast<int>(pTypeExt->KeepTargetOnMove_ExtraDistance.Get());
+			const int range = pWeapon->Range;
+			pWeapon->Range += extraDistance; // Temporarily adjust weapon range based on the extra distance.
+
+			if (!pThis->IsCloseEnough(pThis->Target, weaponIndex))
+				pThis->SetTarget(nullptr);
+
+			pWeapon->Range = range;
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
 DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
 {
 	enum { SkipGameCode = 0x51B255 };
@@ -614,3 +811,428 @@ DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
 
 	return 0;
 }
+
+#pragma region DestroyAnimGeneralize
+
+namespace PlayDestroyAnimGeneralize
+{
+	TechnoTypeClass* pType;
+}
+
+DEFINE_HOOK(0x738687, UnitClass_PlayDestroyAnim_SetContext, 0x6)
+{
+	enum { SkipGameCode = 0x73868D };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	PlayDestroyAnimGeneralize::pType = pThis->GetTechnoType();
+	R->EAX(PlayDestroyAnimGeneralize::pType);
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK_AGAIN(0x738822, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
+DEFINE_HOOK_AGAIN(0x7387C4, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
+DEFINE_HOOK(0x7386AC, UnitClass_PlayDestroyAnim_Generalize1, 0x6)
+{
+	R->ECX(PlayDestroyAnimGeneralize::pType);
+	return R->Origin() + 6;
+}
+
+DEFINE_HOOK_AGAIN(0x738801, UnitClass_PlayDestroyAnim_Generalize2, 0x6);
+DEFINE_HOOK(0x7386DA, UnitClass_PlayDestroyAnim_Generalize2, 0x6)
+{
+	R->EAX(PlayDestroyAnimGeneralize::pType);
+	return R->Origin() + 6;
+}
+
+DEFINE_HOOK(0x746D61, UnitClass_Destroy_ToggleAnim, 0x7)
+{
+	enum { SkipGameCode = 0x746D68 };
+
+	GET(TechnoClass*, pThis, ECX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt->ExplodeOnDestroy.Get(pThis->WhatAmI() == AbstractType::Unit || RulesExt::Global()->NonVehExplodeOnDestroy))
+		static_cast<UnitClass*>(pThis)->Explode();
+
+	R->ESI(pThis);
+	return SkipGameCode;
+}
+
+DEFINE_JUMP(VTABLE, 0x7EB1C8, 0x746D60); // Redirect InfantryClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+DEFINE_JUMP(VTABLE, 0x7E402C, 0x746D60); // Redirect BuildingClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+DEFINE_JUMP(VTABLE, 0x7E2414, 0x746D60); // Redirect AircraftClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+
+DEFINE_HOOK(0x7418D4, UnitClass_CrushCell_FireDeathWeapon, 0x6)
+{
+	GET(ObjectClass*, pThis, ESI);
+
+	if ((pThis->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+	{
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+		if (pTypeExt && pTypeExt->FireDeathWeaponOnCrushed.Get(RulesExt::Global()->FireDeathWeaponOnCrushed))
+		{
+			auto const pTechno = static_cast<TechnoClass*>(pThis);
+			pTechno->FireDeathWeapon(0);
+		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x70D703, TechnoClass_FireDeathWeapon_UseGlobalDeathWeaponDamage, 0xA)
+{
+	enum { ReplaceDamage = 0x70D724 };
+
+	if (RulesExt::Global()->UseGlobalDeathWeaponDamage)
+	{
+		auto const pDeathWeapon = RulesClass::Instance()->DeathWeapon;
+		R->EDI(pDeathWeapon);
+		R->EAX(pDeathWeapon ? pDeathWeapon->Damage : 0);
+		return ReplaceDamage;
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region RallyPointEnhancement
+
+DEFINE_HOOK(0x44368D, BuildingClass_ObjectClickedAction_RallyPoint, 0x7)
+{
+	enum { OnTechno = 0x44363C };
+
+	return RulesExt::Global()->RallyPointOnTechno ? OnTechno : 0;
+}
+
+DEFINE_HOOK(0x4473F4, BuildingClass_MouseOverObject_JustHasRallyPoint, 0x6)
+{
+	enum { JustRally = 0x447413 };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : 0;
+}
+
+DEFINE_HOOK(0x447413, BuildingClass_MouseOverObject_RallyPointForceMove, 0x5)
+{
+	enum { AlwaysAlt = 0x44744E };
+
+	return RulesExt::Global()->RallyPointForceMove ? AlwaysAlt : 0;
+}
+
+DEFINE_HOOK(0x70000E, TechnoClass_MouseOverObject_RallyPointForceMove, 0x5)
+{
+	enum { AlwaysAlt = 0x700038 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	if (pThis->WhatAmI() == AbstractType::Building && RulesExt::Global()->RallyPointForceMove)
+	{
+		auto const pType = static_cast<BuildingClass*>(pThis)->Type;
+		auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
+		bool HasRallyPoint = (pTypeExt ? pTypeExt->JustHasRallyPoint : false) || pType->Factory == AbstractType::UnitType || pType->Factory == AbstractType::InfantryType || pType->Factory == AbstractType::AircraftType;
+		return HasRallyPoint ? AlwaysAlt : 0;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x44748E, BuildingClass_MouseOverObject_JustHasRallyPointAircraft, 0x6)
+{
+	enum { JustRally = 0x44749D };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : 0;
+}
+
+DEFINE_HOOK(0x447674, BuildingClass_MouseOverCell_JustHasRallyPoint, 0x6)
+{
+	enum { JustRally = 0x447683 };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : 0;
+}
+
+DEFINE_HOOK(0x447643, BuildingClass_MouseOverCell_RallyPointForceMove, 0x5)
+{
+	enum { AlwaysAlt = 0x447674 };
+
+	return RulesExt::Global()->RallyPointForceMove ? AlwaysAlt : 0;
+}
+
+DEFINE_HOOK(0x700B28, TechnoClass_MouseOverCell_RallyPointForceMove, 0x6)
+{
+	enum { AlwaysAlt = 0x700B30 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	if (pThis->WhatAmI() == AbstractType::Building && RulesExt::Global()->RallyPointForceMove)
+	{
+		auto const pType = static_cast<BuildingClass*>(pThis)->Type;
+		auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
+		bool HasRallyPoint = (pTypeExt ? pTypeExt->JustHasRallyPoint : false) || pType->Factory == AbstractType::UnitType || pType->Factory == AbstractType::InfantryType || pType->Factory == AbstractType::AircraftType;
+
+		return HasRallyPoint ? AlwaysAlt : 0;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x455DA0, BuildingClass_IsUnitFactory_JustHasRallyPoint, 0x6)
+{
+	enum { SkipGameCode = 0x455DCC };
+
+	GET(BuildingClass* const, pThis, ECX);
+
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? SkipGameCode : 0;
+}
+
+// Handle the rally of infantry.
+DEFINE_HOOK(0x444CA3, BuildingClass_KickOutUnit_RallyPointAreaGuard1, 0x6)
+{
+	enum { SkipQueueMove = 0x444D11 };
+
+	GET(BuildingClass*, pThis, ESI);
+	GET(FootClass*, pProduct, EDI);
+
+	if (RulesExt::Global()->RallyPointAreaGuard)
+	{
+		pProduct->SetFocus(pThis->Focus);
+		pProduct->QueueMission(Mission::Area_Guard, true);
+		return SkipQueueMove;
+	}
+
+	return 0;
+}
+
+// Vehicle but without BuildingClass::Unload calling, e.g. the building has WeaponsFactory = no set.
+// Currently I have no idea about how to deal with the normally unloaded vehicles.
+// Also fix the bug that WeaponsFactory = no will make the product ignore the rally point.
+// Also fix the bug that WeaponsFactory = no will make the Jumpjet product park on the ground.
+DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
+{
+	enum { SkipGameCode = 0x4448F8 };
+
+	GET(FootClass*, pProduct, EDI);
+	GET(BuildingClass*, pThis, ESI);
+
+	auto const pFocus = pThis->Focus;
+	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
+	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
+
+	if (isHarvester)
+	{
+		pProduct->SetDestination(pFocus, true);
+		pProduct->QueueMission(Mission::Harvest, true);
+	}
+	else if (RulesExt::Global()->RallyPointAreaGuard)
+	{
+		pProduct->SetFocus(pFocus);
+		pProduct->QueueMission(Mission::Area_Guard, true);
+	}
+	else
+	{
+		pProduct->SetDestination(pFocus, true);
+		pProduct->QueueMission(Mission::Move, true);
+	}
+
+	if (!pFocus && pProduct->GetTechnoType()->Locomotor == LocomotionClass::CLSIDs::Jumpjet)
+		pProduct->Scatter(CoordStruct::Empty, false, false);
+
+	return SkipGameCode;
+}
+
+// This makes the building has WeaponsFactory = no to kick out units in the cell same as WeaponsFactory = yes.
+// Also enhanced the ExitCoord.
+DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
+{
+	if (!RulesExt::Global()->EnableEnhancedExitCoords)
+		return 0;
+
+	GET(FootClass*, pProduct, EDI);
+	GET(BuildingClass*, pThis, ESI);
+	GET(CoordStruct*, pCrd, ECX);
+	REF_STACK(DirType, dir, STACK_OFFSET(0x144,-0x100));
+
+	auto const isJJ = pProduct->GetTechnoType()->Locomotor == LocomotionClass::CLSIDs::Jumpjet;
+	auto const pProductType = pProduct->GetTechnoType();
+	auto const buildingExitCrd = isJJ ? BuildingTypeExt::ExtMap.Find(pThis->Type)->JumpjetExitCoord.Get(pThis->Type->ExitCoord)
+		: TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType())->ExitCoord.Get(pThis->Type->ExitCoord);
+	auto const exitCrd = TechnoTypeExt::ExtMap.Find(pProductType)->ExitCoord.Get(buildingExitCrd);
+
+	pCrd->X += exitCrd.X;
+	pCrd->Y += exitCrd.Y;
+	pCrd->Z += exitCrd.Z;
+
+	if (!isJJ)
+	{
+		auto nCell = CellClass::Coord2Cell(*pCrd);
+		auto const pCell = MapClass::Instance->GetCellAt(nCell);
+		bool isBridge = pCell->ContainsBridge();
+		nCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(*pCrd),
+			pProductType->SpeedType, -1, pProductType->MovementZone, isBridge, 1, 1, false,
+			false, false, isBridge, nCell, false, false);
+		*pCrd = CellClass::Cell2Coord(nCell, pCrd->Z);
+	}
+
+	dir = DirType::East;
+	return 0;
+}
+
+// Ships.
+DEFINE_HOOK(0x444424, BuildingClass_KickOutUnit_RallyPointAreaGuard3, 0x5)
+{
+	enum { SkipQueueMove = 0x44443F };
+
+	GET(FootClass*, pProduct, EDI);
+	GET(AbstractClass*, pFocus, ESI);
+
+	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
+	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
+
+	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
+	{
+		pProduct->SetFocus(pFocus);
+		pProduct->QueueMission(Mission::Area_Guard, true);
+		return SkipQueueMove;
+	}
+
+	return 0;
+}
+
+// For common aircrafts.
+// Also make AirportBound aircraft not ignore the rally point.
+DEFINE_HOOK(0x444061, BuildingClass_KickOutUnit_RallyPointAreaGuard4, 0x6)
+{
+	enum { SkipQueueMove = 0x444091, NotSkip = 0x444075 };
+
+	GET(FootClass*, pProduct, EBP);
+	GET(AbstractClass*, pFocus, ESI);
+
+	if (RulesExt::Global()->RallyPointAreaGuard)
+	{
+		pProduct->SetFocus(pFocus);
+		pProduct->QueueMission(Mission::Area_Guard, true);
+		return SkipQueueMove;
+	}
+
+	return NotSkip;
+}
+
+// For aircrafts with AirportBound = no and the airport is full.
+// Still some other bug in it.
+DEFINE_HOOK(0x443EB8, BuildingClass_KickOutUnit_RallyPointAreaGuard5, 0x5)
+{
+	enum { SkipQueueMove = 0x443ED3 };
+
+	GET(FootClass*, pProduct, EBP);
+	GET(AbstractClass*, pFocus, EAX);
+
+	if (RulesExt::Global()->RallyPointAreaGuard)
+	{
+		pProduct->SetFocus(pFocus);
+		pProduct->QueueMission(Mission::Area_Guard, true);
+		return SkipQueueMove;
+	}
+
+	return 0;
+}
+
+// For unloaded units.
+DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
+{
+	enum { SkipQueueMove = 0x73AAC1 };
+
+	GET(UnitClass*, pThis, EBP);
+	GET(AbstractClass*, pFocus, EAX);
+
+	bool isHarvester = pThis->Type->Harvester;
+	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
+	{
+		pThis->SetFocus(pFocus);
+		pThis->QueueMission(Mission::Area_Guard, true);
+		return SkipQueueMove;
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region CrushBuildingOnAnyCell
+
+namespace CrushBuildingOnAnyCell
+{
+	CellClass* pCell;
+}
+
+DEFINE_HOOK(0x741733, UnitClass_CrushCell_SetContext, 0x6)
+{
+	GET(CellClass*, pCell, ESI);
+
+	CrushBuildingOnAnyCell::pCell = pCell;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
+{
+	GET(UnitClass*, pThis, EDI);
+
+	if (RulesExt::Global()->CrushBuildingOnAnyCell)
+	{
+		if (auto const pBuilding = CrushBuildingOnAnyCell::pCell->GetBuilding())
+		{
+			if (reinterpret_cast<bool(__thiscall*)(BuildingClass*, TechnoClass*)>(0x5F6CD0)(pBuilding, pThis)) // IsCrushable
+			{
+				VocClass::PlayAt(pBuilding->Type->CrushSound, pThis->Location, 0);
+				pBuilding->Destroy();
+				pBuilding->RegisterDestruction(pThis);
+				pBuilding->Mark(MarkType::Up);
+				// pBuilding->Limbo(); // Vanilla do this. May be not necessary?
+				pBuilding->UnInit();
+
+				R->AL(true);
+			}
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region FollowTargetSelf
+
+DEFINE_HOOK(0x4D9620, FootClass_SetDestination_FollowTargetSelf, 0x5)
+{
+	enum { SkipGameCode = 0x4D962B };
+
+	GET(AbstractClass*, pDestination, ECX);
+
+	if (RulesExt::Global()->FollowTargetSelf)
+	{
+		auto crd = pDestination->GetCoords();
+		R->EAX(&crd);
+		return SkipGameCode;
+	}
+
+	return 0;
+}
+
+#pragma endregion

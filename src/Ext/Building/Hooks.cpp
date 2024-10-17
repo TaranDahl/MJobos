@@ -443,6 +443,39 @@ DEFINE_HOOK(0x443CCA, BuildingClass_KickOutUnit_AircraftType_Phobos, 0xA)
 	return 0;
 }
 
+// Kick out stuck units when the factory building is not busy
+DEFINE_HOOK(0x450248, BuildingClass_UpdateFactory_KickOutStuckUnits, 0x6)
+{
+	GET(BuildingClass*, pThis, ESI);
+
+	if (!(Unsorted::CurrentFrame % 15))
+	{
+		BuildingTypeClass* const pType = pThis->Type;
+
+		if (pType->Factory == AbstractType::UnitType && pType->WeaponsFactory && !pType->Naval && pThis->QueuedMission != Mission::Unload)
+		{
+			const Mission mission = pThis->CurrentMission;
+
+			if (mission == Mission::Guard || (mission == Mission::Unload && pThis->MissionStatus == 1))
+				BuildingExt::KickOutStuckUnits(pThis);
+		}
+	}
+
+	return 0;
+}
+
+// Should not kick out units if the factory building is in construction process
+DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_NoKickOutInConstruction, 0xA)
+{
+	enum { ThisIsOK = 0x444565, ThisIsNotOK = 0x4444B3};
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	const Mission mission = pThis->GetCurrentMission();
+
+	return (mission == Mission::Unload || mission == Mission::Construction) ? ThisIsNotOK : ThisIsOK;
+}
+
 // Ares didn't have something like 0x7397E4 in its UnitDelivery code
 DEFINE_HOOK(0x44FBBF, CreateBuildingFromINIFile_AfterCTOR_BeforeUnlimbo, 0x8)
 {
@@ -582,6 +615,35 @@ DEFINE_HOOK(0x449149, BuildingClass_Captured_FactoryPlant2, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
+{
+	GET(BuildingClass*, pThis, ECX);
+
+	auto const pOwner = pThis->Owner;
+	auto const mission = pThis->CurrentMission;
+
+	if (pThis->Health < pThis->GetTechnoType()->Strength
+		&& pThis->Type->ClickRepairable
+		&& mission != Mission::Construction && mission != Mission::Selling
+		&& (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman()) && RulesExt::Global()->PlayerAutoRepair)
+	{
+		pThis->IsBeingRepaired = true;	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x448480, BuildingClass_SetOwningHouse_CapturedEVA, 0x5)
+{
+	GET(HouseClass*, pToHouse, EBX);
+
+	if (pToHouse->IsControlledByCurrentPlayer()) // Not necessary to per techno customize this, I guess?
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_WeCaptureABuilding.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+	else
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_OurBuildingIsCaptured.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+
+	return 0x44848F;
+}
 
 #pragma region DestroyableObstacle
 

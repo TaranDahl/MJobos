@@ -37,10 +37,11 @@ IngameScore.LoseTheme= ; Soundtrack theme ID
  - `Anchor.Horizontal` and `Anchor.Vertical` set the anchor point from which the display is drawn (depending on `Align`) relative to unit's center/selection box. For buildings, `Anchor.Building` is used instead.
     - `Offset` and `Offset.ShieldDelta` (the latter applied when a shield is active) can be used to further modify the position.
   - By default, values are displayed in `current/maximum` format (i.e. 20/40). `HideMaxValue=yes` will make the counter show only the current value (i.e. 20). `Percentage=yes` changes the format to `percent%` (i.e. 50%).
-  - `CanSee` and `CanSee.Observer` can limit visibility to specific players.
+  - `VisibleToHouses` and `VisibleToHouses.Observer` can limit visibility to specific players.
+    - `VisibleInSpecialState` controls whether this display type will show when the owner is in ironcurtain or is attacked by a temporal weapon.
   - The digits can be either a custom shape (.shp) or text drawn using the game font. This depends on whether `Shape` is set.
     - `Text.Color`, `Text.Color.ConditionYellow` and `Text.Color.ConditionRed` allow customization of the font color. `Text.Background=yes` will additionally draw a black rectangle background.
-    - When using shapes, a custom palette can be specified with `Palette`. `Shape.Spacing` controls pixel buffer between characters.
+    - When using shapes, a custom palette can be specified with `Palette`. `Shape.Spacing` controls pixel buffer between characters. If `Shape.PercentageFrame` set to true, it will only draw one frame that corresponds to total frames by percentage.
     - Frames 0-9 will be used as digits when the owner's health bar is green, 10-19 when yellow, 20-29 when red. For `/` and `%` characters, frame numbers are 30-31, 32-33, 34-35, respectively.
   - Default `Offset.ShieldDelta` for `InfoType=Shield` is `0,-10`, `0,0` for others.
   - Default `Shape.Spacing` for buildings is `4,-2`, `4,0` for others.
@@ -59,7 +60,7 @@ Aircraft.DefaultDigitalDisplayTypes=    ; list of DigitalDisplayTypes
 
 [SOMEDIGITALDISPLAYTYPE]                ; DigitalDisplayType
 ; Generic
-InfoType=Health                         ; Displayed value enumeration (health|shield|ammo|mindcontrol|spawns|passengers|tiberium|experience|occupants|gattlingstage)
+InfoType=Health                         ; Displayed value enumeration (health|shield|ammo|mindcontrol|spawns|passengers|tiberium|experience|occupants|gattlingstage|ROF|Reload|SpawnTimer|GattlingTimer|ProduceCash|PassengerKill|AutoDeath|SuperWeapon|IronCurtain|TemporalLife)
 Offset=0,0                              ; integers - horizontal, vertical
 Offset.ShieldDelta=                     ; integers - horizontal, vertical
 Align=right                             ; Text alignment enumeration (left|right|center/centre)
@@ -70,6 +71,7 @@ Percentage=false                        ; boolean
 HideMaxValue=false                      ; boolean
 VisibleToHouses=owner                   ; Affected house enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 VisibleToHouses.Observer=true           ; boolean
+VisibleInSpecialState=true              ; boolean
 ValueScaleDivisor=1                     ; integer
 ; Text
 Text.Color=0,255,0                      ; integers - Red, Green, Blue
@@ -137,7 +139,7 @@ HealthBar.Hide=false  ; boolean
   - Combat light effects (`Bright=true`) and everything that uses same functionality e.g Iron Curtain / Force Field impact flashes.
   - Alpha images attached to ParticleSystems or Particles that are generated through a Warhead's `Particle` if `[AudioVisual]` -> `WarheadParticleAlphaImageIsLightFlash` or on Warhead `Particle.AlphaImageIsLightFlash` is set to true, latter defaults to former.
     - Additionally these alpha images are not created if `[AudioVisual]`->`LightFlashAlphaImageDetailLevel` is higher than current detail level, regardless of the `HideLightFlashEffects` setting.
-  
+
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
@@ -146,7 +148,7 @@ LightFlashAlphaImageDetailLevel=0            ; integer
 
 [SOMEWARHEAD]                                ; WarheadType
 Particle.AlphaImageIsLightFlash=             ; boolean
-```                                          
+```
 
 In `RA2MD.ini`:
 ```ini
@@ -276,6 +278,71 @@ In `rulesmd.ini`:
 SelectionFlashDuration=0  ; integer, number of frames
 ```
 
+### Units Rotate Turret When in Idle Action
+
+- Now unit with turret without `TurretSpins=true` can looks more vivid when it is in idle.
+  - `UnitIdleRotateTurret` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `UnitIdleRotateTurret`.
+  - `UnitIdlePointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `UnitIdlePointToMouse`.
+  - `UnitIdleActionRestartMin` and `UnitIdleActionRestartMax` control the delay from idle to action occurrence together.
+  - `UnitIdleActionIntervalMin` and `UnitIdleActionIntervalMax` control the delay between every idle actions together.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+UnitIdleRotateTurret=false      ; boolean
+UnitIdlePointToMouse=false      ; boolean
+UnitIdleActionRestartMin=150    ; integer, number of frames
+UnitIdleActionRestartMax=300    ; integer, number of frames
+UnitIdleActionIntervalMin=150   ; integer, number of frames
+UnitIdleActionIntervalMax=450   ; integer, number of frames
+
+[SOMETECHNO]                    ; TechnoType
+UnitIdleRotateTurret=           ; boolean
+UnitIdlePointToMouse=           ; boolean
+```
+
+### Show Some Progress
+
+- You can now let the buildings with factories draw an extra bar below HP bar to show the progress of production by setting `FactoryProgressDisplay=true`, and buildings with main superweapon to show the progress of the superweapon by setting `MainSWProgressDisplay=true`. Besides, you can also let the technos draw its invulnerable timer when Iron Curtain or Force Shield is applied on by setting `InvulnerableDisplay=true`, and draw its temporal life timer when temporal weapon is targeting on it by setting `TemporalLifeDisplay=true`. Note that though you can select a SHP file for these displays to draw the pips, the background of the non-buildings' bar and the buildings' empty pip will always draw like the vanilla game, and the palette is always use the PALETTE.pal .
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+FactoryProgressDisplay=false                  ; boolean
+FactoryProgressDisplay.Offset=0,0             ; integers - horizontal, vertical
+FactoryProgressDisplay.Pips=3                 ; integer, zero-based frame index
+MainSWProgressDisplay=false                   ; boolean
+MainSWProgressDisplay.Offset=0,0              ; integers - horizontal, vertical
+MainSWProgressDisplay.Pips=5                  ; integer, zero-based frame index
+InvulnerableDisplay=false                     ; boolean
+InvulnerableDisplay.Others.Offset=0,0         ; integers - horizontal, vertical
+InvulnerableDisplay.Buildings.Offset=0,0      ; integers - horizontal, vertical
+InvulnerableDisplay.Others.Pips=17,18         ; integer, zero-based frame index - ForceShield, IronCurtain
+InvulnerableDisplay.Buildings.Pips=5,4        ; integer, zero-based frame index - ForceShield, IronCurtain
+TemporalLifeDisplay=false                     ; boolean
+TemporalLifeDisplay.Others.Offset=0,0         ; integers - horizontal, vertical
+TemporalLifeDisplay.Buildings.Offset=0,0      ; integers - horizontal, vertical
+TemporalLifeDisplay.Others.Pips=17            ; integer, zero-based frame index
+TemporalLifeDisplay.Buildings.Pips=5          ; integer, zero-based frame index
+ProgressDisplay.Others.PipsShape=PIPS.shp     ; filename - including the .shp extension
+ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp extension
+```
+
+### More display styles for placing grids
+
+- This feature is highly compatible with `ExpandBuildingPlace`. If set `DrawAdjacentBoundary` to true, it will display the four corners of the `Adjacent` boundary. If set `CheckExpandPlaceGrid` to true, it will display the placing grids with `place.shp` and following corresponding frame number.
+  - `ExpandLandGridFrames` controls the placing grids frames on non-water cell. The three numbers respectively represent "Some technos that can command departure have occupied this area", "This cell is actually beyond the scope, but there is still at least one cell inside the entire region" and "Here is no problem, everything is OK".
+  - `ExpandWaterGridFrames` controls the placing grids frames on water cell. Each item corresponds to the same as above.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+DrawAdjacentBoundary=false     ; boolean
+CheckExpandPlaceGrid=false     ; boolean
+ExpandLandGridFrames=1,0,0     ; integer, zero-based frame index - have technos, near boundary, is normal
+ExpandWaterGridFrames=1,0,0    ; integer, zero-based frame index - have technos, near boundary, is normal
+```
+
 ## Hotkey Commands
 
 ### `[ ]` Display Damage Numbers
@@ -313,9 +380,20 @@ SelectionFlashDuration=0  ; integer, number of frames
 - Switches on/off [digital display types](#digital-display).
 - For localization add `TXT_DIGITAL_DISPLAY` and `TXT_DIGITAL_DISPLAY_DESC` into your `.csf` file.
 
+### `[ ]` Select Captured Units
+- Select the units within the current screen that are captured by non-permanent mind-controller.
+- If selected any unit, `MSG:SelectCaptured` is logged on the left-top of the screen, otherwise `MSG:NothingSelected` is logged.
+- For localization add `MSG:SelectCaptured`, `TXT_SELECT_CAPTURED` and `TXT_SELECT_CAPTURED_DESC` into your `.csf` file.
+
 ### `[ ]` Toggle Frame By Frame Mode
 - Switches on/off [frame by frame mode](Miscellanous.html#frame-step-in).
 - For localization add `TXT_FRAME_BY_FRAME` and `TXT_FRAME_BY_FRAME_DESC` into your `.csf` file.
+
+### `[ ]` Exclusive SW Sidebar Shortcuts
+- Switches visible/invisible [this](#Exclusive-sidebar-for-superweapons).
+- For localization add `TXT_EX_SW_SWITCH` and `TXT_EX_SW_SWITCH_DESC` into your `.csf` file.
+- And Select the SWs in this exclusive sidebar.
+- For localization add `TXT_EX_SW_BUTTON_XX` and `TXT_EX_SW_BUTTON_XX_DESC` into your `.csf` file. (`XX` -> `03`, `10` .etc)
 
 ## Loading screen
 
@@ -365,6 +443,68 @@ In `rulesmd.ini`:
 ```ini
 [AudioVisual]
 MissingCameo=XXICON.SHP  ; filename - including the .shp/.pcx extension
+```
+
+### Show cameo when unbuildable
+
+- A setting that allows you to preview information. This feature can be used as before, playing "new construction options" and clearing the specific production queue when prerequisites loss.
+  - `AlwaysExistTheCameo` controls whether you can see the cameo when the prerequisite have not satisfied (`TechnoLevel`, `Owner`, `RequiredHouses` and `ForbiddenHouses` should be satisfied). Defaults to `[AudioVisual]` -> `AlwaysExistTheCameo`.
+  - `BuildingStatisticsCameo` controls whether the number of buildings of this type that you currently own needs to be displayed in the upper right corner of the building cameo (requires the cameo exist).
+  - `CameoOverlayShapes` controls the drawn image file.
+  - `CameoOverlayFrames` controls which frame in `CameoOverlayShapes` to draw in three different situations: currently owned this building type, grey cameo and have its prerequisite, grey cameo but have no prerequisite (The last situation requires `AlwaysExistTheCameo` to be true). When set to a negative number, it means that there is no need to draw under the corresponding conditions.
+  - `CameoOverlayPalette` the color palette used when drawing `CameoOverlayShapes`.
+  - If `PrerequisiteForCameo` is not set, the grey cameo will only show when `AIBasePlanningSide` is satisfied. If set a techno type, the grey cameo will show if you have a techno in this type or this type's `TechnoLevel`, `Owner`, `RequiredHouses`, `ForbiddenHouses` and `PrerequisiteForCameo` is satisfied.
+  - The `UIExtraDescription` is like `UIDescription`, but this only appearing when the techno is truly unbuildable.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+AlwaysExistTheCameo=false        ; boolean
+BuildingStatisticsCameo=false    ; boolean
+CameoOverlayShapes=pips.shp      ; filename - including the .shp extension
+CameoOverlayFrames=-1,-1,-1      ; integer - owned this building, grey and have its prerequisite, grey but have no prerequisite
+CameoOverlayPalette=palette.pal  ; filename - including the .pal extension
+
+[SOMETECHNO]                     ; TechnoType
+AlwaysExistTheCameo=             ; boolean
+PrerequisiteForCameo=            ; TechnoType
+UIExtraDescription=              ; CSF entry key
+```
+
+### Exclusive sidebar for superweapons
+
+- Now, you can display a sidebar exclusive to superweapons through a series of settings. At the same time, you can specify the shortcuts for these buttons in the shortcut key settings.
+  - `SWSidebarBackground` controls whether to draw the background shape of the exclusive sidebar.
+  - `SWSidebarBackground.OnPCX` and `SWSidebarBackground.OffPCX` controlled the shapes of this exclusive sidebar's switch displaying, respectively used in non-hidden and hidden. Required sizes are all `10 * 50`.
+  - `SWSidebarBackground.TopPCX`, `SWSidebarBackground.CenterPCX` and `SWSidebarBackground.BottomPCX` controlled the materials that were combined to create the entire exclusive sidebar background shape. Their required sizes are respectively `80 * 20`, `80 * 50` and `80 * 20`. In `SWSidebarBackground.CenterPCX`, the position of the superweapon's `SidebarPCX` is 5 pixels away from the left contour of this background, 15 pixels away from the right contour, and 1 pixel away from both the upper and lower contours.
+  - `SW.InScreen.Show` controls whether the superweapon should be displayed first in the exclusive sidebar. If the exclusive sidebar is full (up to 10 are displayed), the overflowing superweapon's cameo will be added back to the original sidebar. If there is an empty space in the exclusive sidebar afterwards, it will no longer return to the exclusive sidebar, unless the permission to use the superweapon is regained (lost and gained again). Therefore, it is not recommended to place all superweapons in the exclusive sidebar.
+  - `SW.InScreen.PriorityHouses` controls if the superweapon is displayed first in the exclusive sidebar, players belonging to these houses will have priority in placing the superweapon cameo in the exclusive sidebar.
+  - `SW.InScreen.RequiredHouses` controls if the superweapon is displayed first in the exclusive sidebar, players must belong to these houses in order to have superweapon a real chance of being displayed in the exclusive sidebar. The default is empty, which means this condition will always be met.
+  - `SW.QuickFireAtMouse` controls whether the superweapon which is command by keyboards will forcibly launch to the mouse position without all Ares conditions check except charging and funds. If the mouse is not in the tactical map now, the superweapon will launch like `SW.QuickFireInScreen=true` do.
+  - `SW.QuickFireInScreen` controls whether the superweapon will forcibly launch to the center position of the current screen without all Ares conditions check except charging and funds.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+SWSidebarBackground=true         ; boolean
+
+[SOMESIDE]                       ; Side
+SWSidebarBackground.OnPCX=       ; filename - including the .pcx extension
+SWSidebarBackground.OffPCX=      ; filename - including the .pcx extension
+SWSidebarBackground.TopPCX=      ; filename - including the .pcx extension
+SWSidebarBackground.CenterPCX=   ; filename - including the .pcx extension
+SWSidebarBackground.BottomPCX=   ; filename - including the .pcx extension
+
+[SOMESW]                         ; SuperWeapon
+SW.InScreen.Show=false           ; boolean
+SW.InScreen.PriorityHouses=      ; list of house types
+SW.InScreen.RequiredHouses=      ; list of house types
+SW.QuickFireAtMouse=false        ; boolean
+SW.QuickFireInScreen=false       ; boolean
+```
+
+```{note}
+If you want to change the printing message of switch on/off, for localization add `TXT_EX_SW_BAR_VISIBLE` and `TXT_EX_SW_BAR_INVISIBLE` into your `.csf` file.
 ```
 
 ### Harvester counter

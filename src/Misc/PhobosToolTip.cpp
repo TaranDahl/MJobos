@@ -1,6 +1,7 @@
 #include <Helpers/Macro.h>
 
 #include "PhobosToolTip.h"
+#include "TacticalButtons.h"
 
 #include <AircraftClass.h>
 #include <BuildingClass.h>
@@ -17,6 +18,7 @@
 
 #include <Ext/Side/Body.h>
 #include <Ext/Surface/Body.h>
+#include <Ext/House/Body.h>
 
 #include <sstream>
 #include <iomanip>
@@ -32,6 +34,13 @@ inline const wchar_t* PhobosToolTip::GetUIDescription(TechnoTypeExt::ExtData* pD
 {
 	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription.Get().empty()
 		? pData->UIDescription.Get().Text
+		: nullptr;
+}
+
+inline const wchar_t* PhobosToolTip::GetUIExtraDescription(TechnoTypeExt::ExtData* pData) const
+{
+	return Phobos::Config::ToolTipDescriptions && !pData->UIExtraDescription.Get().empty()
+		? pData->UIExtraDescription.Get().Text
 		: nullptr;
 }
 
@@ -116,12 +125,13 @@ void PhobosToolTip::HelpText(TechnoTypeClass* pType)
 		return;
 
 	auto const pData = TechnoTypeExt::ExtMap.Find(pType);
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 
 	int nBuildTime = TickTimeToSeconds(this->GetBuildTime(pType));
 	int nSec = nBuildTime % 60;
 	int nMin = nBuildTime / 60;
 
-	int cost = pType->GetActualCost(HouseClass::CurrentPlayer);
+	int cost = pType->GetActualCost(pHouse);
 
 	std::wostringstream oss;
 	oss << pType->UIName << L"\n"
@@ -141,6 +151,17 @@ void PhobosToolTip::HelpText(TechnoTypeClass* pType)
 
 	if (auto pDesc = this->GetUIDescription(pData))
 		oss << L"\n" << pDesc;
+
+	if (pData->AlwaysExistTheCameo.Get(RulesExt::Global()->AlwaysExistTheCameo) && pHouse)
+	{
+		auto& vec = HouseExt::ExtMap.Find(pHouse)->OwnedExistCameoTechnoTypes;
+
+		if (std::find(vec.begin(), vec.end(), pData) != vec.end())
+		{
+			if (auto pExDesc = this->GetUIExtraDescription(pData))
+				oss << L"\n" << pExDesc;
+		}
+	}
 
 	this->TextBuffer = oss.str();
 }
@@ -197,6 +218,29 @@ DEFINE_HOOK(0x6A9316, SidebarClass_StripClass_HelpText, 0x6)
 	PhobosToolTip::Instance.HelpText(pThis->Cameos[0]); // pStrip->Cameos[nID] in fact
 	R->EAX(L"X");
 	return 0x6A93DE;
+}
+
+DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
+{
+	enum { UseButtonTip = 0x4AE5F8, SkipGameCode = 0x4AE69B };
+
+	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const int buttonIndex = pButtons->GetButtonIndex();
+
+	if (buttonIndex < 0)
+		return 0;
+
+	if (!buttonIndex)
+		return SkipGameCode;
+
+	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
+		R->EAX(PhobosToolTip::Instance.GetBuffer());
+	else if (buttonIndex > 70 && buttonIndex <= 100) // Button index 71-100 : Select buttons
+		R->EAX(pButtons->HoveredSelected);
+	else
+		R->EAX(0);
+
+	return UseButtonTip;
 }
 
 // TODO: reimplement CCToolTip::Draw2 completely
