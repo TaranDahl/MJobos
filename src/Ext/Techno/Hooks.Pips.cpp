@@ -3,6 +3,107 @@
 #include <TiberiumClass.h>
 #include "Body.h"
 
+DEFINE_HOOK(0x6F65D1, TechnoClass_DrawHealthBar_Buildings, 0x6)
+{
+	GET(TechnoClass*, pThis, ESI);
+	GET(int, length, EBX);
+	GET_STACK(Point2D*, pLocation, STACK_OFFSET(0x4C, 0x4));
+	GET_STACK(RectangleStruct*, pBound, STACK_OFFSET(0x4C, 0x8));
+
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (const auto pShieldData = pExt->Shield.get())
+	{
+		if (pShieldData->IsAvailable())
+			pShieldData->DrawShieldBar(length, pLocation, pBound);
+	}
+
+	TechnoExt::ProcessDigitalDisplays(pThis);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x6F683C, TechnoClass_DrawHealthBar_Units, 0x7)
+{
+	GET(TechnoClass*, pThis, ESI);
+	GET_STACK(Point2D*, pLocation, STACK_OFFSET(0x4C, 0x4));
+	GET_STACK(RectangleStruct*, pBound, STACK_OFFSET(0x4C, 0x8));
+
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (const auto pShieldData = pExt->Shield.get())
+	{
+		if (pShieldData->IsAvailable())
+		{
+			const int length = pThis->WhatAmI() == AbstractType::Infantry ? 8 : 17;
+			pShieldData->DrawShieldBar(length, pLocation, pBound);
+		}
+	}
+
+	TechnoExt::ProcessDigitalDisplays(pThis);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x6F534E, TechnoClass_DrawExtras_Insignia, 0x5)
+{
+	enum { SkipGameCode = 0x6F5388 };
+
+	GET(TechnoClass*, pThis, EBP);
+	GET_STACK(Point2D*, pLocation, STACK_OFFSET(0x98, 0x4));
+	GET(RectangleStruct*, pBounds, ESI);
+
+	if (pThis->VisualCharacter(false, nullptr) != VisualType::Hidden)
+	{
+		if (RulesExt::Global()->DrawInsignia_OnlyOnSelected.Get() && !pThis->IsSelected && !pThis->IsMouseHovering)
+			return SkipGameCode;
+		else
+			TechnoExt::DrawInsignia(pThis, pLocation, pBounds);
+	}
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x6F5EE3, TechnoClass_DrawExtras_DrawAboveHealth, 0x9)
+{
+	GET(TechnoClass*, pThis, EBP);
+	GET_STACK(RectangleStruct*, pBounds, STACK_OFFSET(0x98, 0x8));
+
+	CellClass* const pCell = MapClass::Instance->TryGetCellAt(pThis->GetCenterCoords());
+
+	if ((pCell && !pCell->IsFogged() && !pCell->IsShrouded()) || pThis->IsSelected || pThis->IsMouseHovering)
+	{
+		const AbstractType absType = pThis->WhatAmI();
+
+		if (absType == AbstractType::Building)
+		{
+			BuildingClass* const pBuilding = static_cast<BuildingClass*>(pThis);
+			const Point2D basePosition = TechnoExt::GetBuildingSelectBracketPosition(pBuilding, BuildingSelectBracketPosition::Top);
+
+			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, true, false);
+			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, true, false);
+
+			HouseClass* const pOwner = pThis->Owner;
+
+			if (pOwner != HouseClass::FindSpecial() && pOwner != HouseClass::FindNeutral() && pOwner != HouseClass::FindCivilianSide())
+			{
+				TechnoExt::DrawSuperProgress(pBuilding, pBounds, basePosition);
+				TechnoExt::DrawFactoryProgress(pBuilding, pBounds, basePosition);
+			}
+		}
+		else
+		{
+			const bool isInfantry = absType == AbstractType::Infantry;
+			const Point2D basePosition = TechnoExt::GetFootSelectBracketPosition(pThis, Anchor(HorizontalPosition::Left, VerticalPosition::Top));
+
+			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, false, isInfantry);
+			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, false, isInfantry);
+		}
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x709B2E, TechnoClass_DrawPips_Sizes, 0x5)
 {
 	GET(TechnoClass*, pThis, ECX);

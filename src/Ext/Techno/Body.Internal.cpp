@@ -1,7 +1,7 @@
 #include "Body.h"
 
 #include <AirstrikeClass.h>
-
+#include <SpawnManagerClass.h>
 #include <Utilities/EnumFunctions.h>
 
 // Unsorted methods
@@ -76,31 +76,32 @@ CoordStruct TechnoExt::GetFLHAbsoluteCoords(TechnoClass* pThis, CoordStruct pCoo
 	return location;
 }
 
-CoordStruct TechnoExt::GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound)
+CoordStruct TechnoExt::GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound, TechnoTypeExt::ExtData* pTypeExt)
 {
 	FLHFound = false;
 	CoordStruct FLH = CoordStruct::Empty;
 
-	auto const pExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	if (!pTypeExt)
+		pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 
 	auto pInf = abstract_cast<InfantryClass*>(pThis);
-	auto pickedFLHs = pExt->WeaponBurstFLHs;
+	auto pickedFLHs = pTypeExt->WeaponBurstFLHs;
 
 	if (pThis->Veterancy.IsElite())
 	{
 		if (pInf && pInf->IsDeployed())
-			pickedFLHs = pExt->EliteDeployedWeaponBurstFLHs;
+			pickedFLHs = pTypeExt->EliteDeployedWeaponBurstFLHs;
 		else if (pInf && pInf->Crawling)
-			pickedFLHs = pExt->EliteCrouchedWeaponBurstFLHs;
+			pickedFLHs = pTypeExt->EliteCrouchedWeaponBurstFLHs;
 		else
-			pickedFLHs = pExt->EliteWeaponBurstFLHs;
+			pickedFLHs = pTypeExt->EliteWeaponBurstFLHs;
 	}
 	else
 	{
 		if (pInf && pInf->IsDeployed())
-			pickedFLHs = pExt->DeployedWeaponBurstFLHs;
+			pickedFLHs = pTypeExt->DeployedWeaponBurstFLHs;
 		else if (pInf && pInf->Crawling)
-			pickedFLHs = pExt->CrouchedWeaponBurstFLHs;
+			pickedFLHs = pTypeExt->CrouchedWeaponBurstFLHs;
 	}
 	if ((int)pickedFLHs[weaponIndex].size() > pThis->CurrentBurstIndex)
 	{
@@ -111,12 +112,15 @@ CoordStruct TechnoExt::GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FL
 	return FLH;
 }
 
-CoordStruct TechnoExt::GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool& FLHFound)
+CoordStruct TechnoExt::GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool& FLHFound, TechnoTypeExt::ExtData* pTypeExt)
 {
 	FLHFound = false;
 	CoordStruct FLH = CoordStruct::Empty;
 
-	if (auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
+	if (!pTypeExt)
+		pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt)
 	{
 		Nullable<CoordStruct> pickedFLH;
 
@@ -146,6 +150,53 @@ CoordStruct TechnoExt::GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool&
 	}
 
 	return FLH;
+}
+
+void TechnoExt::ExtData::InitializeDisplayInfo()
+{
+	auto const pThis = this->OwnerObject();
+	auto const pType = pThis->GetTechnoType();
+	auto const pPrimary = pThis->GetWeapon(0);
+	auto const pSecondary = pThis->GetWeapon(1);
+
+	if (pPrimary && pPrimary->WeaponType && pType->LandTargeting != LandTargetingType::Land_Not_OK)
+		pThis->ChargeTurretDelay = pPrimary->WeaponType->ROF;
+	else if (pSecondary && pSecondary->WeaponType)
+		pThis->ChargeTurretDelay = pSecondary->WeaponType->ROF;
+
+	if (pType->Ammo > 0)
+		pThis->ReloadTimer.TimeLeft = pType->Reload;
+
+	if (auto pTypeExt = this->TypeExtData)
+	{
+		auto pDelType = pTypeExt->PassengerDeletionType.get();
+
+		if (pDelType && !pThis->Passengers.GetFirstPassenger())
+			this->PassengerDeletionTimer.TimeLeft = pDelType->Rate;
+	}
+}
+
+void TechnoExt::ExtData::InitializeUnitIdleAction()
+{
+	TechnoClass* const pThis = this->OwnerObject();
+
+	if (pThis->WhatAmI() != AbstractType::Unit || !pThis->HasTurret())
+		return;
+
+	TechnoTypeClass* const pType = pThis->GetTechnoType();
+	TechnoTypeExt::ExtData* const pTypeExt = this->TypeExtData;
+
+	if (pTypeExt->AutoFire || pType->TurretSpins)
+		return;
+
+	if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
+		this->UnitIdleAction = true;
+
+	if (!SessionClass::IsSingleplayer())
+		return;
+
+	if (pTypeExt->UnitIdlePointToMouse.Get(RulesExt::Global()->UnitIdlePointToMouse))
+		this->UnitIdleActionSelected = true;
 }
 
 void TechnoExt::ExtData::InitializeAttachEffects()

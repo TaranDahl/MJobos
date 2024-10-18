@@ -25,6 +25,8 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_InitialReady)
 		.Process(this->SW_PostDependent)
 		.Process(this->SW_MaxCount)
+		.Process(this->SidebarPCX)
+		.Process(this->CameoPal)
 		.Process(this->UIDescription)
 		.Process(this->CameoPriority)
 		.Process(this->LimboDelivery_Types)
@@ -48,11 +50,22 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
+		.Process(this->SW_QuickFireAtMouse)
+		.Process(this->SW_QuickFireInScreen)
+		.Process(this->SW_InScreen_Show)
+		.Process(this->SW_InScreen_PriorityHouses)
+		.Process(this->SW_InScreen_RequiredHouses)
 		.Process(this->TabIndex)
 		.Process(this->UseWeeds)
 		.Process(this->UseWeeds_Amount)
 		.Process(this->UseWeeds_StorageTimer)
 		.Process(this->UseWeeds_ReadinessAnimationPercentage)
+		.Process(this->SW_GrantOneTime)
+		.Process(this->SW_GrantOneTime_InitialReady)
+		.Process(this->SW_GrantOneTime_RandomWeightsData)
+		.Process(this->SW_GrantOneTime_RollChances)
+		.Process(this->Message_GrantOneTimeLaunched)
+		.Process(this->EVA_GrantOneTimeLaunched)
 		.Process(this->EMPulse_WeaponIndex)
 		.Process(this->EMPulse_SuspendOthers)
 		.Process(this->EMPulse_Cannons)
@@ -87,6 +100,8 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_InitialReady.Read(exINI, pSection, "SW.InitialReady");
 	this->SW_PostDependent.Read(exINI, pSection, "SW.PostDependent");
 	this->SW_MaxCount.Read(exINI, pSection, "SW.MaxCount");
+	this->SidebarPCX.Read(pINI, pSection, "SidebarPCX");
+	this->CameoPal.LoadFromINI(pINI, pSection, "SidebarPalette");
 
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");
@@ -172,6 +187,12 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ShowDesignatorRange.Read(exINI, pSection, "ShowDesignatorRange");
 
+	this->SW_QuickFireAtMouse.Read(exINI, pSection, "SW.QuickFireAtMouse");
+	this->SW_QuickFireInScreen.Read(exINI, pSection, "SW.QuickFireInScreen");
+	this->SW_InScreen_Show.Read(exINI, pSection, "SW.InScreen.Show");
+	this->SW_InScreen_PriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.PriorityHouses", this->SW_InScreen_PriorityHouses);
+	this->SW_InScreen_RequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.RequiredHouses", this->SW_InScreen_RequiredHouses);
+
 	this->TabIndex.Read(exINI, pSection, "TabIndex");
 	GeneralUtils::IntValidCheck(&this->TabIndex, pSection, "TabIndex", 1, 0, 3);
 
@@ -179,6 +200,38 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UseWeeds_Amount.Read(exINI, pSection, "UseWeeds.Amount");
 	this->UseWeeds_StorageTimer.Read(exINI, pSection, "UseWeeds.StorageTimer");
 	this->UseWeeds_ReadinessAnimationPercentage.Read(exINI, pSection, "UseWeeds.ReadinessAnimationPercentage");
+
+	this->SW_GrantOneTime.Read(exINI, pSection, "SW.GrantOneTime");
+	this->SW_GrantOneTime_InitialReady.Read(exINI, pSection, "SW.GrantOneTime.InitialReady");
+	this->Message_GrantOneTimeLaunched.Read(exINI, pSection, "Message.GrantOneTimeLaunched");
+	this->EVA_GrantOneTimeLaunched.Read(exINI, pSection, "EVA.GrantOneTimeLaunched");
+	this->SW_GrantOneTime_RollChances.Read(exINI, pSection, "SW.GrantOneTime.RollChances");
+
+	// SW.GrantOneTime.RandomWeights
+	for (size_t i = 0; ; ++i)
+	{
+		ValueableVector<int> weights3;
+		_snprintf_s(tempBuffer, sizeof(tempBuffer), "SW.GrantOneTime.RandomWeights%d", i);
+		weights3.Read(exINI, pSection, tempBuffer);
+
+		if (!weights3.size())
+			break;
+
+		if (this->SW_GrantOneTime_RandomWeightsData.size() > i)
+			this->SW_GrantOneTime_RandomWeightsData[i] = std::move(weights3);
+		else
+			this->SW_GrantOneTime_RandomWeightsData.push_back(std::move(weights3));
+	}
+
+	ValueableVector<int> weights3;
+	weights3.Read(exINI, pSection, "SW.GrantOneTime.RandomWeights");
+	if (weights3.size())
+	{
+		if (this->SW_GrantOneTime_RandomWeightsData.size())
+			this->SW_GrantOneTime_RandomWeightsData[0] = std::move(weights3);
+		else
+			this->SW_GrantOneTime_RandomWeightsData.push_back(std::move(weights3));
+	}
 }
 
 void SWTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
