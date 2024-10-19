@@ -830,6 +830,7 @@ DEFINE_JUMP(LJMP, 0x719CBC, 0x719CD8);//Teleport, notorious CLEG frozen state re
 DEFINE_JUMP(LJMP, 0x72A16A, 0x72A186);//Tunnel, not a big deal
 DEFINE_JUMP(LJMP, 0x663428, 0x663445);//Rocket, not a big deal
 DEFINE_JUMP(LJMP, 0x5170CE, 0x5170E0);//Hover, not a big deal
+DEFINE_JUMP(LJMP, 0x65B3F7, 0x65B416);//RadSite, no effect
 
 // Save GameModeOptions in campaign modes
 DEFINE_JUMP(LJMP, 0x67E3BD, 0x67E3D3); // Save
@@ -1044,3 +1045,11 @@ DEFINE_HOOK(0x44985B, BuildingClass_Mission_Guard_UnitReload, 0x6)
 
 	return 0;
 }
+
+// Patch tileset parsing to not reset certain tileset indices for Lunar theater.
+DEFINE_JUMP(LJMP, 0x546C8B, 0x546CBF);
+
+// Skip the Disappear func calling in cloak process.
+// Disappear announces the techno's pointer invalid and make the references in bullet or missile spawns null.
+DEFINE_JUMP(LJMP, 0x703789, 0x703795);
+DEFINE_JUMP(LJMP, 0x6FBBC3, 0x6FBBCE);
