@@ -1095,51 +1095,6 @@ namespace detail
 	}
 
 	template <>
-	inline bool read<ExpireWeaponCondition>(ExpireWeaponCondition& value, INI_EX& parser, const char* pSection, const char* pKey)
-	{
-		if (parser.ReadString(pSection, pKey))
-		{
-			auto parsed = ExpireWeaponCondition::None;
-
-			auto str = parser.value();
-			char* context = nullptr;
-			for (auto cur = strtok_s(str, Phobos::readDelims, &context); cur; cur = strtok_s(nullptr, Phobos::readDelims, &context))
-			{
-				if (!_strcmpi(cur, "none"))
-				{
-					parsed |= ExpireWeaponCondition::None;
-				}
-				else if (!_strcmpi(cur, "expire"))
-				{
-					parsed |= ExpireWeaponCondition::Expire;
-				}
-				else if (!_strcmpi(cur, "remove"))
-				{
-					parsed |= ExpireWeaponCondition::Remove;
-				}
-				else if (!_strcmpi(cur, "death"))
-				{
-					parsed |= ExpireWeaponCondition::Death;
-				}
-				else if (!_strcmpi(cur, "all"))
-				{
-					parsed |= ExpireWeaponCondition::All;
-				}
-				else
-				{
-					Debug::INIParseFailed(pSection, pKey, cur, "Expected a expire weapon trigger condition type");
-					return false;
-				}
-			}
-
-			value = parsed;
-			return true;
-		}
-
-		return false;
-	}
-
-	template <>
 	inline bool read<CLSID>(CLSID& value, INI_EX& parser, const char* pSection, const char* pKey)
 	{
 		if (!parser.ReadString(pSection, pKey))
@@ -1336,6 +1291,46 @@ if(_strcmpi(parser.value(), #name) == 0){ value = __uuidof(name ## LocomotionCla
 			else if (_strcmpi(str, "gattlingstage") == 0)
 			{
 				value = DisplayInfoType::GattlingStage;
+			}
+			else if (_strcmpi(str, "rof") == 0)
+			{
+				value = DisplayInfoType::ROF;
+			}
+			else if (_strcmpi(str, "reload") == 0)
+			{
+				value = DisplayInfoType::Reload;
+			}
+			else if (_strcmpi(str, "spawntimer") == 0)
+			{
+				value = DisplayInfoType::SpawnTimer;
+			}
+			else if (_strcmpi(str, "gattlingtimer") == 0)
+			{
+				value = DisplayInfoType::GattlingTimer;
+			}
+			else if (_strcmpi(str, "producecash") == 0)
+			{
+				value = DisplayInfoType::ProduceCash;
+			}
+			else if (_strcmpi(str, "passengerkill") == 0)
+			{
+				value = DisplayInfoType::PassengerKill;
+			}
+			else if (_strcmpi(str, "autodeath") == 0)
+			{
+				value = DisplayInfoType::AutoDeath;
+			}
+			else if (_strcmpi(str, "superweapon") == 0)
+			{
+				value = DisplayInfoType::SuperWeapon;
+			}
+			else if (_strcmpi(str, "ironcurtain") == 0)
+			{
+				value = DisplayInfoType::IronCurtain;
+			}
+			else if (_strcmpi(str, "temporallife") == 0)
+			{
+				value = DisplayInfoType::TemporalLife;
 			}
 			else
 			{

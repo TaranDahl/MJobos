@@ -92,6 +92,53 @@ public:
 		Valueable<double> HeightShadowScaling_MinScale;
 		double AirShadowBaseScale_log;
 
+		Valueable<bool> JumpjetClimbPredictHeight;
+		Valueable<bool> JumpjetClimbWithoutCutOut;
+		Valueable<bool> UnitIdleRotateTurret;
+		Valueable<bool> UnitIdlePointToMouse;
+		Valueable<int> UnitIdleActionRestartMin;
+		Valueable<int> UnitIdleActionRestartMax;
+		Valueable<int> UnitIdleActionIntervalMin;
+		Valueable<int> UnitIdleActionIntervalMax;
+		Valueable<bool> RecountBurst;
+		Valueable<bool> FactoryProgressDisplay;
+		Valueable<bool> MainSWProgressDisplay;
+		Valueable<bool> InvulnerableDisplay;
+		Valueable<bool> TemporalLifeDisplay;
+		Valueable<Point2D> FactoryProgressDisplay_Offset;
+		Valueable<Point2D> MainSWProgressDisplay_Offset;
+		Valueable<Point2D> InvulnerableDisplay_Others_Offset;
+		Valueable<Point2D> InvulnerableDisplay_Buildings_Offset;
+		Valueable<Point2D> TemporalLifeDisplay_Others_Offset;
+		Valueable<Point2D> TemporalLifeDisplay_Buildings_Offset;
+		Valueable<int> FactoryProgressDisplay_Pips;
+		Valueable<int> MainSWProgressDisplay_Pips;
+		Valueable<Point2D> InvulnerableDisplay_Others_Pips;
+		Valueable<Point2D> InvulnerableDisplay_Buildings_Pips;
+		Valueable<int> TemporalLifeDisplay_Others_Pips;
+		Valueable<int> TemporalLifeDisplay_Buildings_Pips;
+		Valueable<SHPStruct*> ProgressDisplay_Others_PipsShape;
+		Valueable<SHPStruct*> ProgressDisplay_Buildings_PipsShape;
+		Valueable<double> DamageOwnerMultiplier;
+		Valueable<double> DamageAlliesMultiplier;
+		Valueable<double> DamageEnemiesMultiplier;
+		Valueable<bool> CheckUnitBaseNormal;
+		Valueable<bool> AlwaysExistTheCameo;
+		Valueable<bool> BuildingStatisticsCameo;
+		Valueable<SHPStruct*> CameoOverlayShapes;
+		Valueable<Vector3D<int>> CameoOverlayFrames;
+		CustomPalette CameoOverlayPalette;
+		Valueable<bool> ExpandBuildingPlace;
+		Valueable<bool> DrawAdjacentBoundary;
+		Valueable<bool> CheckExpandPlaceGrid;
+		Valueable<Vector3D<int>> ExpandLandGridFrames;
+		Valueable<Vector3D<int>> ExpandWaterGridFrames;
+		Valueable<bool> SWSidebarBackground;
+		Valueable<bool> AIAutoDeployMCV;
+		Valueable<bool> AISetBaseCenter;
+		Valueable<bool> AIBiasSpawnCell;
+		Valueable<bool> AIForbidConYard;
+
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -146,6 +193,54 @@ public:
 		Valueable<Point2D> DrawInsignia_AdjustPos_Units;
 		Valueable<AnimTypeClass*> Promote_VeteranAnimation;
 		Valueable<AnimTypeClass*> Promote_EliteAnimation;
+
+		Valueable<bool> CombatAlert;
+		Valueable<bool> CombatAlert_IgnoreBuilding;
+		Valueable<bool> CombatAlert_SuppressIfInScreen;
+		Valueable<int> CombatAlert_Interval;
+		Valueable<bool> CombatAlert_SuppressIfAllyDamage;
+		Valueable<bool> CombatAlert_MakeAVoice;
+		Valueable<bool> CombatAlert_UseFeedbackVoice;
+		Valueable<bool> CombatAlert_UseAttackVoice;
+		Valueable<bool> CombatAlert_UseEVA;
+		Valueable<bool> CylinderRangefinding;
+		Valueable<bool> BuildingWaypoint;
+		Valueable<bool> AircraftWaypoint;
+		Valueable<bool> StopPlanningOnEnter;
+		Valueable<bool> StrafingTargetScatter;
+		Nullable<int> AINormalTargetingDelay;
+		Nullable<int> PlayerNormalTargetingDelay;
+		Nullable<int> AIGuardAreaTargetingDelay;
+		Nullable<int> PlayerGuardAreaTargetingDelay;
+		Valueable<bool> PlayerAttackIronCurtain;
+		Valueable<bool> AIAttackIronCurtain;
+		Valueable<bool> PlayerAutoRepair;
+		Valueable<bool> PlayerReturnFire_Smarter;
+		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
+		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
+		Valueable<bool> PlayerGuardModePursuit;
+		Valueable<double> PlayerGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Valueable<Leptons> PlayerGuardModeGuardRangeMax;
+		Valueable<Leptons> PlayerGuardStationaryStray;
+		Valueable<bool> AIGuardModePursuit;
+		Valueable<double> AIGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> AIGuardModeGuardRangeAddend;
+		Valueable<Leptons> AIGuardModeGuardRangeMax;
+		Valueable<Leptons> AIGuardStationaryStray;
+		Valueable<bool> UseGlobalDeathWeaponDamage;
+		Valueable<bool> NonVehExplodeOnDestroy;
+		Valueable<bool> FireDeathWeaponOnCrushed;
+		Valueable<bool> CrushBuildingOnAnyCell;
+		Valueable<bool> RallyPointOnTechno;
+		Valueable<bool> RallyPointForceMove;
+		Valueable<bool> RallyPointAreaGuard;
+		Valueable<bool> EnableEnhancedExitCoords;
+		Valueable<bool> PlayerDestroyWalls;
+		Valueable<bool> DestroyOwnerlessWalls;
+		Valueable<bool> AIAngerOnAlly;
+		Valueable<bool> FollowTargetSelf;
+		Valueable<bool> HarvesterScanAfterUnload;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -221,6 +316,53 @@ public:
 			, HeightShadowScaling_MinScale { 0.0 }
 			, AirShadowBaseScale_log { 0.693376137 }
 
+			, JumpjetClimbPredictHeight { false }
+			, JumpjetClimbWithoutCutOut { false }
+			, UnitIdleRotateTurret { false }
+			, UnitIdlePointToMouse { false }
+			, UnitIdleActionRestartMin { 150 }
+			, UnitIdleActionRestartMax { 300 }
+			, UnitIdleActionIntervalMin { 150 }
+			, UnitIdleActionIntervalMax { 450 }
+			, RecountBurst { false }
+			, FactoryProgressDisplay { false }
+			, MainSWProgressDisplay { false }
+			, InvulnerableDisplay { false }
+			, TemporalLifeDisplay { false }
+			, FactoryProgressDisplay_Offset { { 0, 0 } }
+			, MainSWProgressDisplay_Offset { { 0, 0 } }
+			, InvulnerableDisplay_Others_Offset { { 0, 0 } }
+			, InvulnerableDisplay_Buildings_Offset { { 0, 0 } }
+			, TemporalLifeDisplay_Others_Offset { { 0, 0 } }
+			, TemporalLifeDisplay_Buildings_Offset { { 0, 0 } }
+			, FactoryProgressDisplay_Pips { 3 }
+			, MainSWProgressDisplay_Pips { 5 }
+			, InvulnerableDisplay_Others_Pips { { 17, 18 } }
+			, InvulnerableDisplay_Buildings_Pips { { 5, 4 } }
+			, TemporalLifeDisplay_Others_Pips { 17 }
+			, TemporalLifeDisplay_Buildings_Pips { 5 }
+			, ProgressDisplay_Others_PipsShape { FileSystem::PIPS_SHP }
+			, ProgressDisplay_Buildings_PipsShape { FileSystem::PIPS_SHP }
+			, DamageOwnerMultiplier { 1.0 }
+			, DamageAlliesMultiplier { 1.0 }
+			, DamageEnemiesMultiplier { 1.0 }
+			, CheckUnitBaseNormal { false }
+			, AlwaysExistTheCameo { false }
+			, BuildingStatisticsCameo { false }
+			, CameoOverlayShapes { FileSystem::PIPS_SHP }
+			, CameoOverlayFrames { { -1, -1, -1 } }
+			, CameoOverlayPalette {}
+			, ExpandBuildingPlace { false }
+			, DrawAdjacentBoundary { false }
+			, CheckExpandPlaceGrid { false }
+			, ExpandLandGridFrames { { 1, 0, 0 } }
+			, ExpandWaterGridFrames { { 1, 0, 0 } }
+			, SWSidebarBackground { true }
+			, AIAutoDeployMCV { false }
+			, AISetBaseCenter { false }
+			, AIBiasSpawnCell { false }
+			, AIForbidConYard { false }
+
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
 			, ForbidParallelAIQueues_Building { false }
@@ -269,6 +411,53 @@ public:
 			, ShowDesignatorRange { true }
 			, DropPodTrailer { }
 			, PodImage { }
+			, CombatAlert { false }
+			, CombatAlert_IgnoreBuilding { true }
+			, CombatAlert_SuppressIfInScreen { true }
+			, CombatAlert_Interval { 150 }
+			, CombatAlert_SuppressIfAllyDamage { true }
+			, CombatAlert_MakeAVoice { true }
+			, CombatAlert_UseFeedbackVoice { true }
+			, CombatAlert_UseAttackVoice { true }
+			, CombatAlert_UseEVA { true }
+			, CylinderRangefinding { false }
+			, BuildingWaypoint { false }
+			, AircraftWaypoint { false }
+			, StopPlanningOnEnter { true }
+			, StrafingTargetScatter { true }
+			, AINormalTargetingDelay {}
+			, PlayerNormalTargetingDelay {}
+			, AIGuardAreaTargetingDelay {}
+			, PlayerGuardAreaTargetingDelay {}
+			, PlayerAttackIronCurtain { true }
+			, AIAttackIronCurtain { false }
+			, PlayerAutoRepair { false }
+			, PlayerReturnFire_Smarter { false }
+			, EVA_WeCaptureABuilding {}
+			, EVA_OurBuildingIsCaptured {}
+			, PlayerGuardModePursuit { true }
+			, PlayerGuardModeGuardRangeMultiplier { 2.0 }
+			, PlayerGuardModeGuardRangeAddend { Leptons(0) }
+			, PlayerGuardModeGuardRangeMax { Leptons(4096) }
+			, PlayerGuardStationaryStray { Leptons(-256) }
+			, AIGuardModePursuit { true }
+			, AIGuardModeGuardRangeMultiplier { 2.0 }
+			, AIGuardModeGuardRangeAddend { Leptons(0) }
+			, AIGuardModeGuardRangeMax { Leptons(4096) }
+			, AIGuardStationaryStray { Leptons(-256) }
+			, UseGlobalDeathWeaponDamage { false }
+			, NonVehExplodeOnDestroy { false }
+			, FireDeathWeaponOnCrushed { false }
+			, CrushBuildingOnAnyCell { false }
+			, RallyPointOnTechno { false }
+			, RallyPointForceMove { false }
+			, RallyPointAreaGuard { false }
+			, EnableEnhancedExitCoords { false }
+			, PlayerDestroyWalls { false }
+			, DestroyOwnerlessWalls { false }
+			, AIAngerOnAlly { true }
+			, FollowTargetSelf { false }
+			, HarvesterScanAfterUnload { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }

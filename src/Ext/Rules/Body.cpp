@@ -135,6 +135,53 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 		this->HeightShadowScaling = false;
 	this->HeightShadowScaling_MinScale.Read(exINI, GameStrings::AudioVisual, "HeightShadowScaling.MinScale");
 
+	this->JumpjetClimbPredictHeight.Read(exINI, GameStrings::General, "JumpjetClimbPredictHeight");
+	this->JumpjetClimbWithoutCutOut.Read(exINI, GameStrings::General, "JumpjetClimbWithoutCutOut");
+	this->UnitIdleRotateTurret.Read(exINI, GameStrings::AudioVisual, "UnitIdleRotateTurret");
+	this->UnitIdlePointToMouse.Read(exINI, GameStrings::AudioVisual, "UnitIdlePointToMouse");
+	this->UnitIdleActionRestartMin.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionRestartMin");
+	this->UnitIdleActionRestartMax.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionRestartMax");
+	this->UnitIdleActionIntervalMin.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionIntervalMin");
+	this->UnitIdleActionIntervalMax.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionIntervalMax");
+	this->RecountBurst.Read(exINI, GameStrings::General, "RecountBurst");
+	this->FactoryProgressDisplay.Read(exINI, GameStrings::AudioVisual, "FactoryProgressDisplay");
+	this->MainSWProgressDisplay.Read(exINI, GameStrings::AudioVisual, "MainSWProgressDisplay");
+	this->InvulnerableDisplay.Read(exINI, GameStrings::AudioVisual, "InvulnerableDisplay");
+	this->TemporalLifeDisplay.Read(exINI, GameStrings::AudioVisual, "TemporalLifeDisplay");
+	this->FactoryProgressDisplay_Offset.Read(exINI, GameStrings::AudioVisual, "FactoryProgressDisplay.Offset");
+	this->MainSWProgressDisplay_Offset.Read(exINI, GameStrings::AudioVisual, "MainSWProgressDisplay.Offset");
+	this->InvulnerableDisplay_Others_Offset.Read(exINI, GameStrings::AudioVisual, "InvulnerableDisplay.Others.Offset");
+	this->InvulnerableDisplay_Buildings_Offset.Read(exINI, GameStrings::AudioVisual, "InvulnerableDisplay.Buildings.Offset");
+	this->TemporalLifeDisplay_Others_Offset.Read(exINI, GameStrings::AudioVisual, "TemporalLifeDisplay.Others.Offset");
+	this->TemporalLifeDisplay_Buildings_Offset.Read(exINI, GameStrings::AudioVisual, "TemporalLifeDisplay.Buildings.Offset");
+	this->FactoryProgressDisplay_Pips.Read(exINI, GameStrings::AudioVisual, "FactoryProgressDisplay.Pips");
+	this->MainSWProgressDisplay_Pips.Read(exINI, GameStrings::AudioVisual, "MainSWProgressDisplay.Pips");
+	this->InvulnerableDisplay_Others_Pips.Read(exINI, GameStrings::AudioVisual, "InvulnerableDisplay.Others.Pips");
+	this->InvulnerableDisplay_Buildings_Pips.Read(exINI, GameStrings::AudioVisual, "InvulnerableDisplay.Buildings.Pips");
+	this->TemporalLifeDisplay_Others_Pips.Read(exINI, GameStrings::AudioVisual, "TemporalLifeDisplay.Others.Pips");
+	this->TemporalLifeDisplay_Buildings_Pips.Read(exINI, GameStrings::AudioVisual, "TemporalLifeDisplay.Buildings.Pips");
+	this->ProgressDisplay_Others_PipsShape.Read(exINI, GameStrings::AudioVisual, "ProgressDisplay.Others.PipsShape");
+	this->ProgressDisplay_Buildings_PipsShape.Read(exINI, GameStrings::AudioVisual, "ProgressDisplay.Buildings.PipsShape");
+	this->DamageOwnerMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageOwnerMultiplier");
+	this->DamageAlliesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageAlliesMultiplier");
+	this->DamageEnemiesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageEnemiesMultiplier");
+	this->CheckUnitBaseNormal.Read(exINI, GameStrings::General, "CheckUnitBaseNormal");
+	this->AlwaysExistTheCameo.Read(exINI, GameStrings::AudioVisual, "AlwaysExistTheCameo");
+	this->BuildingStatisticsCameo.Read(exINI, GameStrings::AudioVisual, "BuildingStatisticsCameo");
+	this->CameoOverlayShapes.Read(exINI, GameStrings::AudioVisual, "CameoOverlayShapes");
+	this->CameoOverlayFrames.Read(exINI, GameStrings::AudioVisual, "CameoOverlayFrames");
+	this->CameoOverlayPalette.LoadFromINI(pINI, GameStrings::AudioVisual, "CameoOverlayPalette");
+	this->ExpandBuildingPlace.Read(exINI, GameStrings::General, "ExpandBuildingPlace");
+	this->DrawAdjacentBoundary.Read(exINI, GameStrings::AudioVisual, "DrawAdjacentBoundary");
+	this->CheckExpandPlaceGrid.Read(exINI, GameStrings::AudioVisual, "CheckExpandPlaceGrid");
+	this->ExpandLandGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandLandGridFrames");
+	this->ExpandWaterGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandWaterGridFrames");
+	this->SWSidebarBackground.Read(exINI, GameStrings::AudioVisual, "SWSidebarBackground");
+	this->AIAutoDeployMCV.Read(exINI, GameStrings::AI, "AIAutoDeployMCV");
+	this->AISetBaseCenter.Read(exINI, GameStrings::AI, "AISetBaseCenter");
+	this->AIBiasSpawnCell.Read(exINI, GameStrings::AI, "AIBiasSpawnCell");
+	this->AIForbidConYard.Read(exINI, GameStrings::AI, "AIForbidConYard");
+
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
 	this->ForbidParallelAIQueues_Building.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Building");
@@ -184,6 +231,54 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->Infantry_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Infantry.DefaultDigitalDisplayTypes");
 	this->Vehicles_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Vehicles.DefaultDigitalDisplayTypes");
 	this->Aircraft_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Aircraft.DefaultDigitalDisplayTypes");
+
+	this->CombatAlert.Read(exINI, GameStrings::AudioVisual, "CombatAlert");
+	this->CombatAlert_IgnoreBuilding.Read(exINI, GameStrings::AudioVisual, "CombatAlert.IgnoreBuilding");
+	this->CombatAlert_SuppressIfInScreen.Read(exINI, GameStrings::AudioVisual, "CombatAlert.SuppressIfInScreen");
+	this->CombatAlert_Interval.Read(exINI, GameStrings::AudioVisual, "CombatAlert.Interval");
+	this->CombatAlert_SuppressIfAllyDamage.Read(exINI, GameStrings::AudioVisual, "CombatAlert.SuppressIfAllyDamage");
+	this->CombatAlert_MakeAVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.MakeAVoice");
+	this->CombatAlert_UseFeedbackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseFeedbackVoice");
+	this->CombatAlert_UseAttackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseAttackVoice");
+	this->CombatAlert_UseEVA.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseEVA");
+	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
+	this->AircraftWaypoint.Read(exINI, GameStrings::General, "AircraftWaypoint");
+	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
+	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
+	this->StrafingTargetScatter.Read(exINI, GameStrings::General, "StrafingTargetScatter");
+	this->AINormalTargetingDelay.Read(exINI, GameStrings::General, "AINormalTargetingDelay");
+	this->PlayerNormalTargetingDelay.Read(exINI, GameStrings::General, "PlayerNormalTargetingDelay");
+	this->AIGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "AIGuardAreaTargetingDelay");
+	this->PlayerGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "PlayerGuardAreaTargetingDelay");
+	this->PlayerAttackIronCurtain.Read(exINI, GameStrings::General, "PlayerAttackIronCurtain");
+	this->AIAttackIronCurtain.Read(exINI, GameStrings::General, "AIAttackIronCurtain");
+	this->PlayerAutoRepair.Read(exINI, GameStrings::General, "PlayerAutoRepair");
+	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
+	this->EVA_WeCaptureABuilding.Read(exINI, GameStrings::AudioVisual, "EVA.WeCaptureABuilding");
+	this->EVA_OurBuildingIsCaptured.Read(exINI, GameStrings::AudioVisual, "EVA.OurBuildingIsCaptured");
+	this->PlayerGuardModePursuit.Read(exINI, GameStrings::General, "PlayerGuardModePursuit");
+	this->PlayerGuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "PlayerGuardModeGuardRangeMultiplier");
+	this->PlayerGuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "PlayerGuardModeGuardRangeAddend");
+	this->PlayerGuardModeGuardRangeMax.Read(exINI, GameStrings::General, "PlayerGuardModeGuardRangeMax");
+	this->PlayerGuardStationaryStray.Read(exINI, GameStrings::General, "PlayerGuardStationaryStray");
+	this->AIGuardModePursuit.Read(exINI, GameStrings::General, "AIGuardModePursuit");
+	this->AIGuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeMultiplier");
+	this->AIGuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeAddend");
+	this->AIGuardModeGuardRangeMax.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeMax");
+	this->AIGuardStationaryStray.Read(exINI, GameStrings::General, "AIGuardStationaryStray");
+	this->UseGlobalDeathWeaponDamage.Read(exINI, GameStrings::CombatDamage, "UseGlobalDeathWeaponDamage");
+	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
+	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
+	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
+	this->RallyPointOnTechno.Read(exINI, GameStrings::General, "RallyPointOnTechno");
+	this->RallyPointForceMove.Read(exINI, GameStrings::General, "RallyPointForceMove");
+	this->RallyPointAreaGuard.Read(exINI, GameStrings::General, "RallyPointAreaGuard");
+	this->EnableEnhancedExitCoords.Read(exINI, GameStrings::General, "EnableEnhancedExitCoords");
+	this->PlayerDestroyWalls.Read(exINI, GameStrings::General, "PlayerDestroyWalls");
+	this->DestroyOwnerlessWalls.Read(exINI, GameStrings::General, "DestroyOwnerlessWalls");
+	this->AIAngerOnAlly.Read(exINI, GameStrings::General, "AIAngerOnAlly");
+	this->FollowTargetSelf.Read(exINI, GameStrings::General, "FollowTargetSelf");
+	this->HarvesterScanAfterUnload.Read(exINI, GameStrings::General, "HarvesterScanAfterUnload");
 
 	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
 	this->JumpjetLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "JumpjetLevelLightMultiplier");
@@ -327,6 +422,52 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AirShadowBaseScale_log)
 		.Process(this->HeightShadowScaling)
 		.Process(this->HeightShadowScaling_MinScale)
+		.Process(this->JumpjetClimbPredictHeight)
+		.Process(this->JumpjetClimbWithoutCutOut)
+		.Process(this->UnitIdleRotateTurret)
+		.Process(this->UnitIdlePointToMouse)
+		.Process(this->UnitIdleActionRestartMin)
+		.Process(this->UnitIdleActionRestartMax)
+		.Process(this->UnitIdleActionIntervalMin)
+		.Process(this->UnitIdleActionIntervalMax)
+		.Process(this->RecountBurst)
+		.Process(this->FactoryProgressDisplay)
+		.Process(this->MainSWProgressDisplay)
+		.Process(this->InvulnerableDisplay)
+		.Process(this->TemporalLifeDisplay)
+		.Process(this->FactoryProgressDisplay_Offset)
+		.Process(this->MainSWProgressDisplay_Offset)
+		.Process(this->InvulnerableDisplay_Others_Offset)
+		.Process(this->InvulnerableDisplay_Buildings_Offset)
+		.Process(this->TemporalLifeDisplay_Others_Offset)
+		.Process(this->TemporalLifeDisplay_Buildings_Offset)
+		.Process(this->FactoryProgressDisplay_Pips)
+		.Process(this->MainSWProgressDisplay_Pips)
+		.Process(this->InvulnerableDisplay_Others_Pips)
+		.Process(this->InvulnerableDisplay_Buildings_Pips)
+		.Process(this->TemporalLifeDisplay_Others_Pips)
+		.Process(this->TemporalLifeDisplay_Buildings_Pips)
+		.Process(this->ProgressDisplay_Others_PipsShape)
+		.Process(this->ProgressDisplay_Buildings_PipsShape)
+		.Process(this->DamageOwnerMultiplier)
+		.Process(this->DamageAlliesMultiplier)
+		.Process(this->DamageEnemiesMultiplier)
+		.Process(this->CheckUnitBaseNormal)
+		.Process(this->AlwaysExistTheCameo)
+		.Process(this->BuildingStatisticsCameo)
+		.Process(this->CameoOverlayShapes)
+		.Process(this->CameoOverlayFrames)
+		.Process(this->CameoOverlayPalette)
+		.Process(this->ExpandBuildingPlace)
+		.Process(this->DrawAdjacentBoundary)
+		.Process(this->CheckExpandPlaceGrid)
+		.Process(this->ExpandLandGridFrames)
+		.Process(this->ExpandWaterGridFrames)
+		.Process(this->SWSidebarBackground)
+		.Process(this->AIAutoDeployMCV)
+		.Process(this->AISetBaseCenter)
+		.Process(this->AIBiasSpawnCell)
+		.Process(this->AIForbidConYard)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)
@@ -373,6 +514,53 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowDesignatorRange)
 		.Process(this->DropPodTrailer)
 		.Process(this->PodImage)
+		.Process(this->CombatAlert)
+		.Process(this->CombatAlert_IgnoreBuilding)
+		.Process(this->CombatAlert_SuppressIfInScreen)
+		.Process(this->CombatAlert_Interval)
+		.Process(this->CombatAlert_SuppressIfAllyDamage)
+		.Process(this->CombatAlert_MakeAVoice)
+		.Process(this->CombatAlert_UseFeedbackVoice)
+		.Process(this->CombatAlert_UseAttackVoice)
+		.Process(this->CombatAlert_UseEVA)
+		.Process(this->CylinderRangefinding)
+		.Process(this->AircraftWaypoint)
+		.Process(this->BuildingWaypoint)
+		.Process(this->StopPlanningOnEnter)
+		.Process(this->StrafingTargetScatter)
+		.Process(this->AINormalTargetingDelay)
+		.Process(this->PlayerNormalTargetingDelay)
+		.Process(this->AIGuardAreaTargetingDelay)
+		.Process(this->PlayerGuardAreaTargetingDelay)
+		.Process(this->PlayerAttackIronCurtain)
+		.Process(this->AIAttackIronCurtain)
+		.Process(this->PlayerAutoRepair)
+		.Process(this->PlayerReturnFire_Smarter)
+		.Process(this->EVA_WeCaptureABuilding)
+		.Process(this->EVA_OurBuildingIsCaptured)
+		.Process(this->PlayerGuardModePursuit)
+		.Process(this->PlayerGuardModeGuardRangeMultiplier)
+		.Process(this->PlayerGuardModeGuardRangeAddend)
+		.Process(this->PlayerGuardModeGuardRangeMax)
+		.Process(this->PlayerGuardStationaryStray)
+		.Process(this->AIGuardModePursuit)
+		.Process(this->AIGuardModeGuardRangeMultiplier)
+		.Process(this->AIGuardModeGuardRangeAddend)
+		.Process(this->AIGuardModeGuardRangeMax)
+		.Process(this->AIGuardStationaryStray)
+		.Process(this->UseGlobalDeathWeaponDamage)
+		.Process(this->NonVehExplodeOnDestroy)
+		.Process(this->FireDeathWeaponOnCrushed)
+		.Process(this->CrushBuildingOnAnyCell)
+		.Process(this->RallyPointOnTechno)
+		.Process(this->RallyPointForceMove)
+		.Process(this->RallyPointAreaGuard)
+		.Process(this->EnableEnhancedExitCoords)
+		.Process(this->PlayerDestroyWalls)
+		.Process(this->DestroyOwnerlessWalls)
+		.Process(this->AIAngerOnAlly)
+		.Process(this->FollowTargetSelf)
+		.Process(this->HarvesterScanAfterUnload)
 		.Process(this->AircraftLevelLightMultiplier)
 		.Process(this->JumpjetLevelLightMultiplier)
 		.Process(this->VoxelLightSource)

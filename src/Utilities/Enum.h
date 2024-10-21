@@ -240,18 +240,6 @@ enum class ChronoSparkleDisplayPosition : unsigned char
 
 MAKE_ENUM_FLAGS(ChronoSparkleDisplayPosition);
 
-enum class ExpireWeaponCondition : unsigned char
-{
-	None = 0x0,
-	Expire = 0x1,
-	Remove = 0x2,
-	Death = 0x4,
-
-	All = 0xFF,
-};
-
-MAKE_ENUM_FLAGS(ExpireWeaponCondition);
-
 enum class HorizontalPosition : BYTE
 {
 	Left = 0,
@@ -288,7 +276,17 @@ enum class DisplayInfoType : BYTE
 	Tiberium = 6,
 	Experience = 7,
 	Occupants = 8,
-	GattlingStage = 9
+	GattlingStage = 9,
+	ROF = 10,
+	Reload = 11,
+	SpawnTimer = 12,
+	GattlingTimer = 13,
+	ProduceCash = 14,
+	PassengerKill = 15,
+	AutoDeath = 16,
+	SuperWeapon = 17,
+	IronCurtain = 18,
+	TemporalLife = 19
 };
 
 class MouseCursorHotSpotX

@@ -38,8 +38,11 @@ bool __forceinline BuildingExt::CanUndeployOnSell(BuildingClass* pThis)
 		if (!GameModeOptionsClass::Instance->MCVRedeploy)
 			return false;
 		// or MindControlledBy YURIX (why? for balance?)
-		if (pThis->MindControlledBy || !pThis->Owner->IsControlledByHuman())
+		if (pThis->MindControlledBy)
 			return false;
+		// Skip human check
+		//if (!pThis->Owner->IsControlledByHuman())
+		//	return false;
 	}
 	// Move Focus check outside Conyard check to allow generic Unsellable=no buildings to be sold
 	return pThis->Focus;

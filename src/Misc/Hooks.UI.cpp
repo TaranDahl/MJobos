@@ -13,6 +13,7 @@
 #include <Ext/SWType/Body.h>
 #include <Misc/FlyingStrings.h>
 #include <Utilities/Debug.h>
+#include "TacticalButtons.h"
 
 DEFINE_HOOK(0x777C41, UI_ApplyAppIcon, 0x9)
 {
@@ -239,6 +240,61 @@ DEFINE_HOOK(0x456776, BuildingClass_DrawRadialIndicator_Visibility, 0x6)
 
 	return DoNotDraw;
 }
+
+#pragma region MessageList
+
+DEFINE_HOOK(0x4A8B9B, DisplayClass_Set_View_Dimensions, 0x6)
+{
+	if (!Phobos::Config::MessageDisplayInCenter)
+		return 0;
+
+	enum { SkipGameCode = 0x4A8BBD };
+
+	const RectangleStruct* const pRect = &DSurface::ViewBounds;
+	const int sideWidth = pRect->Width / 6;
+
+	MessageListClass::Instance->Init(pRect->X + sideWidth, (pRect->Height - pRect->Height / 8 - 120),
+		6, 98, 14, -1, -1, 0, 20, 98, pRect->Width - (sideWidth << 1));
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x684A9A, UnknownClass_sub_684620_InitMessageList, 0x6)
+{
+	if (!Phobos::Config::MessageDisplayInCenter)
+		return 0;
+
+	enum { SkipGameCode = 0x684ACE };
+
+	const RectangleStruct* const pRect = &DSurface::ViewBounds;
+	const int sideWidth = pRect->Width / 6;
+
+	MessageListClass::Instance->Init(pRect->X + sideWidth, (pRect->Height - pRect->Height / 8 - 120),
+		6, 98, 14, -1, -1, 0, 20, 98, pRect->Width - (sideWidth << 1));
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x623A9F, DSurface_sub_623880_DrawBitFontStrings, 0x5)
+{
+	if (!Phobos::Config::MessageDisplayInCenter)
+		return 0;
+
+	enum { SkipGameCode = 0x623AAB };
+
+	GET(RectangleStruct* const, pRect, EAX);
+	GET(DSurface* const, pSurface, ECX);
+	GET(const int, height, EBP);
+
+	pRect->Height = height;
+	ColorStruct black { 0, 0, 0 };
+	int trans = (TacticalButtonsClass::Instance.OnMessages || ScenarioClass::Instance->UserInputLocked) ? 80 : 40;
+	pSurface->FillRectTrans(pRect, &black, trans);
+
+	return SkipGameCode;
+}
+
+#pragma endregion
 
 #pragma region ShowBriefing
 

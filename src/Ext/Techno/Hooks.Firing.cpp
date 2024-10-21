@@ -139,9 +139,11 @@ DEFINE_HOOK(0x6F36DB, TechnoClass_WhatWeaponShouldIUse, 0x8)
 			if (pShield->IsActive())
 			{
 				auto const secondary = pThis->GetWeapon(1)->WeaponType;
+				auto const pSecondProjExt = BulletTypeExt::ExtMap.Find(secondary->Projectile);
 				bool secondaryIsAA = pTargetTechno && pTargetTechno->IsInAir() && secondary && secondary->Projectile->AA;
+				bool secondaryIsAU = pTargetTechno && pTargetTechno->InWhichLayer() == Layer::Underground && pSecondProjExt && pSecondProjExt->AU;
 
-				if (secondary && (allowFallback || (allowAAFallback && secondaryIsAA) || TechnoExt::CanFireNoAmmoWeapon(pThis, 1)))
+				if (secondary && (allowFallback || (allowAAFallback && secondaryIsAA) || secondaryIsAU || TechnoExt::CanFireNoAmmoWeapon(pThis, 1)))
 				{
 					if (!pShield->CanBeTargeted(pThis->GetWeapon(0)->WeaponType))
 						return Secondary;
@@ -166,8 +168,16 @@ DEFINE_HOOK(0x6F37EB, TechnoClass_WhatWeaponShouldIUse_AntiAir, 0x6)
 	GET(WeaponTypeClass*, pSecWeapon, EAX);
 
 	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
+	const auto pPrimaryProj = pWeapon->Projectile;
+	const auto pSecondaryProj = pSecWeapon->Projectile;
 
-	if (!pWeapon->Projectile->AA && pSecWeapon->Projectile->AA && pTargetTechno && pTargetTechno->IsInAir())
+	if (!pPrimaryProj->AA && pSecondaryProj->AA && pTargetTechno && pTargetTechno->IsInAir())
+		return Secondary;
+
+	const auto pPrimaryProjExt = BulletTypeExt::ExtMap.Find(pPrimaryProj);
+	const auto pSecondaryProjExt = BulletTypeExt::ExtMap.Find(pSecondaryProj);
+
+	if (!pPrimaryProjExt->AU && pSecondaryProjExt->AU && pTargetTechno && (pTargetTechno->InWhichLayer()==Layer::Underground))
 		return Secondary;
 
 	return Primary;
@@ -215,7 +225,9 @@ DEFINE_HOOK(0x6F3432, TechnoClass_WhatWeaponShouldIUse_Gattling, 0xA)
 			else
 			{
 				auto const pCell = pTargetTechno->GetCell();
-				bool isOnWater = (pCell->LandType == LandType::Water || pCell->LandType == LandType::Beach) && !pTargetTechno->IsInAir();
+				bool isOnWater = (pCell->LandType == LandType::Water || pCell->LandType == LandType::Beach) && !pTargetTechno->IsInAir() && !(pTargetTechno->InWhichLayer() == Layer::Underground);
+				auto const pOddProjExt = BulletTypeExt::ExtMap.Find(pWeaponOdd->Projectile);
+				auto const pEvenProjExt = BulletTypeExt::ExtMap.Find(pWeaponEven->Projectile);
 
 				if (!pTargetTechno->OnBridge && isOnWater)
 				{
@@ -225,7 +237,8 @@ DEFINE_HOOK(0x6F3432, TechnoClass_WhatWeaponShouldIUse_Gattling, 0xA)
 						chosenWeaponIndex = evenWeaponIndex;
 				}
 				else if ((pTargetTechno->IsInAir() && !pWeaponOdd->Projectile->AA && pWeaponEven->Projectile->AA) ||
-					!pTargetTechno->IsInAir() && pThis->GetTechnoType()->LandTargeting == LandTargetingType::Land_Secondary)
+					!pTargetTechno->IsInAir() && pThis->GetTechnoType()->LandTargeting == LandTargetingType::Land_Secondary ||
+					pTargetTechno->InWhichLayer() == Layer::Underground && pOddProjExt && !pOddProjExt->AU && pEvenProjExt && pEvenProjExt->AU)
 				{
 					chosenWeaponIndex = evenWeaponIndex;
 				}
@@ -394,6 +407,28 @@ DEFINE_HOOK(0x6FC689, TechnoClass_CanFire_LandNavalTarget, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x51C9B8, InfantryClass_CanFire_OnMoving1, 0x17)
+{
+	enum { CheckPass = 0x51C9CF, CheckNotPass = 0x51CAFA };
+
+	GET(InfantryClass*, pThis, EBX);
+
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->FiringByPassMovingCheck || pThis->SpeedPercentage <= 0.1) ? CheckPass : CheckNotPass;
+}
+
+DEFINE_HOOK(0x51CAAC, InfantryClass_CanFire_OnMoving2, 0x13)
+{
+	enum { CheckPass = 0x51CACD, CheckNotPass = 0x51CABF };
+
+	GET(InfantryClass*, pThis, EBX);
+
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->FiringByPassMovingCheck || !pThis->Locomotor->Is_Moving_Now()) ? CheckPass : CheckNotPass;
+}
+
 // Skips bridge-related coord checks to allow AA to target air units while both are on a bridge.
 DEFINE_HOOK(0x6FCBE6, TechnoClass_CanFire_BridgeAAFix, 0x6)
 {
@@ -407,9 +442,64 @@ DEFINE_HOOK(0x6FCBE6, TechnoClass_CanFire_BridgeAAFix, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x6FC749, TechnoClass_GetFireError_AntiUnderground, 0x5)
+{
+	enum { Illegal = 0x6FC86A, GoOtherChecks = 0x6FC762 };
+
+	GET(Layer, layer, EAX);
+	//GET(TechnoClass*, pThis, EBX);
+	GET(WeaponTypeClass*, pWeapon, EDI);
+
+	auto const pProj = pWeapon->Projectile;
+	auto const pProjExt = BulletTypeExt::ExtMap.Find(pProj);
+
+	if (layer == Layer::Underground && !(pProjExt && pProjExt->AU))
+		return Illegal;
+
+	if ((layer == Layer::Air || layer == Layer::Top) && !pProj->AA)
+		return Illegal;
+
+	return GoOtherChecks;
+}
+
 #pragma endregion
 
 #pragma region TechnoClass_Fire
+DEFINE_HOOK(0x6FDD7D, TechnoClass_FireAt_UpdateWeaponType, 0x5)
+{
+	enum { CanNotFire = 0x6FDE03 };
+
+	GET(WeaponTypeClass* const, pWeapon, EBX);
+	GET(TechnoClass* const, pThis, ESI);
+
+	if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+	{
+		if (pThis->CurrentBurstIndex && pWeapon != pExt->LastWeaponType && pExt->TypeExtData->RecountBurst.Get(RulesExt::Global()->RecountBurst))
+		{
+			if (pExt->LastWeaponType && pExt->LastWeaponType->Burst)
+			{
+				const double ratio = static_cast<double>(pThis->CurrentBurstIndex) / pExt->LastWeaponType->Burst;
+				const int rof = static_cast<int>(ratio * pExt->LastWeaponType->ROF * pExt->AE.ROFMultiplier) - (Unsorted::CurrentFrame - pThis->unknown_int_120);
+
+				if (rof > 0)
+				{
+					pThis->ChargeTurretDelay = rof;
+					pThis->RearmTimer.Start(rof);
+					pThis->CurrentBurstIndex = 0;
+					pExt->LastWeaponType = pWeapon;
+
+					return CanNotFire;
+				}
+			}
+
+			pThis->CurrentBurstIndex = 0;
+		}
+
+		pExt->LastWeaponType = pWeapon;
+	}
+
+	return 0;
+}
 
 DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_DiscardAEOnFire, 0x6)
 {
@@ -578,14 +668,77 @@ DEFINE_HOOK(0x6FF4CC, TechnoClass_FireAt_ToggleLaserWeaponIndex, 0x6)
 	{
 		if (auto const pExt = BuildingExt::ExtMap.Find(abstract_cast<BuildingClass*>(pThis)))
 		{
-			if (pExt->CurrentLaserWeaponIndex.empty())
+			if (!pExt->CurrentLaserWeaponIndex.has_value())
 				pExt->CurrentLaserWeaponIndex = weaponIndex;
 			else
-				pExt->CurrentLaserWeaponIndex.clear();
+				pExt->CurrentLaserWeaponIndex.reset();
 		}
 	}
 
 	return 0;
+}
+
+DEFINE_HOOK_AGAIN(0x6FE71C, TechnoClass_Fire_BallisticScatterPhobos, 0x6);
+DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
+{
+	GET_STACK(BulletTypeClass*, pProjectile, 0x68);
+	GET(TechnoClass*, pThis, ESI);
+	GET_BASE(AbstractClass*, pTarget, 0x8);
+	GET_STACK(WeaponTypeClass*, pWeapon, STACK_OFFSET(0xB0, -0x70));
+
+	auto pExt = BulletTypeExt::ExtMap.Find(pProjectile);
+
+	bool shouldScatter = ScenarioClass::Instance->Random.RandomRanged(0, 100) <= pExt->BallisticScatter_Chance * 100;
+
+	if (!shouldScatter)
+	{
+		R->EAX(0);
+		return 0;
+	}
+
+	// defaults for !FlakScatter || Inviso
+	const int globalScatter = RulesClass::Instance->BallisticScatter;
+	int min = pExt->BallisticScatter_Min.Get(Leptons(globalScatter / 2));
+	int max = pExt->BallisticScatter_Max.Get(Leptons(globalScatter));
+
+	if (pExt->BallisticScatter_IncreaseByRange)
+	{
+		const int minInMinRange = pExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
+		const int minInMaxRange = pExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
+		const int maxInMinRange = pExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
+		const int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
+		const int minRange = pExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+		const int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+		const int deltaRange = maxRange - minRange;
+		const int deltaRangeReal = static_cast<int>((pTarget->GetCoords() - pThis->GetCoords()).Magnitude()) - minRange;
+		const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / static_cast<double>(deltaRange)), 0, 1);
+		min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
+		max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
+	}
+
+	int scatter = ScenarioClass::Instance->Random.RandomRanged(min, max);
+
+	R->EAX(scatter);
+	return 0;
+}
+
+DEFINE_HOOK(0x6FF7EF, TechnoClass_Fire_LimboLaunchRecord, 0xA)
+{
+	enum { SkipGameCode = 0x6FF7F9 };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET_STACK(BulletClass* const, pBullet, STACK_OFFSET(0xB0, -0x74));
+
+	if (!pThis->InLimbo)
+	{
+		auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
+		pBulletExt->LimboedLauncher = pThis;
+		pBulletExt->LimboedDir = pThis->PrimaryFacing.Current().GetDir();
+	}
+
+	pThis->Limbo();
+
+	return SkipGameCode;
 }
 
 #pragma endregion
@@ -625,28 +778,55 @@ namespace BurstFLHTemp
 DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 {
 	GET(TechnoClass*, pThis, EBX);
+	GET(int, OriginalX, ECX);
+	GET(int, OriginalY, EBP);
+	GET(int, OriginalZ, EAX);
 	GET_STACK(int, weaponIndex, STACK_OFFSET(0xD8, 0x8));
 
-	if (weaponIndex < 0)
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (!pExt)
 		return 0;
+
+	auto const pTypeExt = pExt->TypeExtData;
+
+	if (weaponIndex < 0)
+	{
+		FootClass* currentPassenger = pThis->Passengers.FirstPassenger;
+		const int passengerIndex = -weaponIndex - 1;
+
+		for (int i = 0; i < passengerIndex && currentPassenger; i++)
+			currentPassenger = abstract_cast<FootClass*>(currentPassenger->NextObject);
+
+		if (auto const pPassengerExt = TechnoExt::ExtMap.Find(currentPassenger))
+			pPassengerExt->LastWeaponFLH = { OriginalX, OriginalY, OriginalZ };
+
+		return 0;
+	}
 
 	bool FLHFound = false;
 	CoordStruct FLH = CoordStruct::Empty;
 
-	FLH = TechnoExt::GetBurstFLH(pThis, weaponIndex, FLHFound);
+	FLH = TechnoExt::GetBurstFLH(pThis, weaponIndex, FLHFound, pTypeExt);
 	BurstFLHTemp::FLHFound = FLHFound;
 
 	if (!FLHFound)
 	{
 		if (auto pInf = abstract_cast<InfantryClass*>(pThis))
-			FLH = TechnoExt::GetSimpleFLH(pInf, weaponIndex, FLHFound);
+			FLH = TechnoExt::GetSimpleFLH(pInf, weaponIndex, FLHFound, pTypeExt);
 	}
 
 	if (FLHFound)
 	{
+		pExt->LastWeaponFLH = FLH;
+
 		R->ECX(FLH.X);
 		R->EBP(FLH.Y);
 		R->EAX(FLH.Z);
+	}
+	else
+	{
+		pExt->LastWeaponFLH = { OriginalX, ((pThis->CurrentBurstIndex % 2 == 1) ? -OriginalY : OriginalY), OriginalZ };
 	}
 
 	return 0;
@@ -676,9 +856,9 @@ DEFINE_HOOK(0x70E1A0, TechnoClass_GetTurretWeapon_LaserWeapon, 0x5)
 	{
 		auto const pExt = BuildingExt::ExtMap.Find(pBuilding);
 
-		if (!pExt->CurrentLaserWeaponIndex.empty())
+		if (pExt->CurrentLaserWeaponIndex.has_value())
 		{
-			auto weaponStruct = pThis->GetWeapon(pExt->CurrentLaserWeaponIndex.get());
+			auto weaponStruct = pThis->GetWeapon(*pExt->CurrentLaserWeaponIndex);
 			R->EAX(weaponStruct);
 			return ReturnResult;
 		}
@@ -848,69 +1028,3 @@ DEFINE_HOOK(0x5223B3, InfantryClass_Approach_Target_DeployFireWeapon, 0x6)
 	R->EDI(pThis->Type->DeployFireWeapon == -1 ? pThis->SelectWeapon(pThis->Target) : pThis->Type->DeployFireWeapon);
 	return 0x5223B9;
 }
-
-#pragma region WallWeaponStuff
-
-DEFINE_HOOK(0x70095A, TechnoClass_WhatAction_WallWeapon, 0x6)
-{
-	GET(TechnoClass*, pThis, ESI);
-	GET_STACK(OverlayTypeClass*, pOverlayTypeClass, STACK_OFFSET(0x2C, -0x18));
-
-	int weaponIndex = TechnoExt::GetWeaponIndexAgainstWall(pThis, pOverlayTypeClass);
-	R->EAX(pThis->GetWeapon(weaponIndex));
-
-	return 0;
-}
-
-DEFINE_HOOK(0x51C1F1, InfantryClass_CanEnterCell_WallWeapon, 0x5)
-{
-	enum { SkipGameCode = 0x51C1FE };
-
-	GET(InfantryClass*, pThis, EBP);
-	GET(OverlayTypeClass*, pOverlayTypeClass, ESI);
-
-	R->EAX(pThis->GetWeapon(TechnoExt::GetWeaponIndexAgainstWall(pThis, pOverlayTypeClass)));
-
-	return SkipGameCode;
-}
-
-DEFINE_HOOK(0x73F495, UnitClass_CanEnterCell_WallWeapon, 0x6)
-{
-	enum { SkipGameCode = 0x73F4A1 };
-
-	GET(UnitClass*, pThis, EBX);
-	GET(OverlayTypeClass*, pOverlayTypeClass, ESI);
-
-	R->EAX(pThis->GetWeapon(TechnoExt::GetWeaponIndexAgainstWall(pThis, pOverlayTypeClass)));
-
-	return SkipGameCode;
-}
-
-namespace CellEvalTemp
-{
-	int weaponIndex;
-}
-
-DEFINE_HOOK(0x6F8C9D, TechnoClass_EvaluateCell_SetContext, 0x7)
-{
-	GET(int, weaponIndex, EAX);
-
-	CellEvalTemp::weaponIndex = weaponIndex;
-
-	return 0;
-}
-
-WeaponStruct* __fastcall TechnoClass_EvaluateCellGetWeaponWrapper(TechnoClass* pThis)
-{
-	return pThis->GetWeapon(CellEvalTemp::weaponIndex);
-}
-
-int __fastcall TechnoClass_EvaluateCellGetWeaponRangeWrapper(TechnoClass* pThis, void* _, int weaponIndex)
-{
-	return pThis->GetWeaponRange(CellEvalTemp::weaponIndex);
-}
-
-DEFINE_JUMP(CALL6, 0x6F8CE3, GET_OFFSET(TechnoClass_EvaluateCellGetWeaponWrapper));
-DEFINE_JUMP(CALL6, 0x6F8DD2, GET_OFFSET(TechnoClass_EvaluateCellGetWeaponRangeWrapper));
-
-#pragma endregion

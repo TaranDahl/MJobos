@@ -225,6 +225,83 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
+		Valueable<bool> LeaveTransportKill;
+		Nullable<bool> RecountBurst;
+		Nullable<bool> UnitIdleRotateTurret;
+		Nullable<bool> UnitIdlePointToMouse;
+		Nullable<int> TurretROT;
+		Valueable<double> Turret_SelfRotation_Angle;
+		Valueable<bool> Turret_SelfRotation_Symmetric;
+		Valueable<bool> Turret_BodyRotation_Enable;
+		Valueable<double> Turret_BodyRotation_Angle;
+		Valueable<bool> Turret_BodyRotation_Symmetric;
+		Valueable<bool> CanBeBuiltOn;
+		Valueable<bool> UnitBaseNormal;
+		Valueable<bool> UnitBaseForAllyBuilding;
+		Nullable<bool> AlwaysExistTheCameo;
+		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
+		bool CameoCheckMutex; // Not read from ini
+		Valueable<CSFText> UIExtraDescription;
+		PhobosPCXFile CameoPCX;
+		PhobosPCXFile GreyCameoPCX;
+		Valueable<DisplayInfoType> UpperSelectedInfoType;
+		Valueable<ColorStruct> UpperSelectedInfoColor;
+		Valueable<DisplayInfoType> BelowSelectedInfoType;
+		Valueable<ColorStruct> BelowSelectedInfoColor;
+		Valueable<TechnoTypeClass*> FakeOf;
+		CustomPalette CameoPal;
+
+		Nullable<bool> CombatAlert;
+		Nullable<bool> CombatAlert_NotBuilding;
+		Nullable<bool> CombatAlert_UseFeedbackVoice;
+		Nullable<bool> CombatAlert_UseAttackVoice;
+		Nullable<bool> CombatAlert_UseEVA;
+		NullableIdx<VoxClass> CombatAlert_EVA;
+		Valueable<int> Spawner_RecycleRange;
+		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
+		//Valueable<CoordStruct> Spawner_RecycleFLH;
+		//Valueable<bool> Spawner_RecycleOnTurret;
+		Nullable<int> AINormalTargetingDelay;
+		Nullable<int> PlayerNormalTargetingDelay;
+		Nullable<int> AIGuardAreaTargetingDelay;
+		Nullable<int> PlayerGuardAreaTargetingDelay;
+		Valueable<bool> KeepWarping;
+		Nullable<int> KeepWarping_Distance;
+		Valueable<bool> FiringByPassMovingCheck;
+		Valueable<bool> SkipCrushSlowdown;
+		Nullable<bool> PlayerGuardModePursuit;
+		Nullable<Leptons> PlayerGuardModeStray;
+		Nullable<double> PlayerGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Nullable<Leptons> PlayerGuardStationaryStray;
+		Nullable<bool> AIGuardModePursuit;
+		Nullable<Leptons> AIGuardModeStray;
+		Nullable<double> AIGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> AIGuardModeGuardRangeAddend;
+		Nullable<Leptons> AIGuardStationaryStray;
+		Valueable<bool> Engineer_CanAutoFire;
+		Valueable<bool> BunkerableAnyWay;
+		Valueable<bool> Harvester_CanGuardArea;
+		Valueable<int> DigStartROT;
+		Valueable<int> DigInSpeed;
+		Valueable<int> DiggingSpeed;
+		Valueable<int> DigOutSpeed;
+		Valueable<int> DigEndROT;
+		Valueable<int> FlightClimb;
+		Valueable<int> FlightCrash;
+		Nullable<bool> ExplodeOnDestroy;
+		Nullable<bool> FireDeathWeaponOnCrushed;
+		Nullable<CoordStruct> ExitCoord;
+		Valueable<bool> MissileSpawnUseOtherFLHs;
+		Valueable<bool> HarvesterQuickUnloader;
+		Nullable<bool> KeepAlive;
+
+		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
+		ValueableVector<int> InitialPayload_Nums;
+
+		Valueable<bool> KeepTargetOnMove;
+		Valueable<Leptons> KeepTargetOnMove_ExtraDistance;
+
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
@@ -449,6 +526,81 @@ public:
 			, BuildLimitGroup_ExtraLimit_Nums {}
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
+
+			, LeaveTransportKill { false }
+			, RecountBurst {}
+			, UnitIdleRotateTurret {}
+			, UnitIdlePointToMouse {}
+			, TurretROT {}
+			, Turret_SelfRotation_Angle { 0.0 }
+			, Turret_SelfRotation_Symmetric { true }
+			, Turret_BodyRotation_Enable { false }
+			, Turret_BodyRotation_Angle { 0.0 }
+			, Turret_BodyRotation_Symmetric { true }
+			, CanBeBuiltOn { false }
+			, UnitBaseNormal { false }
+			, UnitBaseForAllyBuilding { false }
+			, AlwaysExistTheCameo {}
+			, PrerequisiteForCameo {}
+			, CameoCheckMutex { false }
+			, UIExtraDescription {}
+			, UpperSelectedInfoType { DisplayInfoType::Shield }
+			, UpperSelectedInfoColor { { 153, 153, 255 } }
+			, BelowSelectedInfoType { DisplayInfoType::Health }
+			, BelowSelectedInfoColor { { 0, 0, 0 } }
+			, FakeOf {}
+			, CameoPal {}
+
+			, CombatAlert {}
+			, CombatAlert_NotBuilding {}
+			, CombatAlert_UseFeedbackVoice {}
+			, CombatAlert_UseAttackVoice {}
+			, CombatAlert_UseEVA {}
+			, CombatAlert_EVA {}
+			, Spawner_RecycleRange { -1 }
+			, Spawner_RecycleAnim { nullptr }
+			//, Spawner_RecycleFLH { {0,0,0} }
+			//, Spawner_RecycleOnTurret { false }
+			, AINormalTargetingDelay {}
+			, PlayerNormalTargetingDelay {}
+			, AIGuardAreaTargetingDelay {}
+			, PlayerGuardAreaTargetingDelay {}
+			, KeepWarping { false }
+			, KeepWarping_Distance {}
+			, FiringByPassMovingCheck { false }
+			, SkipCrushSlowdown { false }
+			, PlayerGuardModePursuit {}
+			, PlayerGuardModeStray {}
+			, PlayerGuardModeGuardRangeMultiplier {}
+			, PlayerGuardModeGuardRangeAddend {}
+			, PlayerGuardStationaryStray {}
+			, AIGuardModePursuit {}
+			, AIGuardModeStray {}
+			, AIGuardModeGuardRangeMultiplier {}
+			, AIGuardModeGuardRangeAddend {}
+			, AIGuardStationaryStray {}
+			, Engineer_CanAutoFire { false }
+			, BunkerableAnyWay { false }
+			, Harvester_CanGuardArea { false }
+			, DigStartROT { -1 }
+			, DigInSpeed { -1 }
+			, DiggingSpeed { 19 }
+			, DigOutSpeed { -1 }
+			, DigEndROT { -1 }
+			, FlightClimb { -1 }
+			, FlightCrash { -1 }
+			, ExplodeOnDestroy { }
+			, FireDeathWeaponOnCrushed { }
+			, ExitCoord { }
+			, MissileSpawnUseOtherFLHs { false }
+			, HarvesterQuickUnloader { false }
+			, KeepAlive { }
+
+			, InitialPayload_Types {}
+			, InitialPayload_Nums {}
+
+			, KeepTargetOnMove { false }
+			, KeepTargetOnMove_ExtraDistance { Leptons(0) }
 
 			, Wake { }
 			, Wake_Grapple { }

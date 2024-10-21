@@ -10,6 +10,9 @@
 #include "ToggleDigitalDisplay.h"
 #include "ToggleDesignatorRange.h"
 #include "SaveVariablesToFile.h"
+#include "SelectCaptured.h"
+#include "SWShortcuts.h"
+#include "SelectedInfo.h"
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
@@ -19,6 +22,19 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
+	MakeCommand<SelectCapturedCommandClass>();
+	MakeCommand<SWShortcutsCommandClass<0>>();
+	MakeCommand<SWShortcutsCommandClass<1>>();
+	MakeCommand<SWShortcutsCommandClass<2>>();
+	MakeCommand<SWShortcutsCommandClass<3>>();
+	MakeCommand<SWShortcutsCommandClass<4>>();
+	MakeCommand<SWShortcutsCommandClass<5>>();
+	MakeCommand<SWShortcutsCommandClass<6>>();
+	MakeCommand<SWShortcutsCommandClass<7>>();
+	MakeCommand<SWShortcutsCommandClass<8>>();
+	MakeCommand<SWShortcutsCommandClass<9>>();
+	MakeCommand<SWShortcutsCommandClass<10>>();
+	MakeCommand<SelectedInfoCommandClass>();
 
 	if (Phobos::Config::DevelopmentCommands)
 	{

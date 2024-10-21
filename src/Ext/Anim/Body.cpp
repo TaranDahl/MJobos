@@ -384,7 +384,9 @@ void AnimExt::InvalidateTechnoPointers(TechnoClass* pTechno)
 		if (!pExt)
 		{
 			auto const ID = pAnim->Type ? pAnim->Type->get_ID() : "N/A";
-			Debug::FatalErrorAndExit("AnimExt::InvalidateTechnoPointers: Animation of type [%s] has no ExtData!", ID);
+//			Debug::FatalErrorAndExit("AnimExt::InvalidateTechnoPointers: Animation of type [%s] has no ExtData!", ID);
+			Debug::Log("AnimExt::InvalidateTechnoPointers: Animation of type [%s] has no ExtData!", ID);
+			continue;
 		}
 
 		if (pExt->Invoker == pTechno)
@@ -404,7 +406,9 @@ void AnimExt::InvalidateParticleSystemPointers(ParticleSystemClass* pParticleSys
 		if (!pExt)
 		{
 			auto const ID = pAnim->Type ? pAnim->Type->get_ID() : "N/A";
-			Debug::FatalErrorAndExit("AnimExt::InvalidateParticleSystemPointers: Animation of type [%s] has no ExtData!", ID);
+//			Debug::FatalErrorAndExit("AnimExt::InvalidateParticleSystemPointers: Animation of type [%s] has no ExtData!", ID);
+			Debug::Log("AnimExt::InvalidateParticleSystemPointers: Animation of type [%s] has no ExtData!", ID);
+			continue;
 		}
 
 		if (pExt->AttachedSystem == pParticleSystem)
@@ -439,7 +443,7 @@ DEFINE_HOOK(0x421EA0, AnimClass_CTOR_SetContext, 0x6)
 }
 
 DEFINE_HOOK_AGAIN(0x422126, AnimClass_CTOR, 0x5)
-DEFINE_HOOK_AGAIN(0x422707, AnimClass_CTOR, 0x5)
+DEFINE_HOOK_AGAIN(0x4226F6, AnimClass_CTOR, 0x6)
 DEFINE_HOOK(0x4228D2, AnimClass_CTOR, 0x5)
 {
 	GET(AnimClass*, pItem, ESI);

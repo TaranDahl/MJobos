@@ -47,7 +47,16 @@ public:
 		bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 		int WHAnimRemainingCreationInterval;
 		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
+		bool UnitIdleAction;
+		bool UnitIdleActionSelected;
+		bool UnitIdleIsSelected;
+		CDTimerClass UnitIdleActionTimer;
+		CDTimerClass UnitIdleActionGapTimer;
+		CDTimerClass UnitAutoDeployTimer;
+		WeaponTypeClass* LastWeaponType;
+		CoordStruct LastWeaponFLH;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
+		bool KeepTargetOnMove;
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
@@ -82,7 +91,16 @@ public:
 			, CanCloakDuringRearm { false }
 			, WHAnimRemainingCreationInterval { 0 }
 			, CanCurrentlyDeployIntoBuilding { false }
+			, UnitIdleAction { false }
+			, UnitIdleActionSelected { false }
+			, UnitIdleIsSelected { 0 }
+			, UnitIdleActionTimer {}
+			, UnitIdleActionGapTimer {}
+			, UnitAutoDeployTimer {}
+			, LastWeaponType {}
+			, LastWeaponFLH {}
 			, FiringObstacleCell {}
+			, KeepTargetOnMove { false }
 			, IsDetachingForCloak { false }
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }
@@ -106,11 +124,18 @@ public:
 		void RecalculateStatMultipliers();
 		void UpdateTemporal();
 		void UpdateMindControlAnim();
+		void UpdateRecountBurst();
 		void InitializeLaserTrails();
 		void InitializeAttachEffects();
 		void UpdateSelfOwnedAttachEffects();
 		bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts) const;
 		int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr) const;
+		void InitializeDisplayInfo();
+		void InitializeUnitIdleAction();
+		void StopIdleAction();
+		void ApplyIdleAction();
+		void ManualIdleAction();
+		void StopRotateWithNewROT(int ROT = -1);
 
 		virtual ~ExtData() override;
 		virtual void InvalidatePointer(void* ptr, bool bRemoved) override { }
@@ -129,6 +154,20 @@ public:
 		~ExtContainer();
 	};
 
+	struct DrawFrameStruct
+	{
+		int TopLength;
+		int TopFrame;
+		SHPStruct* TopPipSHP;
+		int MidLength;
+		int MidFrame;
+		SHPStruct* MidPipSHP;
+		int MaxLength;
+		int BrdFrame;
+		Point2D* Location;
+		RectangleStruct* Bounds;
+	};
+
 	static ExtContainer ExtMap;
 
 	static bool LoadGlobals(PhobosStreamReader& Stm);
@@ -141,12 +180,11 @@ public:
 
 	static CoordStruct GetFLHAbsoluteCoords(TechnoClass* pThis, CoordStruct flh, bool turretFLH = false);
 
-	static CoordStruct GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound);
-	static CoordStruct GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool& FLHFound);
+	static CoordStruct GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound, TechnoTypeExt::ExtData* pTypeExt = nullptr);
+	static CoordStruct GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool& FLHFound, TechnoTypeExt::ExtData* pTypeExt = nullptr);
 
 	static void ChangeOwnerMissionFix(FootClass* pThis);
 	static void KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, AnimTypeClass* pVanishAnimation, bool isInLimbo = false);
-	static void TransferMindControlOnDeploy(TechnoClass* pTechnoFrom, TechnoClass* pTechnoTo);
 	static void ApplyMindControlRangeLimit(TechnoClass* pThis);
 	static void ObjectKilledBy(TechnoClass* pThis, TechnoClass* pKiller);
 	static void UpdateSharedAmmo(TechnoClass* pThis);
@@ -165,6 +203,12 @@ public:
 	static int GetCustomTintColor(TechnoClass* pThis);
 	static int GetCustomTintIntensity(TechnoClass* pThis);
 	static void ApplyCustomTintValues(TechnoClass* pThis, int& color, int& intensity);
+	static void DrawFactoryProgress(BuildingClass* pThis, RectangleStruct* pBounds, Point2D basePosition);
+	static void DrawSuperProgress(BuildingClass* pThis, RectangleStruct* pBounds, Point2D basePosition);
+	static void DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds, Point2D basePosition, bool isBuilding, bool isInfantry);
+	static void DrawTemporalProgress(TechnoClass* pThis, RectangleStruct* pBounds, Point2D basePosition, bool isBuilding, bool isInfantry);
+	static void DrawVanillaStyleFootBar(DrawFrameStruct* pDraw);
+	static void DrawVanillaStyleBuildingBar(DrawFrameStruct* pDraw);
 	static Point2D GetScreenLocation(TechnoClass* pThis);
 	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
 	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);

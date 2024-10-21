@@ -47,6 +47,33 @@
 DEFINE_JUMP(LJMP, 0x545CE2, 0x545CE9) //Phobos_BugFixes_Tileset255_RemoveNonMMArrayFill
 DEFINE_JUMP(LJMP, 0x546C23, 0x546C8B) //Phobos_BugFixes_Tileset255_RefNonMMArray
 
+//Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied.
+DEFINE_HOOK(0x62AA32, ParasiteClass_TryInfect_MissBehaviorFix, 0x5)
+{
+	GET(bool, isReturnSuccess, EAX);
+	GET(ParasiteClass*, pParasite, ESI);
+
+	auto const pParasiteTechno = pParasite->Owner;
+
+	if (isReturnSuccess || !pParasiteTechno)
+		return 0;
+
+	auto const pType = pParasiteTechno->GetTechnoType();
+
+	if (!pType)
+		return 0;
+
+	isReturnSuccess = pParasiteTechno->Unlimbo(CellClass::Cell2Coord(MapClass::Instance->NearByLocation(pParasiteTechno->LastMapCoords, pType->SpeedType, -1,
+		pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false)), DirType::North);
+
+	R->AL(isReturnSuccess);
+	return 0;
+}
+
+// Patches TechnoClass::Kill_Cargo/KillPassengers (push ESI -> push EBP)
+// Fixes recursive passenger kills not being accredited
+// to proper techno but to their transports
+DEFINE_PATCH(0x707CF2, 0x55);
 
 // WWP's shit code! Wrong check.
 // To avoid units dying when they are already dead.
@@ -968,7 +995,77 @@ DEFINE_HOOK(0x5B11DD, MechLocomotionClass_ProcessMoving_SlowdownDistance, 0x9)
 	return distance >= pLinkedTo->GetCurrentSpeed() ? KeepMoving : CloseEnough;
 }
 
+// ReselectIfLimboed only works if the target is infantry.
+// Why did you do this, WW?
+DEFINE_JUMP(LJMP, 0x6FF78F, 0x6FF79C) // TechnoClass_Fire_ReselectIfLimboedCheck
+
+// Skip the Disappear func calling in cloak process.
+// Disappear announces the techno's pointer invalid and make the references in bullet or missile spawns null.
+DEFINE_JUMP(LJMP, 0x703789, 0x703795);
+DEFINE_JUMP(LJMP, 0x6FBBC3, 0x6FBBCE);
+
+// Jumpjet infantry will no longer acts stupid when assigned a attack mission.
+DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
+{
+	enum { FuncRet = 0x51B1D7 };
+
+	GET(InfantryClass* const, pThis, EBP);
+	GET(AbstractClass* const, pDest, EBX);
+
+	if (pThis->Type->BalloonHover && !pDest && pThis->Destination && locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor) && pThis->Target)
+	{
+		pThis->ForceMission(Mission::Attack);
+		return FuncRet;
+	}
+
+	return 0;
+}
+
 DEFINE_JUMP(LJMP, 0x517FF5, 0x518016); // Warhead with InfDeath=9 versus infantry in air
+
+#pragma region End_Piggyback PowerOn
+
+// Auther: tyuah8
+static void End_Piggyback_PowerOn(ILocomotion* loco)
+{
+	const auto pLoco = static_cast<LocomotionClass*>(loco);
+	const auto pLinkedTo = pLoco->LinkedTo;
+
+	if (!pLinkedTo->Deactivated && !pLinkedTo->IsUnderEMP())
+		pLoco->Power_On();
+	else
+		pLoco->Power_Off();
+}
+
+DEFINE_HOOK(0x4AF94D, DriveLocomotionClass__End_Piggyback__PowerOn, 0x7)
+{
+	GET(ILocomotion*, loco, EAX);
+	End_Piggyback_PowerOn(loco);
+	return 0;
+}
+
+DEFINE_HOOK(0x54DADC, JumpjetLocomotionClass__End_Piggyback__PowerOn, 0x5)
+{
+	GET(ILocomotion*, loco, EAX);
+	End_Piggyback_PowerOn(loco);
+	return 0;
+}
+
+DEFINE_HOOK(0x69F05D, ShipLocomotionClass__End_Piggyback__PowerOn, 0x7)
+{
+	GET(ILocomotion*, loco, EAX);
+	End_Piggyback_PowerOn(loco);
+	return 0;
+}
+
+DEFINE_HOOK(0x719F17, TeleportLocomotionClass__End_Piggyback__PowerOn, 0x5)
+{
+	GET(ILocomotion*, loco, ECX);
+	End_Piggyback_PowerOn(loco);
+	return 0;
+}
+
+#pragma endregion
 
 // Fixes docks not repairing docked aircraft unless they enter the dock first e.g just built ones.
 // Also potential edge cases with unusual docking offsets, original had a distance check for 64 leptons which is replaced with IsInAir here.
@@ -990,3 +1087,4 @@ DEFINE_HOOK(0x44985B, BuildingClass_Mission_Guard_UnitReload, 0x6)
 
 // Patch tileset parsing to not reset certain tileset indices for Lunar theater.
 DEFINE_JUMP(LJMP, 0x546C8B, 0x546CBF);
+

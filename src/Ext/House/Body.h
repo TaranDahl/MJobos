@@ -23,6 +23,9 @@ public:
 	public:
 		std::map<BuildingTypeExt::ExtData*, int> PowerPlantEnhancers;
 		std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
+		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
+		std::vector<UnitClass*> OwnedDeployingUnits;
+		std::vector<CellStruct> BaseNormalCells;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
@@ -35,8 +38,15 @@ public:
 		BuildingClass* Factory_NavyType;
 		BuildingClass* Factory_AircraftType;
 
+		CDTimerClass CombatAlertTimer;
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
+
+		std::vector<int> SWButtonData;
+		BuildingTypeClass* CurrentBuildingType;
+		CellStruct CurrentBuildingTopLeft;
+		CDTimerClass CurrentBuildingTimer;
+		int CurrentBuildingTimes;
 
 		//Read from INI
 		Nullable<bool> RepairBaseNodes[3];
@@ -59,6 +69,9 @@ public:
 		ExtData(HouseClass* OwnerObject) : Extension<HouseClass>(OwnerObject)
 			, PowerPlantEnhancers {}
 			, OwnedLimboDeliveredBuildings {}
+			, OwnedExistCameoTechnoTypes {}
+			, OwnedDeployingUnits {}
+			, BaseNormalCells {}
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}
@@ -68,6 +81,12 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
+			, SWButtonData {}
+			, CurrentBuildingType { nullptr }
+			, CurrentBuildingTopLeft {}
+			, CurrentBuildingTimer {}
+			, CurrentBuildingTimes { 0 }
+			, CombatAlertTimer {}
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { }
 			, RestrictedFactoryPlants {}
