@@ -663,6 +663,7 @@ This page lists all the individual contributions to the project by their author.
   - Fix the bug that `DeploysInto` and `UndeploysInto` will make damaged techno lose 1 health
   - RA1-Style multi-turret and multi-barrel
   - Fix the issue of Ares' EMP not suspending the production of AI factories
+  - Simplified unloading for miners
 - **Noble Fish**:
   - Documentation maintenance
   - Chinese documentation maintenance and translation
@@ -856,6 +857,7 @@ This page lists all the individual contributions to the project by their author.
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
   - Fix the issue that spawner or slave would execute some player commands
   - Customize whether aircraft is a cargo plane
+  - Simplified unloading for miners
 - **solar-III (凤九歌)**
   - Target scanning delay customization (documentation)
   - Skip target scanning function calling for unarmed technos (documentation)
