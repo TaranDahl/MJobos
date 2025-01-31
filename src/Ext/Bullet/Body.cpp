@@ -95,14 +95,14 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, WeaponTypeClass* 
 
 			static PhobosMap<EventActorType, AbstractClass*> participants;
 			participants.clear();
-			participants.insert(EventActorType::Me, pSource);
-			participants.insert(EventActorType::They, pFirer);
+			participants[EventActorType::Me] = pSource;
+			participants[EventActorType::They] = pFirer;
 			pSourceExt->InvokeEvent(EventTypeClass::WhenIntercept, &participants);
 
 			if (pFirer) {
 				const auto pFirerExt = TechnoExt::ExtMap.Find(pFirer);
-				participants.insert(EventActorType::Me, pFirer);
-				participants.insert(EventActorType::They, pSource);
+				participants[EventActorType::Me] = pFirer;
+				participants[EventActorType::They] = pSource;
 				pFirerExt->InvokeEvent(EventTypeClass::WhenIntercepted, &participants);
 			}
 		}
@@ -181,8 +181,8 @@ void BulletExt::ExtData::InvokeBulletEvent(EventTypeClass* pEventTypeClass, Abst
 	auto const& map = this->TypeExtData->EventHandlersMap;
 	static PhobosMap<EventActorType, AbstractClass*> participants;
 	participants.clear();
-	participants.insert(EventActorType::Me, this->OwnerObject()->Owner);
-	participants.insert(EventActorType::They, pThey);
+	participants[EventActorType::Me] = this->OwnerObject()->Owner;
+	participants[EventActorType::They] = pThey;
 	EventHandlerTypeClass::InvokeEventStatic(pEventTypeClass, &participants, &map);
 }
 

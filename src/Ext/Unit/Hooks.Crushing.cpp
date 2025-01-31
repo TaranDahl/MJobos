@@ -113,11 +113,11 @@ DEFINE_HOOK(0x7418AA, UnitClass_CrushCell_WhenCrushed, 6)
 
 		static PhobosMap<EventActorType, AbstractClass*> participants;
 		participants.clear();
-		participants.insert(EventActorType::Me, pCrusher);
-		participants.insert(EventActorType::They, pVictimTechno);
+		participants[EventActorType::Me] = pCrusher;
+		participants[EventActorType::They] = pVictimTechno;
 		pCrusherExt->InvokeEvent(EventTypeClass::WhenCrush, &participants);
-		participants.insert(EventActorType::Me, pVictimTechno);
-		participants.insert(EventActorType::They, pCrusher);
+		participants[EventActorType::Me] = pVictimTechno;
+		participants[EventActorType::They] = pCrusher;
 		pVictimExt->InvokeEvent(EventTypeClass::WhenCrushed, &participants);
 	}
 

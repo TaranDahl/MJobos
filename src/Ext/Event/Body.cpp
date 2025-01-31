@@ -59,7 +59,7 @@ void EventExt::RespondToTriggerCustomHotkey()
 		{
 			if (auto const pTechnoExt = TechnoExt::ExtMap.Find(pTechno))
 			{
-				participants.insert(EventActorType::Me, pTechno);
+				participants[EventActorType::Me] = pTechno;
 				pTechnoExt->InvokeEvent(pEventType, &participants);
 			}
 		}
@@ -67,7 +67,7 @@ void EventExt::RespondToTriggerCustomHotkey()
 		{
 			if (auto const pHouseExt = HouseExt::ExtMap.Find(pHouse))
 			{
-				participants.insert(EventActorType::Me, pHouse);
+				participants[EventActorType::Me] = pHouse;
 				pHouseExt->InvokeEvent(pEventType, &participants);
 			}
 		}

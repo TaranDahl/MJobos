@@ -40,16 +40,16 @@ DEFINE_HOOK(0x4FB64B, HouseClass_UnitFromFactory_VoiceCreated, 0x5)
 
 	static PhobosMap<EventActorType, AbstractClass*> participants;
 	participants.clear();
-	participants.insert(EventActorType::Me, pBuilding);
-	participants.insert(EventActorType::They, pThisTechno);
+	participants[EventActorType::Me] = pBuilding;
+	participants[EventActorType::They] = pThisTechno;
 	pBuildingExt->InvokeEvent(EventTypeClass::WhenProduce, &participants);
 
-	participants.insert(EventActorType::Me, pThisTechno);
-	participants.insert(EventActorType::They, pBuilding);
+	participants[EventActorType::Me] = pThisTechno;
+	participants[EventActorType::They] = pBuilding;
 	pTechnoExt->InvokeEvent(EventTypeClass::WhenProduced, &participants);
 
-	participants.insert(EventActorType::Me, pBuilding);
-	participants.insert(EventActorType::They, pThisTechno);
+	participants[EventActorType::Me] = pBuilding;
+	participants[EventActorType::They] = pThisTechno;
 	pHouseExt->InvokeEvent(EventTypeClass::WhenProduce, &participants);
 
 	return 0x4FB650;

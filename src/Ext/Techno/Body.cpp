@@ -489,12 +489,12 @@ void TechnoExt::ExtData::InvokeEvent(EventTypeClass* pEventTypeClass, PhobosMap<
 	{
 		auto pAttachEffect = std::move(attachEffect.get());
 		auto const& map = pAttachEffect->GetType()->EventHandlersMap;
-		pParticipants->insert(EventActorType::Enchanter, pAttachEffect->GetInvoker());
+		pParticipants->operator[](EventActorType::Enchanter) = pAttachEffect->GetInvoker();
 		EventHandlerTypeClass::InvokeEventStatic(pEventTypeClass, pParticipants, &map);
 	}
 
 	auto const& map = this->TypeExtData->EventHandlersMap;
-	pParticipants->insert(EventActorType::Enchanter, pEnchanterOriginal);
+	pParticipants->operator[](EventActorType::Enchanter) = pEnchanterOriginal;
 	EventHandlerTypeClass::InvokeEventStatic(pEventTypeClass, pParticipants, &map);
 }
 

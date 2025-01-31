@@ -126,12 +126,12 @@ DEFINE_HOOK(0x51A002, InfantryClass_UpdatePosition_BeforeInfiltrate, 6)
 
 	static PhobosMap<EventActorType, AbstractClass*> participants;
 	participants.clear();
-	participants.insert(EventActorType::Me, pSpy);
-	participants.insert(EventActorType::They, pBuilding);
+	participants[EventActorType::Me] = pSpy;
+	participants[EventActorType::They] = pBuilding;
 	pSpyExt->InvokeEvent(EventTypeClass::WhenInfiltrate, &participants);
 
-	participants.insert(EventActorType::Me, pBuilding);
-	participants.insert(EventActorType::They, pSpy);
+	participants[EventActorType::Me] = pBuilding;
+	participants[EventActorType::They] = pSpy;
 	pBuildingExt->InvokeEvent(EventTypeClass::WhenInfiltrated, &participants);
 
 	return 0;

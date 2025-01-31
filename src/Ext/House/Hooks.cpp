@@ -275,7 +275,7 @@ DEFINE_HOOK(0x7015C9, TechnoClass_Captured_UpdateTracking, 0x6)
 		// It is only updated with "TechnoExt::ExtData::OnEarlyUpdate()".
 		static PhobosMap<EventActorType, AbstractClass*> participants;
 		participants.clear();
-		participants.insert(EventActorType::Me, pMe);
+		participants[EventActorType::Me] = pMe;
 		pExt->InvokeEvent(EventTypeClass::WhenCaptured, &participants);
 	}
 

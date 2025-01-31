@@ -147,13 +147,13 @@ DEFINE_HOOK(0x702672, TechnoClass_ReceiveDamage_RevengeWeapon, 0x5)
 		}
 
 		auto const pSourceExt = TechnoExt::ExtMap.Find(pSource);
-		participants.insert(EventActorType::Me, pSource);
-		participants.insert(EventActorType::They, pThis);
+		participants[EventActorType::Me] = pSource;
+		participants[EventActorType::They] = pThis;
 		pSourceExt->InvokeEvent(EventTypeClass::WhenKill, &participants);
 	}
 
-	participants.insert(EventActorType::Me, pThis);
-	participants.insert(EventActorType::They, pSource);
+	participants[EventActorType::Me] = pThis;
+	participants[EventActorType::They] = pSource;
 	pExt->InvokeEvent(EventTypeClass::WhenKilled, &participants);
 
 	return 0;

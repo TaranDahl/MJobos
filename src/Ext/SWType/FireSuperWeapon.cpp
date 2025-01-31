@@ -302,12 +302,12 @@ void SWTypeExt::ExtData::ApplyEventHandlers(SuperClass* pSW) const
 {
 	static PhobosMap<EventActorType, AbstractClass*> participants;
 	participants.clear();
-	participants.insert(EventActorType::Me, pSW->Owner);
+	participants[EventActorType::Me] = pSW->Owner;
 	EventHandlerTypeClass::InvokeEventStatic(EventTypeClass::WhenLaunch, &participants, &this->EventHandlersMap);
 
 	for (const auto pTargetFoot : *FootClass::Array)
 	{
-		participants.insert(EventActorType::They, pTargetFoot);
+		participants[EventActorType::They] = pTargetFoot;
 
 		EventHandlerTypeClass::InvokeEventStatic(EventTypeClass::WhenImpact, &participants, &this->EventHandlersMap);
 	}
@@ -319,8 +319,8 @@ void SWTypeExt::ExtData::ApplyEventInvokers(SuperClass* pSW, const CellStruct& c
 	{
 		static PhobosMap<EventActorType, AbstractClass*> participants;
 		participants.clear();
-		participants.insert(EventActorType::Me, pTargetFoot);
-		participants.insert(EventActorType::They, pSW->Owner);
+		participants[EventActorType::Me] = pTargetFoot;
+		participants[EventActorType::They] = pSW->Owner;
 		for (auto pEventInvokerType : EventInvokers)
 		{
 			pEventInvokerType->TryExecute(pSW->Owner, &participants);

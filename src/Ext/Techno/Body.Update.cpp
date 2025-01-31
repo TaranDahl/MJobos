@@ -833,7 +833,7 @@ void TechnoExt::ExtData::UpdateTechnoCurrentLayer()
 			this->CurrentLayer = NewLayer;
 			static PhobosMap<EventActorType, AbstractClass*> participants;
 			participants.clear();
-			participants.insert(EventActorType::Me, pThis);
+			participants[EventActorType::Me] = pThis;
 			this->InvokeEvent(EventTypeClass::QuitLayerEventType(OldLayer), &participants);
 			this->InvokeEvent(EventTypeClass::EnterLayerEventType(NewLayer), &participants);
 		}

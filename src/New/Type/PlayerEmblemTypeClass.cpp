@@ -23,7 +23,7 @@ void PlayerEmblemTypeClass::InvokeEventHandlers(EventTypeClass* pEventType, Hous
 {
 	static PhobosMap<EventActorType, AbstractClass*> participants;
 	participants.clear();
-	participants.insert(EventActorType::Me, pHouse);
+	participants[EventActorType::Me] = pHouse;
 	EventHandlerTypeClass::InvokeEventStatic(pEventType, &participants, &this->EventHandlersMap);
 }
 
