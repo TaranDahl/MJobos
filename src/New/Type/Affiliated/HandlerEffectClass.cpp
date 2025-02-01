@@ -1,12 +1,13 @@
 #include "HandlerEffectClass.h"
 #include <Ext/Techno/Body.h>
+#include <SpawnManagerClass.h>
 #include <Ext/WeaponType/Body.h>
 #include <Ext/Bullet/Body.h>
 #include <Misc/FlyingStrings.h>
 #include <Utilities/Helpers.Alex.h>
 #include <AircraftClass.h>
-
 #include <Ext/House/Body.h>
+
 HandlerEffectClass::HandlerEffectClass()
 	: HasAnyTechnoEffect { false }
 
@@ -32,6 +33,8 @@ HandlerEffectClass::HandlerEffectClass()
 	, Passengers_Create_Nums {}
 	, Passengers_Create_Owner {}
 	, Passengers_Create_OwnerExt {}
+	, InsertInto_Actor {}
+	, InsertInto_ActorExt {}
 	, Veterancy_Set {}
 	, Veterancy_Add {}
 	, Voice {}
@@ -159,6 +162,15 @@ void HandlerEffectClass::LoadFromINI(INI_EX& exINI, const char* pSection, const 
 		Passengers_Create_Owner.Read(exINI, pSection, tempBuffer);
 		_snprintf_s(tempBuffer, sizeof(tempBuffer), "%s.%s.Passengers.Create.OwnerExt", actorName, effectName);
 		Passengers_Create_OwnerExt.Read(exINI, pSection, tempBuffer);
+	}
+
+	// Abduction
+	_snprintf_s(tempBuffer, sizeof(tempBuffer), "%s.%s.InsertInto.Actor", actorName, effectName);
+	InsertInto_Actor.Read(exINI, pSection, tempBuffer);
+	if (InsertInto_Actor.isset())
+	{
+		_snprintf_s(tempBuffer, sizeof(tempBuffer), "%s.%s.InsertInto.ActorExt", actorName, effectName);
+		InsertInto_ActorExt.Read(exINI, pSection, tempBuffer);
 	}
 
 	// Veterancy
@@ -459,6 +471,81 @@ void HandlerEffectClass::ExecuteForTechno(AbstractClass* pOwner, HouseClass* pOw
 		else
 		{
 			this->CreatePassengers(pTarget, pTarget->Owner);
+		}
+	}
+
+	// Abduction
+	if (InsertInto_Actor.isset() && pTarget->WhatAmI() != AbstractType::Building && !pTarget->Spawned && !pTarget->SlaveOwner)
+	{
+		auto pInsertIntoActor = HandlerCompClass::GetTrueTarget(pParticipants->get_or_default(InsertInto_Actor.Get(), nullptr), InsertInto_ActorExt);
+		if (auto pTransport = abstract_cast<UnitClass*>(pInsertIntoActor))
+		{
+			auto pTransportType = pTransport->Type;
+			if (pTransportType->Passengers > 0)
+			{
+				auto sizeLimit = static_cast<int>(pTransportType->SizeLimit);
+				auto thisSize = static_cast<int>(pTarget->GetTechnoType()->Size);
+				if (sizeLimit >= thisSize)
+				{
+					auto pTranspottTypeExt = TechnoTypeExt::ExtMap.Find(pTransportType);
+					auto bySize = pTranspottTypeExt->Passengers_BySize;
+					auto totalSize = bySize ? pTransport->Passengers.GetTotalSize() : pTransport->Passengers.NumPassengers;
+					auto additionalSize = bySize ? thisSize : 1;
+					if (totalSize + additionalSize <= pTransportType->Passengers)
+					{
+						auto pFoot = abstract_cast<FootClass*>(pTarget);
+
+						if (!pFoot->IsAttackedByLocomotor && !pFoot->IsLetGoByLocomotor)
+						{
+							pFoot->StopMoving();
+							pFoot->SetDestination(nullptr, true);
+							pFoot->SetTarget(nullptr);
+							pFoot->CurrentTargets.Clear();
+							pFoot->SetArchiveTarget(nullptr);
+							pFoot->QueueMission(Mission::Sleep, true);
+							pFoot->MissionAccumulateTime = 0; // don't ask
+							pFoot->unknown_5A0 = 0;
+							pFoot->CurrentGattlingStage = 0;
+							pFoot->SetCurrentWeaponStage(0);
+
+							// if this unit is currently in a state of temporal flux, get it back to our time-frame
+							if (pFoot->TemporalTargetingMe)
+							{
+								pFoot->TemporalTargetingMe->Detach();
+							}
+
+							pFoot->Locomotor->Force_Track(-1, CoordStruct::Empty);
+							CoordStruct coordsUnitSource = pFoot->GetCoords();
+							pFoot->Locomotor->Mark_All_Occupation_Bits(MarkType::Up);
+							pFoot->MarkAllOccupationBits(coordsUnitSource);
+							pFoot->ClearPlanningTokens(nullptr);
+							pFoot->Flashing.DurationRemaining = 0;
+
+							pFoot->Limbo();
+							pFoot->OnBridge = false;
+
+							// because we are throwing away the locomotor in a split second, piggybacking
+							// has to be stopped. otherwise the object might remain in a weird state.
+							while (LocomotionClass::End_Piggyback(pFoot->Locomotor)) { };
+
+							// throw away the current locomotor and instantiate
+							// a new one of the default type for this unit.
+							if (auto NewLoco = LocomotionClass::CreateInstance(pTarget->GetTechnoType()->Locomotor))
+							{
+								pFoot->Locomotor = std::move(NewLoco);
+								pFoot->Locomotor->Link_To_Object(pFoot);
+							}
+
+							pFoot->Transporter = pTransport;
+							if (pTransportType->OpenTopped && pFoot->Owner->IsAlliedWith(pTransport))
+							{
+								pTransport->EnteredOpenTopped(pFoot);
+							}
+							pTransport->AddPassenger(pFoot);
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -897,6 +984,7 @@ bool HandlerEffectClass::IsDefinedAnyTechnoEffect() const
 		|| Passengers_Eject.Get()
 		|| Passengers_Kill.Get()
 		|| !Passengers_Create_Types.empty()
+		|| InsertInto_Actor.isset()
 		|| Veterancy_Set.isset()
 		|| Veterancy_Add.isset()
 		|| Voice.isset()
@@ -955,6 +1043,8 @@ bool HandlerEffectClass::Serialize(T& stm)
 		.Process(this->Passengers_Create_Nums)
 		.Process(this->Passengers_Create_Owner)
 		.Process(this->Passengers_Create_OwnerExt)
+		.Process(this->InsertInto_Actor)
+		.Process(this->InsertInto_ActorExt)
 		.Process(this->Veterancy_Set)
 		.Process(this->Veterancy_Add)
 		.Process(this->Voice)

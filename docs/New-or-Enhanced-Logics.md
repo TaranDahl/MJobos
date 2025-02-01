@@ -742,6 +742,16 @@ TriggerN.EventHandler=...                          ; EventHandlerType
             </li>
           </ul>
         </li>
+		</li>
+          Abduction:
+          <ul>
+		    <li>Units can be forcibly inserted (similar to have been abducted) into a vehicle's passenger slots.</li>
+			<li><code>*.InsertInto.Actor|ActorExt</code> determines which actor's passenger slots will this unit be inserted into.</li>
+		    <li>If the <code>*.InsertInto.Actor|ActorExt</code> is not a valid vehicle type with enough free passenger slots to hold this unit, or the unit's size exceeds the vehicle's size limit, nothing happens when the effect is conducted.</li>
+		    <li>If this unit is spawned, is a slave, or is attacked by a locomotor weapon, nothing happens when the effect is conducted.</li>
+		    <li>If this unit is mind-controlled or mind-controlling something, the mind-control links are NOT revoked, in contrary of the abduction mechanic of Ares.</li>
+          </ul>
+		</li>
         <li>
           Veterancy:
           <ul>
@@ -925,6 +935,10 @@ Next=                                              ; EventHandlerType
 (actor).Effect.Passengers.Create.Nums=             ; list of integers
 (actor).Effect.Passengers.Create.Owner=            ; basic actor
 (actor).Effect.Passengers.Create.OwnerExt=         ; extended actor
+
+;; effects (techno) - abduction
+(actor).Effect.InsertInto.Actor=                   ; basic actor
+(actor).Effect.InsertInto.ActorExt=                ; extended actor
 
 ;; effects (techno) - veterancy
 (actor).Effect.Veterancy.Set=                      ; single Veterancy Enumeration (rookie|veteral|elite)
