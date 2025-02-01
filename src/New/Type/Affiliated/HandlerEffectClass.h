@@ -43,9 +43,6 @@ public:
 	Nullable<EventActorType> Passengers_Create_Owner;
 	Nullable<EventExtendedActorType> Passengers_Create_OwnerExt;
 
-	Nullable<EventActorType> InsertInto_Actor;
-	Nullable<EventExtendedActorType> InsertInto_ActorExt;
-
 	Nullable<VeterancyType> Veterancy_Set;
 	Nullable<double> Veterancy_Add;
 
