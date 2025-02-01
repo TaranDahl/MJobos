@@ -281,7 +281,7 @@ void HandlerEffectClass::LoadFromINI(INI_EX& exINI, const char* pSection, const 
 		Scope_TechnoTypes.Read(exINI, pSection, tempBuffer);
 
 		// all filters must be specified
-		if (Scope_Abstract.isset() && Scope_House.isset() && !Scope_TechnoTypes.empty())
+		if (Scope_Abstract.isset() && Scope_House.isset())
 		{
 			_snprintf_s(tempBuffer, sizeof(tempBuffer), "%s.%s.Scope.EventInvoker", actorName, effectName);
 			EventInvokerTypeClass::LoadTypeListFromINI(exINI, pSection, tempBuffer, &this->Scope_EventInvokers);
@@ -830,7 +830,7 @@ bool HandlerEffectClass::IsEligibleForAreaSearch(TechnoClass* pTechno, HouseClas
 	if (pTechno->IsInAir() && !Scope_AirIncluded)
 		return false;
 
-	return Scope_TechnoTypes.Contains(pTechno->GetTechnoType());
+	return Scope_TechnoTypes.empty() || Scope_TechnoTypes.Contains(pTechno->GetTechnoType());
 }
 
 // Basically copied from Ares "TechnoExt::ExtData::CreateInitialPayload()".
