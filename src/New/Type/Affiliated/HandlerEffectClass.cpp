@@ -475,7 +475,9 @@ void HandlerEffectClass::ExecuteForTechno(AbstractClass* pOwner, HouseClass* pOw
 	}
 
 	// Abduction
-	if (InsertInto_Actor.isset() && pTarget->WhatAmI() != AbstractType::Building && !pTarget->Spawned && !pTarget->SlaveOwner)
+	if (InsertInto_Actor.isset() && pTarget->WhatAmI() != AbstractType::Building && !pTarget->Spawned && !pTarget->SlaveOwner
+		&& !pTarget->BunkerLinkedItem
+		&& !HandlerCompClass::GetTransportingTechno(pTarget))
 	{
 		auto pInsertIntoActor = HandlerCompClass::GetTrueTarget(pParticipants->get_or_default(InsertInto_Actor.Get(), nullptr), InsertInto_ActorExt);
 		if (auto pTransport = abstract_cast<UnitClass*>(pInsertIntoActor))
