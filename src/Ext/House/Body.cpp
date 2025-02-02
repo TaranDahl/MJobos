@@ -10,6 +10,11 @@
 
 HouseExt::ExtContainer HouseExt::ExtMap;
 
+void HouseExt::ExtData::Initialize()
+{
+	this->InvokeInitialEventHandlers();
+}
+
 std::vector<int> HouseExt::AIProduction_CreationFrames;
 std::vector<int> HouseExt::AIProduction_Values;
 std::vector<int> HouseExt::AIProduction_BestChoices;
@@ -602,6 +607,24 @@ void HouseExt::ExtData::InvokeEvent(EventTypeClass* pEventTypeClass, PhobosMap<E
 	}
 }
 
+void HouseExt::ExtData::InvokeInitialEventHandlers()
+{
+	if (!InitialEventHandlersInvoked)
+	{
+		if (!RulesExt::Global()->InitialEventHandlers.empty())
+		{
+			static PhobosMap<EventActorType, AbstractClass*> participants;
+			participants.clear();
+			participants[EventActorType::Me] = this->OwnerObject();
+			for (auto pEHType : RulesExt::Global()->InitialEventHandlers)
+			{
+				pEHType->HandleEvent(&participants);
+			}
+		}
+		InitialEventHandlersInvoked = true;
+	}
+}
+
 void HouseExt::ExtData::UpdatePlayerEmblemBuildOptions()
 {
 	PlayerEmblems_BuildOptions_Allowed.clear();
@@ -692,6 +715,7 @@ void HouseExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerEmblems_BuildOptions_Disallowed)
 		.Process(this->PlayerEmblems_HasAutoAE)
 		.Process(this->PlayerEmblems_AutoAETarget)
+		.Process(this->InitialEventHandlersInvoked)
 		;
 }
 

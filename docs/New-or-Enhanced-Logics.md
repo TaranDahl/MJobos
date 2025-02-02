@@ -842,9 +842,16 @@ TriggerN.EventHandler=...                          ; EventHandlerType
       - Effects for the basic actors are executed before those for the extended actors.
       - Effects for the extended actors are executed in the order they are listed in the document.
       - Effects on a same actor are resolved in the order the effect types are listed in the document.
+- Initial Event Handler:
+  - Event Handlers can be called at the begining of the game.
+  - Initial Event Handlers are defined under `[General]` as `InitialEventHandlerN`, where N is an integer starts from 0. `InitialEventHandler` is a valid alternative if only one is specified.
+  - Initial Event Handlers are called once for each house, without checking event types. The `Me` basic actor is the house. The other basic actors are missing.
 
 In `rulesmd.ini`:
 ```ini
+[General]
+InitialEventHandlerN=                              ; EventHandlerType
+
 [SOMETECHNO]                                       ; TechnoType
 EventHandlerN=...                                  ; EventHandlerType
 
@@ -973,7 +980,7 @@ Next=                                              ; EventHandlerType
 #### Event Invokers
 
 - Event Invokers can be given to warheads, super weapons, and the effect part of event handlers, to invoke any event type and trigger the event handlers on their targets. Event Invokers are listed under `[EventInvokerTypes]`, however listing them there is not mandatory.
-- Each warhead, super weapon, or the effect part of event handlers, may have multiple invokers listed. The invokers are associated with them like `EventInvokerN`, where N is an integer starting from 0. `EventInvoker` is a valid alternative is only one is specified.
+- Each warhead, super weapon, or the effect part of event handlers, may have multiple invokers listed. The invokers are associated with them like `EventInvokerN`, where N is an integer starting from 0. `EventInvoker` is a valid alternative if only one is specified.
 - Actors:
   - Similar to Event Handlers, the Invokers also have actors. There are two basic actors that every Invoker will have.
     - `Invoker`: The firer of the warhead, the firing house of the super weapon, or the actor this invoker is invoked upon through a handler's effect.
@@ -987,11 +994,11 @@ Next=                                              ; EventHandlerType
   - See [Event Handlers -> Filters](#event-handlers) to learn more about Filters.
 - Event Types:
   - Event types can be specified, these will be invoked upon the targets, and the event handlers attached to them will handle it.
-  - Event types on invokers are defined like `EventTypeN`, where N is an integer starting from 0. `EventType` is a valid alternative is only one is specified.
+  - Event types on invokers are defined like `EventTypeN`, where N is an integer starting from 0. `EventType` is a valid alternative if only one is specified.
   - The Event Types can be any of the pre-defined event types, or any custom string, to allow a custom event call.
 - Extra Event Handlers:
   - Extra event handlers can be specified, these will be forcibly invoked as if they were attached to each affected target of this event invoker, before any event handlers attached to the targets themselves to be invoked. Extra event handlers are invoked once for each target, without checking event types.
-  - Extra event handlers are defined like `ExtraEventHandlerN`, where N is an integer starting from 0. `ExtraEventHandler` is a valid alternative is only one is specified.
+  - Extra event handlers are defined like `ExtraEventHandlerN`, where N is an integer starting from 0. `ExtraEventHandler` is a valid alternative if only one is specified.
   - To the extra event handlers, the `Me` actor there will be the `Target` actor here, and the `They` actor there will be the `Invoker` actor here.
 - Target pass down:
   - The event invoking can be passed down to other related technos. The same event types and extra event handlers will be invoked on them as well. Target pass down can happen even if the parent doesn't pass the filters itself.

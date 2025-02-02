@@ -68,6 +68,8 @@ public:
 		std::set<PlayerEmblemTypeClass*> PlayerEmblems_HasAutoAE;
 		std::set<TechnoTypeClass*> PlayerEmblems_AutoAETarget;
 
+		bool InitialEventHandlersInvoked;
+
 		ExtData(HouseClass* OwnerObject) : Extension<HouseClass>(OwnerObject)
 			, PowerPlantEnhancers {}
 			, OwnedLimboDeliveredBuildings {}
@@ -98,6 +100,7 @@ public:
 			, PlayerEmblems_BuildOptions_Disallowed {}
 			, PlayerEmblems_HasAutoAE {}
 			, PlayerEmblems_AutoAETarget {}
+			, InitialEventHandlersInvoked { false }
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);
@@ -111,13 +114,14 @@ public:
 		virtual ~ExtData() = default;
 
 		virtual void LoadFromINIFile(CCINIClass* pINI) override;
-		//virtual void Initialize() override;
+		virtual void Initialize() override;
 		virtual void InvalidatePointer(void* ptr, bool bRemoved) override;
 
 		void UpdateVehicleProduction();
 
 		bool CanHandleEvent(EventTypeClass* pEventTypeClass) const;
 		void InvokeEvent(EventTypeClass* pEventTypeClass, PhobosMap<EventActorType, AbstractClass*>* pParticipants) const;
+		void InvokeInitialEventHandlers();
 
 		void UpdatePlayerEmblemBuildOptions();
 		void UpdateAutoAttachEffects();
