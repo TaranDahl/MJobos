@@ -2,6 +2,7 @@
 
 #include <SessionClass.h>
 #include <VeinholeMonsterClass.h>
+#include <Ext/House/Body.h>
 
 std::unique_ptr<ScenarioExt::ExtData> ScenarioExt::Data = nullptr;
 
@@ -190,6 +191,17 @@ DEFINE_HOOK(0x683549, ScenarioClass_CTOR, 0x9)
 	ScenarioExt::Global()->Waypoints.clear();
 	ScenarioExt::Global()->Variables[0].clear();
 	ScenarioExt::Global()->Variables[1].clear();
+
+	return 0;
+}
+
+DEFINE_HOOK(0x687CCD, ScenarioClass_Start, 0x6)
+{
+	for (const auto& pHouse : *HouseClass::Array)
+	{
+		auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
+		pHouseExt->InvokeInitialEventHandlers();
+	}
 
 	return 0;
 }

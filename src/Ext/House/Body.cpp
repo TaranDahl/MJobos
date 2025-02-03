@@ -10,11 +10,6 @@
 
 HouseExt::ExtContainer HouseExt::ExtMap;
 
-void HouseExt::ExtData::Initialize()
-{
-	this->InvokeInitialEventHandlers();
-}
-
 std::vector<int> HouseExt::AIProduction_CreationFrames;
 std::vector<int> HouseExt::AIProduction_Values;
 std::vector<int> HouseExt::AIProduction_BestChoices;

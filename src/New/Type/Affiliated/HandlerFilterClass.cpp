@@ -411,10 +411,13 @@ bool HandlerFilterClass::CheckForHouse(HouseClass* pHouse, HouseClass* pTargetHo
 		bool sideFlag = false;
 		for (auto pSide : Sides)
 		{
-			if (pTargetHouse->Type->SideIndex == pSide->GetArrayIndex())
+			for (auto houseIndex : pSide->HouseTypes)
 			{
-				sideFlag = true;
-				break;
+				if (pTargetHouse->Type->ArrayIndex == houseIndex)
+				{
+					sideFlag = true;
+					break;
+				}
 			}
 		}
 		if (negative == sideFlag)

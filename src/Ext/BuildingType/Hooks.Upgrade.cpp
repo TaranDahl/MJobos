@@ -108,30 +108,42 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
 	GET_STACK(bool const, includeInProduction, 0xC);
 	GET(CanBuildResult const, resultOfAres, EAX);
 
+	bool buildableFlag = resultOfAres == CanBuildResult::Buildable;
+
 	auto const pThisExt = HouseExt::ExtMap.Find(pThis);
 	auto pItemNoConst = const_cast<TechnoTypeClass*>(pItem);
 	if (pThisExt->PlayerEmblems_BuildOptions_Disallowed.contains(pItemNoConst))
 	{
 		R->EAX(CanBuildResult::Unbuildable);
+		buildableFlag = false;
 	}
 	else if (pThisExt->PlayerEmblems_BuildOptions_Allowed.contains(pItemNoConst))
 	{
 		if (HouseExt::HasFactoryCheck(pThis, pItem, true))
 		{
-			R->EAX(HouseExt::BuildLimitCheck(pThis, pItem, includeInProduction));
+			auto const buildLimitCheckResult = HouseExt::BuildLimitCheck(pThis, pItem, includeInProduction);
+			buildableFlag = buildLimitCheckResult > 0;
+			R->EAX(buildLimitCheckResult);
 		}
 	}
 
-	if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
+	if (buildableFlag)
 	{
-		if (auto pBuildingExt = BuildingTypeExt::ExtMap.Find(pBuilding))
+		if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
 		{
-			if (pBuildingExt->PowersUp_Buildings.size() > 0 && resultOfAres == CanBuildResult::Buildable)
-				R->EAX(CheckBuildLimitForUpgrade(pThis, pBuilding, includeInProduction));
+			if (auto pBuildingExt = BuildingTypeExt::ExtMap.Find(pBuilding))
+			{
+				if (pBuildingExt->PowersUp_Buildings.size() > 0)
+				{
+					auto const buildLimitCheckResult = CheckBuildLimitForUpgrade(pThis, pBuilding, includeInProduction);
+					buildableFlag = buildLimitCheckResult > 0;
+					R->EAX(buildLimitCheckResult);
+				}
+			}
 		}
 	}
 
-	if (resultOfAres == CanBuildResult::Buildable)
+	if (buildableFlag)
 	{
 		R->EAX(HouseExt::BuildLimitGroupCheck(pThis, pItem, buildLimitOnly, includeInProduction));
 
