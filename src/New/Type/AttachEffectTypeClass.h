@@ -21,12 +21,28 @@ enum class DiscardCondition : unsigned char
 
 MAKE_ENUM_FLAGS(DiscardCondition);
 
+// AE expire weapon condition
+enum class ExpireWeaponCondition : unsigned char
+{
+	None = 0x0,
+	Expire = 0x1,
+	Remove = 0x2,
+	Death = 0x4,
+	Discard = 0x8,
+
+	All = 0xFF,
+};
+
+MAKE_ENUM_FLAGS(ExpireWeaponCondition);
+
 class AttachEffectTypeClass final : public Enumerable<AttachEffectTypeClass>
 {
 	static std::unordered_map<std::string, std::set<AttachEffectTypeClass*>> GroupsMap;
 
 public:
 	Valueable<int> Duration;
+	Valueable<bool> Duration_ApplyFirepowerMult;
+	Valueable<bool> Duration_ApplyArmorMultOnTarget;
 	Valueable<bool> Cumulative;
 	Valueable<int> Cumulative_MaxCount;
 	Valueable<bool> Powered;
@@ -50,6 +66,8 @@ public:
 	Valueable<AffectedHouse> Tint_VisibleToHouses;
 	Valueable<double> FirepowerMultiplier;
 	Valueable<double> ArmorMultiplier;
+	ValueableVector<WarheadTypeClass*> ArmorMultiplier_AllowWarheads;
+	ValueableVector<WarheadTypeClass*> ArmorMultiplier_DisallowWarheads;
 	Valueable<double> SpeedMultiplier;
 	Valueable<double> ROFMultiplier;
 	Valueable<bool> ROFMultiplier_ApplyOnCurrentTimer;
@@ -70,12 +88,17 @@ public:
 	Valueable<bool> ReflectDamage_Warhead_Detonate;
 	Valueable<double> ReflectDamage_Multiplier;
 	Valueable<AffectedHouse> ReflectDamage_AffectsHouses;
+	Valueable<double> ReflectDamage_Chance;
+	Nullable<int> ReflectDamage_Override;
 	Valueable<bool> DisableWeapons;
+	Valueable<bool> Unkillable;
 
 	std::vector<std::string> Groups;
 
 	AttachEffectTypeClass(const char* const pTitle) : Enumerable<AttachEffectTypeClass>(pTitle)
 		, Duration { 0 }
+		, Duration_ApplyFirepowerMult { false }
+		, Duration_ApplyArmorMultOnTarget { false }
 		, Cumulative { false }
 		, Cumulative_MaxCount { -1 }
 		, Powered { false }
@@ -99,6 +122,8 @@ public:
 		, Tint_VisibleToHouses { AffectedHouse::All }
 		, FirepowerMultiplier { 1.0 }
 		, ArmorMultiplier { 1.0 }
+		, ArmorMultiplier_AllowWarheads {}
+		, ArmorMultiplier_DisallowWarheads {}
 		, SpeedMultiplier { 1.0 }
 		, ROFMultiplier { 1.0 }
 		, ROFMultiplier_ApplyOnCurrentTimer { true }
@@ -119,7 +144,10 @@ public:
 		, ReflectDamage_Warhead_Detonate { false }
 		, ReflectDamage_Multiplier { 1.0 }
 		, ReflectDamage_AffectsHouses { AffectedHouse::All }
+		, ReflectDamage_Chance { 1.0 }
+		, ReflectDamage_Override {}
 		, DisableWeapons { false }
+		, Unkillable { false }
 		, Groups {}
 	{};
 
@@ -147,4 +175,71 @@ private:
 	template <typename T>
 	void Serialize(T& Stm);
 	void AddToGroupsMap();
+};
+
+// Container for AttachEffect attachment for an individual effect passed to AE attach function.
+struct AEAttachParams
+{
+	int DurationOverride;
+	int Delay;
+	int InitialDelay;
+	int RecreationDelay;
+	bool CumulativeRefreshAll;
+	bool CumulativeRefreshAll_OnAttach;
+	bool CumulativeRefreshSameSourceOnly;
+
+	AEAttachParams() :
+		DurationOverride { 0 }
+		, Delay { 0 }
+		, InitialDelay { 0 }
+		, RecreationDelay { -1 }
+		, CumulativeRefreshAll { false }
+		, CumulativeRefreshAll_OnAttach { false }
+		, CumulativeRefreshSameSourceOnly { true }
+	{
+	}
+};
+
+// Container for AttachEffect attachment info parsed from INI.
+class AEAttachInfoTypeClass
+{
+public:
+	ValueableVector<AttachEffectTypeClass*> AttachTypes;
+	Valueable<bool> CumulativeRefreshAll;
+	Valueable<bool> CumulativeRefreshAll_OnAttach;
+	Valueable<bool> CumulativeRefreshSameSourceOnly;
+	ValueableVector<AttachEffectTypeClass*> RemoveTypes;
+	std::vector<std::string> RemoveGroups;
+	ValueableVector<int> CumulativeRemoveMinCounts;
+	ValueableVector<int> CumulativeRemoveMaxCounts;
+	ValueableVector<int> DurationOverrides;
+	ValueableVector<int> Delays;
+	ValueableVector<int> InitialDelays;
+	ValueableVector<int> RecreationDelays;
+
+	void LoadFromINI(CCINIClass* pINI, const char* pSection);
+	bool Load(PhobosStreamReader& stm, bool registerForChange);
+	bool Save(PhobosStreamWriter& stm) const;
+
+	AEAttachParams GetAttachParams(unsigned int index, bool selfOwned) const;
+
+	AEAttachInfoTypeClass() :
+		AttachTypes {}
+		, CumulativeRefreshAll { false }
+		, CumulativeRefreshAll_OnAttach { false }
+		, CumulativeRefreshSameSourceOnly { true }
+		, RemoveTypes {}
+		, RemoveGroups {}
+		, CumulativeRemoveMinCounts {}
+		, CumulativeRemoveMaxCounts {}
+		, DurationOverrides {}
+		, Delays {}
+		, InitialDelays {}
+		, RecreationDelays {}
+	{
+	}
+
+private:
+	template <typename T>
+	bool Serialize(T& stm);
 };
