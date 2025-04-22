@@ -364,6 +364,7 @@ New:
 - [RadarInvisible for non-enemy house](Fixed-or-Improved-Logics.md#radarinvisible-for-non-enemy-house) (By TaranDahl)
 - New `Pips.HideIfNoStrength` and `SelfHealing.EnabledBy` additions for shields (by FS-21)
 - [Customize harvester dump amount](New-or-Enhanced-Logics.md#customize-harvester-dump-amount) (by NetsuNegi)
+- Make techno follow the target itself (by TaranDahl)
 
 Vanilla fixes:
 - Prevent the units with locomotors that cause problems from entering the tank bunker (by TaranDahl)
