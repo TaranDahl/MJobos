@@ -1110,7 +1110,10 @@ void __fastcall HouseExt::DecideTechnosFate(HouseClass* pThis)
 		DynamicVectorClass<HouseClass*> allies;
 		for (auto pHouse : HouseClass::Array) // Find a house to give. Human player first.
 		{
-			if (pHouse->Type->MultiplayPassive)
+			if (pHouse->Type->MultiplayPassive
+				|| pHouse->Defeated
+				|| pHouse->IsObserver()
+				|| pHouse == pThis)
 				continue;
 
 			if (!pThis->IsAlliedWith(pHouse))
@@ -1144,7 +1147,10 @@ void __fastcall HouseExt::DecideTechnosFate(HouseClass* pThis)
 		DynamicVectorClass<HouseClass*> enemies;
 		for (auto pHouse : HouseClass::Array) // Find a house to give. Human player first.
 		{
-			if (pHouse->Type->MultiplayPassive)
+			if (pHouse->Type->MultiplayPassive
+				|| pHouse->Defeated
+				|| pHouse->IsObserver()
+				|| pHouse == pThis)
 				continue;
 
 			if (pThis->IsAlliedWith(pHouse))
