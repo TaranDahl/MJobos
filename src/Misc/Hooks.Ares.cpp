@@ -6,6 +6,7 @@
 #include <Utilities/Helpers.Alex.h>
 
 #include <Ext/Sidebar/Body.h>
+#include <Ext/House/Body.h>
 
 // Remember that we still don't fix Ares "issues" a priori. Extensions as well.
 // Patches presented here are exceptions rather that the rule. They must be short, concise and correct.
@@ -46,6 +47,9 @@ void Apply_Ares3_0_Patches()
 
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x436DA, &LetGo);
+
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x24AC9, &HouseExt::DecideTechnosFate);
 }
 
 void Apply_Ares3_0p1_Patches()
@@ -71,4 +75,7 @@ void Apply_Ares3_0p1_Patches()
 
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x441BA, &LetGo);
+
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x255E9, &HouseExt::DecideTechnosFate);
 }

@@ -456,3 +456,11 @@ DEFINE_HOOK(0x4FD8F7, HouseClass_UpdateAI_OnLastLegs, 0x10)
 
 	return ret;
 }
+
+DEFINE_HOOK_AGAIN(0x4F87FA, HouseClass_Update_DestroyAll, 0x5);
+DEFINE_HOOK(0x4F8F7B, HouseClass_Update_DestroyAll, 0x5)
+{
+	GET(HouseClass*, pThis, ECX);
+	HouseExt::DecideTechnosFate(pThis);
+	return R->Origin() + 0x5;
+}
