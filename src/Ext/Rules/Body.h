@@ -221,7 +221,7 @@ public:
 
 		Valueable<bool> HarvesterScanAfterUnload;
 
-		Valueable<int> DefeatedBehavior;
+		Valueable<AffectedHouse> ReorganizeToWhenDefeated;
 
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -390,7 +390,7 @@ public:
 
 			, HarvesterScanAfterUnload { false }
 
-			, DefeatedBehavior { 0 }
+			, ReorganizeToWhenDefeated { AffectedHouse::None }
 		{ }
 
 		virtual ~ExtData() = default;
