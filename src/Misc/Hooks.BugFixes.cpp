@@ -20,6 +20,7 @@
 #include <WarheadTypeClass.h>
 #include <HashTable.h>
 #include <TunnelLocomotionClass.h>
+#include <TacticalClass.h>
 
 #include <Ext/Rules/Body.h>
 #include <Ext/BuildingType/Body.h>
@@ -109,7 +110,7 @@ DEFINE_HOOK(0x737D57, UnitClass_ReceiveDamage_DyingFix, 0x7)
 	GET(DamageState, result, EAX);
 
 	// Immediately release locomotor warhead's hold on a crashable unit if it dies while attacked by one.
-	if (result == DamageState::NowDead && pThis->IsAttackedByLocomotor && pThis->GetTechnoType()->Crashable)
+	if (result == DamageState::NowDead && pThis->IsAttackedByLocomotor && pThis->Type->Crashable)
 		pThis->IsAttackedByLocomotor = false;
 
 	if (result != DamageState::PostMortem && pThis->DeathFrameCounter > 0)
@@ -124,45 +125,53 @@ DEFINE_HOOK(0x702299, TechnoClass_ReceiveDamage_DebrisMaximumsFix, 0xA)
 {
 	GET(TechnoClass* const, pThis, ESI);
 
-	auto pType = pThis->GetTechnoType();
+	const auto pType = pThis->GetTechnoType();
 
-	// If DebrisMaximums has one value, then legacy behavior is used
+// Jun12,2025 - CrimRecya : I think there is no need to return to the unreasonable vanilla logic
+// Otherwise, they should be in a parallel relationship rather than a sequential relationship
+/*	// If DebrisMaximums has one value, then legacy behavior is used
 	if (pType->DebrisMaximums.Count == 1 &&
 		pType->DebrisMaximums.GetItem(0) > 0 &&
 		pType->DebrisTypes.Count > 0)
 	{
 		return 0;
-	}
+	}*/
 
-	auto totalSpawnAmount = ScenarioClass::Instance->Random.RandomRanged(
-		pType->MinDebris, pType->MaxDebris);
+	// Removed -1 from the MaxDebris
+	int totalSpawnAmount = ScenarioClass::Instance->Random.RandomRanged(pType->MinDebris, pType->MaxDebris);
 
-	if (pType->DebrisTypes.Count > 0 && pType->DebrisMaximums.Count > 0)
+	const auto& debrisTypes = pType->DebrisTypes;
+	const auto& debrisMaximums = pType->DebrisMaximums;
+
+	// Make DebrisTypes generate completely in accordance with DebrisMaximums,
+	// without continuously looping until it exceeds totalSpawnAmount
+	if (debrisTypes.Count > 0 && debrisMaximums.Count > 0)
 	{
-		auto cord = pThis->GetCoords();
-		for (int currentIndex = 0; currentIndex < pType->DebrisTypes.Count; ++currentIndex)
+		auto coord = pThis->GetCoords();
+
+		for (int currentIndex = 0; currentIndex < debrisMaximums.Count; ++currentIndex)
 		{
-			if (pType->DebrisMaximums.GetItem(currentIndex) > 0)
+			const int currentMaxDebris = debrisMaximums.GetItem(currentIndex);
+
+			if (currentMaxDebris > 0)
 			{
-				int adjustedMaximum = Math::min(pType->DebrisMaximums.GetItem(currentIndex), pType->MaxDebris);
-				int amountToSpawn = abs(ScenarioClass::Instance->Random.Random()) % (adjustedMaximum + 1); //0x702337
+				const int adjustedMaximum = Math::min(currentMaxDebris, pType->MaxDebris);
+				int amountToSpawn = std::abs(ScenarioClass::Instance->Random.Random()) % (adjustedMaximum + 1); // 0x702337
 				amountToSpawn = Math::min(amountToSpawn, totalSpawnAmount);
 				totalSpawnAmount -= amountToSpawn;
 
-				for (; amountToSpawn > 0; --amountToSpawn)
+				for ( ; amountToSpawn > 0; --amountToSpawn)
 				{
-					GameCreate<VoxelAnimClass>(pType->DebrisTypes.GetItem(currentIndex),
-						&cord, pThis->Owner);
+					GameCreate<VoxelAnimClass>(debrisTypes.GetItem(currentIndex), &coord, pThis->Owner);
 				}
 
-				if (totalSpawnAmount < 1)
+				if (totalSpawnAmount <= 0)
 					break;
 			}
 		}
 	}
 
 	R->EBX(totalSpawnAmount);
-
 	return 0x7023E5;
 }
 
@@ -198,6 +207,14 @@ DEFINE_HOOK(0x6FF660, TechnoClass_FireAt_BurstOffsetFix_2, 0x6)
 	++pThis->CurrentBurstIndex;
 	pThis->CurrentBurstIndex %= pThis->GetWeapon(weaponIndex)->WeaponType->Burst;
 
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (pExt->ForceFullRearmDelay)
+	{
+		pExt->ForceFullRearmDelay = false;
+		pThis->CurrentBurstIndex = 0;
+	}
+
 	return 0;
 }
 
@@ -208,7 +225,7 @@ DEFINE_HOOK(0x44377E, BuildingClass_ActiveClickWith, 0x6)
 	GET(BuildingClass*, pThis, ESI);
 	GET_STACK(CellStruct*, pCell, STACK_OFFSET(0x84, 0x8));
 
-	if (pThis->GetTechnoType()->UndeploysInto)
+	if (pThis->Type->UndeploysInto)
 		pThis->SetRallypoint(pCell, false);
 	else if (pThis->IsUnitFactory())
 		pThis->SetRallypoint(pCell, true);
@@ -338,7 +355,7 @@ DEFINE_HOOK(0x480552, CellClass_AttachesToNeighbourOverlay_Gate, 0x7)
 		{
 			if (pObject->Health > 0)
 			{
-				if (auto pBuilding = abstract_cast<BuildingClass*>(pObject))
+				if (auto pBuilding = abstract_cast<BuildingClass*, true>(pObject))
 				{
 					auto pBType = pBuilding->Type;
 					if ((RulesClass::Instance->EWGates.FindItemIndex(pBType) != -1) && (state == 2 || state == 6))
@@ -359,7 +376,7 @@ DEFINE_HOOK(0x415F5C, AircraftClass_FireAt_SpeedModifiers, 0xA)
 
 	if (const auto pLocomotor = locomotion_cast<FlyLocomotionClass*>(pThis->Locomotor))
 	{
-		double currentSpeed = pThis->GetTechnoType()->Speed * pLocomotor->CurrentSpeed *
+		double currentSpeed = pThis->Type->Speed * pLocomotor->CurrentSpeed *
 			TechnoExt::GetCurrentSpeedMultiplier(pThis);
 		R->EAX(static_cast<int>(currentSpeed));
 	}
@@ -782,7 +799,6 @@ DEFINE_HOOK(0x6D9781, Tactical_RenderLayers_DrawInfoTipAndSpiedSelection, 0x5)
 }
 #pragma endregion DrawInfoTipAndSpiedSelection
 
-
 bool __fastcall BuildingClass_SetOwningHouse_Wrapper(BuildingClass* pThis, void*, HouseClass* pHouse, bool announce)
 {
 	// Fix : Suppress capture EVA event if ConsideredVehicle=yes
@@ -790,14 +806,21 @@ bool __fastcall BuildingClass_SetOwningHouse_Wrapper(BuildingClass* pThis, void*
 
 	bool res = reinterpret_cast<bool(__thiscall*)(BuildingClass*, HouseClass*, bool)>(0x448260)(pThis, pHouse, announce);
 
-	// Fix : update powered anims next frame
 	if (res && (pThis->Type->Powered || pThis->Type->PoweredSpecial))
-		pThis->WasOnline = !pThis->WasOnline;
+	{
+		bool on = pThis->IsPowerOnline();
+		if (on != pThis->WasOnline)
+		{
+			reinterpret_cast<void(__thiscall*)(BuildingClass*)>(0x4549B0)(pThis);
+			pThis->WasOnline = on;
+		}
+	}
 	return res;
 }
 
 DEFINE_FUNCTION_JUMP(VTABLE, 0x7E4290, BuildingClass_SetOwningHouse_Wrapper);
-DEFINE_JUMP(LJMP, 0x6E0C78, 0x6E0C7F);//Simplify TAction 36
+DEFINE_JUMP(LJMP, 0x6E0BD4, 0x6E0BFE);
+DEFINE_JUMP(LJMP, 0x6E0C1D, 0x6E0C8B);//Simplify TAction 36
 
 // Fix a glitch related to incorrect target setting for missiles
 // Author: Belonit
@@ -996,6 +1019,19 @@ DEFINE_HOOK(0x44985B, BuildingClass_Mission_Guard_UnitReload, 0x6)
 	return 0;
 }
 
+// Fix a potential edge case where aircraft gets stuck in 'sleep' (reload/repair) on dock if it gets assigned target from team mission etc.
+DEFINE_HOOK(0x41915D, AircraftClass_ReceiveCommand_QueryPreparedness, 0x8)
+{
+	enum { CheckAmmo = 0x419169 };
+
+	GET(AircraftClass*, pThis, ESI);
+
+	if (pThis->Team && pThis->Team->Focus == pThis->Target && pThis->CurrentMission == Mission::Sleep)
+		return CheckAmmo;
+
+	return 0;
+}
+
 // Fix tileset parsing to not reset certain tileset indices for Lunar theater if the fix is enabled.
 DEFINE_HOOK(0x546C95, IsometricTileTypeClass_ReadINI_LunarFixes, 0x6)
 {
@@ -1138,6 +1174,8 @@ DEFINE_HOOK(0x73ED66, UnitClass_Mission_Harvest_PathfindingFix, 0x5)
 
 #pragma region StopEventFix
 
+DEFINE_JUMP(LJMP, 0x4C752A, 0x4C757D); // Skip cell under bridge check
+
 DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 {
 	enum { SkipGameCode = 0x4C762A };
@@ -1162,6 +1200,9 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 
 	// Clearing the current target should still be necessary for all technos
 	pTechno->SetTarget(nullptr);
+
+	// Stop any enter action
+	pTechno->QueueUpToEnter = nullptr;
 
 	if (commonAircraft)
 	{
@@ -1189,26 +1230,31 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 	}
 	else
 	{
-		// Check Jumpjets
-		const auto pFoot = abstract_cast<FootClass*>(pTechno);
-		const auto pJumpjetLoco = pFoot ? locomotion_cast<JumpjetLocomotionClass*>(pFoot->Locomotor) : nullptr;
+		const auto pFoot = abstract_cast<FootClass*, true>(pTechno);
 
 		// Clear archive target for infantries and vehicles like receive a mega mission
 		if (pFoot && !pAircraft)
 			pTechno->SetArchiveTarget(nullptr);
 
-		// To avoid foots stuck in Mission::Area_Guard
-		if (pTechno->CurrentMission == Mission::Area_Guard && !pTechno->GetTechnoType()->DefaultToGuardArea)
-			pTechno->QueueMission(Mission::Guard, true);
+		// Only stop when it is not under the bridge (meeting the original conditions which has been skipped)
+		if (!pTechno->vt_entry_2B0() || pTechno->OnBridge || pTechno->IsInAir() || pTechno->GetCell()->SlopeIndex)
+		{
+			// To avoid foots stuck in Mission::Area_Guard
+			if (pTechno->CurrentMission == Mission::Area_Guard && !pTechno->GetTechnoType()->DefaultToGuardArea)
+				pTechno->QueueMission(Mission::Guard, true);
 
-		// To avoid jumpjets falling into a state of standing idly by
-		if (!pJumpjetLoco) // If is not jumpjet, clear the destination is enough
-			pTechno->SetDestination(nullptr, true);
-		else if (!pFoot->Destination) // When in attack move and have had a target, the destination will be cleaned up, enter the guard mission can prevent the jumpjets stuck in a status of standing idly by
-			pTechno->QueueMission(Mission::Guard, true);
-		else if (static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2) // If the jumpjet is moving, find the forward cell then stop in it
-			pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(pJumpjetLoco->LocomotionFacing.Current().GetValue<3>())), true);
-		// Otherwise landing or idling normally without answering the stop command
+			// Check Jumpjets
+			const auto pJumpjetLoco = pFoot ? locomotion_cast<JumpjetLocomotionClass*>(pFoot->Locomotor) : nullptr;
+
+			// To avoid jumpjets falling into a state of standing idly by
+			if (!pJumpjetLoco) // If is not jumpjet, clear the destination is enough
+				pTechno->SetDestination(nullptr, true);
+			else if (!pFoot->Destination) // When in attack move and have had a target, the destination will be cleaned up, enter the guard mission can prevent the jumpjets stuck in a status of standing idly by
+				pTechno->QueueMission(Mission::Guard, true);
+			else if (static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2) // If the jumpjet is moving, find the forward cell then stop in it
+				pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(pJumpjetLoco->LocomotionFacing.Current().GetValue<3>())), true);
+			// Otherwise landing or idling normally without answering the stop command
+		}
 	}
 
 	return SkipGameCode;
@@ -1218,8 +1264,29 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 
 #pragma region UntetherFix
 
-// Radio: do not untether techno who have other tether link
-DEFINE_HOOK(0x6F4BB3, TechnoClass_ReceiveCommand_NotifyUnlink, 0x7)
+// Change enter to move when unlink
+DEFINE_HOOK(0x6F4C50, TechnoClass_ReceiveCommand_NotifyUnlink, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+	GET_STACK(TechnoClass* const, pCall, STACK_OFFSET(0x18, 0x4));
+	// If the link connection is cancelled and foot A is entering techno B, it may cause A and B to overlap
+	if (!pCall->InLimbo // Has not already entered
+		&& (pCall->AbstractFlags & AbstractFlags::Foot) // Is foot
+		&& pCall->CurrentMission == Mission::Enter // Is entering
+		&& static_cast<FootClass*>(pCall)->Destination == pThis // Is entering techno B
+		&& pCall->WhatAmI() != AbstractType::Aircraft // Not aircraft
+		&& pThis->GetTechnoType()->Passengers > 0) // Have passenger seats
+	{
+		pCall->SetDestination(pThis->GetCell(), false); // Set the destination at its feet
+		pCall->QueueMission(Mission::Move, false); // Replace entering with moving
+		pCall->NextMission(); // Immediately respond to the Mission::Move
+	}
+
+	return 0;
+}
+
+// Do not untether techno who have other tether link
+DEFINE_HOOK(0x6F4BB3, TechnoClass_ReceiveCommand_RequestUntether, 0x7)
 {
 	// Place the hook after processing to prevent functions from calling each other and getting stuck in a dead loop.
 	GET(TechnoClass* const, pThis, ESI);
@@ -1245,12 +1312,73 @@ DEFINE_HOOK(0x6F4BB3, TechnoClass_ReceiveCommand_NotifyUnlink, 0x7)
 
 #pragma endregion
 
+#pragma region JumpjetShadowPointFix
+
+Point2D *__stdcall JumpjetLoco_ILoco_Shadow_Point(ILocomotion * iloco, Point2D *pPoint)
+{
+	__assume(iloco != nullptr);
+	const auto pLoco = static_cast<JumpjetLocomotionClass*>(iloco);
+	const auto pThis = pLoco->LinkedTo;
+	const auto pCell = MapClass::Instance.GetCellAt(pThis->Location);
+	auto height = pThis->Location.Z - MapClass::Instance.GetCellFloorHeight(pThis->Location);
+	// Vanilla GetHeight check OnBridge flag, which can not work on jumpjet
+	// Here, we simulate the drawing of an airplane for altitude calculation
+	if (pCell->ContainsBridge()
+		&& ((pCell->Flags & CellFlags::BridgeDir) && pCell->GetNeighbourCell(FacingType::North)->ContainsBridge()
+			|| !(pCell->Flags & CellFlags::BridgeDir) && pCell->GetNeighbourCell(FacingType::West)->ContainsBridge()))
+	{
+		height -= CellClass::BridgeHeight;
+	}
+
+	*pPoint = Point2D { 0, TacticalClass::AdjustForZ(height) };
+	return pPoint;
+}
+DEFINE_FUNCTION_JUMP(VTABLE, 0x7ECD98, JumpjetLoco_ILoco_Shadow_Point);
+
+#pragma endregion
+
+#pragma region SpawnerFix
+
+// Enable the carrier on the bridge to retrieve the aircraft normally
+DEFINE_HOOK(0x4CF3F9, FlyLocomotionClass_FlightUpdate_FixFlightLevel, 0x5)
+{
+	enum { SkipGameCode = 0x4CF4D2 };
+
+	GET(FlyLocomotionClass* const, pThis, EBP);
+
+	const auto pFoot = pThis->LinkedTo;
+
+	if (pFoot->GetMapCoords() == CellClass::Coord2Cell(pThis->MovingDestination) // Maintain height until on same cell to prevent poor visual display
+		&& MapClass::Instance.GetCellAt(pFoot->Location)->ContainsBridge() // Only effective when on the bridge
+		&& pThis->FlightLevel >= CellClass::BridgeHeight) // Not lower than the ground level
+	{
+		// Subtract the excess bridge height to allow the aircraft to return to the correct altitude
+		pThis->FlightLevel -= CellClass::BridgeHeight;
+	}
+
+	return SkipGameCode;
+}
+
+// Let in air aircraft carrier ignore nearby elevated bridge check
+DEFINE_HOOK(0x6FC617, TechnoClass_GetFireError_Spawner, 0x8)
+{
+	enum { ContinueCheck = 0x6FC61F, TemporaryCannotFire = 0x6FCD0E };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET(const bool, nearElevatedBridge, EAX);
+
+	// In addition, the return value of the function has been changed to allow the aircraft carrier to retain the current target
+	return (nearElevatedBridge && !pThis->IsInAir()) ? TemporaryCannotFire : ContinueCheck;
+}
+
+#pragma endregion
+
 #pragma region TeamCloseRangeFix
 
 int __fastcall Check2DDistanceInsteadOf3D(ObjectClass* pSource, void* _, AbstractClass* pTarget)
 {
 	// At present, it seems that aircraft use their own mapcoords and the team destination's mapcoords to check.
-    // During the previous test, it was found that if the aircraft uses this and needs to return to the airport
+	// During the previous test, it was found that if the aircraft uses this and needs to return to the airport
 	// with the script first, it will interrupt the remaining tasks for unknown reasons - CrimRecya
 	return (pSource->IsInAir() && pSource->WhatAmI() != AbstractType::Aircraft) // Jumpjets or sth in the air
 		? (pSource->DistanceFrom(pTarget) * 2) // 2D distance (2x is the bonus to units in the air)
@@ -1283,6 +1411,7 @@ size_t __fastcall HexStr2Int_replacement(const char* str)
 	// Fake a pointer to trick Ares
 	return std::hash<std::string_view>{}(str) & 0xFFFFFF;
 }
+
 DEFINE_FUNCTION_JUMP(CALL, 0x6E8305, HexStr2Int_replacement); // TaskForce
 DEFINE_FUNCTION_JUMP(CALL, 0x6E5FA6, HexStr2Int_replacement); // TagType
 
@@ -1452,6 +1581,17 @@ DEFINE_HOOK(0x449462, BuildingClass_IsCellOccupied_UndeploysInto, 0x6)
 	return SkipGameCode;
 }
 
+DEFINE_HOOK(0x73FA92, UnitClass_IsCellOccupied_LandType, 0x8)
+{
+	enum { ContinueCheck = 0x73FC24, NoMove = 0x73FACD };
+
+	GET(UnitClass*, pThis, EBX);
+	GET(CellClass*, pCell, EDI);
+	GET_STACK(bool, containsBridge, STACK_OFFSET(0x90, -0x7D));
+
+	return GroundType::Array[static_cast<int>(containsBridge ? LandType::Road : pCell->LandType)].Cost[static_cast<int>(pThis->Type->SpeedType)] == 0.0f ? NoMove : ContinueCheck;
+}
+
 #pragma region XSurfaceFix
 
 // Fix a crash at 0x7BAEA1 when trying to access a point outside of surface bounds.
@@ -1542,9 +1682,46 @@ DEFINE_HOOK(0x5F530B, ObjectClass_Disappear_AnnounceExpiredPointer, 0x6)
 	GET(ObjectClass*, pThis, ESI);
 	GET_STACK(bool, removed, STACK_OFFSET(0x8, 0x4));
 	R->ECX(pThis);
-	R->EDX(((pThis->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None) ? Disappear::removed : removed);
+	// Do not working for buildings for now, because it will break some vanilla building tracking.
+	// Hoping someone could investigate thoroughly and enable it for buildings.
+	R->EDX(((pThis->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None) ? Disappear::removed : removed);
 	Disappear::removed = false;
 	return 0x5F5311;
+}
+
+// I think no one wants to see wild pointers caused by WW's negligence
+DEFINE_HOOK(0x4D9A1B, FootClass_PointerExpired_RemoveDestination, 0x6)
+{
+	GET_STACK(bool, removed, STACK_OFFSET(0x1C, 0x8));
+
+	if (removed)
+		return 0x4D9ABD;
+
+	R->BL(true);
+	return 0x4D9A25;
+}
+
+namespace RemoveSpawneeHelper
+{
+	bool removed = false;
+}
+
+DEFINE_HOOK(0x707B23, TechnoClass_PointerExpired_RemoveSpawnee, 0x6)
+{
+	GET(SpawnManagerClass*, pSpawnManager, ECX);
+	GET(AbstractClass*, pRemove, EBP);
+	GET_STACK(bool, removed, STACK_OFFSET(0x20, 0x8));
+
+	RemoveSpawneeHelper::removed = removed;
+	pSpawnManager->UnlinkPointer(pRemove);
+	RemoveSpawneeHelper::removed = false;
+
+	return 0x707B29;
+}
+
+DEFINE_HOOK(0x6B7CE4, SpawnManagerClass_UnlinkPointer_RemoveSpawnee, 0x6)
+{
+	return RemoveSpawneeHelper::removed ? 0x6B7CF4 : 0;
 }
 
 #pragma endregion
@@ -1564,9 +1741,466 @@ DEFINE_HOOK(0x75EE49, WaveClass_DrawSonic_CrashFix, 0x7)
 	return 0;
 }
 
-// EIP 004C2C19 crash has 2 causes: the Owner of an EBolt being invalid, and the ElectricBolt of a Unit being invalid
-// Vanilla doesn't have InvalidatePointer for EBolt, so it's made into this way to clear the pointer on EBolt
-// now we'll clear Owner for EBolt in AnnounceInvalidPointer so there won't be nullptr when EBolt trying to access an Owner
-// in this case, we can also dismiss ElectricBolt on Unit, to prevent the crash that caused by its invalidation
-DEFINE_JUMP(LJMP, 0x6FD5F2, 0x6FD5FC)
-DEFINE_JUMP(LJMP, 0x6FD600, 0x6FD606)
+// WW used SetDesired here, causing the barrel drawn incorrectly.
+DEFINE_HOOK(0x6F6DEE, TechnoClass_Unlimbo_BarrelFacingBugFix, 0x7)
+{
+	enum { SkipGameCode = 0x6F6DFA };
+
+	GET(DirStruct*, pDir, ECX);
+	GET(TechnoClass*, pThis, ESI);
+
+	pThis->BarrelFacing.SetCurrent(*pDir);
+
+	return SkipGameCode;
+}
+
+namespace BulletDrawVoxelTemp
+{
+	ConvertClass* Convert = nullptr;
+}
+
+DEFINE_HOOK(0x46B19B, BulletClass_DrawVoxel_GetLightConvert, 0x6)
+{
+	GET(BulletClass*, pThis, EAX);
+
+	if (pThis->Type->AnimPalette)
+	{
+		BulletDrawVoxelTemp::Convert = FileSystem::ANIM_PAL;
+	}
+	else if (pThis->Type->FirersPalette)
+	{
+		const int inheritColor = pThis->InheritedColor;
+		const int colorIndex = inheritColor == -1 ? HouseClass::CurrentPlayer->ColorSchemeIndex : inheritColor;
+		BulletDrawVoxelTemp::Convert = ColorScheme::Array.Items[colorIndex]->LightConvert;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x46B212, BulletClass_DrawVoxel_SetLightConvert, 0x6)
+{
+	enum { SkipGameCode = 0x46B218 };
+
+	const auto pConvert = BulletDrawVoxelTemp::Convert;
+
+	if (!pConvert)
+		return 0;
+
+	R->ECX(pConvert);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x46B23C, BulletClass_DrawVoxel_SetLightConvert2, 0x6)
+{
+	enum { SkipGameCode = 0x46B242 };
+
+	const auto pConvert = BulletDrawVoxelTemp::Convert;
+
+	if (!pConvert)
+		return 0;
+
+	BulletDrawVoxelTemp::Convert = nullptr;
+	R->ECX(pConvert);
+	return SkipGameCode;
+}
+
+#pragma region StructureFindingFix
+
+// These functions should consider reachablity.
+DEFINE_HOOK(0x4DFC39, FootClass_FindBioReactor_CheckValid, 0x6)
+{
+	GET(FootClass*, pThis, ESI);
+	GET(BuildingClass*, pBuilding, EDI);
+
+	return pThis->IsInSameZoneAs(pBuilding) ? 0 : R->Origin() + 0x6;
+}
+
+DEFINE_HOOK(0x4DFED2, FootClass_FindGarrisonStructure_CheckValid, 0x6)
+{
+	GET(FootClass*, pThis, ESI);
+	GET(BuildingClass*, pBuilding, EBX);
+
+	return pThis->IsInSameZoneAs(pBuilding) ? 0 : R->Origin() + 0x6;
+}
+
+DEFINE_HOOK(0x4E0024, FootClass_FindTankBunker_CheckValid, 0x8)
+{
+	GET(FootClass*, pThis, EDI);
+	GET(BuildingClass*, pBuilding, ESI);
+
+	return pThis->IsInSameZoneAs(pBuilding) ? 0 : R->Origin() + 0x8;
+}
+
+DEFINE_HOOK(0x4DFD92, FootClass_FindBattleBunker_CheckValid, 0x8)
+{
+	GET(FootClass*, pThis, ESI);
+	GET(BuildingClass*, pBuilding, EBX);
+
+	return pThis->IsInSameZoneAs(pBuilding) ? 0 : R->Origin() + 0x8;
+}
+
+DEFINE_HOOK(0x4DFB28, FootClass_FindGrinder_CheckValid, 0x8)
+{
+	GET(FootClass*, pThis, ESI);
+	GET(BuildingClass*, pBuilding, EBX);
+
+	return pThis->IsInSameZoneAs(pBuilding) ? 0 : R->Origin() + 0x8;
+}
+
+#pragma endregion
+
+DEFINE_HOOK_AGAIN(0x73A1D3, FootClass_UpdatePosition_EnterGrinderSound, 0x6)// UnitClass
+DEFINE_HOOK(0x5198C3, FootClass_UpdatePosition_EnterGrinderSound, 0x6)// InfantryClass
+{
+	GET(BuildingClass*, pGrinder, EBX);
+	const int enterSound = pGrinder->Type->EnterGrinderSound;
+
+	if (enterSound >= 0)
+	{
+		R->ECX(enterSound);
+		return R->Origin() + 0x6;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x73A2D2, UnitClass_UpdatePosition_EnterBioReactor, 0x5)
+{
+	GET(BuildingClass*, pBuilding, EBX);
+	GET(UnitClass*, pThis, EBP);
+
+	const auto pBuildingType = pBuilding->Type;
+
+	if (pBuildingType->UnitAbsorb)
+	{
+		pThis->Transporter = pBuilding;
+		const int enterSound = pBuildingType->EnterBioReactorSound;
+		VocClass::PlayAt((enterSound >= 0 ? enterSound : RulesClass::Instance->EnterBioReactorSound), pThis->GetCoords(), 0);
+		pThis->Absorbed = true;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x51A304, InfantryClass_UpdatePosition_EnterBioReactor, 0x6)
+{
+	enum { SkipGameCode = 0x51A30A };
+
+	GET(BuildingClass*, pReactor, EDI);
+	GET(InfantryClass*, pThis, ESI);
+
+	pThis->Transporter = pReactor;
+	const int enterSound = pReactor->Type->EnterBioReactorSound;
+
+	if (enterSound >= 0)
+	{
+		R->ECX(enterSound);
+		return SkipGameCode;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x442F9B, BuildingClass_DestroyedByC4_LeaveBioReactor, 0x6)
+{
+	GET(FootClass*, pFoot, ESI);
+	pFoot->Transporter = nullptr;
+	return 0;
+}
+
+DEFINE_HOOK(0x44A541, BuildingClass_Mission_Selling_LeaveBioReactor, 0x7)
+{
+	GET(FootClass*, pFoot, ESI);
+	pFoot->Transporter = nullptr;
+	return 0;
+}
+
+DEFINE_HOOK(0x44DBCF, BuildingClass_Mission_Unload_LeaveBioReactor, 0x6)
+{
+	enum { SkipGameCode = 0x44DBD5 };
+
+	GET(BuildingClass*, pReactor, EBP);
+	GET(FootClass*, pFoot, ESI);
+
+	pFoot->Transporter = nullptr;
+	const int leaveSound = pReactor->Type->LeaveBioReactorSound;
+
+	if (leaveSound >= 0)
+	{
+		R->ECX(leaveSound);
+		return SkipGameCode;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x51A298, InfantryClass_UpdatePosition_EnterBuilding_CheckSize, 0x6)
+{
+	enum { CannotEnter = 0x51A4BF };
+
+	GET(InfantryClass*, pThis, ESI);
+	GET(BuildingClass*, pDestination, EDI);
+	// Compared to `Vehicle entering building` / `Infantry entering vehicle` / `Vehicle entering vehicle`,
+	// `Infantry entering building` lacks the judgment of this
+	return (pThis->SendCommand(RadioCommand::QueryCanEnter, pDestination) == RadioCommand::AnswerPositive) ? 0 : CannotEnter;
+}
+
+DEFINE_HOOK(0x710352, FootClass_ImbueLocomotor_ResetUnloadingHarvester, 0x7)
+{
+	GET(FootClass*, pTarget, ESI);
+
+	if (const auto pUnit = abstract_cast<UnitClass*>(pTarget))
+		pUnit->Unloading = false;
+
+	return 0;
+}
+
+DEFINE_JUMP(LJMP, 0x73C41B, 0x73C431)
+
+DEFINE_HOOK(0x73C43F, UnitClass_DrawAsVXL_Shadow_IsLocomotorFix2, 0x6)
+{
+	enum { SkipGameCode = 0x73C445 };
+
+	GET(UnitClass*, pThis, EBP);
+	GET(UnitTypeClass*, pType, EAX);
+
+	R->AL(pType->BalloonHover || pThis->IsAttackedByLocomotor);
+	return SkipGameCode;
+}
+
+namespace RemoveCellContentTemp
+{
+	bool CheckBeforeUnmark = false;
+}
+
+DEFINE_HOOK(0x737F74, UnitClass_ReceiveDamage_NowDead_MarkUp, 0x6)
+{
+	enum { SkipGameCode = 0x737F80 };
+
+	GET(UnitClass*, pThis, ESI);
+
+	RemoveCellContentTemp::CheckBeforeUnmark = true;
+	pThis->Mark(MarkType::Up);
+	RemoveCellContentTemp::CheckBeforeUnmark = false;
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x47EAF7, CellClass_RemoveContent_BeforeUnmarkOccupationBits, 0x7)
+{
+	enum { ContinueCheck = 0x47EAFE, DontUnmark = 0x47EB8F };
+
+	GET(CellClass*, pCell, EDI);
+	GET_STACK(bool, onBridge, STACK_OFFSET(0x14, 0x8));
+
+	if (RemoveCellContentTemp::CheckBeforeUnmark && (onBridge ? pCell->AltObject : pCell->FirstObject))
+		return DontUnmark;
+
+	GET(ObjectClass*, pContent, ESI);
+	R->EAX(pContent->WhatAmI());
+	return ContinueCheck;
+}
+
+DEFINE_HOOK(0x481778, CellClass_ScatterContent_Scatter, 0x6)
+{
+	enum { NextTechno = 0x4817D9 };
+
+	GET(TechnoClass*, pTechno, ESI);
+
+	if (!pTechno)
+		return NextTechno;
+
+	REF_STACK(const CoordStruct, coords, STACK_OFFSET(0x2C, 0x4));
+	GET_STACK(const bool, ignoreMission, STACK_OFFSET(0x2C, 0x8));
+	GET_STACK(const bool, ignoreDestination, STACK_OFFSET(0x2C, 0xC));
+
+	if (ignoreDestination || pTechno->HasAbility(Ability::Scatter)
+		|| (pTechno->Owner->IsControlledByHuman()
+		? RulesClass::Instance->PlayerScatter
+		: pTechno->Owner->IQLevel2 >= RulesClass::Instance->Scatter))
+	{
+		pTechno->Scatter(coords, ignoreMission, ignoreDestination);
+	}
+
+	return NextTechno;
+}
+
+#pragma region ElectricAssultFix
+
+namespace ElectricAssultTemp
+{
+	WeaponTypeClass* WeaponType;
+}
+
+DEFINE_HOOK_AGAIN(0x4D5102, FootClass_ElectricAssultFix_SetWeaponType, 0x6)	// Mission_Guard
+DEFINE_HOOK(0x4D6F66, FootClass_ElectricAssultFix_SetWeaponType, 0x6)		// Mission_AreaGuard
+{
+	GET(WeaponTypeClass*, Secondary, ECX);
+
+	ElectricAssultTemp::WeaponType = Secondary;
+	return 0;
+}
+
+DEFINE_HOOK_AGAIN(0x4D5184, FootClass_ElectricAssultFix2, 0x7)	// Mission_Guard
+DEFINE_HOOK(0x4D6FE1, FootClass_ElectricAssultFix2, 0x7)		// Mission_AreaGuard
+{
+	GET(FootClass*, pThis, ESI);
+	GET(BuildingClass*, pBuilding, EDI);
+	enum { SkipGuard = 0x4D51AE, ContinueGuard = 0x4D5198,
+		SkipAreaGuard = 0x4D7001, ContinueAreaGuard = 0x4D6FF5 };
+
+	const auto pWeapon = ElectricAssultTemp::WeaponType;
+	bool InGuard = (R->Origin() == 0x4D5184);
+
+	if (pBuilding->Owner == pThis->Owner &&
+		GeneralUtils::GetWarheadVersusArmor(pWeapon->Warhead, pBuilding, pBuilding->Type) != 0.0)
+	{
+		return InGuard ? SkipGuard : SkipAreaGuard;
+	}
+
+	return InGuard ? ContinueGuard : ContinueAreaGuard;
+}
+
+#pragma endregion
+
+DEFINE_HOOK(0x489416, MapClass_DamageArea_AirDamageSelfFix, 0x6)
+{
+	enum { NextTechno = 0x489547 };
+
+	GET(TechnoClass*, pAirTechno, EBX);
+	GET_BASE(TechnoClass*, pSourceTechno, 0x8);
+
+	if (pAirTechno != pSourceTechno)
+		return 0;
+
+	if (pSourceTechno->GetTechnoType()->DamageSelf)
+		return 0;
+
+	GET_BASE(WarheadTypeClass*, pWarhead, 0xC);
+
+	if (WarheadTypeExt::ExtMap.Find(pWarhead)->AllowDamageOnSelf)
+		return 0;
+
+	return NextTechno;
+}
+
+#pragma region DamageAreaItemsFix
+
+// Obviously, it is unreasonable for a large-scale damage like a nuke to only cause damage to units
+// located on or under the bridge that are in the same position as the damage center point
+namespace DamageAreaTemp
+{
+	const CellClass* CheckingCell = nullptr;
+	bool CheckingCellAlt = false;
+}
+
+// Skip useless alt check, so it will only start checking from the cell's FirstObject
+// Note: Ares hook at 0x489562(0x6) and return 0
+DEFINE_JUMP(LJMP, 0x489568, 0x489592);
+
+DEFINE_HOOK(0x4896BF, DamageArea_DamageItemsFix1, 0x6)
+{
+	enum { CheckNextCell = 0x4899BE, CheckThisObject = 0x4896DD };
+
+	GET(const CellClass* const, pCell, EBX);
+
+	DamageAreaTemp::CheckingCell = pCell;
+	auto pObject = pCell->FirstObject;
+
+	if (pObject)
+	{
+		R->ESI(pObject);
+		return CheckThisObject;
+	}
+
+	pObject = pCell->AltObject;
+
+	if (!pObject)
+		return CheckNextCell;
+
+	DamageAreaTemp::CheckingCellAlt = true;
+
+	R->ESI(pObject);
+	return CheckThisObject;
+}
+
+DEFINE_HOOK(0x4899B3, DamageArea_DamageItemsFix2, 0x5)
+{
+	enum { CheckNextCell = 0x4899BE, CheckThisObject = 0x4896DD };
+
+	GET(const ObjectClass*, pObject, ESI);
+
+	pObject = pObject->NextObject;
+
+	if (pObject)
+	{
+		R->ESI(pObject);
+		return CheckThisObject;
+	}
+
+	if (DamageAreaTemp::CheckingCellAlt)
+	{
+		DamageAreaTemp::CheckingCellAlt = false;
+		return CheckNextCell;
+	}
+
+	pObject = DamageAreaTemp::CheckingCell->AltObject;
+
+	if (!pObject)
+		return CheckNextCell;
+
+	DamageAreaTemp::CheckingCellAlt = true;
+
+	R->ESI(pObject);
+	return CheckThisObject;
+}
+
+DEFINE_HOOK(0x489BDB, DamageArea_RockerItemsFix1, 0x6)
+{
+	enum { SkipGameCode = 0x489C29 };
+
+	GET(const short, cellX, ESI);
+	GET(const short, cellY, EBX);
+
+	const auto pCell = MapClass::Instance.GetCellAt(CellStruct { cellX, cellY });
+	DamageAreaTemp::CheckingCell = pCell;
+	auto pObject = pCell->FirstObject;
+
+	if (pObject)
+	{
+		R->EAX(pObject);
+		return SkipGameCode;
+	}
+
+	pObject = pCell->AltObject;
+
+	if (pObject)
+		DamageAreaTemp::CheckingCellAlt = true;
+
+	R->EAX(pObject);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x489E47, DamageArea_RockerItemsFix2, 0x6)
+{
+	GET(const ObjectClass*, pObject, EDI);
+
+	if (pObject)
+		return 0;
+
+	if (DamageAreaTemp::CheckingCellAlt)
+	{
+		DamageAreaTemp::CheckingCellAlt = false;
+		return 0;
+	}
+
+	pObject = DamageAreaTemp::CheckingCell->AltObject;
+
+	if (pObject)
+		DamageAreaTemp::CheckingCellAlt = true;
+
+	R->EDI(pObject);
+	return 0;
+}
+
+#pragma region

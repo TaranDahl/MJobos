@@ -7,10 +7,10 @@ WeaponTypeExt::ExtContainer WeaponTypeExt::ExtMap;
 
 bool WeaponTypeExt::ExtData::HasRequiredAttachedEffects(TechnoClass* pTarget, TechnoClass* pFirer) const
 {
-	bool hasRequiredTypes = this->AttachEffect_RequiredTypes.size() > 0;
-	bool hasDisallowedTypes = this->AttachEffect_DisallowedTypes.size() > 0;
-	bool hasRequiredGroups = this->AttachEffect_RequiredGroups.size() > 0;
-	bool hasDisallowedGroups = this->AttachEffect_DisallowedGroups.size() > 0;
+	const bool hasRequiredTypes = this->AttachEffect_RequiredTypes.size() > 0;
+	const bool hasDisallowedTypes = this->AttachEffect_DisallowedTypes.size() > 0;
+	const bool hasRequiredGroups = this->AttachEffect_RequiredGroups.size() > 0;
+	const bool hasDisallowedGroups = this->AttachEffect_DisallowedGroups.size() > 0;
 
 	if (hasRequiredTypes || hasDisallowedTypes || hasRequiredGroups || hasDisallowedGroups)
 	{
@@ -39,6 +39,15 @@ bool WeaponTypeExt::ExtData::HasRequiredAttachedEffects(TechnoClass* pTarget, Te
 	}
 
 	return true;
+}
+
+bool WeaponTypeExt::ExtData::IsHealthRatioEligible(TechnoClass* const pTarget) const
+{
+	if (!pTarget)
+		return true;
+
+	const auto ratio = pTarget->GetHealthPercentage();
+	return ratio <= this->CanTarget_MaxHealth && ratio >= this->CanTarget_MinHealth;
 }
 
 void WeaponTypeExt::ExtData::Initialize()
@@ -81,6 +90,7 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Bolt_Disable3.Read(exINI, pSection, "Bolt.Disable3");
 	this->Bolt_Arcs.Read(exINI, pSection, "Bolt.Arcs");
 	this->Bolt_Duration.Read(exINI, pSection, "Bolt.Duration");
+	this->Bolt_FollowFLH.Read(exINI, pSection, "Bolt.FollowFLH");
 
 	this->RadType.Read<true>(exINI, pSection, "RadType");
 
@@ -88,13 +98,17 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Strafing_Shots.Read(exINI, pSection, "Strafing.Shots");
 	this->Strafing_SimulateBurst.Read(exINI, pSection, "Strafing.SimulateBurst");
 	this->Strafing_UseAmmoPerShot.Read(exINI, pSection, "Strafing.UseAmmoPerShot");
+	this->Strafing_EndDelay.Read(exINI, pSection, "Strafing.EndDelay");
 	this->CanTarget.Read(exINI, pSection, "CanTarget");
 	this->CanTargetHouses.Read(exINI, pSection, "CanTargetHouses");
+	this->CanTarget_MaxHealth.Read(exINI, pSection, "CanTarget.MaxHealth");
+	this->CanTarget_MinHealth.Read(exINI, pSection, "CanTarget.MinHealth");
 	this->Burst_Delays.Read(exINI, pSection, "Burst.Delays");
 	this->Burst_FireWithinSequence.Read(exINI, pSection, "Burst.FireWithinSequence");
 	this->AreaFire_Target.Read(exINI, pSection, "AreaFire.Target");
 	this->FeedbackWeapon.Read<true>(exINI, pSection, "FeedbackWeapon");
 	this->Laser_IsSingleColor.Read(exINI, pSection, "IsSingleColor");
+	this->VisualScatter.Read(exINI, pSection, "VisualScatter");
 	this->ROF_RandomDelay.Read(exINI, pSection, "ROF.RandomDelay");
 	this->ChargeTurret_Delays.Read(exINI, pSection, "ChargeTurret.Delays");
 	this->OmniFire_TurnToTarget.Read(exINI, pSection, "OmniFire.TurnToTarget");
@@ -125,6 +139,15 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Beam_Amplitude.Read(exINI, pSection, "Beam.Amplitude");
 	this->Beam_IsHouseColor.Read(exINI, pSection, "Beam.IsHouseColor");
 	this->LaserThickness.Read(exINI, pSection, "LaserThickness");
+
+	// handle SkipWeaponPicking
+	if (this->CanTarget != AffectedTarget::All || this->CanTargetHouses != AffectedHouse::All
+		|| this->CanTarget_MaxHealth < 1.0 || this->CanTarget_MinHealth > 0.0
+		|| this->AttachEffect_RequiredTypes.size() || this->AttachEffect_RequiredGroups.size()
+		|| this->AttachEffect_DisallowedTypes.size() || this->AttachEffect_DisallowedGroups.size())
+	{
+		this->SkipWeaponPicking = false;
+	}
 }
 
 template <typename T>
@@ -138,18 +161,23 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Bolt_Disable3)
 		.Process(this->Bolt_Arcs)
 		.Process(this->Bolt_Duration)
+		.Process(this->Bolt_FollowFLH)
 		.Process(this->Strafing)
 		.Process(this->Strafing_Shots)
 		.Process(this->Strafing_SimulateBurst)
 		.Process(this->Strafing_UseAmmoPerShot)
+		.Process(this->Strafing_EndDelay)
 		.Process(this->CanTarget)
 		.Process(this->CanTargetHouses)
+		.Process(this->CanTarget_MaxHealth)
+		.Process(this->CanTarget_MinHealth)
 		.Process(this->RadType)
 		.Process(this->Burst_Delays)
 		.Process(this->Burst_FireWithinSequence)
 		.Process(this->AreaFire_Target)
 		.Process(this->FeedbackWeapon)
 		.Process(this->Laser_IsSingleColor)
+		.Process(this->VisualScatter)
 		.Process(this->ROF_RandomDelay)
 		.Process(this->ChargeTurret_Delays)
 		.Process(this->OmniFire_TurnToTarget)
@@ -179,6 +207,7 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Beam_Amplitude)
 		.Process(this->Beam_IsHouseColor)
 		.Process(this->LaserThickness)
+		.Process(this->SkipWeaponPicking)
 		;
 };
 
@@ -266,12 +295,17 @@ int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pF
 {
 	auto pTechno = pFirer;
 
-	if (pTechno->Transporter && pTechno->Transporter->GetTechnoType()->OpenTopped)
+	if (pTechno->Transporter)
 	{
-		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->Transporter->GetTechnoType());
+		auto const pType = pTechno->Transporter->GetTechnoType();
 
-		if (pTypeExt->OpenTopped_UseTransportRangeModifiers)
-			pTechno = pTechno->Transporter;
+		if (pType->OpenTopped)
+		{
+			auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+			if (pTypeExt->OpenTopped_UseTransportRangeModifiers)
+				pTechno = pTechno->Transporter;
+		}
 	}
 
 	auto const pTechnoExt = TechnoExt::ExtMap.Find(pTechno);
@@ -308,13 +342,13 @@ int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pF
 
 int WeaponTypeExt::GetTechnoKeepRange(WeaponTypeClass* pThis, TechnoClass* pFirer, bool isMinimum)
 {
-	if (!pThis || !pFirer)
+	if (!pThis)
 		return 0;
 
 	const auto pExt = WeaponTypeExt::ExtMap.Find(pThis);
 	const auto keepRange = pExt->KeepRange.Get();
 
-	if (!keepRange)
+	if (!keepRange || !pFirer || pFirer->Transporter)
 		return 0;
 
 	const auto absType = pFirer->WhatAmI();

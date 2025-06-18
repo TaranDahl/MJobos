@@ -95,7 +95,7 @@ DEFINE_HOOK(0x4B5B70, DroppodLocomotionClass_ILoco_Process, 0x5)
 
 		if (timeSinceCreation % podType->Trailer_SpawnDelay == 1)
 		{
-			if (auto trailerType = podType->Trailer.Get(RulesExt::Global()->DropPodTrailer))
+			if (auto trailerType = podType->Trailer.Get(RulesExt::Global()->DropPodTrailer.Get(RulesExt::Global()->DropPodDefaultTrailer)))
 			{
 				auto trailer = GameCreate<AnimClass>(trailerType, oldLoc);
 				AnimExt::SetAnimOwnerHouseKind(trailer, pLinked->Owner, nullptr, false, true);
@@ -185,7 +185,7 @@ DEFINE_HOOK(0x4B607D, DroppodLocomotionClass_ILoco_MoveTo, 0x8)
 
 	auto const lThis = static_cast<DropPodLocomotionClass*>(iloco);
 	auto const pLinked = lThis->LinkedTo;
-	const auto podType = TechnoTypeExt::ExtMap.Find(pLinked->GetTechnoType())->DroppodType.get();
+	const auto podType = TechnoExt::ExtMap.Find(pLinked)->TypeExtData->DroppodType.get();
 
 	if (!podType)
 		return 0;
