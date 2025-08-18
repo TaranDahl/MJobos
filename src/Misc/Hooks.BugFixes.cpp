@@ -1523,6 +1523,11 @@ DEFINE_HOOK(0x467C1C, BulletClass_Update_InvisoLatencyFix, 0x6)
 	return 0x467C22;
 }
 
+namespace InvisoBlockageFix
+{
+    CoordStruct srcCrd = { 0, 0, 0 };
+}
+
 DEFINE_HOOK(0x468670, BulletClass_Unlimbo_Start_InvisoBlockageFix, 0x6)
 {
 	GET_STACK(int, returnAddress, 0);
@@ -1535,8 +1540,8 @@ DEFINE_HOOK(0x468670, BulletClass_Unlimbo_Start_InvisoBlockageFix, 0x6)
 
 	if (auto pTechno = pThis->Owner)
 	{
-		CoordStruct technoCrd = pTechno->GetCoords();
-		pSrcCrd = &technoCrd;
+		InvisoBlockageFix::srcCrd = pTechno->GetCoords();
+		pSrcCrd = &InvisoBlockageFix::srcCrd;
 	}
 
 	return 0;
