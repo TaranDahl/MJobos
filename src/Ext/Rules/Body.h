@@ -98,6 +98,8 @@ public:
 		Valueable<double> HeightShadowScaling_MinScale;
 		double AirShadowBaseScale_log;
 
+		Valueable<bool> ExtendedBuildingPlacing;
+
 		Valueable<bool> ExtendedAircraftMissions;
 		Valueable<bool> AmphibiousEnter;
 		Valueable<bool> AmphibiousUnload;
@@ -326,6 +328,8 @@ public:
 			, HeightShadowScaling { false }
 			, HeightShadowScaling_MinScale { 0.0 }
 			, AirShadowBaseScale_log { 0.693376137 }
+
+			, ExtendedBuildingPlacing { false }
 
 			, ExtendedAircraftMissions { false }
 			, AmphibiousEnter { false }

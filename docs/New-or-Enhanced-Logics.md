@@ -661,6 +661,43 @@ SpyEffect.VictimSuperWeapon=       ; SuperWeaponType
 SpyEffect.InfiltratorSuperWeapon=  ; SuperWeaponType
 ```
 
+### Building placing and deploying logic enhancement
+
+- In vanilla games, buildings are always cannot placing or deploying on the cells that other infantries or units on. Now this can be changed by setting `ExtendedBuildingPlacing` to true, when you try to place the building on these cells, it will check whether the occupiers can be scatter by yourself (include your own technos and allies technos) and whether there are enough spaces to scatter. If can, it will record which building you are placing and show a preview to you and your allies, then start a timer to record this placement and order the occupiers to leave this building area. When the area is cleared, the building will be truly place down and the production queue will be restored to original state. But when the timer expires or an unexpected situation has occurred which make the building impossible be constructed here anymore, it will stop the action and play "cannot deploy here", then you should re-place or re-deploy the building in a valid space.
+- `LimboBuild` controls whether building can be automatically placed like `LimboDelivery`.
+  - `LimboBuildID` defines the numeric ID of the building placed by `LimboBuild`.
+- `PlaceBuilding.Extra` controls whether the actual placement type of the building can be changed by holding the left mouse button and changing the mouse position when placing.
+  - `DefaultPlacingDirection` controls the default placing direction at the beginning of the game and every time after placing the building.
+  - `PlaceBuilding.OnLand` controls buildings can be replaced when placed on land.
+  - `PlaceBuilding.OnWater` controls buildings can be replaced when placed on water.
+  - `PlaceBuilding.DirectionShape` and `PlaceBuilding.DirectionPalette` controls what additional directional guidance shape looks like when placing `PlaceBuilding.Extra=true` buildings.
+
+In `rulesmd.ini`:
+```ini
+[General]
+ExtendedBuildingPlacing=false   ; boolean
+
+[SOMEBUILDING]                  ; BuildingType
+LimboBuild=false                ; boolean
+LimboBuildID=-1                 ; integer
+PlaceBuilding.Extra=false       ; boolean
+PlaceBuilding.OnLand=           ; List of BuildingTypes
+PlaceBuilding.OnWater=          ; List of BuildingTypes
+PlaceBuilding.DirectionShape=   ; filename with .shp extension
+PlaceBuilding.DirectionPalette= ; filename with .pal extension
+```
+
+In `ra2md.ini`:
+```ini
+[Phobos]
+DefaultPlacingDirection=0       ; integer, 0-31
+```
+
+```{note}
+- `PlaceBuilding.OnLand` and `PlaceBuilding.OnWater` are only work for players.
+- The replacement building and the original building must have the same `BuildCat`, and neither can have `LimboBuild` or `PlaceAnywhere`.
+```
+
 ## Infantry
 
 ### Customizable FLH when infantry is prone or deployed

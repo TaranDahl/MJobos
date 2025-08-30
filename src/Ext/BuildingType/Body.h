@@ -64,6 +64,16 @@ public:
 		Valueable<int> SellBuildupLength;
 		Valueable<bool> IsDestroyableObstacle;
 
+		Valueable<bool> LimboBuild;
+		Valueable<int> LimboBuildID;
+		Valueable<BuildingTypeClass*> LaserFencePost_Fence;
+		ValueableVector<BuildingTypeClass*> PlaceBuilding_OnLand;
+		ValueableVector<BuildingTypeClass*> PlaceBuilding_OnWater;
+		Valueable<SHPStruct*> PlaceBuilding_DirectionShape;
+		CustomPalette PlaceBuilding_DirectionPalette;
+		Valueable<bool> PlaceBuilding_Extra;
+		Valueable<bool> CanBuildUnderUnits;
+
 		Valueable<bool> IsAnimDelayedBurst;
 
 		std::vector<std::optional<DirType>> AircraftDockingDirs;
@@ -136,6 +146,15 @@ public:
 			, ConsideredVehicle {}
 			, ZShapePointMove_OnBuildup { false }
 			, SellBuildupLength { 23 }
+			, LimboBuild { false }
+			, LimboBuildID { -1 }
+			, LaserFencePost_Fence {}
+			, PlaceBuilding_OnLand {}
+			, PlaceBuilding_OnWater {}
+			, PlaceBuilding_DirectionShape { nullptr }
+			, PlaceBuilding_DirectionPalette {}
+			, PlaceBuilding_Extra { false }
+			, CanBuildUnderUnits { false }
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
@@ -162,6 +181,8 @@ public:
 			, Refinery_UseNormalActiveAnim { false }
 			, HasPowerUpAnim {}
 		{ }
+
+		BuildingTypeClass* GetAnotherPlacingType(size_t direction, bool onWater);
 
 		// Ares 0.A functions
 		int GetSuperWeaponCount() const;
@@ -203,4 +224,10 @@ public:
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
 	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
+	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
+	static bool IsSameBuildingType(BuildingTypeClass* pType1, BuildingTypeClass* pType2);
+	static bool BuildLimboBuilding(BuildingClass* pBuilding);
+	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
+	static bool DeleteLimboBuilding(BuildingClass* pBuilding, int ID);
 };
