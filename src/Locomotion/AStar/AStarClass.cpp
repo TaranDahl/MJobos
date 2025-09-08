@@ -1,9 +1,16 @@
-﻿#include "AStarClass.h"
+#include "AStarClass.h"
 
 #ifdef ENABLE_ASTAR_REIMPL
 
 #include <TubeClass.h>
 #include <Ext/Techno/Body.h>
+
+// 用外积模长衡量哪个向量与目标向量夹角更小
+auto CrossProductMagnitude = [](const CellStruct& a, const CellStruct& b)
+	{
+		// 外积模长公式：|a.x*b.y - a.y*b.x|
+		return std::abs(a.X * b.Y - a.Y * b.X);
+	};
 
 #pragma region NextPathCell
 
@@ -28,6 +35,8 @@ void AStarClass::ProcessFinalPath(
 	const FootClass* const pFoot
 ) const
 {
+	// 跳过这个函数似乎对寻路效果影响不大?
+	return;
 	const int pathLength = pPath->PathLength - 1;
 
 	if (pathLength <= 0)
@@ -555,6 +564,10 @@ void AStarClass::GetFinalStepCell(
 
 #pragma region PlotStraightPath
 
+// 尝试1：重写PlotStraightPath这个函数
+// 结果：有点用但不多，这个函数经常不会被调用。
+// 原本情况下调用时的pVector总是|X|==|Y|的，实际上可以说没有任何效果。
+// 将ProcessFinalPath整个跳过, 则这个函数偶尔会得到|X|!=|Y|的输入，这种时候确实能够优化。
 bool AStarClass::PlotStraightPath(
 	int* const pDirs,
 	const int maxLength,
@@ -571,113 +584,151 @@ bool AStarClass::PlotStraightPath(
 	const int sumXY = vecY + vecX;
 	int primaryDir = (vecX >= 0) ? (vecY >= 0 ? 3 : 1) : (vecY >= 0 ? 5 : 7);
 	int secondaryDir = (vecX - vecY <= 0) ? (sumXY <= 0 ? 6 : 4) : (sumXY <= 0 ? 0 : 2);
+	int totalSteps = Math::max(vecX, vecY);
+	auto originalVec = *pVector;
 
 	// 计算各方向步数
 	const int absX = std::abs(vecX);
 	const int absY = std::abs(vecY);
+
+	// 1. 确定主要方向和次要方向
 	int minSteps = Math::min(absX, absY);
 	int diagSteps = Math::max(absX, absY) - minSteps;
 
-	const double threat = reinterpret_cast<double(__thiscall*)(const FootClass*)>(0x4DC760)(pFoot); // GetThreatAvoidanceCoefficient
+	if (totalSteps <= 0 || totalSteps > maxLength)
+		return false;
+
+
+	// 2. 计算外积模长（核心：评估两个向量的夹角）
+	/*auto CrossProductMagnitude = [](const CellStruct& a, const CellStruct& b)
+		{
+			// 外积模长公式：|a.x*b.y - a.y*b.x|
+			return std::abs(a.X * b.Y - a.Y * b.X);
+		};*/
+
+	// 3. 初始化状态变量
+	auto currentPos = *pCurrent;
+	int currentLevel = curLevel;
+	int threatCount = 0;
+	int majorUsed = 0;  // 已使用的主方向步数
+	int minorUsed = 0;  // 已使用的次方向步数
+	const double threat = reinterpret_cast<double(__thiscall*)(const FootClass*)>(0x4DC760)(pFoot);
 	const auto pOwner = pFoot->Owner;
 
-	int phase = 0;
-	bool blocked = false;
+	//Debug::LogAndMessage("Start (%d, %d), Vec (%d, %d)\n", currentPos.X, currentPos.Y, originalVec.X, originalVec.Y);
 
-	// 尝试平行四边形的两侧的边
-	while (true)
+	// 4. 逐步生成路径（每步在主/次方向中选择）
+	for (int step = 0; step < totalSteps; ++step)
 	{
-		int firstSteps = minSteps;
-		int secondSteps = diagSteps;
-		int threatCount = 0;
-		auto currentPosition = *pCurrent;
+		// 检查剩余可用步数
+		const bool canUseMajor = (majorUsed < minSteps);
+		const bool canUseMinor = (minorUsed < diagSteps);
 
-		// 交换方向顺序
-		if (phase > 0)
+		if (!canUseMajor && !canUseMinor)
+			break;
+
+		// 当前位置到目标的向量
+		const CellStruct currentToTarget = originalVec - (currentPos - *pCurrent);
+
+		// 5. 计算两个方向的外积模长
+		int majorCross = INT_MAX;  // 主方向的外积模长
+		int minorCross = INT_MAX;  // 次方向的外积模长
+
+		if (canUseMajor)
 		{
-			std::swap(primaryDir, secondaryDir);
-			std::swap(minSteps, diagSteps);
+			// 主方向移动后的新向量
+			const CellStruct majorStep = Unsorted::AdjacentCell[primaryDir & 7];
+			const CellStruct newToTargetMajor = currentToTarget - majorStep;
+			majorCross = CrossProductMagnitude(newToTargetMajor, originalVec);
 		}
 
-		if (minSteps)
+		if (canUseMinor)
 		{
-			int currentLevel = curLevel;
-
-			// 沿主要方向移动
-			if (minSteps > 0)
-			{
-				do
-				{
-					currentPosition += Unsorted::AdjacentCell[primaryDir & 7];
-					const auto pCell = MapClass::Instance.GetCellAt(currentPosition);
-
-					if (threat > 0.00001 && MapClass::Instance.GetThreatPosed(currentPosition, pOwner) * threat >= 0.01)
-						++threatCount;
-
-					// 检查路径可行性
-					blocked = (pFoot->IsCellOccupied(pCell, static_cast<FacingType>(primaryDir), currentLevel, nullptr, true) != Move::OK)
-						|| (pCell->Flags & CellFlags::Tube)
-						|| (threatCount > 3)
-						|| (!allowThreats && threatCount > 0);
-
-					--firstSteps;
-
-					// 更新高度
-					const int level = pCell->Level;
-					const int upLevel = level + 4;
-					currentLevel = (currentLevel == upLevel && pCell->ContainsBridge()) ? upLevel : level;
-				}
-				while (firstSteps > 0 && !blocked);
-			}
-
-			// 沿次要方向移动
-			if (diagSteps > 0 && !blocked)
-			{
-				do
-				{
-					currentPosition += Unsorted::AdjacentCell[secondaryDir & 7];
-					const auto pCell = MapClass::Instance.GetCellAt(currentPosition);
-
-					if (threat > 0.00001 && MapClass::Instance.GetThreatPosed(currentPosition, pOwner) * threat >= 0.01)
-						++threatCount;
-
-					// 检查路径可行性
-					blocked = (pFoot->IsCellOccupied(pCell, static_cast<FacingType>(secondaryDir), currentLevel, nullptr, true) != Move::OK)
-						|| (pCell->Flags & CellFlags::Tube)
-						|| (threatCount > 3)
-						|| (!allowThreats && threatCount > 0);
-
-					--secondSteps;
-
-					// 更新高度
-					const int level = pCell->Level;
-					const int upLevel = level + 4;
-					currentLevel = (currentLevel == upLevel && pCell->ContainsBridge()) ? upLevel : level;
-				}
-				while (secondSteps > 0 && !blocked);
-			}
-
-			// 尝试成功
-			if (!blocked)
-				break;
+			// 次方向移动后的新向量
+			const CellStruct minorStep = Unsorted::AdjacentCell[secondaryDir & 7];
+			const CellStruct newToTargetMinor = currentToTarget - minorStep;
+			minorCross = CrossProductMagnitude(newToTargetMinor, originalVec);
 		}
 
-		// 两边均失败
-		if (++phase >= 2)
-			return false;
+		//Debug::LogAndMessage("Step %d, majorCross %d, minorCross %d\n", majorCross, minorCross);
+		// 6. 选择外积模长更小的方向（夹角更小）
+		int preferredDir = -1;
+		bool isPreferredMajor = false;
+
+		if (canUseMajor && canUseMinor)
+		{
+			// 两者都可用：选外积模长小的
+			preferredDir = (majorCross <= minorCross) ? primaryDir : secondaryDir;
+			isPreferredMajor = (preferredDir == primaryDir);
+		}
+		else if (canUseMajor)
+		{
+			preferredDir = primaryDir;
+			isPreferredMajor = true;
+		}
+		else
+		{
+			preferredDir = secondaryDir;
+			isPreferredMajor = false;
+		}
+
+		// 7. 验证方向可行性（障碍物/威胁检查）
+		auto TryMove = [&](int dir, bool isMajor) -> bool
+			{
+				const CellStruct newPos = currentPos + Unsorted::AdjacentCell[dir & 7];
+				const auto pCell = MapClass::Instance.GetCellAt(newPos);
+
+				// 障碍物检查
+				const bool blocked = (pFoot->IsCellOccupied(pCell, static_cast<FacingType>(dir), currentLevel, nullptr, true) != Move::OK)
+					|| (pCell->Flags & CellFlags::Tube);
+
+				// 威胁检查
+				int newThreat = threatCount;
+				if (threat > 0.00001 && MapClass::Instance.GetThreatPosed(newPos, pOwner) * threat >= 0.01)
+					newThreat++;
+
+				const bool threatBlocked = (newThreat > 3) || (!allowThreats && newThreat > 0);
+
+				if (!blocked && !threatBlocked)
+				{
+					// 移动有效：更新状态
+					pDirs[step] = dir;
+					currentPos = newPos;
+					threatCount = newThreat;
+					// 更新高度（处理桥梁）
+					const int cellLevel = pCell->Level;
+					const int bridgeLevel = cellLevel + 4;
+					currentLevel = (currentLevel == bridgeLevel && pCell->ContainsBridge()) ? bridgeLevel : cellLevel;
+					// 更新步数计数器
+					isMajor ? majorUsed++ : minorUsed++;
+					return true;
+				}
+				return false;
+			};
+
+		// 尝试首选方向
+		if (TryMove(preferredDir, isPreferredMajor))
+			continue;
+
+		// 首选方向不可行，尝试另一个方向
+		if (isPreferredMajor && canUseMinor)
+		{
+			if (TryMove(secondaryDir, false))
+				continue;
+		}
+		else if (!isPreferredMajor && canUseMajor)
+		{
+			if (TryMove(primaryDir, true))
+				continue;
+		}
+
+		// 两个方向都不可行
+		std::fill_n(pDirs, maxLength, -2);
+		return false;
 	}
 
-	// 确认成功后写入路径
-	if (minSteps > 0)
-		std::fill_n(pDirs, minSteps, primaryDir);
-
-	if (diagSteps > 0)
-		std::fill_n(pDirs + minSteps, diagSteps, secondaryDir);
-
-	// 标记无效路径
-	const int totalSteps = minSteps + diagSteps;
+	// 标记剩余无效步数
 	const int remainingSteps = maxLength - totalSteps;
-
 	if (remainingSteps > 0)
 		std::fill_n(pDirs + totalSteps, remainingSteps, -2);
 
@@ -690,6 +741,80 @@ bool AStarClass::PlotStraightPath(
 
 DEFINE_FUNCTION_JUMP(CALL, 0x42A415, AStarClass::ProcessFinalPath);
 DEFINE_FUNCTION_JUMP(CALL, 0x42A41E, AStarClass::OptimizeFinalPath);
+
+namespace FindRegularPathContext
+{
+	CellStruct startCell;
+	int CheckNextDirAddress = 0x42A1A1;
+}
+
+// 记录寻路起始位置。
+DEFINE_HOOK(0x429A9F, PathFinder_FindRegularPath_SetContext, 0x7)
+{
+	GET_STACK(CellStruct*, pStartMapCrd, STACK_OFFSET(0x5C, 0x4));
+	FindRegularPathContext::startCell = *pStartMapCrd;
+	return 0;
+}
+
+// 到达这里才能创建PathNode。
+DEFINE_HOOK(0x42A022, PathFinder_FindRegularPath_CreatePathNode, 0x8)
+{
+	GET(float, cost, ECX);
+	GET_STACK(CellClass**, pFromCellPtr, STACK_OFFSET(0x5C, -0x3C));
+	GET_STACK(CellClass**, pToCellPtr, STACK_OFFSET(0x5C, -0x38));
+	GET_STACK(CellStruct*, pEndMapCrd, STACK_OFFSET(0x5C, 0x8));
+	//GET_STACK(CellStruct*, pStartMapCrd, STACK_OFFSET(0x5C, 0x4));
+	auto pStartMapCrd = &FindRegularPathContext::startCell;
+
+	auto vec1 = (*pFromCellPtr)->MapCoords - *pEndMapCrd;
+	auto vec2 = (*pToCellPtr)->MapCoords - *pEndMapCrd;
+	auto projMag = std::abs(vec1.X * vec2.X + vec1.Y * vec2.Y) / (float)(vec1.X * vec1.X + vec1.Y * vec1.Y);
+	//Debug::LogAndMessage("FromCell (%d, %d), ToCell (%d, %d), EndCell(%d, %d), cross %d\n", (*pFromCellPtr)->MapCoords.X, (*pFromCellPtr)->MapCoords.Y, (*pToCellPtr)->MapCoords.X, (*pToCellPtr)->MapCoords.Y, pEndMapCrd->X, pEndMapCrd->Y, projMag);
+	auto startToCurrent = (*pFromCellPtr)->MapCoords - *pStartMapCrd;
+	auto currentToEnd = *pEndMapCrd - (*pFromCellPtr)->MapCoords;
+	auto startToEnd = *pEndMapCrd - *pStartMapCrd;
+	auto currentToNext = (*pToCellPtr)->MapCoords - (*pFromCellPtr)->MapCoords;
+	//Debug::LogAndMessage("StartToEnd (%d, %d), StartToCurrent (%d, %d), CurrentToNext (%d, %d), CurrentToEnd (%d, %d)\n", startToEnd.X, startToEnd.Y, startToCurrent.X, startToCurrent.Y, currentToNext.X, currentToNext.Y, currentToEnd.X, currentToEnd.Y);
+	R->ECX(projMag);
+	return 0;
+}
+
+// 此处也是个什么条件，满足之后会跳过一个方向。但似乎平地寻路根本用不到这个。
+DEFINE_HOOK(0x429F1B, PathFinder_FindRegularPath_CheckToSkipDir, 0x6)
+{
+	GET(AStarClass*, pThis, ESI);
+	GET(AStarClass::PathQueueNode*, pEndNode, EDX);
+	GET(int, someIdx, EDI);
+
+	GET_STACK(CellClass**, pFromCellPtr, STACK_OFFSET(0x5C, -0x3C));
+	GET_STACK(CellClass**, pToCellPtr, STACK_OFFSET(0x5C, -0x38));
+	GET_STACK(CellStruct*, pEndMapCrd, STACK_OFFSET(0x5C, 0x8));
+	//GET_STACK(CellStruct*, pStartMapCrd, STACK_OFFSET(0x5C, 0x4));
+	auto pStartMapCrd = &FindRegularPathContext::startCell;
+
+	auto left = pThis->Distances[someIdx];
+	auto right = pEndNode->PathCost + 1.009;
+
+	Debug::LogAndMessage("Should ? %d, left %.3f, right %.3f\n", left < right, left, right);
+
+	return left < right ? FindRegularPathContext::CheckNextDirAddress : 0x429F37;
+}
+
+// useHierarchical 时会跳过一个方向。暂时禁用这个。
+DEFINE_HOOK(0x429EC1, PathFinder_FindRegularPath_UseUnHierarchical, 0x6)
+{
+	GET_STACK(bool, hier, STACK_OFFSET(0x5C, 0x18));
+	return 0x429EC7;
+}
+
+// 这里也会跳过一个方向，而且这里经常会走。
+DEFINE_HOOK(0x429E21, PathFinder_FindRegularPath_IsNextExist, 0x6)
+{
+	GET(CellClass*, pNextCell, EBX);
+	if (!pNextCell)
+		Debug::LogAndMessage("Here1\n");
+	return pNextCell ? 0x429E27 : FindRegularPathContext::CheckNextDirAddress;
+}
 
 #pragma endregion
 
