@@ -115,7 +115,7 @@ DEFINE_HOOK(0x4180F4, AircraftClass_Mission_Attack_WeaponRange, 0x5)
 
 	GET(AircraftClass*, pThis, ESI);
 
-	R->EAX(pThis->GetWeapon(TechnoExt::ExtMap.Find(pThis)->CurrentAircraftWeaponIndex)->WeaponType);
+	R->EAX(pThis->GetWeapon(TechnoExt::ExtMap.Find(pThis)->CurrentAircraftWeaponIndex));
 
 	return SkipGameCode;
 }
@@ -1027,12 +1027,17 @@ DEFINE_HOOK(0x4179F7, AircraftClass_EnterIdleMode_NoCrash, 0x6)
 	if (TechnoTypeExt::ExtMap.Find(pThis->Type)->ExtendedAircraftMissions_UnlandDamage.Get(RulesExt::Global()->ExtendedAircraftMissions ? 1 : -1) < 0)
 		return 0;
 
-	if (pThis->CurrentMission != Mission::Area_Guard || !pThis->ArchiveTarget)
+	if (!pThis->Team && (pThis->CurrentMission != Mission::Area_Guard || !pThis->ArchiveTarget))
 	{
 		const auto pCell = reinterpret_cast<CellClass*(__thiscall*)(AircraftClass*)>(0x41A160)(pThis);
 		pThis->SetDestination(pCell, true);
 		pThis->SetArchiveTarget(pCell);
 		pThis->QueueMission(Mission::Area_Guard, true);
+	}
+	else if (!pThis->Destination)
+	{
+		const auto pCell = reinterpret_cast<CellClass*(__thiscall*)(AircraftClass*)>(0x41A160)(pThis);
+		pThis->SetDestination(pCell, true);
 	}
 
 	return SkipGameCode;
