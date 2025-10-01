@@ -2131,7 +2131,7 @@ inline void LoadTips(INI_EX exINI, const char* pSection, DynamicVectorClass<CSFT
         tip.Read(exINI, pSection, tempBuffer);
 
         if (!tip.Get())
-            return;
+            continue;
         
         pDest->AddUnique(tip);
     }
