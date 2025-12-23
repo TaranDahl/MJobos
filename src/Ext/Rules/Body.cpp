@@ -339,6 +339,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->SortCameoByName.Read(exINI, GameStrings::General, "SortCameoByName");
 
 	this->MergeBuildingDamage.Read(exINI, GameStrings::CombatDamage, "MergeBuildingDamage");
+
+	this->ExtendedRearmWeapon.Read(exINI, GameStrings::CombatDamage, "ExtendedRearmWeapon");
 	
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -617,6 +619,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIAirTargetingFix)
 		.Process(this->SortCameoByName)
 		.Process(this->MergeBuildingDamage)
+		.Process(this->ExtendedRearmWeapon)
 		;
 }
 

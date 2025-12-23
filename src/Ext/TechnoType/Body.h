@@ -451,6 +451,8 @@ public:
 
 		Nullable<bool> TurretResponse;
 
+		Nullable<bool> ExtendedRearmWeapon;
+
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
 			, HealthBar_HidePips { false }
@@ -852,6 +854,8 @@ public:
 			, InfantryAutoDeploy {}
 
 			, TurretResponse {}
+
+			, ExtendedRearmWeapon {}
 		{ }
 
 		virtual ~ExtData() = default;
