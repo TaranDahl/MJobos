@@ -43,6 +43,7 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 	this->ApplyMindControlRangeLimit();
 	this->UpdateRecountBurst();
 	this->UpdateRearmInEMPState();
+	this->UpdateExtendedRearmProgress();
 
 	if (this->AttackMoveFollowerTempCount)
 		this->AttackMoveFollowerTempCount--;
@@ -2135,4 +2136,20 @@ void TechnoExt::ExtData::UpdateTintValues()
 		auto const pShieldType = this->Shield->GetType();
 		calculateTint(Drawing::RGB_To_Int(pShieldType->Tint_Color), static_cast<int>(pShieldType->Tint_Intensity * 1000), pShieldType->Tint_VisibleToHouses);
 	}
+}
+
+void TechnoExt::ExtData::UpdateExtendedRearmProgress()
+{
+	std::vector<int> finishedIdx;
+
+	for (auto& tuple : this->ExtendedRearmProgress)
+	{
+		tuple.second.second += 1.0 / this->AE.ROFMultiplier; // progress
+		if (tuple.second.first <= tuple.second.second) // timeleft <= progress
+			finishedIdx.push_back(tuple.first);
+	}
+
+	// Remove finished
+	for (int idx : finishedIdx)
+		this->ExtendedRearmProgress.erase(idx);
 }

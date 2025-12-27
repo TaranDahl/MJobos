@@ -103,7 +103,7 @@ public:
 
 		bool JumpjetStraightAscend; // Is set to true jumpjet units will ascend straight and do not adjust rotation or position during it.
 
-		std::map<int, double> RearmProgress;
+		std::map<int, std::pair<int, double>> ExtendedRearmProgress;
 
 		ExtData(TechnoClass* OwnerObject) : Extension<TechnoClass>(OwnerObject)
 			, TypeExtData { nullptr }
@@ -171,7 +171,7 @@ public:
 			, SpecialTracked { false }
 			, FallingDownTracked { false }
 			, JumpjetStraightAscend { false }
-			, RearmProgress {}
+			, ExtendedRearmProgress {}
 		{ }
 
 		void OnEarlyUpdate();
@@ -210,8 +210,11 @@ public:
 		int ApplyForceWeaponInRange(AbstractClass* pTarget);
 		void ResetDelayedFireTimer();
 		void UpdateTintValues();
-
 		void AmmoAutoConvertActions();
+		void UpdateExtendedRearmProgress();
+		void StartExtendedRearm(int wpIdx, int ROF);
+		bool IsExtendedRearmReady(int wpIdx);
+
 
 		virtual ~ExtData() override;
 		virtual void InvalidatePointer(void* ptr, bool bRemoved) override;

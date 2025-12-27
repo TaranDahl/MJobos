@@ -481,6 +481,22 @@ DEFINE_HOOK(0x6FC749, TechnoClass_GetFireError_AntiUnderground, 0x5)
 	return GoOtherChecks;
 }
 
+DEFINE_HOOK(0x6FC94F, TechnoClass_GetFireError_ExtendedROF, 0x6)
+{
+	enum { RearmReady = 0x6FC981, ErrorRearm = 0x6FC972 };
+
+	GET(TechnoClass*, pThis, ESI);
+	GET_STACK(int, idx, STACK_OFFSET(0x20, 0x8));
+
+	auto pExt = TechnoExt::ExtMap.Find(pThis);
+	auto pTypeExt = pExt->TypeExtData;
+
+	if (!pTypeExt->ExtendedRearmWeapon.Get(RulesExt::Global()->ExtendedRearmWeapon))
+		return 0;
+
+	return pThis->RearmTimer.InProgress() || !pExt->IsExtendedRearmReady(idx) ? ErrorRearm : RearmReady;
+}
+
 #pragma endregion
 
 #pragma region TechnoClass_Fire
@@ -806,17 +822,6 @@ DEFINE_HOOK(0x6FF4CC, TechnoClass_FireAt_ToggleLaserWeaponIndex, 0x6)
 	return 0;
 }
 
-// Issue #46: Laser is mirrored relative to FireFLH
-// Author: Starkku
-DEFINE_HOOK(0x6FF2BE, TechnoClass_FireAt_BurstOffsetFix, 0x6)
-{
-	GET(TechnoClass*, pThis, ESI);
-
-	--pThis->CurrentBurstIndex; // Restored in TechnoClass_FireAt_LateLogic hook.
-
-	return 0x6FF2D1;
-}
-
 static inline void SetChargeTurretDelay(TechnoClass* pThis, int rearmDelay, WeaponTypeClass* pWeapon)
 {
 	pThis->ChargeTurretDelay = rearmDelay;
@@ -860,6 +865,46 @@ DEFINE_HOOK(0x6FF29E, TechnoClass_FireAt_ChargeTurret2, 0x6)
 	SetChargeTurretDelay(pThis, rearmDelay, pWeapon);
 
 	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x6FE4C8, TechnoClass_FireAt_DiskLaserROF, 0x6)
+{
+	GET(TechnoClass*, pThis, ESI);
+
+	auto pExt = TechnoExt::ExtMap.Find(pThis);
+	auto pTypeExt = pExt->TypeExtData;
+
+	if (!pTypeExt->ExtendedRearmWeapon.Get(RulesExt::Global()->ExtendedRearmWeapon))
+		return 0;
+
+	GET(int, rof, EAX);
+	GET_STACK(int, wpIdx, STACK_OFFSET(0xB8, 0xC));
+
+	pThis->RearmTimer.Start(0);
+	pExt->StartExtendedRearm(wpIdx, rof);
+	return 0;
+}
+
+DEFINE_HOOK(0x6FF2BE, TechnoClass_FireAt_NormalROF, 0x6)
+{
+	GET(TechnoClass*, pThis, ESI);
+
+	auto pExt = TechnoExt::ExtMap.Find(pThis);
+	auto pTypeExt = pExt->TypeExtData;
+
+	if (!pTypeExt->ExtendedRearmWeapon.Get(RulesExt::Global()->ExtendedRearmWeapon))
+		return 0;
+
+	GET(int, rof, EAX);
+	GET_STACK(int, wpIdx, STACK_OFFSET(0xB0, 0xC));
+
+	pThis->RearmTimer.Start(0);
+	pExt->StartExtendedRearm(wpIdx, rof);
+
+	// Issue #46: Laser is mirrored relative to FireFLH
+	// Author: Starkku
+	--pThis->CurrentBurstIndex; // Restored in TechnoClass_FireAt_LateLogic hook.
+	return 0x6FF2D1;
 }
 
 #pragma endregion
@@ -981,7 +1026,7 @@ DEFINE_HOOK(0x6FD0B5, TechnoClass_RearmDelay_ROF, 0x6)
 	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
 	auto const pExt = TechnoExt::ExtMap.Find(pThis);
 	auto const range = pWeaponExt->ROF_RandomDelay.Get(RulesExt::Global()->ROF_RandomDelay);
-	const double rof = pWeapon->ROF * pExt->AE.ROFMultiplier;
+	const double rof = pWeapon->ROF * (pExt->TypeExtData->ExtendedRearmWeapon.Get(RulesExt::Global()->ExtendedRearmWeapon) ? 1.0 : pExt->AE.ROFMultiplier); // Extended rearm weapon apply rof mult per frame.
 	pExt->LastRearmWasFullDelay = true;
 
 	R->EAX(GeneralUtils::GetRangedRandomOrSingleValue(range));

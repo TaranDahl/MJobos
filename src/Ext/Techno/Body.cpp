@@ -876,6 +876,17 @@ bool TechnoExt::SimpleDeployerAllowedToDeploy(UnitClass* pThis, bool defaultValu
 	return true;
 }
 
+void TechnoExt::ExtData::StartExtendedRearm(int wpIdx, int ROF)
+{
+	if (ROF > 0)
+		this->ExtendedRearmProgress.emplace(wpIdx, std::pair<int, double>(ROF, 0.0));
+}
+
+bool TechnoExt::ExtData::IsExtendedRearmReady(int wpIdx)
+{
+	return !this->ExtendedRearmProgress.contains(wpIdx);
+}
+
 // =============================
 // load / save
 
@@ -947,7 +958,7 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->SpecialTracked)
 		.Process(this->FallingDownTracked)
 		.Process(this->JumpjetStraightAscend)
-		.Process(this->RearmProgress)
+		//.Process(this->ExtendedRearmProgress)
 		;
 }
 
