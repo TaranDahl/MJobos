@@ -481,6 +481,11 @@ DEFINE_HOOK(0x6FC749, TechnoClass_GetFireError_AntiUnderground, 0x5)
 	return GoOtherChecks;
 }
 
+//1.修改装填进度结构以支持SL
+//2.武器上定义通用ROF
+//3.支持按ROF换武器
+//4.支持按ROF换多武器
+//5.分离Burst记录
 DEFINE_HOOK(0x6FC94F, TechnoClass_GetFireError_ExtendedROF, 0x6)
 {
 	enum { RearmReady = 0x6FC981, ErrorRearm = 0x6FC972 };
