@@ -1494,22 +1494,28 @@ DEFINE_HOOK(0x4D5FFE, FootClass_ApproachTarget_DecideDest, 0x8)
 {
 	enum { ReturnWithDest = 0x4D689A, CheckNextRange = 0x4D686C };
 
-	if (false)
+	if (false) // flag
 		return 0;
 
 	GET(FootClass*, pThis, EBX);
 	GET_STACK(int, distToApproach, STACK_OFFSET(0x158, -0xF4));
+
+	auto pTarget = pThis->Target;
+
+	// To reduce cost.
+	if (pThis->DistanceFrom(pTarget) >= distToApproach * 3.0)
+		return 0;
+
+	GET_STACK(int, wpIdx, STACK_OFFSET(0x158, -0xAC));
 	GET_STACK(bool, isAirUnit, STACK_OFFSET(0x158, -0x13D));
 	GET_STACK(bool, requireBuildable, STACK_OFFSET(0x158, -0x135));
 	GET_STACK(CellStruct, targetMapCrd, STACK_OFFSET(0x158, 0x134));
 	GET_STACK(int, targetDirection, STACK_OFFSET(0x158, -0x88));
-	GET_STACK(int, wpIdx, STACK_OFFSET(0x158, -0xAC));
 
 	CellStruct destMapCrd = targetMapCrd;
 
 	auto pType = pThis->GetTechnoType();
 	auto closeRange = pType->CloseRange;
-	auto pTarget = pThis->Target;
 	auto movementZone = pType->MovementZone;
 	auto speedType = pType->SpeedType;
 	auto alt = pThis->IsOnBridge();
