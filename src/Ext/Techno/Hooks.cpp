@@ -1489,3 +1489,100 @@ DEFINE_HOOK(0x6F9398, TechnoClass_SelectAutoTarget_Scan_FallingDown, 0x9)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x4D5FFE, FootClass_ApproachTarget_DecideDest, 0x8)
+{
+	enum { ReturnWithDest = 0x4D689A, CheckNextRange = 0x4D686C };
+
+	if (false)
+		return 0;
+
+	GET(FootClass*, pThis, EBX);
+	GET_STACK(int, distToApproach, STACK_OFFSET(0x158, -0xF4));
+	GET_STACK(bool, isAirUnit, STACK_OFFSET(0x158, -0x13D));
+	GET_STACK(bool, requireBuildable, STACK_OFFSET(0x158, -0x135));
+	GET_STACK(CellStruct, targetMapCrd, STACK_OFFSET(0x158, 0x134));
+	GET_STACK(int, targetDirection, STACK_OFFSET(0x158, -0x88));
+	GET_STACK(int, wpIdx, STACK_OFFSET(0x158, -0xAC));
+
+	CellStruct destMapCrd = targetMapCrd;
+
+	auto pType = pThis->GetTechnoType();
+	auto closeRange = pType->CloseRange;
+	auto pTarget = pThis->Target;
+	auto movementZone = pType->MovementZone;
+	auto speedType = pType->SpeedType;
+	auto alt = pThis->IsOnBridge();
+	auto headToCrd = pThis->GetDestination();
+	auto mzt = MapClass::Instance.GetMovementZoneType(CellClass::Coord2Cell(headToCrd), movementZone, alt);
+	auto rtti = pThis->WhatAmI();
+	auto pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto targetCrd = pTarget->GetCoords();
+
+	auto facingOffsets = Make_Global<int[25]>(0x8224DC); // FootClass::AttackPositionFacingOffsets
+
+	auto isInCloseRange = [targetCrd, closeRange](CoordStruct crd)
+		{
+			return closeRange && (targetCrd - crd).Magnitude() < 307.2;
+		};
+
+	auto isCellClearToMove = [pThis, movementZone, speedType, mzt, targetCrd, closeRange](CoordStruct crd)
+		{
+			if (!MapClass::Instance.IsWithinUsableArea(crd))
+				return false;
+
+			if (!(closeRange && (targetCrd - crd).Magnitude() < 307.2
+				|| true)) // IsCloseEnough
+			{
+				return false;
+			}
+
+			auto pCell = MapClass::Instance.GetCellAt(crd);
+
+			if (closeRange)
+				pThis->Mark(MarkType::Up);
+			auto result = pCell->IsClearToMove(speedType, false, false, mzt, movementZone, -1, 1);
+			if (closeRange)
+				pThis->Mark(MarkType::Down);
+
+			return result;
+		};
+
+	for (int i = 0; i != 25; ++i)
+	{
+		auto offset = facingOffsets[i];
+		// TODO: 方向偏移计算
+		auto currentFacingCrd = CoordStruct(0, 0, targetCrd.Z);
+		auto currentFacingCell = MapClass::Instance.GetCellAt(currentFacingCrd);
+
+		if (rtti == AbstractType::Infantry && closeRange)
+		{
+			currentFacingCrd = currentFacingCell->FindInfantrySubposition(targetCrd, false, false, true);
+		}
+		else
+		{
+			currentFacingCrd = CellClass::Cell2Coord(CellClass::Coord2Cell(currentFacingCrd));
+			currentFacingCrd.Z = 0;
+		}
+
+		if (requireBuildable && false) // CellClass::IsBuildable
+			continue;
+
+		bool clear = isCellClearToMove(currentFacingCrd);
+
+		if (!clear)
+		{
+			if (rtti == AbstractType::Infantry)
+				continue;
+
+			
+		}
+
+
+
+
+	}
+
+	R->Stack(STACK_OFFSET(0x158, -0x144), destMapCrd);
+	return CheckNextRange;
+}
