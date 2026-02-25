@@ -507,37 +507,37 @@ public:
 private:
 	BlitterFlags value { BlitterFlags::None };
 };
-
-class TheaterSpecificSHP
-{
-public:
-	constexpr TheaterSpecificSHP() noexcept = default;
-
-	TheaterSpecificSHP(SHPStruct* pSHP)
-	{
-		*this = pSHP;
-	}
-
-	TheaterSpecificSHP& operator = (SHPStruct* pSHP)
-	{
-		this->value = pSHP;
-	}
-
-	operator SHPStruct* ()
-	{
-		return this->value;
-	}
-
-	SHPStruct* GetSHP()
-	{
-		return *this;
-	}
-
-	bool Read(INI_EX& parser, const char* pSection, const char* pKey);
-
-	bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
-
-	bool Save(PhobosStreamWriter& Stm) const;
-private:
-	SHPStruct* value { nullptr };
-};
+//
+//class TheaterSpecificSHP
+//{
+//public:
+//	constexpr TheaterSpecificSHP() noexcept = default;
+//
+//	TheaterSpecificSHP(SHPStruct* pSHP)
+//	{
+//		*this = pSHP;
+//	}
+//
+//	TheaterSpecificSHP& operator = (SHPStruct* pSHP)
+//	{
+//		this->value = pSHP;
+//	}
+//
+//	operator SHPStruct* ()
+//	{
+//		return this->value;
+//	}
+//
+//	SHPStruct* GetSHP()
+//	{
+//		return *this;
+//	}
+//
+//	bool Read(INI_EX& parser, const char* pSection, const char* pKey);
+//
+//	bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
+//
+//	bool Save(PhobosStreamWriter& Stm) const;
+//private:
+//	SHPStruct* value { nullptr };
+//};

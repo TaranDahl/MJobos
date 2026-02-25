@@ -81,24 +81,9 @@ public:
 		void Serialize(T& Stm);
 	};
 
-	static int GetFlags(int iEvent);
-
-	static std::optional<bool> Execute(TEventClass* pThis, int iEvent, HouseClass* pHouse,
-		ObjectClass* pObject, CDTimerClass* pTimer, bool* isPersitant, TechnoClass* pSource);
-
-	template<bool IsGlobal, typename _Pr>
-	static bool VariableCheck(TEventClass* pThis);
-	template<bool IsSrcGlobal, bool IsGlobal, typename _Pr>
-	static bool VariableCheckBinary(TEventClass* pThis);
-
-	static bool HouseOwnsTechnoTypeTEvent(TEventClass* pThis);
-	static bool HouseDoesntOwnTechnoTypeTEvent(TEventClass* pThis);
-
-	static bool CellHasAnyTechnoTypeFromListTEvent(TEventClass* pThis, ObjectClass* pObject, HouseClass* pHouse);
-	static bool CellHasTechnoTypeTEvent(TEventClass* pThis, ObjectClass* pObject, HouseClass* pHouse);
-
-	static bool AttachedIsUnderAttachedEffectTEvent(TEventClass* pThis, ObjectClass* pObject);
-
+	// TODO : callback
+	//static std::optional<bool> Execute(TEventClass* pThis, int iEvent, HouseClass* pHouse,
+	//	ObjectClass* pObject, CDTimerClass* pTimer, bool* isPersitant, TechnoClass* pSource);
 
 	class ExtContainer final : public Container<TEventExt>
 	{

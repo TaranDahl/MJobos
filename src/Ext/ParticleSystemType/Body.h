@@ -10,15 +10,12 @@ public:
 	using base_type = ParticleSystemTypeClass;
 
 	static constexpr DWORD Canary = 0xF9984EFE;
-	static constexpr size_t ExtPointerOffset = 0x18;
 
 	class ExtData final : public Extension<ParticleSystemTypeClass>
 	{
 	public:
-		Valueable<bool> AdjustTargetCoordsOnRotation;
 
 		ExtData(ParticleSystemTypeClass* OwnerObject) : Extension<ParticleSystemTypeClass>(OwnerObject)
-			, AdjustTargetCoordsOnRotation { true }
 		{ }
 
 		virtual ~ExtData() = default;

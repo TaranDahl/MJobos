@@ -4,36 +4,18 @@
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
-#include <New/Type/LaserTrailTypeClass.h>
-
 class VoxelAnimTypeExt
 {
 public:
 	using base_type = VoxelAnimTypeClass;
 
 	static constexpr DWORD Canary = 0xAAAEEEEE;
-	static constexpr size_t ExtPointerOffset = 0x18;
 
 	class ExtData final : public Extension<VoxelAnimTypeClass>
 	{
 	public:
 
-		ValueableIdxVector<LaserTrailTypeClass> LaserTrail_Types;
-		Valueable<bool> ExplodeOnWater;
-		Valueable<bool> Warhead_Detonate;
-		ValueableVector<AnimTypeClass*> WakeAnim;
-		NullableVector<AnimTypeClass*> SplashAnims;
-		Valueable<bool> SplashAnims_PickRandom;
-		Valueable<int> Trailer_SpawnDelay;
-
 		ExtData(VoxelAnimTypeClass* OwnerObject) : Extension<VoxelAnimTypeClass>(OwnerObject)
-			, LaserTrail_Types()
-			, ExplodeOnWater { false }
-			, Warhead_Detonate { false }
-			, WakeAnim {}
-			, SplashAnims {}
-			, SplashAnims_PickRandom { false }
-			, Trailer_SpawnDelay { 2 }
 		{ }
 
 		virtual ~ExtData() = default;

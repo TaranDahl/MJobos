@@ -1,82 +1,8 @@
 #include "Body.h"
 
-#include <VeinholeMonsterClass.h>
-
 #include <Ext/House/Body.h>
 
 std::unique_ptr<ScenarioExt::ExtData> ScenarioExt::Data = nullptr;
-
-bool ScenarioExt::CellParsed = false;
-
-void ScenarioExt::ExtData::SetVariableToByID(bool bIsGlobal, int nIndex, char bState)
-{
-	auto& dict = Global()->Variables[bIsGlobal];
-
-	auto itr = dict.find(nIndex);
-
-	if (itr != dict.end() && itr->second.Value != bState)
-	{
-		itr->second.Value = bState;
-		ScenarioClass::Instance->VariablesChanged = true;
-		if (!bIsGlobal)
-			TagClass::NotifyLocalChanged(nIndex);
-		else
-			TagClass::NotifyGlobalChanged(nIndex);
-	}
-}
-
-void ScenarioExt::ExtData::GetVariableStateByID(bool bIsGlobal, int nIndex, char* pOut)
-{
-	auto& dict = Global()->Variables[bIsGlobal];
-
-	auto itr = dict.find(nIndex);
-	if (itr != dict.end())
-		*pOut = static_cast<char>(itr->second.Value);
-}
-
-void ScenarioExt::ExtData::ReadVariables(bool bIsGlobal, CCINIClass* pINI)
-{
-	if (!bIsGlobal) // Local variables need to be read again
-		Global()->Variables[false].clear();
-	else if (Global()->Variables[true].size() != 0) // Global variables had been loaded, DO NOT CHANGE THEM
-		return;
-
-	const int nCount = pINI->GetKeyCount("VariableNames");
-	for (int i = 0; i < nCount; ++i)
-	{
-		const auto pKey = pINI->GetKeyName("VariableNames", i);
-		int nIndex;
-		if (sscanf_s(pKey, "%d", &nIndex) == 1)
-		{
-			auto& var = Global()->Variables[bIsGlobal][nIndex];
-			pINI->ReadString("VariableNames", pKey, pKey, Phobos::readBuffer);
-			char* buffer;
-			strcpy_s(var.Name, strtok_s(Phobos::readBuffer, ",", &buffer));
-			if (auto pState = strtok_s(nullptr, ",", &buffer))
-				var.Value = atoi(pState);
-			else
-				var.Value = 0;
-		}
-	}
-}
-
-// you've inspired something controversial
-void ScenarioExt::ExtData::SaveVariablesToFile(bool isGlobal)
-{
-	CCINIClass fINI {};
-	CCFileClass file { isGlobal ? "globals.ini" : "locals.ini" };
-
-	if (file.Exists())
-		fINI.ReadCCFile(&file);
-	else
-		file.CreateFileA();
-
-	for (const auto& [_,varext] : Global()->Variables[isGlobal])
-		fINI.WriteInteger(ScenarioClass::Instance->FileName, varext.Name, varext.Value, false);
-
-	fINI.WriteCCFile(&file);
-	file.Close();
-}
 
 void ScenarioExt::Allocate(ScenarioClass* pThis)
 {
@@ -91,33 +17,6 @@ void ScenarioExt::Remove(ScenarioClass* pThis)
 void ScenarioExt::LoadFromINIFile(ScenarioClass* pThis, CCINIClass* pINI)
 {
 	Data->LoadFromINI(pINI);
-
-	for (auto const pHouse : HouseClass::Array)
-	{
-		HouseExt::ExtMap.Find(pHouse)->FreeRadar = ScenarioClass::Instance->FreeRadar;
-	}
-}
-
-void ScenarioExt::ExtData::UpdateAutoDeathObjectsInLimbo()
-{
-	for (auto const pExt : this->AutoDeathObjects)
-	{
-		auto const pTechno = pExt->OwnerObject();
-
-		if (!pTechno->IsInLogic && pTechno->IsAlive)
-			pExt->CheckDeathConditions(true);
-	}
-}
-
-void ScenarioExt::ExtData::UpdateTransportReloaders()
-{
-	for (auto const pExt : this->TransportReloaders)
-	{
-		auto const pTechno = pExt->OwnerObject();
-
-		if (pTechno->IsAlive && pTechno->Transporter && pTechno->Transporter->IsInLogic)
-			pTechno->Reload();
-	}
 }
 
 // =============================
@@ -125,58 +24,17 @@ void ScenarioExt::ExtData::UpdateTransportReloaders()
 
 void ScenarioExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 {
-	auto pThis = this->OwnerObject();
+	//auto pThis = this->OwnerObject();
 
-	INI_EX maINI(pINI);
-	INI_EX ruINI(CCINIClass::INI_Rules);
+	//INI_EX maINI(pINI);
+	//INI_EX ruINI(CCINIClass::INI_Rules);
 
-	if (SessionClass::IsCampaign())
-	{
-		Nullable<bool> SP_MCVRedeploy;
-		SP_MCVRedeploy.Read(maINI, GameStrings::Basic, GameStrings::MCVRedeploys);
-		if (!SP_MCVRedeploy.isset())
-			SP_MCVRedeploy.Read(ruINI, GameStrings::Basic, GameStrings::MCVRedeploys);
-		GameModeOptionsClass::Instance.MCVRedeploy = SP_MCVRedeploy.Get(false);
-
-		CCINIClass ini_missionmd {};
-		ini_missionmd.LoadFromFile(GameStrings::MISSIONMD_INI);
-		auto const scenarioName = pThis->FileName;
-
-		// Override rankings
-		pThis->ParTimeEasy = ini_missionmd.ReadTime(scenarioName, "Ranking.ParTimeEasy", pThis->ParTimeEasy);
-		pThis->ParTimeMedium = ini_missionmd.ReadTime(scenarioName, "Ranking.ParTimeMedium", pThis->ParTimeMedium);
-		pThis->ParTimeDifficult = ini_missionmd.ReadTime(scenarioName, "Ranking.ParTimeHard", pThis->ParTimeDifficult);
-		ini_missionmd.ReadString(scenarioName, "Ranking.UnderParTitle", pThis->UnderParTitle, pThis->UnderParTitle);
-		ini_missionmd.ReadString(scenarioName, "Ranking.UnderParMessage", pThis->UnderParMessage, pThis->UnderParMessage);
-		ini_missionmd.ReadString(scenarioName, "Ranking.OverParTitle", pThis->OverParTitle, pThis->OverParTitle);
-		ini_missionmd.ReadString(scenarioName, "Ranking.OverParMessage", pThis->OverParMessage, pThis->OverParMessage);
-
-		this->ShowBriefing = pINI->ReadBool(GameStrings::Basic, "ShowBriefing", this->ShowBriefing);
-		this->BriefingTheme = pINI->ReadTheme(GameStrings::Basic, "BriefingTheme", this->BriefingTheme);
-	}
 }
 
 template <typename T>
 void ScenarioExt::ExtData::Serialize(T& Stm)
 {
 	Stm
-		.Process(this->Waypoints)
-		.Process(this->Variables[0])
-		.Process(this->Variables[1])
-		.Process(this->ShowBriefing)
-		.Process(this->BriefingTheme)
-		.Process(this->AutoDeathObjects)
-		.Process(this->TransportReloaders)
-		.Process(this->SWSidebar_Enable)
-		.Process(this->SWSidebar_Indices)
-		.Process(this->RecordMessages)
-		.Process(this->DefaultLS640BkgdName)
-		.Process(this->DefaultLS800BkgdName)
-		.Process(this->DefaultLS800BkgdPal)
-		.Process(this->LimboLaunchers)
-		.Process(this->UndergroundTracker)
-		.Process(this->SpecialTracker)
-		.Process(this->FallingDownTracker)
 		;
 }
 
@@ -201,10 +59,6 @@ DEFINE_HOOK(0x683549, ScenarioClass_CTOR, 0x9)
 
 	ScenarioExt::Allocate(pItem);
 
-	ScenarioExt::Global()->Waypoints.clear();
-	ScenarioExt::Global()->Variables[0].clear();
-	ScenarioExt::Global()->Variables[1].clear();
-
 	return 0;
 }
 
@@ -213,6 +67,7 @@ DEFINE_HOOK(0x6BEB7D, ScenarioClass_DTOR, 0x6)
 	GET(ScenarioClass*, pItem, ESI);
 
 	ScenarioExt::Remove(pItem);
+
 	return 0;
 }
 
@@ -270,10 +125,5 @@ DEFINE_HOOK(0x68AD2F, ScenarioClass_LoadFromINI, 0x5)
 
 DEFINE_HOOK(0x55B4E1, LogicClass_Update_BeforeAll, 0x5)
 {
-	VeinholeMonsterClass::UpdateAllVeinholes();
-
-	ScenarioExt::Global()->UpdateAutoDeathObjectsInLimbo();
-	ScenarioExt::Global()->UpdateTransportReloaders();
-
 	return 0;
 }

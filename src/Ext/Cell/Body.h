@@ -10,7 +10,6 @@ public:
 	using base_type = CellClass;
 
 	static constexpr DWORD Canary = 0x13371337;
-	static constexpr size_t ExtPointerOffset = 0x144;
 
 	struct RadLevel
 	{
@@ -32,9 +31,9 @@ public:
 	class ExtData final : public Extension<CellClass>
 	{
 	public:
-		std::vector<RadSiteClass*> RadSites {};
-		std::vector<RadLevel> RadLevels { };
-		int InfantryCount{ 0 };
+		// TODO : extern
+		//std::vector<RadSiteClass*> RadSites {};
+		//std::vector<RadLevel> RadLevels { };
 
 		ExtData(CellClass* OwnerObject) : Extension<CellClass>(OwnerObject)
 		{ }

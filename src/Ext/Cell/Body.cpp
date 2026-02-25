@@ -9,9 +9,6 @@ template <typename T>
 void CellExt::ExtData::Serialize(T& Stm)
 {
 	Stm
-		.Process(this->RadSites)
-		.Process(this->RadLevels)
-		.Process(this->InfantryCount)
 		;
 }
 

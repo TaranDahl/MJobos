@@ -10,15 +10,11 @@ public:
 	using base_type = TiberiumClass;
 
 	static constexpr DWORD Canary = 0xAABBCCDD;
-	static constexpr size_t ExtPointerOffset = 0x18;
 
 	class ExtData final : public Extension<TiberiumClass>
 	{
 	public:
-		Nullable<ColorStruct> MinimapColor;
-
 		ExtData(TiberiumClass* OwnerObject) : Extension<TiberiumClass>(OwnerObject)
-			, MinimapColor {}
 		{ }
 
 		virtual ~ExtData() = default;

@@ -9,17 +9,15 @@ template <typename T>
 void ParticleSystemTypeExt::ExtData::Serialize(T& Stm)
 {
 	Stm
-		.Process(this->AdjustTargetCoordsOnRotation)
 		;
 }
 
 void ParticleSystemTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 {
-	auto pThis = this->OwnerObject();
-	const char* pSection = pThis->ID;
-	INI_EX exINI(pINI);
+	//auto pThis = this->OwnerObject();
+	//const char* pSection = pThis->ID;
+	//INI_EX exINI(pINI);
 
-	this->AdjustTargetCoordsOnRotation.Read(exINI, pSection, "AdjustTargetCoordsOnRotation");
 }
 
 void ParticleSystemTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

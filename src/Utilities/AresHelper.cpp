@@ -82,7 +82,7 @@ void AresHelper::GetGameModulesBaseAddresses()
 				{
 					if (!_strcmpi(originalModuleName, "Ares.dll"))
 						AresBaseAddress = (uintptr_t)modEntry.modBaseAddr;
-					else if (!_strcmpi(originalModuleName, PHOBOS_DLL))
+					else if (!_strcmpi(originalModuleName, "Phobos.dll"))
 						PhobosBaseAddress = (uintptr_t)modEntry.modBaseAddr;
 					syringables.emplace_back(originalModuleName, modEntry.modBaseAddr);
 				}

@@ -1,178 +1,178 @@
-#pragma once
-
-#include <New/Type/ShieldTypeClass.h>
-
-#include "SpecificStructures.h"
-
-class TechnoClass;
-class WarheadTypeClass;
-
-class ShieldClass
-{
-public:
-	static std::vector<ShieldClass*> Array;
-
-	ShieldClass();
-	ShieldClass(TechnoClass* pTechno, bool isAttached);
-	ShieldClass(TechnoClass* pTechno) : ShieldClass(pTechno, false) { };
-	~ShieldClass();
-
-	int ReceiveDamage(args_ReceiveDamage* args);
-	bool CanBeTargeted(WeaponTypeClass* pWeapon) const;
-	bool CanBePenetrated(WarheadTypeClass* pWarhead) const;
-	void BreakShield(const std::vector<AnimTypeClass*>& pBreakAnim, WeaponTypeClass* pBreakWeapon = nullptr);
-
-	void SetRespawn(int duration, double amount, int rate, bool restartInCombat, int restartInCombatDelay, bool resetTimer, std::vector<AnimTypeClass*> anim, WeaponTypeClass* weapon = nullptr);
-	void SetSelfHealing(int duration, double amount, int rate, bool restartInCombat, int restartInCombatDelay, bool resetTimer);
-	void SetRespawnRestartInCombat();
-	void KillAnim();
-	void AI_Temporal();
-	void AI();
-
-	void DrawShieldBar_Building(const int length, RectangleStruct* pBound);
-	void DrawShieldBar_Other(const int length, RectangleStruct* pBound);
-
-	double GetHealthRatio() const
-	{
-		return static_cast<double>(this->HP) / this->Type->Strength;
-	}
-
-	void SetHP(int amount)
-	{
-		this->HP = std::min(amount, this->Type->Strength.Get());
-	}
-
-	int GetHP() const
-	{
-		return this->HP;
-	}
-
-	bool IsActive() const
-	{
-		return this->Available
-			&& this->HP > 0
-			&& this->Online;
-	}
-
-	bool IsAvailable() const
-	{
-		return this->Available;
-	}
-
-	bool IsBrokenAndNonRespawning() const
-	{
-		return this->HP <= 0 && !this->Type->Respawn;
-	}
-
-	ShieldTypeClass* GetType() const
-	{
-		return this->Type;
-	}
-
-	ArmorType GetArmorType(TechnoTypeClass* pTechnoType = nullptr) const;
-	int GetFramesSinceLastBroken() const { return Unsorted::CurrentFrame - this->LastBreakFrame; }
-	void SetAnimationVisibility(bool visible);
-	void UpdateTint();
-	void ConvertCheck(TechnoTypeClass* pTechnoType);
-
-	static void SyncShieldToAnother(TechnoClass* pFrom, TechnoClass* pTo);
-	static bool ShieldIsBrokenTEvent(ObjectClass* pAttached);
-
-	bool IsGreenSP() const
-	{
-		auto const pType = this->Type;
-		return pType->GetConditionYellow() * pType->Strength.Get() < this->HP;
-	}
-
-	bool IsYellowSP() const
-	{
-		auto const pType = this->Type;
-		const int health = this->HP;
-		const int strength = pType->Strength.Get();
-		return pType->GetConditionRed() * strength < health && health <= pType->GetConditionYellow() * strength;
-	}
-
-	bool IsRedSP() const
-	{
-		auto const pType = this->Type;
-		return this->HP <= pType->GetConditionYellow() * pType->Strength.Get();
-	}
-
-	static void PointerGotInvalid(void* ptr, bool removed);
-
-	bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
-	bool Save(PhobosStreamWriter& Stm) const;
-
-private:
-	template <typename T>
-	bool Serialize(T& Stm);
-
-	void SelfHealing();
-	int GetPercentageAmount(double iStatus);
-
-	void RespawnShield();
-
-	void CreateAnim();
-	void UpdateIdleAnim();
-	AnimTypeClass* GetIdleAnimType();
-
-	void WeaponNullifyAnim(const std::vector<AnimTypeClass*>& pHitAnim);
-	void ResponseAttack();
-
-	void CloakCheck();
-	void OnlineCheck();
-	void TemporalCheck();
-	void EnabledByCheck();
-
-	int DrawShieldBar_Pip(const bool isBuilding) const;
-	int DrawShieldBar_PipAmount(const int length) const;
-
-	/// Properties ///
-	TechnoClass* Techno;
-	TechnoTypeClass* TechnoID;
-	int HP;
-	AnimClass* IdleAnim;
-	bool Cloak;
-	bool Online;
-	bool Temporal;
-	bool Available;
-	bool Attached;
-	bool AreAnimsHidden;
-	bool IsSelfHealingEnabled;
-
-	double SelfHealing_Warhead;
-	int SelfHealing_Rate_Warhead;
-	bool SelfHealing_RestartInCombat_Warhead;
-	int SelfHealing_RestartInCombatDelay_Warhead;
-	double Respawn_Warhead;
-	int Respawn_Rate_Warhead;
-	bool Respawn_RestartInCombat_Warhead;
-	int Respawn_RestartInCombatDelay_Warhead;
-	std::vector<AnimTypeClass*> Respawn_Anim_Warhead;
-	WeaponTypeClass* Respawn_Weapon_Warhead;
-
-	int LastBreakFrame;
-	double LastTechnoHealthRatio;
-
-	ShieldTypeClass* Type;
-
-	struct Timers
-	{
-		Timers() :
-			SelfHealing_CombatRestart { }
-			, SelfHealing { }
-			, SelfHealing_WHModifier { }
-			, Respawn_CombatRestart { }
-			, Respawn { }
-			, Respawn_WHModifier { }
-		{ }
-
-		CDTimerClass SelfHealing_CombatRestart;
-		CDTimerClass SelfHealing;
-		CDTimerClass SelfHealing_WHModifier;
-		CDTimerClass Respawn_CombatRestart;
-		CDTimerClass Respawn;
-		CDTimerClass Respawn_WHModifier;
-
-	} Timers;
-};
+//#pragma once
+//
+//#include <New/Type/ShieldTypeClass.h>
+//
+//#include "SpecificStructures.h"
+//
+//class TechnoClass;
+//class WarheadTypeClass;
+//
+//class ShieldClass
+//{
+//public:
+//	static std::vector<ShieldClass*> Array;
+//
+//	ShieldClass();
+//	ShieldClass(TechnoClass* pTechno, bool isAttached);
+//	ShieldClass(TechnoClass* pTechno) : ShieldClass(pTechno, false) { };
+//	~ShieldClass();
+//
+//	int ReceiveDamage(args_ReceiveDamage* args);
+//	bool CanBeTargeted(WeaponTypeClass* pWeapon) const;
+//	bool CanBePenetrated(WarheadTypeClass* pWarhead) const;
+//	void BreakShield(const std::vector<AnimTypeClass*>& pBreakAnim, WeaponTypeClass* pBreakWeapon = nullptr);
+//
+//	void SetRespawn(int duration, double amount, int rate, bool restartInCombat, int restartInCombatDelay, bool resetTimer, std::vector<AnimTypeClass*> anim, WeaponTypeClass* weapon = nullptr);
+//	void SetSelfHealing(int duration, double amount, int rate, bool restartInCombat, int restartInCombatDelay, bool resetTimer);
+//	void SetRespawnRestartInCombat();
+//	void KillAnim();
+//	void AI_Temporal();
+//	void AI();
+//
+//	void DrawShieldBar_Building(const int length, RectangleStruct* pBound);
+//	void DrawShieldBar_Other(const int length, RectangleStruct* pBound);
+//
+//	double GetHealthRatio() const
+//	{
+//		return static_cast<double>(this->HP) / this->Type->Strength;
+//	}
+//
+//	void SetHP(int amount)
+//	{
+//		this->HP = std::min(amount, this->Type->Strength.Get());
+//	}
+//
+//	int GetHP() const
+//	{
+//		return this->HP;
+//	}
+//
+//	bool IsActive() const
+//	{
+//		return this->Available
+//			&& this->HP > 0
+//			&& this->Online;
+//	}
+//
+//	bool IsAvailable() const
+//	{
+//		return this->Available;
+//	}
+//
+//	bool IsBrokenAndNonRespawning() const
+//	{
+//		return this->HP <= 0 && !this->Type->Respawn;
+//	}
+//
+//	ShieldTypeClass* GetType() const
+//	{
+//		return this->Type;
+//	}
+//
+//	ArmorType GetArmorType(TechnoTypeClass* pTechnoType = nullptr) const;
+//	int GetFramesSinceLastBroken() const { return Unsorted::CurrentFrame - this->LastBreakFrame; }
+//	void SetAnimationVisibility(bool visible);
+//	void UpdateTint();
+//	void ConvertCheck(TechnoTypeClass* pTechnoType);
+//
+//	static void SyncShieldToAnother(TechnoClass* pFrom, TechnoClass* pTo);
+//	static bool ShieldIsBrokenTEvent(ObjectClass* pAttached);
+//
+//	bool IsGreenSP() const
+//	{
+//		auto const pType = this->Type;
+//		return pType->GetConditionYellow() * pType->Strength.Get() < this->HP;
+//	}
+//
+//	bool IsYellowSP() const
+//	{
+//		auto const pType = this->Type;
+//		const int health = this->HP;
+//		const int strength = pType->Strength.Get();
+//		return pType->GetConditionRed() * strength < health && health <= pType->GetConditionYellow() * strength;
+//	}
+//
+//	bool IsRedSP() const
+//	{
+//		auto const pType = this->Type;
+//		return this->HP <= pType->GetConditionYellow() * pType->Strength.Get();
+//	}
+//
+//	static void PointerGotInvalid(void* ptr, bool removed);
+//
+//	bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
+//	bool Save(PhobosStreamWriter& Stm) const;
+//
+//private:
+//	template <typename T>
+//	bool Serialize(T& Stm);
+//
+//	void SelfHealing();
+//	int GetPercentageAmount(double iStatus);
+//
+//	void RespawnShield();
+//
+//	void CreateAnim();
+//	void UpdateIdleAnim();
+//	AnimTypeClass* GetIdleAnimType();
+//
+//	void WeaponNullifyAnim(const std::vector<AnimTypeClass*>& pHitAnim);
+//	void ResponseAttack();
+//
+//	void CloakCheck();
+//	void OnlineCheck();
+//	void TemporalCheck();
+//	void EnabledByCheck();
+//
+//	int DrawShieldBar_Pip(const bool isBuilding) const;
+//	int DrawShieldBar_PipAmount(const int length) const;
+//
+//	/// Properties ///
+//	TechnoClass* Techno;
+//	TechnoTypeClass* TechnoID;
+//	int HP;
+//	AnimClass* IdleAnim;
+//	bool Cloak;
+//	bool Online;
+//	bool Temporal;
+//	bool Available;
+//	bool Attached;
+//	bool AreAnimsHidden;
+//	bool IsSelfHealingEnabled;
+//
+//	double SelfHealing_Warhead;
+//	int SelfHealing_Rate_Warhead;
+//	bool SelfHealing_RestartInCombat_Warhead;
+//	int SelfHealing_RestartInCombatDelay_Warhead;
+//	double Respawn_Warhead;
+//	int Respawn_Rate_Warhead;
+//	bool Respawn_RestartInCombat_Warhead;
+//	int Respawn_RestartInCombatDelay_Warhead;
+//	std::vector<AnimTypeClass*> Respawn_Anim_Warhead;
+//	WeaponTypeClass* Respawn_Weapon_Warhead;
+//
+//	int LastBreakFrame;
+//	double LastTechnoHealthRatio;
+//
+//	ShieldTypeClass* Type;
+//
+//	struct Timers
+//	{
+//		Timers() :
+//			SelfHealing_CombatRestart { }
+//			, SelfHealing { }
+//			, SelfHealing_WHModifier { }
+//			, Respawn_CombatRestart { }
+//			, Respawn { }
+//			, Respawn_WHModifier { }
+//		{ }
+//
+//		CDTimerClass SelfHealing_CombatRestart;
+//		CDTimerClass SelfHealing;
+//		CDTimerClass SelfHealing_WHModifier;
+//		CDTimerClass Respawn_CombatRestart;
+//		CDTimerClass Respawn;
+//		CDTimerClass Respawn_WHModifier;
+//
+//	} Timers;
+//};

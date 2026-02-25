@@ -1,3 +1,4 @@
+
 #include "Body.h"
 
 TeamExt::ExtContainer TeamExt::ExtMap;
@@ -9,19 +10,6 @@ template <typename T>
 void TeamExt::ExtData::Serialize(T& Stm)
 {
 	Stm
-		.Process(this->WaitNoTargetAttempts)
-		.Process(this->NextSuccessWeightAward)
-		.Process(this->IdxSelectedObjectFromAIList)
-		.Process(this->CloseEnough)
-		.Process(this->Countdown_RegroupAtLeader)
-		.Process(this->MoveMissionEndMode)
-		.Process(this->WaitNoTargetCounter)
-		.Process(this->WaitNoTargetTimer)
-		.Process(this->ForceJump_Countdown)
-		.Process(this->ForceJump_InitialCountdown)
-		.Process(this->ForceJump_RepeatMode)
-		.Process(this->TeamLeader)
-		.Process(this->PreviousScriptList)
 		;
 }
 
@@ -39,7 +27,6 @@ void TeamExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
 
 void TeamExt::ExtData::InvalidatePointer(void* ptr, bool bRemoved)
 {
-	AnnounceInvalidPointer(TeamLeader, ptr);
 }
 
 // =============================

@@ -14,11 +14,6 @@ public:
 	class ExtData final : public Extension<EBolt>
 	{
 	public:
-		ColorStruct Color[3] {};
-		bool Disable[3] { false };
-		int Arcs { 8 };
-		int BurstIndex { 0 };
-
 		ExtData(EBolt* OwnerObject) : Extension<EBolt>(OwnerObject)
 		{ }
 
@@ -50,14 +45,4 @@ public:
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 
-	static int __forceinline GetDefaultColor_Int(ConvertClass* pConvert, int idx)
-	{
-		if (pConvert->BytesPerPixel == 1)
-			return reinterpret_cast<uint8_t*>(pConvert->PaletteData)[idx];
-		else
-			return reinterpret_cast<uint16_t*>(pConvert->PaletteData)[idx];
-	}
-
-	static EBolt* CreateEBolt(WeaponTypeClass* pWeapon);
-	static DWORD _cdecl _EBolt_Draw_Colors(REGISTERS* R);
 };

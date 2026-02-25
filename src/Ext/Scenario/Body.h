@@ -5,14 +5,6 @@
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
-#include <Ext/Techno/Body.h>
-
-struct ExtendedVariable
-{
-	char Name[0x100];
-	int Value;
-};
-
 class ScenarioExt
 {
 public:
@@ -24,53 +16,8 @@ public:
 	{
 	public:
 
-		bool ShowBriefing;
-		int BriefingTheme;
-
-		std::map<int, CellStruct> Waypoints;
-		std::map<int, ExtendedVariable> Variables[2]; // 0 for local, 1 for global
-
-		std::vector<TechnoExt::ExtData*> AutoDeathObjects;
-		std::vector<TechnoExt::ExtData*> TransportReloaders; // Objects that can reload ammo in limbo
-
-		bool SWSidebar_Enable;
-		std::vector<int> SWSidebar_Indices;
-
-		std::vector<std::wstring> RecordMessages;
-
-		PhobosFixedString<64u> DefaultLS640BkgdName;
-		PhobosFixedString<64u> DefaultLS800BkgdName;
-		PhobosFixedString<64u> DefaultLS800BkgdPal;
-
-		std::vector<TechnoExt::ExtData*> LimboLaunchers;
-
-		DynamicVectorClass<TechnoClass*> UndergroundTracker; // Technos that are underground.
-		DynamicVectorClass<TechnoClass*> SpecialTracker; // For special purposes, like tracking technos that are forced moving. Currently unused.
-		DynamicVectorClass<TechnoClass*> FallingDownTracker; // Technos that are falling down, parachutes and land technos falling from bridge.
-
 		ExtData(ScenarioClass* OwnerObject) : Extension<ScenarioClass>(OwnerObject)
-			, ShowBriefing { false }
-			, BriefingTheme { -1 }
-			, Waypoints { }
-			, Variables { }
-			, AutoDeathObjects {}
-			, TransportReloaders {}
-			, SWSidebar_Enable { true }
-			, SWSidebar_Indices {}
-			, RecordMessages {}
-			, DefaultLS640BkgdName {}
-			, DefaultLS800BkgdName {}
-			, DefaultLS800BkgdPal {}
-			, LimboLaunchers {}
-			, UndergroundTracker {}
-			, SpecialTracker {}
-			, FallingDownTracker {}
 		{ }
-
-		static void SetVariableToByID(bool bIsGlobal, int nIndex, char bState);
-		static void GetVariableStateByID(bool bIsGlobal, int nIndex, char* pOut);
-		static void ReadVariables(bool bIsGlobal, CCINIClass* pINI);
-		static void SaveVariablesToFile(bool isGlobal);
 
 		virtual ~ExtData() = default;
 
@@ -80,9 +27,6 @@ public:
 
 		virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
-
-		void UpdateAutoDeathObjectsInLimbo();
-		void UpdateTransportReloaders();
 	private:
 		template <typename T>
 		void Serialize(T& Stm);
@@ -93,8 +37,6 @@ private:
 
 public:
 	static IStream* g_pStm;
-
-	static bool CellParsed;
 
 	static void Allocate(ScenarioClass* pThis);
 	static void Remove(ScenarioClass* pThis);

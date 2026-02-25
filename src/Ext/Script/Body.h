@@ -180,55 +180,6 @@ public:
 
 	static ExtContainer ExtMap;
 
-	static void ProcessAction(TeamClass* pTeam);
-	static void ExecuteTimedAreaGuardAction(TeamClass* pTeam);
-	static void LoadIntoTransports(TeamClass* pTeam);
-	static void WaitUntilFullAmmoAction(TeamClass* pTeam);
-	static void Mission_Gather_NearTheLeader(TeamClass* pTeam, int countdown = -1);
-	static void DecreaseCurrentTriggerWeight(TeamClass* pTeam, bool forceJumpLine = true, double modifier = 0);
-	static void IncreaseCurrentTriggerWeight(TeamClass* pTeam, bool forceJumpLine = true, double modifier = 0);
-	static void WaitIfNoTarget(TeamClass* pTeam, int attempts = -1);
-	static void TeamWeightReward(TeamClass* pTeam, double award = 0);
-	static void PickRandomScript(TeamClass* pTeam, int idxScriptsList = -1);
-	static void UnregisterGreatSuccess(TeamClass* pTeam);
-	static void SetCloseEnoughDistance(TeamClass* pTeam, double distance = -1);
-	static void SetMoveMissionEndMode(TeamClass* pTeam, int mode = -1);
-	static void SkipNextAction(TeamClass* pTeam, int successPercentage = -1);
-	static FootClass* FindTheTeamLeader(TeamClass* pTeam);
-	static void Set_ForceJump_Countdown(TeamClass* pTeam, bool repeatLine = false, int count = -1);
-	static void Stop_ForceJump_Countdown(TeamClass* pTeam);
-	static void JumpBackToPreviousScript(TeamClass* pTeam);
-	static void ChronoshiftToEnemyBase(TeamClass* pTeam, int extraDistance);
-
-	static void ForceGlobalOnlyTargetHouseEnemy(TeamClass* pTeam, int mode);
-
-	static bool IsExtVariableAction(int action);
-	static void VariablesHandler(TeamClass* pTeam, PhobosScripts eAction, int nArg);
-	template<bool IsGlobal, class _Pr>
-	static void VariableOperationHandler(TeamClass* pTeam, int nVariable, int Number);
-	template<bool IsSrcGlobal, bool IsGlobal, class _Pr>
-	static void VariableBinaryOperationHandler(TeamClass* pTeam, int nVariable, int nVarToOperate);
-	static bool IsUnitAvailable(TechnoClass* pTechno, bool checkIfInTransportOrAbsorbed);
-	static void Log(const char* pFormat, ...);
-
-	// Mission.Attack.cpp
-	static void Mission_Attack(TeamClass* pTeam, int calcThreatMode = 0, bool repeatAction = true, int attackAITargetType = -1, int idxAITargetTypeItem = -1);
-	static TechnoClass* GreatestThreat(TechnoClass* pTechno, int method, int calcThreatMode = 0, HouseClass* onlyTargetThisHouseEnemy = nullptr, int attackAITargetType = -1, int idxAITargetTypeItem = -1, bool agentMode = false);
-	static bool EvaluateObjectWithMask(TechnoClass* pTechno, int mask, int attackAITargetType = -1, int idxAITargetTypeItem = -1, TechnoClass* pTeamLeader = nullptr);
-	static void Mission_Attack_List(TeamClass* pTeam, int calcThreatMode = 0, bool repeatAction = true, int attackAITargetType = -1);
-	static void Mission_Attack_List1Random(TeamClass* pTeam, int calcThreatMode = 0, bool repeatAction = true, int attackAITargetType = -1);
-	static bool CheckUnitTargetingCapability(TechnoClass* pTechno, bool targetInAir, bool agentMode);
-	static bool IsUnitArmed(TechnoClass* pTechno, TechnoTypeClass* pType);
-	static bool IsMindControlledByEnemy(HouseClass* pHouse, TechnoClass* pTechno);
-
-	// Mission.Move.cpp
-	static void Mission_Move(TeamClass* pTeam, int calcThreatMode = 0, bool pickAllies = false, int attackAITargetType = -1, int idxAITargetTypeItem = -1);
-	static TechnoClass* FindBestObject(TechnoClass* pTechno, int method, int calcThreatMode = 0, bool pickAllies = false, int attackAITargetType = -1, int idxAITargetTypeItem = -1);
-	static void Mission_Move_List(TeamClass* pTeam, int calcThreatMode = 0, bool pickAllies = false, int attackAITargetType = -1);
-	static void Mission_Move_List1Random(TeamClass* pTeam, int calcThreatMode = 0, bool pickAllies = false, int attackAITargetType = -1, int idxAITargetTypeItem = -1);
-
-private:
-	static void ModifyCurrentTriggerWeight(TeamClass* pTeam, bool forceJumpLine = true, double modifier = 0);
-	static bool MoveMissionEndStatus(TeamClass* pTeam, TechnoClass* pFocus, FootClass* pLeader = nullptr, int mode = 0);
-	static void ChronoshiftTeamToTarget(TeamClass* pTeam, TechnoClass* pTeamLeader, AbstractClass* pTarget);
+	// TODO : callback
+	//static void ProcessAction(TeamClass* pTeam);
 };

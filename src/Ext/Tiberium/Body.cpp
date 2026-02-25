@@ -9,17 +9,15 @@ template <typename T>
 void TiberiumExt::ExtData::Serialize(T& Stm)
 {
 	Stm
-		.Process(this->MinimapColor)
 		;
 }
 
 void TiberiumExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 {
-	auto pThis = this->OwnerObject();
-	const char* pSection = pThis->ID;
-	INI_EX exINI(pINI);
+	//auto pThis = this->OwnerObject();
+	//const char* pSection = pThis->ID;
+	//INI_EX exINI(pINI);
 
-	this->MinimapColor.Read(exINI, pSection, "MinimapColor");
 }
 
 void TiberiumExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

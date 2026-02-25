@@ -1,4 +1,4 @@
-#include "AresFunctions.h"
+﻿#include "AresFunctions.h"
 #include "AresHelper.h"
 #include "Patch.h"
 
@@ -18,8 +18,8 @@ decltype(AresFunctions::AddPassengerFromTunnel) AresFunctions::AddPassengerFromT
 void* AresFunctions::_SWTypeExtMap = nullptr;
 decltype(AresFunctions::_SWTypeExtMapFind) AresFunctions::_SWTypeExtMapFind = nullptr;
 
-void Apply_Ares3_0_Patches();
-void Apply_Ares3_0p1_Patches();
+//void Apply_Ares3_0_Patches();
+//void Apply_Ares3_0p1_Patches();
 
 void AresFunctions::InitAres3_0()
 {
@@ -52,9 +52,9 @@ void AresFunctions::InitAres3_0()
 	NOTE_ARES_FUN(AresFunctions::GetTunnel, 0x0D740);
 	NOTE_ARES_FUN(AresFunctions::AddPassengerFromTunnel, 0x09000);
 
-#ifndef USING_MULTIFINITE_SYRINGE
-	Apply_Ares3_0_Patches();
-#endif
+//#ifndef USING_MULTIFINITE_SYRINGE
+//	Apply_Ares3_0_Patches();
+//#endif
 }
 
 void AresFunctions::InitAres3_0p1()
@@ -88,9 +88,9 @@ void AresFunctions::InitAres3_0p1()
 	NOTE_ARES_FUN(AresFunctions::GetTunnel, 0x0DA30);
 	NOTE_ARES_FUN(AresFunctions::AddPassengerFromTunnel, 0x09040);
 
-#ifndef USING_MULTIFINITE_SYRINGE
-	Apply_Ares3_0p1_Patches();
-#endif
+//#ifndef USING_MULTIFINITE_SYRINGE
+//	Apply_Ares3_0p1_Patches();
+//#endif
 }
 
 #undef NOTE_ARES_FUN

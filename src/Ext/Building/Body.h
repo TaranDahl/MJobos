@@ -1,4 +1,5 @@
 #pragma once
+
 #include <Ext/Techno/Body.h>
 #include <Ext/BuildingType/Body.h>
 
@@ -8,55 +9,24 @@ public:
 	using base_type = BuildingClass;
 
 	static constexpr DWORD Canary = 0x87654321;
-	static constexpr size_t ExtPointerOffset = 0x6FC;
-	static constexpr bool ShouldConsiderInvalidatePointer = true;
+	static constexpr bool ShouldConsiderInvalidatePointer = false;
 
 	class ExtData final : public Extension<BuildingClass>
 	{
 	public:
 		BuildingTypeExt::ExtData* TypeExtData;
 		TechnoExt::ExtData* TechnoExtData;
-		bool DeployedTechno;
-		bool IsCreatedFromMapFile;
-		int LimboID;
-		int GrindingWeapon_LastFiredFrame;
-		int GrindingWeapon_AccumulatedCredits;
-		BuildingClass* CurrentAirFactory;
-		int AccumulatedIncome;
-		std::optional<int> CurrentLaserWeaponIndex;
-		int PoweredUpToLevel; // Distinct from UpgradeLevel, and set to highest PowersUpToLevel out of applied upgrades regardless of how many are currently applied to this building.
-		SuperClass* CurrentEMPulseSW;
-		bool IsFiringNow;
 
 		ExtData(BuildingClass* OwnerObject) : Extension<BuildingClass>(OwnerObject)
 			, TypeExtData { nullptr }
 			, TechnoExtData { nullptr }
-			, DeployedTechno { false }
-			, IsCreatedFromMapFile { false }
-			, LimboID { -1 }
-			, GrindingWeapon_LastFiredFrame { 0 }
-			, GrindingWeapon_AccumulatedCredits { 0 }
-			, CurrentAirFactory { nullptr }
-			, AccumulatedIncome { 0 }
-			, CurrentLaserWeaponIndex {}
-			, PoweredUpToLevel { 0 }
-			, CurrentEMPulseSW {}
-			, IsFiringNow { false }
 		{ }
 
-		void DisplayIncomeString();
-		void ApplyPoweredKillSpawns();
-		bool HasSuperWeapon(int index, bool withUpgrades) const;
-		bool HandleInfiltrate(HouseClass* pInfiltratorHouse, int moneybefore);
-		void UpdatePrimaryFactoryAI();
 		virtual ~ExtData() = default;
 
 		// virtual void LoadFromINIFile(CCINIClass* pINI) override;
 
-		virtual void InvalidatePointer(void* ptr, bool bRemoved) override
-		{
-			AnnounceInvalidPointer(CurrentAirFactory, ptr);
-		}
+		virtual void InvalidatePointer(void* ptr, bool bRemoved) { };
 
 		virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
@@ -91,15 +61,5 @@ public:
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 
-	static void StoreTiberium(BuildingClass* pThis, float amount, int idxTiberiumType, int idxStorageTiberiumType);
-
-	static int CountOccupiedDocks(BuildingClass* pBuilding);
-	static bool HasFreeDocks(BuildingClass* pBuilding);
-	static bool CanGrindTechno(BuildingClass* pBuilding, TechnoClass* pTechno);
-	static bool DoGrindingExtras(BuildingClass* pBuilding, TechnoClass* pTechno, int refund);
-	static bool CanUndeployOnSell(BuildingClass* pThis);
-	static void KickOutStuckUnits(BuildingClass* pThis);
 	static const std::vector<CellStruct> GetFoundationCells(BuildingClass* pThis, CellStruct baseCoords, bool includeOccupyHeight = false);
-	static WeaponStruct* GetLaserWeapon(BuildingClass* pThis);
-	static void __fastcall KickOutClone(std::pair<TechnoTypeClass*, HouseClass*>& info, void*, BuildingClass* pFactory);
 };

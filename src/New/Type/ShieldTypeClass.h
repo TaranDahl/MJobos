@@ -1,145 +1,145 @@
-#pragma once
-
-#include <Utilities/Enumerable.h>
-#include <Utilities/TemplateDef.h>
-#include <Ext/Rules/Body.h>
-
-class ShieldTypeClass final : public Enumerable<ShieldTypeClass>
-{
-public:
-	Valueable<int> Strength;
-	Nullable<int> InitialStrength;
-	Nullable<double> ConditionYellow;
-	Nullable<double> ConditionRed;
-	Valueable<ArmorType> Armor;
-	Valueable<bool> InheritArmorFromTechno;
-	ValueableVector<TechnoTypeClass*> InheritArmor_Allowed;
-	ValueableVector<TechnoTypeClass*> InheritArmor_Disallowed;
-	Valueable<bool> Powered;
-	Valueable<double> Respawn;
-	Valueable<int> Respawn_Rate;
-	Valueable<bool> Respawn_RestartInCombat;
-	Valueable<int> Respawn_RestartInCombatDelay;
-	ValueableVector<AnimTypeClass*> Respawn_Anim;
-	Valueable<WeaponTypeClass*> Respawn_Weapon;
-	Valueable<double> SelfHealing;
-	Valueable<int> SelfHealing_Rate;
-	Valueable<bool> SelfHealing_RestartInCombat;
-	Valueable<int> SelfHealing_RestartInCombatDelay;
-	ValueableVector<BuildingTypeClass*> SelfHealing_EnabledBy;
-
-	Valueable<bool> AbsorbOverDamage;
-	Valueable<int> BracketDelta;
-	Valueable<AttachedAnimFlag> IdleAnim_OfflineAction;
-	Valueable<AttachedAnimFlag> IdleAnim_TemporalAction;
-	Damageable<AnimTypeClass*> IdleAnim;
-	Damageable<AnimTypeClass*> IdleAnimDamaged;
-	ValueableVector<AnimTypeClass*> BreakAnim;
-	ValueableVector<AnimTypeClass*> HitAnim;
-	Valueable<bool> HitFlash;
-	Nullable<int> HitFlash_FixedSize;
-	Valueable<bool> HitFlash_Red;
-	Valueable<bool> HitFlash_Green;
-	Valueable<bool> HitFlash_Blue;
-	Valueable<bool> HitFlash_Black;
-	Valueable<WeaponTypeClass*> BreakWeapon;
-	Valueable<double> AbsorbPercent;
-	Valueable<double> PassPercent;
-	Valueable<int> ReceivedDamage_Minimum;
-	Valueable<int> ReceivedDamage_Maximum;
-
-	Nullable<bool> AllowTransfer;
-
-	Valueable<Vector3D<int>> Pips;
-	Nullable<SHPStruct*> Pips_Background;
-	Valueable<Vector3D<int>> Pips_Building;
-	Nullable<int> Pips_Building_Empty;
-	Valueable<bool> Pips_HideIfNoStrength;
-	Valueable<bool> ImmuneToCrit;
-	Valueable<bool> ImmuneToBerserk;
-
-	Nullable<ColorStruct> Tint_Color;
-	Valueable<double> Tint_Intensity;
-	Valueable<AffectedHouse> Tint_VisibleToHouses;
-
-public:
-	ShieldTypeClass(const char* const pTitle) : Enumerable<ShieldTypeClass>(pTitle)
-		, Strength { 0 }
-		, InitialStrength { }
-		, ConditionYellow { }
-		, ConditionRed { }
-		, Armor { Armor::None }
-		, InheritArmorFromTechno { false }
-		, InheritArmor_Allowed { }
-		, InheritArmor_Disallowed { }
-		, Powered { false }
-		, Respawn { 0.0 }
-		, Respawn_Rate { 0 }
-		, Respawn_RestartInCombat { true }
-		, Respawn_RestartInCombatDelay { 0 }
-		, Respawn_Anim { }
-		, Respawn_Weapon { }
-		, SelfHealing { 0.0 }
-		, SelfHealing_Rate { 0 }
-		, SelfHealing_RestartInCombat { true }
-		, SelfHealing_RestartInCombatDelay { 0 }
-		, SelfHealing_EnabledBy { }
-		, AbsorbOverDamage { false }
-		, BracketDelta { 0 }
-		, IdleAnim_OfflineAction { AttachedAnimFlag::Hides }
-		, IdleAnim_TemporalAction { AttachedAnimFlag::Hides }
-		, IdleAnim { }
-		, IdleAnimDamaged { }
-		, BreakAnim { }
-		, HitAnim { }
-		, HitFlash { false }
-		, HitFlash_FixedSize {}
-		, HitFlash_Red { true }
-		, HitFlash_Green { true }
-		, HitFlash_Blue { true }
-		, HitFlash_Black { false }
-		, BreakWeapon { }
-		, AbsorbPercent { 1.0 }
-		, PassPercent { 0.0 }
-		, ReceivedDamage_Minimum { INT32_MIN }
-		, ReceivedDamage_Maximum { INT32_MAX }
-		, AllowTransfer { }
-		, Pips { { -1,-1,-1 } }
-		, Pips_Background { }
-		, Pips_Building { { -1,-1,-1 } }
-		, Pips_Building_Empty { }
-		, Pips_HideIfNoStrength { false }
-		, ImmuneToBerserk { false }
-		, ImmuneToCrit { false }
-		, Tint_Color {}
-		, Tint_Intensity { 0.0 }
-		, Tint_VisibleToHouses { AffectedHouse::All }
-	{ };
-
-	void LoadFromINI(CCINIClass* pINI);
-	void LoadFromStream(PhobosStreamReader& Stm);
-	void SaveToStream(PhobosStreamWriter& Stm);
-
-	bool HasTint() const
-	{
-		return this->Tint_Color.isset() || this->Tint_Intensity != 0.0;
-	}
-
-	AnimTypeClass* GetIdleAnimType(bool isDamaged, double healthRatio) const
-	{
-		if (isDamaged)
-		{
-			if (const auto damagedAnim = this->IdleAnimDamaged.Get(healthRatio))
-				return damagedAnim;
-		}
-
-		return this->IdleAnim.Get(healthRatio, this->GetConditionYellow(), this->GetConditionRed());
-	}
-
-	double GetConditionYellow() const { return this->ConditionYellow.Get(RulesExt::Global()->Shield_ConditionYellow.Get(RulesClass::Instance->ConditionYellow)); }
-	double GetConditionRed() const { return this->ConditionRed.Get(RulesExt::Global()->Shield_ConditionRed.Get(RulesClass::Instance->ConditionRed)); }
-
-private:
-	template <typename T>
-	void Serialize(T& Stm);
-};
+//#pragma once
+//
+//#include <Utilities/Enumerable.h>
+//#include <Utilities/TemplateDef.h>
+//#include <Ext/Rules/Body.h>
+//
+//class ShieldTypeClass final : public Enumerable<ShieldTypeClass>
+//{
+//public:
+//	Valueable<int> Strength;
+//	Nullable<int> InitialStrength;
+//	Nullable<double> ConditionYellow;
+//	Nullable<double> ConditionRed;
+//	Valueable<ArmorType> Armor;
+//	Valueable<bool> InheritArmorFromTechno;
+//	ValueableVector<TechnoTypeClass*> InheritArmor_Allowed;
+//	ValueableVector<TechnoTypeClass*> InheritArmor_Disallowed;
+//	Valueable<bool> Powered;
+//	Valueable<double> Respawn;
+//	Valueable<int> Respawn_Rate;
+//	Valueable<bool> Respawn_RestartInCombat;
+//	Valueable<int> Respawn_RestartInCombatDelay;
+//	ValueableVector<AnimTypeClass*> Respawn_Anim;
+//	Valueable<WeaponTypeClass*> Respawn_Weapon;
+//	Valueable<double> SelfHealing;
+//	Valueable<int> SelfHealing_Rate;
+//	Valueable<bool> SelfHealing_RestartInCombat;
+//	Valueable<int> SelfHealing_RestartInCombatDelay;
+//	ValueableVector<BuildingTypeClass*> SelfHealing_EnabledBy;
+//
+//	Valueable<bool> AbsorbOverDamage;
+//	Valueable<int> BracketDelta;
+//	Valueable<AttachedAnimFlag> IdleAnim_OfflineAction;
+//	Valueable<AttachedAnimFlag> IdleAnim_TemporalAction;
+//	Damageable<AnimTypeClass*> IdleAnim;
+//	Damageable<AnimTypeClass*> IdleAnimDamaged;
+//	ValueableVector<AnimTypeClass*> BreakAnim;
+//	ValueableVector<AnimTypeClass*> HitAnim;
+//	Valueable<bool> HitFlash;
+//	Nullable<int> HitFlash_FixedSize;
+//	Valueable<bool> HitFlash_Red;
+//	Valueable<bool> HitFlash_Green;
+//	Valueable<bool> HitFlash_Blue;
+//	Valueable<bool> HitFlash_Black;
+//	Valueable<WeaponTypeClass*> BreakWeapon;
+//	Valueable<double> AbsorbPercent;
+//	Valueable<double> PassPercent;
+//	Valueable<int> ReceivedDamage_Minimum;
+//	Valueable<int> ReceivedDamage_Maximum;
+//
+//	Nullable<bool> AllowTransfer;
+//
+//	Valueable<Vector3D<int>> Pips;
+//	Nullable<SHPStruct*> Pips_Background;
+//	Valueable<Vector3D<int>> Pips_Building;
+//	Nullable<int> Pips_Building_Empty;
+//	Valueable<bool> Pips_HideIfNoStrength;
+//	Valueable<bool> ImmuneToCrit;
+//	Valueable<bool> ImmuneToBerserk;
+//
+//	Nullable<ColorStruct> Tint_Color;
+//	Valueable<double> Tint_Intensity;
+//	Valueable<AffectedHouse> Tint_VisibleToHouses;
+//
+//public:
+//	ShieldTypeClass(const char* const pTitle) : Enumerable<ShieldTypeClass>(pTitle)
+//		, Strength { 0 }
+//		, InitialStrength { }
+//		, ConditionYellow { }
+//		, ConditionRed { }
+//		, Armor { Armor::None }
+//		, InheritArmorFromTechno { false }
+//		, InheritArmor_Allowed { }
+//		, InheritArmor_Disallowed { }
+//		, Powered { false }
+//		, Respawn { 0.0 }
+//		, Respawn_Rate { 0 }
+//		, Respawn_RestartInCombat { true }
+//		, Respawn_RestartInCombatDelay { 0 }
+//		, Respawn_Anim { }
+//		, Respawn_Weapon { }
+//		, SelfHealing { 0.0 }
+//		, SelfHealing_Rate { 0 }
+//		, SelfHealing_RestartInCombat { true }
+//		, SelfHealing_RestartInCombatDelay { 0 }
+//		, SelfHealing_EnabledBy { }
+//		, AbsorbOverDamage { false }
+//		, BracketDelta { 0 }
+//		, IdleAnim_OfflineAction { AttachedAnimFlag::Hides }
+//		, IdleAnim_TemporalAction { AttachedAnimFlag::Hides }
+//		, IdleAnim { }
+//		, IdleAnimDamaged { }
+//		, BreakAnim { }
+//		, HitAnim { }
+//		, HitFlash { false }
+//		, HitFlash_FixedSize {}
+//		, HitFlash_Red { true }
+//		, HitFlash_Green { true }
+//		, HitFlash_Blue { true }
+//		, HitFlash_Black { false }
+//		, BreakWeapon { }
+//		, AbsorbPercent { 1.0 }
+//		, PassPercent { 0.0 }
+//		, ReceivedDamage_Minimum { INT32_MIN }
+//		, ReceivedDamage_Maximum { INT32_MAX }
+//		, AllowTransfer { }
+//		, Pips { { -1,-1,-1 } }
+//		, Pips_Background { }
+//		, Pips_Building { { -1,-1,-1 } }
+//		, Pips_Building_Empty { }
+//		, Pips_HideIfNoStrength { false }
+//		, ImmuneToBerserk { false }
+//		, ImmuneToCrit { false }
+//		, Tint_Color {}
+//		, Tint_Intensity { 0.0 }
+//		, Tint_VisibleToHouses { AffectedHouse::All }
+//	{ };
+//
+//	void LoadFromINI(CCINIClass* pINI);
+//	void LoadFromStream(PhobosStreamReader& Stm);
+//	void SaveToStream(PhobosStreamWriter& Stm);
+//
+//	bool HasTint() const
+//	{
+//		return this->Tint_Color.isset() || this->Tint_Intensity != 0.0;
+//	}
+//
+//	AnimTypeClass* GetIdleAnimType(bool isDamaged, double healthRatio) const
+//	{
+//		if (isDamaged)
+//		{
+//			if (const auto damagedAnim = this->IdleAnimDamaged.Get(healthRatio))
+//				return damagedAnim;
+//		}
+//
+//		return this->IdleAnim.Get(healthRatio, this->GetConditionYellow(), this->GetConditionRed());
+//	}
+//
+//	double GetConditionYellow() const { return this->ConditionYellow.Get(RulesExt::Global()->Shield_ConditionYellow.Get(RulesClass::Instance->ConditionYellow)); }
+//	double GetConditionRed() const { return this->ConditionRed.Get(RulesExt::Global()->Shield_ConditionRed.Get(RulesClass::Instance->ConditionRed)); }
+//
+//private:
+//	template <typename T>
+//	void Serialize(T& Stm);
+//};

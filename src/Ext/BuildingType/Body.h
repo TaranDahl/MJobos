@@ -1,4 +1,5 @@
 #pragma once
+
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
@@ -8,187 +9,19 @@ public:
 	using base_type = BuildingTypeClass;
 
 	static constexpr DWORD Canary = 0x11111111;
-	static constexpr size_t ExtPointerOffset = 0x18;
 
 	class ExtData final : public Extension<BuildingTypeClass>
 	{
 	public:
-		Valueable<AffectedHouse> PowersUp_Owner;
-		ValueableVector<BuildingTypeClass*> PowersUp_Buildings;
-		ValueableIdxVector<SuperWeaponTypeClass> SuperWeapons;
-
-		Valueable<double> PowerPlant_DamageFactor;
-		ValueableVector<BuildingTypeClass*> PowerPlantEnhancer_Buildings;
-		Valueable<int> PowerPlantEnhancer_Amount;
-		Nullable<float> PowerPlantEnhancer_Factor;
-		Valueable<int> PowerPlantEnhancer_MaxCount;
-
-		std::vector<Point2D> OccupierMuzzleFlashes;
-		Valueable<bool> Powered_KillSpawns;
-		Valueable<bool> CanC4_AllowZeroDamage;
-		Valueable<bool> Refinery_UseStorage;
-		Valueable<PartialVector2D<double>> InitialStrength_Cloning;
-		Valueable<bool> Cloning_Powered { true };
-		Valueable<bool> ExcludeFromMultipleFactoryBonus;
-
-		ValueableIdx<VocClass> Grinding_Sound;
-		Valueable<WeaponTypeClass*> Grinding_Weapon;
-		Valueable<int> Grinding_Weapon_RequiredCredits;
-		ValueableVector<TechnoTypeClass*> Grinding_AllowTypes;
-		ValueableVector<TechnoTypeClass*> Grinding_DisallowTypes;
-		Valueable<bool> Grinding_AllowAllies;
-		Valueable<bool> Grinding_AllowOwner;
-		Valueable<bool> Grinding_PlayDieSound;
-
-		Nullable<bool> DisplayIncome;
-		Nullable<AffectedHouse> DisplayIncome_Houses;
-		Valueable<Point2D> DisplayIncome_Offset;
-
-		Valueable<bool> PlacementPreview;
-		TheaterSpecificSHP PlacementPreview_Shape;
-		Nullable<int> PlacementPreview_ShapeFrame;
-		Valueable<CoordStruct> PlacementPreview_Offset;
-		Valueable<bool> PlacementPreview_Remap;
-		CustomPalette PlacementPreview_Palette;
-		Nullable<TranslucencyLevel> PlacementPreview_Translucency;
-
-		Valueable<bool> SpyEffect_Custom;
-		ValueableIdx<SuperWeaponTypeClass> SpyEffect_VictimSuperWeapon;
-		ValueableIdx<SuperWeaponTypeClass> SpyEffect_InfiltratorSuperWeapon;
-
-		Nullable<bool> ConsideredVehicle;
-		Valueable<bool> ZShapePointMove_OnBuildup;
-		Valueable<int> SellBuildupLength;
-		Valueable<bool> IsDestroyableObstacle;
-
-		Valueable<bool> IsAnimDelayedBurst;
-
-		std::vector<std::optional<DirType>> AircraftDockingDirs;
-
-		ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
-		ValueableVector<TechnoTypeClass*> FactoryPlant_DisallowTypes;
-		Valueable<int> FactoryPlant_MaxCount;
-
-		Nullable<double> Units_RepairRate;
-		Nullable<int> Units_RepairStep;
-		Nullable<double> Units_RepairPercent;
-		Nullable<bool> Units_UseRepairCost;
-
-		Valueable<bool> NoBuildAreaOnBuildup;
-		ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
-		ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
-		Valueable<int> Adjacent_Disallowed_ExtraDistance;
-
-		Nullable<Point2D> BarracksExitCell;
-
-		Valueable<int> Overpower_KeepOnline;
-		Valueable<int> Overpower_ChargeWeapon;
-
-		Valueable<bool> DisableDamageSound;
-		Nullable<float> BuildingOccupyDamageMult;
-		Nullable<float> BuildingOccupyROFMult;
-		Nullable<float> BuildingBunkerDamageMult;
-		Nullable<float> BuildingBunkerROFMult;
-		NullableIdx<VocClass> BunkerWallsUpSound;
-		NullableIdx<VocClass> BunkerWallsDownSound;
-
-		NullableIdx<VocClass> BuildingRepairedSound;
-
-		Valueable<bool> Refinery_UseNormalActiveAnim;
-
-		ValueableVector<bool> HasPowerUpAnim;
-
-		Valueable<bool> UndeploysInto_Sellable;
-
-		Nullable<bool> BuildingRadioLink_SyncOwner;
-
-		// Ares 0.2
-		Valueable<bool> CloningFacility;
-
-		// Ares 0.A
-		Valueable<BuildingTypeClass*> RubbleIntact;
-		Valueable<bool> RubbleIntactRemove;
 
 		ExtData(BuildingTypeClass* OwnerObject) : Extension<BuildingTypeClass>(OwnerObject)
-			, PowersUp_Owner { AffectedHouse::Owner }
-			, PowersUp_Buildings {}
-			, PowerPlant_DamageFactor { 1.0 }
-			, PowerPlantEnhancer_Buildings {}
-			, PowerPlantEnhancer_Amount { 0 }
-			, PowerPlantEnhancer_Factor { 1.0 }
-			, PowerPlantEnhancer_MaxCount { -1 }
-			, OccupierMuzzleFlashes()
-			, Powered_KillSpawns { false }
-			, CanC4_AllowZeroDamage { false }
-			, InitialStrength_Cloning { { 1.0 } }
-			, ExcludeFromMultipleFactoryBonus { false }
-			, Refinery_UseStorage { false }
-			, Grinding_AllowAllies { false }
-			, Grinding_AllowOwner { true }
-			, Grinding_AllowTypes {}
-			, Grinding_DisallowTypes {}
-			, Grinding_Sound {}
-			, Grinding_PlayDieSound { true }
-			, Grinding_Weapon {}
-			, Grinding_Weapon_RequiredCredits { 0 }
-			, DisplayIncome { }
-			, DisplayIncome_Houses { }
-			, DisplayIncome_Offset { { 0,0 } }
-			, PlacementPreview { true }
-			, PlacementPreview_Shape {}
-			, PlacementPreview_ShapeFrame {}
-			, PlacementPreview_Remap { true }
-			, PlacementPreview_Offset { {0,-15,1} }
-			, PlacementPreview_Palette {}
-			, PlacementPreview_Translucency {}
-			, SpyEffect_Custom { false }
-			, SpyEffect_VictimSuperWeapon {}
-			, SpyEffect_InfiltratorSuperWeapon {}
-			, ConsideredVehicle {}
-			, ZShapePointMove_OnBuildup { false }
-			, SellBuildupLength { 23 }
-			, AircraftDockingDirs {}
-			, FactoryPlant_AllowTypes {}
-			, FactoryPlant_DisallowTypes {}
-			, FactoryPlant_MaxCount { -1 }
-			, IsAnimDelayedBurst { true }
-			, IsDestroyableObstacle { false }
-			, Units_RepairRate {}
-			, Units_RepairStep {}
-			, Units_RepairPercent {}
-			, Units_UseRepairCost {}
-			, NoBuildAreaOnBuildup { false }
-			, Adjacent_Allowed {}
-			, Adjacent_Disallowed {}
-			, Adjacent_Disallowed_ExtraDistance { 0 }
-			, BarracksExitCell {}
-			, Overpower_KeepOnline { 2 }
-			, Overpower_ChargeWeapon { 1 }
-			, DisableDamageSound { false }
-			, BuildingOccupyDamageMult {}
-			, BuildingOccupyROFMult {}
-			, BuildingBunkerDamageMult {}
-			, BuildingBunkerROFMult {}
-			, BunkerWallsUpSound {}
-			, BunkerWallsDownSound {}
-			, BuildingRepairedSound {}
-			, Refinery_UseNormalActiveAnim { false }
-			, HasPowerUpAnim {}
-			, UndeploysInto_Sellable { false }
-			, BuildingRadioLink_SyncOwner {}
-
-			// Ares 0.2
-			, CloningFacility { false }
-
-			// Ares 0.A
-			, RubbleIntact { nullptr }
-			, RubbleIntactRemove { false }
 		{ }
 
+		// TODO : extern
 		// Ares 0.A functions
-		int GetSuperWeaponCount() const;
-		int GetSuperWeaponIndex(int index, HouseClass* pHouse) const;
-		int GetSuperWeaponIndex(int index) const;
+		//int GetSuperWeaponCount() const;
+		//int GetSuperWeaponIndex(int index, HouseClass* pHouse) const;
+		//int GetSuperWeaponIndex(int index) const;
 
 		virtual ~ExtData() = default;
 
@@ -219,10 +52,8 @@ public:
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 
-	static void PlayBunkerSound(BuildingClass const* pThis, bool buildUp = false);
-
-	static int GetEnhancedPower(BuildingClass* pBuilding, HouseClass* pHouse);
-	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
-	static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
-	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	// TODO : extern
+	//static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
+	//static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	//static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
 };

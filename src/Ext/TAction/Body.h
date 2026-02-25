@@ -63,28 +63,7 @@ public:
 	static bool name(TActionClass* pThis, HouseClass* pHouse, \
 		ObjectClass* pObject, TriggerClass* pTrigger, CellStruct const& location)
 
-	ACTION_FUNC(PlayAudioAtRandomWP);
-	ACTION_FUNC(SaveGame);
-	ACTION_FUNC(EditVariable);
-	ACTION_FUNC(GenerateRandomNumber);
-	ACTION_FUNC(PrintVariableValue);
-	ACTION_FUNC(BinaryOperation);
-	ACTION_FUNC(RunSuperWeaponAtLocation);
-	ACTION_FUNC(RunSuperWeaponAtWaypoint);
-	ACTION_FUNC(ToggleMCVRedeploy);
-	ACTION_FUNC(UndeployToWaypoint);
-
-	ACTION_FUNC(EditAngerNode);
-	ACTION_FUNC(ClearAngerNode);
-	ACTION_FUNC(SetForceEnemy);
-	ACTION_FUNC(SetFreeRadar);
-	ACTION_FUNC(SetTeamDelay);
-
-	ACTION_FUNC(CreateBannerLocal);
-	ACTION_FUNC(CreateBannerGlobal);
-	ACTION_FUNC(DeleteBanner);
-
-	static bool RunSuperWeaponAt(TActionClass* pThis, int X, int Y);
+	//ACTION_FUNC(PlayAudioAtRandomWP);
 
 #undef ACTION_FUNC
 #pragma pop_macro("ACTION_FUNC")

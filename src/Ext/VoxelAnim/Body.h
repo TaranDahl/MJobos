@@ -3,7 +3,6 @@
 #include <VoxelAnimClass.h>
 
 #include <Ext/VoxelAnimType/Body.h>
-#include <New/Entity/LaserTrailClass.h>
 
 class VoxelAnimExt
 {
@@ -11,18 +10,12 @@ public:
 	using base_type = VoxelAnimClass;
 
 	static constexpr DWORD Canary = 0xAAAAAACC;
-	static constexpr size_t ExtPointerOffset = 0x18;
 
 	class ExtData final : public Extension<VoxelAnimClass>
 	{
 	public:
 
-		std::vector<std::unique_ptr<LaserTrailClass>> LaserTrails;
-		CDTimerClass TrailerSpawnTimer;
-
 		ExtData(VoxelAnimClass* OwnerObject) : Extension<VoxelAnimClass>(OwnerObject)
-			, LaserTrails()
-			, TrailerSpawnTimer()
 		{ }
 
 		virtual ~ExtData() = default;
@@ -44,7 +37,7 @@ public:
 	};
 
 	static ExtContainer ExtMap;
-	static void InitializeLaserTrails(VoxelAnimClass* pThis);
+
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 };

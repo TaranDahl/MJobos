@@ -10,19 +10,12 @@ public:
 	using base_type = OverlayTypeClass;
 
 	static constexpr DWORD Canary = 0xADF48498;
-	static constexpr size_t ExtPointerOffset = 0x18;
 
 	class ExtData final : public Extension<OverlayTypeClass>
 	{
 	public:
-		Valueable<int> ZAdjust;
-		PhobosFixedString<32u> PaletteFile;
-		DynamicVectorClass<ColorScheme*>* Palette; // Intentionally not serialized - rebuilt from the palette file on load.
 
 		ExtData(OverlayTypeClass* OwnerObject) : Extension<OverlayTypeClass>(OwnerObject)
-			, ZAdjust { 0 }
-			, PaletteFile {}
-			, Palette {}
 		{ }
 
 		virtual ~ExtData() = default;

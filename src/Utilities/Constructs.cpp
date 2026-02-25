@@ -252,37 +252,37 @@ bool TranslucencyLevel::Save(PhobosStreamWriter& Stm) const
 	Stm.Save(this->value);
 	return true;
 }
-
-bool TheaterSpecificSHP::Read(INI_EX& parser, const char* pSection, const char* pKey)
-{
-	if (parser.ReadString(pSection, pKey))
-	{
-		auto pValue = parser.value();
-		GeneralUtils::ApplyTheaterSuffixToString(pValue);
-
-		std::string Result = pValue;
-		if (Result.size() < 4 || !std::equal(Result.end() - 4, Result.end(), ".shp", [](char input, char expected) { return std::tolower(input) == expected; }))
-			Result += ".shp";
-
-		if (auto const pImage = FileSystem::LoadSHPFile(Result.c_str()))
-		{
-			value = pImage;
-			return true;
-		}
-		else
-		{
-			Debug::Log("Failed to find file %s referenced by [%s]%s=%s\n", Result.c_str(), pSection, pKey, pValue);
-		}
-	}
-	return false;
-}
-
-bool TheaterSpecificSHP::Load(PhobosStreamReader& Stm, bool RegisterForChange)
-{
-	return Savegame::ReadPhobosStream(Stm, this->value, RegisterForChange);
-}
-
-bool TheaterSpecificSHP::Save(PhobosStreamWriter& Stm) const
-{
-	return Savegame::WritePhobosStream(Stm, this->value);
-}
+//
+//bool TheaterSpecificSHP::Read(INI_EX& parser, const char* pSection, const char* pKey)
+//{
+//	if (parser.ReadString(pSection, pKey))
+//	{
+//		auto pValue = parser.value();
+//		GeneralUtils::ApplyTheaterSuffixToString(pValue);
+//
+//		std::string Result = pValue;
+//		if (Result.size() < 4 || !std::equal(Result.end() - 4, Result.end(), ".shp", [](char input, char expected) { return std::tolower(input) == expected; }))
+//			Result += ".shp";
+//
+//		if (auto const pImage = FileSystem::LoadSHPFile(Result.c_str()))
+//		{
+//			value = pImage;
+//			return true;
+//		}
+//		else
+//		{
+//			Debug::Log("Failed to find file %s referenced by [%s]%s=%s\n", Result.c_str(), pSection, pKey, pValue);
+//		}
+//	}
+//	return false;
+//}
+//
+//bool TheaterSpecificSHP::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+//{
+//	return Savegame::ReadPhobosStream(Stm, this->value, RegisterForChange);
+//}
+//
+//bool TheaterSpecificSHP::Save(PhobosStreamWriter& Stm) const
+//{
+//	return Savegame::WritePhobosStream(Stm, this->value);
+//}

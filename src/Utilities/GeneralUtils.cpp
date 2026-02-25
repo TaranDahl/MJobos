@@ -83,24 +83,24 @@ struct DummyTypeExtHere
 	std::vector<VersesData> Verses;
 };
 
-const double GeneralUtils::GetWarheadVersusArmor(WarheadTypeClass* pWH, Armor armorType)
-{
-	if (AresHelper::CanUseAres)
-		return reinterpret_cast<DummyTypeExtHere*>(*(uintptr_t*)((char*)pWH + 0x1CC))->Verses[static_cast<int>(armorType)].Verses;
+// const double GeneralUtils::GetWarheadVersusArmor(WarheadTypeClass* pWH, Armor armorType)
+// {
+// 	if (AresHelper::CanUseAres)
+// 		return reinterpret_cast<DummyTypeExtHere*>(*(uintptr_t*)((char*)pWH + 0x1CC))->Verses[static_cast<int>(armorType)].Verses;
 
-	return static_cast<double>(MapClass::GetTotalDamage(100, pWH, armorType, 0)) / 100.0;
-}
+// 	return static_cast<double>(MapClass::GetTotalDamage(100, pWH, armorType, 0)) / 100.0;
+// }
 
-const double GeneralUtils::GetWarheadVersusArmor(WarheadTypeClass* pWH, TechnoClass* pThis, TechnoTypeClass* pType)
-{
-	auto armorType = pType->Armor;
-	auto const pShield = TechnoExt::ExtMap.Find(pThis)->Shield.get();
+// const double GeneralUtils::GetWarheadVersusArmor(WarheadTypeClass* pWH, TechnoClass* pThis, TechnoTypeClass* pType)
+// {
+// 	auto armorType = pType->Armor;
+// 	auto const pShield = TechnoExt::ExtMap.Find(pThis)->Shield.get();
 
-	if (pShield && pShield->IsActive() && !pShield->CanBePenetrated(pWH))
-		armorType = pShield->GetArmorType(pType);
+// 	if (pShield && pShield->IsActive() && !pShield->CanBePenetrated(pWH))
+// 		armorType = pShield->GetArmorType(pType);
 
-	return GeneralUtils::GetWarheadVersusArmor(pWH, armorType);
-}
+// 	return GeneralUtils::GetWarheadVersusArmor(pWH, armorType);
+// }
 
 // Weighted random element choice (weight) - roll for one.
 // Takes a vector of integer type weights, which are then summed to calculate the chances.
@@ -262,36 +262,36 @@ DynamicVectorClass<ColorScheme*>* GeneralUtils::BuildPalette(const char* palette
 
 	return nullptr;
 }
-
-// Gets integer representation of color from ColorAdd corresponding to given index, or 0 if there's no color found.
-// Code is pulled straight from game's draw functions that deal with the tint colors.
-int GeneralUtils::GetColorFromColorAdd(int colorIndex)
-{
-	auto const& colorAdd = RulesClass::Instance->ColorAdd;
-	int colorValue = 0;
-
-	if (colorIndex < 0 || colorIndex >= (sizeof(colorAdd) / sizeof(ColorStruct)))
-		return colorValue;
-
-	auto const& color = colorAdd[colorIndex];
-
-	if (RulesExt::Global()->ColorAddUse8BitRGB)
-		return Drawing::RGB_To_Int(color);
-
-	const int red = color.R;
-	const int green = color.G;
-	const int blue = color.B;
-
-	if (Drawing::ColorMode == RGBMode::RGB565)
-		colorValue |= blue | (32 * (green | (red << 6)));
-
-	if (Drawing::ColorMode != RGBMode::RGB655)
-		colorValue |= blue | (((32 * red) | (green >> 1)) << 6);
-
-	colorValue |= blue | (32 * ((32 * red) | (green >> 1)));
-
-	return colorValue;
-}
+//
+//// Gets integer representation of color from ColorAdd corresponding to given index, or 0 if there's no color found.
+//// Code is pulled straight from game's draw functions that deal with the tint colors.
+//int GeneralUtils::GetColorFromColorAdd(int colorIndex)
+//{
+//	auto const& colorAdd = RulesClass::Instance->ColorAdd;
+//	int colorValue = 0;
+//
+//	if (colorIndex < 0 || colorIndex >= (sizeof(colorAdd) / sizeof(ColorStruct)))
+//		return colorValue;
+//
+//	auto const& color = colorAdd[colorIndex];
+//
+//	if (RulesExt::Global()->ColorAddUse8BitRGB)
+//		return Drawing::RGB_To_Int(color);
+//
+//	const int red = color.R;
+//	const int green = color.G;
+//	const int blue = color.B;
+//
+//	if (Drawing::ColorMode == RGBMode::RGB565)
+//		colorValue |= blue | (32 * (green | (red << 6)));
+//
+//	if (Drawing::ColorMode != RGBMode::RGB655)
+//		colorValue |= blue | (((32 * red) | (green >> 1)) << 6);
+//
+//	colorValue |= blue | (32 * ((32 * red) | (green >> 1)));
+//
+//	return colorValue;
+//}
 
 int GeneralUtils::SafeMultiply(int value, int mult)
 {
