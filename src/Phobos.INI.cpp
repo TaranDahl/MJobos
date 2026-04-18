@@ -12,8 +12,6 @@
 #include <Utilities/Patch.h>
 #include <Utilities/Macro.h>
 
-#include "Misc/BlittersFix.h"
-
 const wchar_t* Phobos::UI::CostLabel = L"";
 //bool Phobos::UI::DisableEmptySpawnPositions = false;
 // 
