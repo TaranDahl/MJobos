@@ -212,43 +212,8 @@ CoordStruct GeneralUtils::CalculateCoordsFromDistance(CoordStruct currentCoords,
 
 	return CoordStruct { x, y, targetCoords.Z };
 }
-
-void GeneralUtils::DisplayDamageNumberString(int damage, DamageDisplayType type, CoordStruct coords, int& offset)
-{
-	if (damage == 0)
-		return;
-
-	ColorStruct color;
-
-	switch (type)
-	{
-	case DamageDisplayType::Regular:
-		color = damage > 0 ? ColorStruct { 255, 0, 0 } : ColorStruct { 0, 255, 0 };
-		break;
-	case DamageDisplayType::Shield:
-		color = damage > 0 ? ColorStruct { 0, 160, 255 } : ColorStruct { 0, 255, 230 };
-		break;
-	case DamageDisplayType::Intercept:
-		color = damage > 0 ? ColorStruct { 255, 128, 128 } : ColorStruct { 128, 255, 128 };
-		break;
-	default:
-		break;
-	}
-
-	const int maxOffset = Unsorted::CellWidthInPixels / 2;
-	int width = 0, height = 0;
-	wchar_t damageStr[0x20];
-	swprintf_s(damageStr, L"%d", damage);
-
-	BitFont::Instance->GetTextDimension(damageStr, &width, &height, 120);
-
-	if (offset >= maxOffset || offset == INT32_MIN)
-		offset = -maxOffset;
-
-	FlyingStrings::Add(damageStr, coords, color, Point2D { offset - (width / 2), 0 });
-
-	offset = offset + width;
-}
+// TODO : API
+//void GeneralUtils::DisplayDamageNumberString(int damage, DamageDisplayType type, CoordStruct coords, int& offset)
 
 DynamicVectorClass<ColorScheme*>* GeneralUtils::BuildPalette(const char* paletteFileName)
 {
