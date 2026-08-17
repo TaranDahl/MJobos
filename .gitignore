@@ -28,3 +28,6 @@ out
 
 # Python virtual environment for docs
 .venv/
+
+# Brainstorm visual companion session files
+.superpowers/
