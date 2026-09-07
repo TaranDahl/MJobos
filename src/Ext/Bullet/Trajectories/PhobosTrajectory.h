@@ -118,6 +118,7 @@ public:
 	virtual bool CalculateBulletVelocity(const double speed);
 	virtual void MultiplyBulletVelocity(const double ratio, const bool shouldDetonate);
 	virtual bool ShouldSkipBridgeCheck() const { return false; }
+	virtual bool ShouldSkipRangedCheck() const { return true; } // Whether to skip is declared as the trajectory's own policy.
 
 	static void RotateVector(BulletVelocity& vector, const BulletVelocity& aim, const double turningRadian);
 	static void RotateAboutTheAxis(BulletVelocity& vector, BulletVelocity& axis, const double radian);

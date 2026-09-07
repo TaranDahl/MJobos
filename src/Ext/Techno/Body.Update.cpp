@@ -1016,10 +1016,7 @@ void TechnoExt::UpdateSharedAmmo(TechnoClass* pThis)
 void TechnoExt::UpdateTemporal()
 {
 	if (const auto pShieldData = this->Shield.get())
-	{
-		if (pShieldData->IsAvailable())
-			pShieldData->AI_Temporal();
-	}
+		pShieldData->AI_Temporal();
 
 	for (auto const& ae : this->AttachedEffects)
 		ae->AI_Temporal();
@@ -1106,24 +1103,10 @@ void TechnoExt::UpdateAttachEffects()
 			if (pType->Cumulative && pType->CumulativeAnimations.size() > 0)
 				cumulativeAnimTypes.insert(pType);
 
-			if (pType->ExpireWeapon && ((hasExpired && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Expire) != ExpireWeaponCondition::None)
-				|| (shouldDiscard && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Discard) != ExpireWeaponCondition::None)))
-			{
-				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || this->GetAttachedEffectCumulativeCount(pType) < 1)
-				{
-					if (pType->ExpireWeapon_UseInvokerAsOwner)
-					{
-						if (auto const pInvoker = attachEffect->GetInvoker())
-							expireWeapons.push_back(AEWeaponParams { pType->ExpireWeapon, pInvoker, pInvoker->Owner });
-						else
-							expireWeapons.push_back(AEWeaponParams { pType->ExpireWeapon, nullptr, attachEffect->GetInvokerHouse() });
-					}
-					else
-					{
-						expireWeapons.push_back(AEWeaponParams { pType->ExpireWeapon, pThis, pThis->Owner });
-					}
-				}
-			}
+			if (hasExpired)
+				attachEffect->AddExpireWeaponParams(ExpireWeaponCondition::Expire, expireWeapons);
+			else if (shouldDiscard)
+				attachEffect->AddExpireWeaponParams(ExpireWeaponCondition::Discard, expireWeapons);
 
 			if (shouldDiscard && attachEffect->ResetIfRecreatable())
 			{
@@ -1140,7 +1123,10 @@ void TechnoExt::UpdateAttachEffects()
 	}
 
 	if (requiresRecalc)
+	{
 		this->RecalculateStatMultipliers();
+		this->UpdateAEAnimDrawingLogic();
+	}
 
 	if (markForRedraw)
 	{
@@ -1170,6 +1156,7 @@ void TechnoExt::UpdateSelfOwnedAttachEffects()
 	std::vector<std::unique_ptr<AttachEffectClass>>::iterator it;
 	std::vector<AEWeaponParams> expireWeapons;
 	bool requiresRecalc = false;
+	int removeCount = 0;
 
 	// Delete ones on old type and not on current.
 	for (it = this->AttachedEffects.begin(); it != this->AttachedEffects.end(); )
@@ -1185,24 +1172,8 @@ void TechnoExt::UpdateSelfOwnedAttachEffects()
 			if (pType->RequiresRecalculation)
 				requiresRecalc = true;
 
-			if (pType->ExpireWeapon && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Expire) != ExpireWeaponCondition::None)
-			{
-				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || this->GetAttachedEffectCumulativeCount(pType) < 1)
-				{
-					if (pType->ExpireWeapon_UseInvokerAsOwner)
-					{
-						if (auto const pInvoker = attachEffect->GetInvoker())
-							expireWeapons.push_back(AEWeaponParams { pType->ExpireWeapon, pInvoker, pInvoker->Owner });
-						else
-							expireWeapons.push_back(AEWeaponParams { pType->ExpireWeapon, nullptr, attachEffect->GetInvokerHouse() });
-					}
-					else
-					{
-						expireWeapons.push_back(AEWeaponParams { pType->ExpireWeapon, pThis, pThis->Owner });
-					}
-				}
-			}
-
+			attachEffect->AddExpireWeaponParams(ExpireWeaponCondition::Expire, expireWeapons);
+			removeCount++;
 			it = this->AttachedEffects.erase(it);
 		}
 		else
@@ -1222,7 +1193,10 @@ void TechnoExt::UpdateSelfOwnedAttachEffects()
 		this->RecalculateStatMultipliers();
 
 	// Add new ones.
-	AttachEffectClass::Attach(pThis, pThis->Owner, pThis, pThis, pTypeExt->AttachEffects, true);
+	const int count = AttachEffectClass::Attach(pThis, pThis->Owner, pThis, pThis, pTypeExt->AttachEffects);
+
+	if (!count && removeCount > 0)
+		this->UpdateAEAnimDrawingLogic();
 }
 
 // Updates CumulativeAnimations AE's on techno.
@@ -1267,6 +1241,15 @@ void TechnoExt::UpdateCumulativeAttachEffects(AttachEffectTypeClass* pAttachEffe
 
 		if (createAnim)
 			pAELargestDuration->CreateAnim();
+	}
+}
+
+// Update AttachEffect animation drawing logic.
+void TechnoExt::ExtData::UpdateAEAnimDrawingLogic()
+{
+	for (auto const& attachEffect : this->AttachedEffects)
+	{
+		attachEffect->UpdateConditionalAnimDrawingLogic();
 	}
 }
 

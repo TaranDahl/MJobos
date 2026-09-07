@@ -13,10 +13,12 @@ void TypeConvertGroup::Convert(TechnoClass* pTarget, const std::vector<TypeConve
 
 		if (fromTypes.size())
 		{
+			const auto pType = pTargetFoot->GetTechnoType();
+
 			for (const auto& from : fromTypes)
 			{
 				// Check if the target matches upgrade-from TechnoType and it has something to upgrade to
-				if (from == pTarget->GetTechnoType())
+				if (from == pType)
 				{
 					TechnoExt::ConvertToType(pTarget, toType);
 					goto end; // Breaking out of nested loops without extra checks one of the very few remaining valid usecases for goto, leave it be.
