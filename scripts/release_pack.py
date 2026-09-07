@@ -7,19 +7,22 @@
     整合包说明/ 目录内容平铺      <- 底部选择栏模板/ + 抛体案例参考.ini + 两个说明 md
 
 子命令（按发布日顺序）:
-    check      查看状态: 版本号、占位小节、upstream 合并行、构建产物、git 状态
+    check      查看状态: version.h 状态、占位小节、upstream 合并行、构建产物、git 状态
     mergeline  生成 upstream 合并 changelog 行（--insert 幂等插入占位小节）
-    prepare    校验占位小节 -> EX_PATCH 递增 -> 回填发布日期
+    prepare    校验占位小节 -> 回填发布日期（--version RecyaN）
     build      调 scripts/build_release.bat 构建 Release 并校验 dll 版本戳
-    pack       组装 zip 到 Release/Phobos-v{版本}-Recya{N}.zip
-    finish     开下一轮占位小节 -> git commit -> git tag
-    all        prepare -> build -> pack -> finish 一条龙
+    pack       组装 zip 到 Release/Phobos-v{版本}-Recya{N}.zip（--version RecyaN）
+    finish     开下一轮占位小节 -> git commit -> git tag（--version RecyaN）
+    all        prepare -> build -> pack -> finish 一条龙（--version RecyaN）
 
 约定:
-    - 版本号唯一定义点 src/Phobos.version.h，version.rc 等全引用宏，无第二处硬编码
-    - zip 名 = Phobos-v{MAJOR.MINOR.REV.PATCH}-Recya{EX_PATCH}.zip
+    - VERSION_EX_PATCH 是 mix 本地宏，语义为"upstream merge 相关状态"，发布流程不碰它；
+      version.h 的所有宏跟随 upstream/merge 演进，Recya 发布序列与之无关
+    - RecyaN 发布号发布时用 --version RecyaN 手动指定（接受 "3" 或 "Recya3"）
+    - zip 名 = Phobos-v{MAJOR.MINOR.REV.PATCH}-Recya{N}.zip；tag = v{...}-Recya{N}
     - 整合包说明/更新改动说明.md 用 `### YYYY.X.XX` 占位小节循环:
       开发期攒条目 -> 发布日回填日期 -> 打包 -> 开下一轮占位小节
+      占位小节标题里的目标版本（`RecyaN -> RecyaN+1`）需与 --version 一致
     - zip 内文档必须是"日期已回填、无占位小节"的快照, 故 pack 必须在 prepare 之后、finish 之前
     - 不碰 PRERELEASE_SUFFIX（upstream 的 alpha 标记与 Recya 版本无关）
 
@@ -90,23 +93,21 @@ def long_str(v):
 
 
 def recya(v):
+    """version.h 内嵌的 Recya 串（EX_PATCH = merge 状态），仅用于展示/构建校验，
+    与 RecyaN 发布号无关。"""
     return f"v{long_str(v)}-Recya{v['EX_PATCH']}"
 
 
-def zip_name(v):
-    return f"Phobos-v{long_str(v)}-Recya{v['EX_PATCH']}.zip"
+def parse_release_number(s):
+    """--version 参数: 接受 "3" 或 "Recya3"（大小写不限），返回 int。"""
+    m = re.fullmatch(r'(?:recya)?(\d+)', s.strip(), re.I)
+    if not m:
+        die(f'版本号格式无法解析: {s!r}（期望 3 或 Recya3）')
+    return int(m.group(1))
 
 
-def bump_ex_patch(new_val, dry=False):
-    raw = VERSION_H.read_bytes()
-    new = re.sub(rb'(#define VERSION_EX_PATCH )(\d+)',
-                 lambda m: m.group(1) + str(new_val).encode(), raw, count=1)
-    if new == raw:
-        die('VERSION_EX_PATCH 替换未生效')
-    if dry:
-        info(f'[dry-run] Phobos.version.h: VERSION_EX_PATCH -> {new_val}')
-    else:
-        VERSION_H.write_bytes(new)
+def zip_name(long, n):
+    return f"Phobos-v{long}-Recya{n}.zip"
 
 
 # ---------- 更新改动说明.md ----------
@@ -150,14 +151,15 @@ def placeholder_entries(lines, i):
 def cmd_check(args):
     v = read_version()
     lines = load_changelog().split('\n')
-    info(f'当前版本号 : {long_str(v)}-Recya{v["EX_PATCH"]}   (PRERELEASE_SUFFIX={v["PRERELEASE"]!r}, 不参与 Recya 版本)')
-    next_v = dict(v, EX_PATCH=v['EX_PATCH'] + 1)
-    info(f'下一版     : {long_str(v)}-Recya{v["EX_PATCH"] + 1} -> zip: Release/{zip_name(next_v)}')
+    info(f'version.h   : {long_str(v)}-Recya{v["EX_PATCH"]} (EX_PATCH=merge 状态, 发布号无关; PRERELEASE_SUFFIX={v["PRERELEASE"]!r})')
     i = find_placeholder(lines)
     if i >= 0:
         entries = placeholder_entries(lines, i)
         info(f'占位小节   : {lines[i].strip()}')
         info(f'             条目 {len(entries)} 条' + ('  [!] 占位小节为空，发布前需补充 changelog' if not entries else ''))
+        m = re.search(r'->\s*`Phobos v([\w.\-]+)`', lines[i])
+        if m:
+            info(f'             本次发布目标: {m.group(1)}（发布时用 --version 指定）')
         if not any('commit ' in e for e in entries):
             info('             尚未记录 upstream 合并行，可运行: release_pack.py mergeline --insert')
     else:
@@ -209,6 +211,7 @@ def cmd_mergeline(args):
 
 
 def cmd_prepare(args):
+    n = parse_release_number(args.version)
     v = read_version()
     lines = load_changelog().split('\n')
     i = find_placeholder(lines)
@@ -220,22 +223,21 @@ def cmd_prepare(args):
     m = re.match(r'^### \d{4}\.X\.XX\s+`Phobos v([\w.\-]+)`\s*->\s*`Phobos v([\w.\-]+)`\s*$', lines[i])
     if not m:
         die(f'占位小节标题格式无法解析: {lines[i].strip()!r}\n期望: ### YYYY.X.XX  `Phobos v旧` -> `Phobos v新`')
-    expect_next = f"{long_str(v)}-Recya{v['EX_PATCH'] + 1}"
+    expect_next = f"{long_str(v)}-Recya{n}"
     if m.group(2) != expect_next:
-        die(f"占位小节目标版本 {m.group(2)} 与 version.h 推导的下一版 {expect_next} 不一致")
+        die(f"占位小节目标版本 {m.group(2)} 与 --version 指定的 {expect_next} 不一致；"
+            f"请核对占位小节标题或 --version 参数")
     today = datetime.date.today()
     new_head = re.sub(r'^### \d{4}\.X\.XX', f'### {today.year}.{today.month}.{today.day}', lines[i])
-    info(f'发布 {long_str(v)}-Recya{v["EX_PATCH"]} -> {long_str(v)}-Recya{v["EX_PATCH"] + 1}，日期 {today.year}.{today.month}.{today.day}')
+    info(f'发布 {m.group(1)} -> {m.group(2)}，日期 {today.year}.{today.month}.{today.day}')
     info(f'  回填: {lines[i].strip()}')
     info(f'   ->   {new_head.strip()}')
     if args.dry_run:
-        bump_ex_patch(v['EX_PATCH'] + 1, dry=True)
         info('[dry-run] 未写任何文件')
         return
     lines[i] = new_head
     save_changelog('\n'.join(lines))
-    bump_ex_patch(v['EX_PATCH'] + 1)
-    info('已写回: 整合包说明/更新改动说明.md（日期） + src/Phobos.version.h（EX_PATCH）')
+    info('已写回: 整合包说明/更新改动说明.md（日期）。version.h 不参与发布，未改动。')
 
 
 def _msbuild_safe_env():
@@ -250,7 +252,7 @@ def cmd_build(args):
     if not BUILD_SCRIPT.exists():
         die(f'找不到 {BUILD_SCRIPT}')
     v = read_version()
-    info(f'开始 Release 构建（版本 {recya(v)}，输出透传，可能需要几分钟）...')
+    info(f'开始 Release 构建（version.h 内嵌 {recya(v)}，与发布号无关，输出透传，可能需要几分钟）...')
     r = subprocess.run([str(BUILD_SCRIPT)], cwd=ROOT, env=_msbuild_safe_env())
     if r.returncode != 0:
         die(f'构建失败，退出码 {r.returncode}')
@@ -290,6 +292,7 @@ def _gbk_zip_patch():
 
 
 def cmd_pack(args):
+    n = parse_release_number(args.version)
     v = read_version()
     lines = load_changelog().split('\n')
     if find_placeholder(lines) >= 0:
@@ -314,7 +317,7 @@ def cmd_pack(args):
     for p in sorted(DOCS_DIR.rglob('*')):
         if p.is_file():
             add_file(p, p.relative_to(DOCS_DIR).as_posix())
-    out = RELEASE_DIR / zip_name(v)
+    out = RELEASE_DIR / zip_name(long_str(v), n)
     if args.dry_run:
         info(f'[dry-run] 将生成 {disp(out)}:')
         for kind, _, arc in items:
@@ -338,20 +341,21 @@ def cmd_pack(args):
 
 
 def cmd_finish(args):
+    n = parse_release_number(args.version)
     v = read_version()
     lines = load_changelog().split('\n')
     if find_placeholder(lines) >= 0:
         die('仍存在 X.XX 占位小节，说明尚未 prepare —— finish 只在发布完成后开下一轮占位小节')
-    zip_path = RELEASE_DIR / zip_name(v)
+    zip_path = RELEASE_DIR / zip_name(long_str(v), n)
     if not zip_path.exists():
         die(f'发布包不存在: {zip_path}（先跑 pack）')
     d = datetime.date.today()
-    old, new = f"{long_str(v)}-Recya{v['EX_PATCH']}", f"{long_str(v)}-Recya{v['EX_PATCH'] + 1}"
+    old, new = f"{long_str(v)}-Recya{n}", f"{long_str(v)}-Recya{n + 1}"
     head = f'### {d.year}.X.XX  `Phobos v{old}` -> `Phobos v{new}`'
     insert_at = next((k for k, l in enumerate(lines) if VERSIONED_HEAD.match(l)), None)
     if insert_at is None:
         die('找不到任何 ### YYYY.M.D 版本小节，无法定位插入点')
-    files = [VERSION_H, CHANGELOG, *args.extra]
+    files = [CHANGELOG, *args.extra]
     git_cmds = [
         ['git', 'add', '--', *(str(f.relative_to(ROOT)) for f in files)],
         ['git', 'commit', '-m', f'Release Phobos v{old}'],
@@ -399,11 +403,14 @@ def main():
     sub.add_parser('check', help='查看版本/占位小节/构建产物/git 状态')
     p = sub.add_parser('mergeline', help='生成 upstream 合并 changelog 行')
     p.add_argument('--insert', action='store_true', help='幂等插入占位小节')
-    for name, help_ in [('prepare', 'EX_PATCH 递增 + 日期回填'), ('build', 'Release 构建'),
+    for name, help_ in [('prepare', '日期回填（不碰 version.h）'), ('build', 'Release 构建'),
                         ('pack', '组装 zip'), ('finish', '开新占位小节 + commit + tag'),
                         ('all', 'prepare->build->pack->finish')]:
         p = sub.add_parser(name, help=help_)
         p.add_argument('--dry-run', action='store_true', help='只打印将执行的动作')
+        if name != 'build':
+            p.add_argument('--version', required=True,
+                           help='发布号，如 Recya3 或 3')
         if name in ('finish', 'all'):
             p.add_argument('--extra', nargs='*', default=[], type=Path,
                            help='额外加入 commit 的文件（如 额外功能说明.md）')
