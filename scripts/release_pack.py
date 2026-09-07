@@ -146,6 +146,27 @@ def placeholder_entries(lines, i):
     return [l for l in lines[i + 1:end] if l.strip()]
 
 
+def strip_placeholder_sections(text):
+    """剔除所有 `### YYYY.X.XX` 占位小节（含其内容与其标题前的空行），
+    返回可直接作为 zip 快照的文本。任何时间点打包都能产出干净快照。"""
+    out = []
+    skip = False
+    for l in text.split('\n'):
+        if PLACEHOLDER_HEAD.match(l):
+            skip = True
+            while out and out[-1].strip() == '':
+                out.pop()
+            continue
+        if skip:
+            if l.startswith('### ') or l.startswith('## '):
+                skip = False
+                out.append('')
+                out.append(l)
+            continue
+        out.append(l)
+    return '\n'.join(out)
+
+
 # ---------- 子命令 ----------
 
 def cmd_check(args):
@@ -295,12 +316,29 @@ def cmd_pack(args):
     n = parse_release_number(args.version)
     v = read_version()
     lines = load_changelog().split('\n')
-    if find_placeholder(lines) >= 0:
-        die('更新改动说明.md 仍含 X.XX 占位小节，zip 快照必须先回填日期（先跑 prepare）')
+    # 快照校验：不允许存在"指向本次发布版本"的占位小节（说明本次还没 prepare）。
+    # 下一轮的占位小节（目标版本更新的）无妨，打包时会自动剔除。
+    this_target = f'{long_str(v)}-Recya{n}'
+    for l in lines:
+        if PLACEHOLDER_HEAD.match(l):
+            m = re.search(r'->\s*`Phobos v([\w.\-]+)`', l)
+            if m and m.group(1) == this_target:
+                die(f'更新改动说明.md 仍含指向本次发布的占位小节（{this_target}），'
+                    f'zip 快照必须先回填日期（先跑 prepare --version {n}）')
     dll, pdb = RELEASE_DIR / 'Phobos.dll', RELEASE_DIR / 'Phobos.pdb'
     for f in (dll, pdb):
         if not f.exists():
             die(f'构建产物缺失: {f}（先跑 build）')
+    # 更新改动说明.md 的 zip 快照：剔除占位小节后按原 BOM/CRLF 习惯编码
+    raw = CHANGELOG.read_bytes()
+    bom = raw.startswith(b'\xef\xbb\xbf')
+    crlf = b'\r\n' in raw
+    snap_text = strip_placeholder_sections(raw.decode('utf-8-sig').replace('\r\n', '\n'))
+    if crlf:
+        snap_text = snap_text.replace('\n', '\r\n')
+    snap = snap_text.encode('utf-8')
+    if bom:
+        snap = b'\xef\xbb\xbf' + snap
     # 条目清单：dll/pdb 在前，整合包说明/ 内容平铺（子目录写 stored 目录条目，同参考包）
     items = [('file', dll, 'Phobos.dll'), ('file', pdb, 'Phobos.pdb')]
     seen_dirs = set()
@@ -331,6 +369,10 @@ def cmd_pack(args):
                     zi = zipfile.ZipInfo(arc)
                     zi.external_attr = 0x10
                     z.writestr(zi, '', compress_type=zipfile.ZIP_STORED)
+                elif src == CHANGELOG:
+                    zi = zipfile.ZipInfo(arc)
+                    zi.compress_type = zipfile.ZIP_DEFLATED
+                    z.writestr(zi, snap)
                 else:
                     z.write(src, arc)
     finally:
