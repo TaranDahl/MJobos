@@ -53,10 +53,11 @@ python scripts/release_pack.py all --version RecyaN [--dry-run]       # 一条�
 5. `python scripts/release_pack.py pack --version RecyaN` —— 展示条目清单。
 6. `python scripts/release_pack.py finish --version RecyaN --dry-run`（如有额外文件加 `--extra`）—— 确认后实跑（commit + tag `v{版本}-Recya{N}`）。
 7. 用 present_files 展示 `Release/Phobos-v{版本}-Recya{N}.zip`。
-8. push 时机由用户决定；发布 commit 与 tag 用 `git push --follow-tags` 或显式推 tag。
+8. **到此为止**：发布 commit 与 tag 留在本地，push（分支/tag）由用户亲自执行——除非用户明确要求，agent 不做任何 push。
 
 ## 边界
 
+- **push 一律由用户亲自执行**（分支/tag/force 都是）：agent 只 commit 到本地；用户明确要求 push 时才代为执行，"继续"类模糊指令不构成 push 授权。
 - **发布节奏由用户决定**，agent 只在被明确要求发布时走流程，平时不主动触发。
 - **version.h 是发布流程的禁区**：任何递增/修改 version.h 的想法都要先跟用户确认——EX_PATCH 的语义已被用户明确纠正过一次（2026-09-07）。
 - 任何一步脚本报错就停下向用户报告，不要绕过脚本手工补救（比如手改 version.h、手工打 zip）。
