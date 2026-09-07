@@ -1,4 +1,4 @@
-#include "Anchor.h"
+﻿#include "Anchor.h"
 
 double Anchor::GetRelativeOffsetHorizontal() const
 {

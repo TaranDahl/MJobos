@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/Anim/Body.h>
 #include <Ext/TechnoType/Body.h>
@@ -10,15 +10,15 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, HouseClass* pKiller)
 	if (!pThis)
 		return;
 
-	auto const pType = pThis->Type;
+	auto const pType = pThis->GetTechnoType(); // Redirect I/A/BClass::Explode(TechnoClass::Explode) to UnitClass::Explode
 
 	if (pType->DestroyAnim.Count > 0)
 	{
 		auto const facing = pThis->PrimaryFacing.Current().GetDir();
 		AnimTypeClass* pAnimType = nullptr;
-		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+		auto const pTypeExt = TechnoTypeExt::Fetch(pType);
 
-		if (!pTypeExt->DestroyAnim_Random.Get())
+		if (!pTypeExt->DestroyAnim_Random.Get(RulesExt::Global()->DestroyAnim_Random))
 		{
 			int idxAnim = 0;
 
@@ -46,8 +46,8 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, HouseClass* pKiller)
 			//auto VictimOwner = pThis->IsMindControlled() && pThis->GetOriginalOwner()
 			//	? pThis->GetOriginalOwner() : pThis->Owner;
 
-			auto const pAnimTypeExt = AnimTypeExt::ExtMap.Find(pAnim->Type);
-			auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);
+			auto const pAnimTypeExt = AnimTypeExt::Fetch(pAnim->Type);
+			auto const pAnimExt = AnimExt::Fetch(pAnim);
 
 			AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pThis->Owner);
 
@@ -72,7 +72,7 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, HouseClass* pKiller)
 	}
 }
 
-void AnimTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
+void AnimTypeExt::LoadFromINIFile(CCINIClass* pINI)
 {
 	const char* pID = this->OwnerObject()->ID;
 
@@ -80,6 +80,14 @@ void AnimTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 
 	this->Palette.LoadFromINI(pINI, pID, "CustomPalette");
 	this->XDrawOffset.Read(exINI, pID, "XDrawOffset");
+	this->XDrawOffset_ApplyBracketWidth.Read(exINI, pID, "XDrawOffset.ApplyBracketWidth");
+	this->XDrawOffset_InvertBracketShift.Read(exINI, pID, "XDrawOffset.InvertBracketShift");
+	this->XDrawOffset_BracketAdjust.Read(exINI, pID, "XDrawOffset.BracketAdjust");
+	this->XDrawOffset_BracketAdjust_Buildings.Read(exINI, pID, "XDrawOffset.BracketAdjust.Buildings");
+	this->YDrawOffset_ApplyBracketHeight.Read(exINI, pID, "YDrawOffset.ApplyBracketHeight");
+	this->YDrawOffset_InvertBracketShift.Read(exINI, pID, "YDrawOffset.InvertBracketShift");
+	this->YDrawOffset_BracketAdjust.Read(exINI, pID, "YDrawOffset.BracketAdjust");
+	this->YDrawOffset_BracketAdjust_Buildings.Read(exINI, pID, "YDrawOffset.BracketAdjust.Buildings");
 	this->HideIfNoOre_Threshold.Read(exINI, pID, "HideIfNoOre.Threshold");
 	this->Layer_UseObjectLayer.Read(exINI, pID, "Layer.UseObjectLayer");
 	this->AttachedAnimPosition.Read(exINI, pID, "AttachedAnimPosition");
@@ -115,6 +123,7 @@ void AnimTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->LargeFireAnims.Read(exINI, pID, "LargeFireAnims");
 	this->LargeFireChances.Read(exINI, pID, "LargeFireChances");
 	this->LargeFireDistances.Read(exINI, pID, "LargeFireDistances");
+	this->RenderIfOutOfScreen.Read(exINI, pID, "RenderIfOutOfScreen");
 	this->Crater_DestroyTiberium.Read(exINI, pID, "Crater.DestroyTiberium");
 	this->TheaterPalette.Read(exINI, pID, "TheaterPalette");
 	this->Tiled_Interval.Read(exINI, pID, "Tiled.Interval");
@@ -138,12 +147,20 @@ void AnimTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 }
 
 template <typename T>
-void AnimTypeExt::ExtData::Serialize(T& Stm)
+void AnimTypeExt::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->Palette)
 		.Process(this->CreateUnitType)
 		.Process(this->XDrawOffset)
+		.Process(this->XDrawOffset_ApplyBracketWidth)
+		.Process(this->XDrawOffset_InvertBracketShift)
+		.Process(this->XDrawOffset_BracketAdjust)
+		.Process(this->XDrawOffset_BracketAdjust_Buildings)
+		.Process(this->YDrawOffset_ApplyBracketHeight)
+		.Process(this->YDrawOffset_InvertBracketShift)
+		.Process(this->YDrawOffset_BracketAdjust)
+		.Process(this->YDrawOffset_BracketAdjust_Buildings)
 		.Process(this->HideIfNoOre_Threshold)
 		.Process(this->Layer_UseObjectLayer)
 		.Process(this->AttachedAnimPosition)
@@ -179,6 +196,7 @@ void AnimTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->LargeFireAnims)
 		.Process(this->LargeFireChances)
 		.Process(this->LargeFireDistances)
+		.Process(this->RenderIfOutOfScreen)
 		.Process(this->Crater_DestroyTiberium)
 		.Process(this->TheaterPalette)
 		.Process(this->Tiled_Interval)
@@ -186,69 +204,16 @@ void AnimTypeExt::ExtData::Serialize(T& Stm)
 		;
 }
 
-void AnimTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
+void AnimTypeExt::LoadFromStream(PhobosStreamReader& Stm)
 {
-	Extension<AnimTypeClass>::LoadFromStream(Stm);
+	ObjectTypeExt::LoadFromStream(Stm);
 	this->Serialize(Stm);
 }
 
-void AnimTypeExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
+void AnimTypeExt::SaveToStream(PhobosStreamWriter& Stm)
 {
-	Extension<AnimTypeClass>::SaveToStream(Stm);
+	ObjectTypeExt::SaveToStream(Stm);
 	this->Serialize(Stm);
-}
-
-AnimTypeExt::ExtContainer::ExtContainer() : Container("AnimTypeClass") { }
-AnimTypeExt::ExtContainer::~ExtContainer() = default;
-
-DEFINE_HOOK(0x42784B, AnimTypeClass_CTOR, 0x5)
-{
-	GET(AnimTypeClass*, pItem, EAX);
-
-	AnimTypeExt::ExtMap.TryAllocate(pItem);
-	return 0;
-}
-
-DEFINE_HOOK(0x428EA8, AnimTypeClass_SDDTOR, 0x5)
-{
-	GET(AnimTypeClass*, pItem, ECX);
-
-	AnimTypeExt::ExtMap.Remove(pItem);
-	return 0;
-}
-
-DEFINE_HOOK_AGAIN(0x428970, AnimTypeClass_SaveLoad_Prefix, 0x8)
-DEFINE_HOOK(0x428800, AnimTypeClass_SaveLoad_Prefix, 0xA)
-{
-	GET_STACK(AnimTypeClass*, pItem, 0x4);
-	GET_STACK(IStream*, pStm, 0x8);
-
-	AnimTypeExt::ExtMap.PrepareStream(pItem, pStm);
-
-	return 0;
-}
-
-DEFINE_HOOK_AGAIN(0x42892C, AnimTypeClass_Load_Suffix, 0x6)
-DEFINE_HOOK(0x428958, AnimTypeClass_Load_Suffix, 0x6)
-{
-	AnimTypeExt::ExtMap.LoadStatic();
-	return 0;
-}
-
-DEFINE_HOOK(0x42898A, AnimTypeClass_Save_Suffix, 0x3)
-{
-	AnimTypeExt::ExtMap.SaveStatic();
-	return 0;
-}
-
-//DEFINE_HOOK_AGAIN(0x4287E9, AnimTypeClass_LoadFromINI, 0xA)// Section dont exist!
-DEFINE_HOOK(0x4287DC, AnimTypeClass_LoadFromINI, 0xA)
-{
-	GET(AnimTypeClass*, pItem, ESI);
-	GET_STACK(CCINIClass*, pINI, 0xBC);
-
-	AnimTypeExt::ExtMap.LoadFromINI(pItem, pINI);
-	return 0;
 }
 
 namespace detail
@@ -280,4 +245,39 @@ namespace detail
 		}
 		return false;
 	}
+}
+
+// =============================
+// container
+
+AnimTypeExt::ExtContainer::ExtContainer() : Container("AnimTypeClass") { }
+AnimTypeExt::ExtContainer::~ExtContainer() = default;
+
+// =============================
+// container hooks
+
+DEFINE_HOOK(0x42784B, AnimTypeClass_CTOR, 0x5)
+{
+	GET(AnimTypeClass*, pItem, EAX);
+
+	AnimTypeExt::ExtMap.TryAllocate(pItem);
+	return 0;
+}
+
+DEFINE_HOOK(0x428EA8, AnimTypeClass_SDDTOR, 0x5)
+{
+	GET(AnimTypeClass*, pItem, ECX);
+
+	AnimTypeExt::ExtMap.Remove(pItem);
+	return 0;
+}
+
+//DEFINE_HOOK_AGAIN(0x4287E9, AnimTypeClass_LoadFromINI, 0xA)// Section dont exist!
+DEFINE_HOOK(0x4287DC, AnimTypeClass_LoadFromINI, 0xA)
+{
+	GET(AnimTypeClass*, pItem, ESI);
+	GET_STACK(CCINIClass*, pINI, 0xBC);
+
+	AnimTypeExt::ExtMap.LoadFromINI(pItem, pINI);
+	return 0;
 }

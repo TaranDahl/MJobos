@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <GadgetClass.h>
 
 #include <Ext/SWType/Body.h>
@@ -16,6 +16,7 @@ public:
 	virtual void OnMouseLeave() override;
 	virtual bool Action(GadgetFlag flags, DWORD* pKey, KeyModifier modifier) override;
 
+	void DrawInfo() const;
 	void SetColumn(int column);
 	bool LaunchSuper() const;
 

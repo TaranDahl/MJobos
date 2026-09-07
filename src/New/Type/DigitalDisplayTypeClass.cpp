@@ -1,4 +1,4 @@
-#include "DigitalDisplayTypeClass.h"
+﻿#include "DigitalDisplayTypeClass.h"
 
 #include <Utilities/ShapeTextPrinter.h>
 

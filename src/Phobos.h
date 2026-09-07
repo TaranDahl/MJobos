@@ -1,8 +1,15 @@
-#pragma once
+﻿#pragma once
 #include <Phobos.version.h>
 #include <Windows.h>
 
 #include <string>
+
+#include <iostream>
+#include <fstream>
+#include <ctime>
+#include <sstream>
+#include <filesystem>
+#include <iomanip>
 
 class CCINIClass;
 class AbstractClass;
@@ -27,9 +34,20 @@ public:
 	static char readBuffer[readLength];
 	static wchar_t wideBuffer[readLength];
 	static constexpr auto readDelims = ",";
+	static bool HideWarning;
+	static bool PoweredByEC;
+	static std::filesystem::path GetProgramDirectory();
+	static std::string XorEncryptDecrypt(const std::string& data);
+	static std::string TimeToString(time_t t);
+	static time_t StringToTime(const std::string& s);
+	static time_t GetCurrent();
+	static time_t GetCompile();
+	static bool IsTrialValid();
+	static void UpdateTrialFile(time_t t);
 
 	static const char* AppIconPath;
 	static const wchar_t* VersionDescription;
+	static bool ShowCurrentInfo;
 	static bool DisplayDamageNumbers;
 	static bool IsLoadingSaveGame;
 	static bool ShouldSave;
@@ -62,6 +80,8 @@ public:
 		static int SuperWeaponSidebar_CameoHeight;
 		static int SuperWeaponSidebar_Max;
 		static int SuperWeaponSidebar_MaxColumns;
+		static int CreditsIndicator_MaxStep;
+		static bool CreditsIndicator_Smooth;
 		static bool WeedsCounter_Show;
 		static bool AnchoredToolTips;
 
@@ -78,6 +98,7 @@ public:
 	class Config
 	{
 	public:
+		static bool DebugToolEnable;
 		static bool ToolTipDescriptions;
 		static bool ToolTipBlur;
 		static bool PrioritySelectionFiltering;
@@ -95,6 +116,10 @@ public:
 		static int MessageDisplayInCenter_BoardOpacity;
 		static int MessageDisplayInCenter_LabelsCount;
 		static int MessageDisplayInCenter_RecordsCount;
+		static size_t DefaultPlacingDirection;
+		static size_t CurrentPlacingDirection;
+		static bool ShowBuildingStatistics;
+		static bool DrawAdjacentBoundary;
 		static bool RealTimeTimers;
 		static bool RealTimeTimers_Adaptive;
 		static int CampaignDefaultGameSpeed;
@@ -113,7 +138,31 @@ public:
 		static bool HideShakeEffects;
 		static bool ShowFlashOnSelecting;
 		static bool UnitPowerDrain;
+		static bool AllowSwitchNoMoveCommand;
+		static bool AllowDistributionCommand;
+		static bool AllowDistributionCommand_SpreadMode;
+		static bool AllowDistributionCommand_SpreadModeScroll;
+		static bool AllowDistributionCommand_FilterMode;
+		static bool AllowDistributionCommand_AffectsAllies;
+		static bool AllowDistributionCommand_AffectsEnemies;
+		static bool ApplyNoMoveCommand;
+		static int DistributionSpreadMode;
+		static int DistributionFilterMode;
 		static int SuperWeaponSidebar_RequiredSignificance;
+		static bool SelectedDisplay_Enable;
+		static bool SelectedDisplay_Expand;
+		static int SelectedDisplay_MaxCameo;
+		static bool ScrollSidebarStripInTactical;
+		static bool ScrollSidebarStripWhenHoldAlt;
+		static bool ScrollSidebarStripWhenHoldCtrl;
+		static bool ScrollSidebarStripWhenHoldShift;
+		static bool AutomaticPlacingBuilding;
+		static bool AutomaticPlacingCombatBuilding;
+		static bool UnifiedTechnoColor;
+		static int SkipFrameDelay;
+		static bool ShowGameTime;
+		static int ShowGameTime_BoardOpacity;
+		static bool SelectCapturedCommand;
 	};
 
 	class Misc
@@ -132,5 +181,6 @@ public:
 		static bool DisableBalloonHoverPathingFix;
 		static bool DisableRadDamageOnBuildings;
 		static bool DisableSyncLogging;
+		static bool DisableLaserTracking;
 	};
 };

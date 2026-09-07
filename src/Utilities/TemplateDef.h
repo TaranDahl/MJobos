@@ -1,4 +1,4 @@
-#pragma region Ares Copyrights
+﻿#pragma region Ares Copyrights
 /*
  *Copyright (c) 2008+, All Ares Contributors
  *All rights reserved.
@@ -42,24 +42,11 @@
 #include "Macro.h"
 #include "Interpolation.h"
 
-#include <InfantryTypeClass.h>
-#include <AircraftTypeClass.h>
-#include <UnitTypeClass.h>
-#include <BuildingTypeClass.h>
-#include <WarheadTypeClass.h>
-#include <WeaponTypeClass.h>
-#include <SuperWeaponTypeClass.h>
-#include <InfantryClass.h>
-#include <AircraftClass.h>
-#include <UnitClass.h>
-#include <BuildingClass.h>
 #include <Powerups.h>
-#include <VocClass.h>
-#include <VoxClass.h>
-#include <ParticleTypeClass.h>
 #include <CRT.h>
-#include <LocomotionClass.h>
 #include <Locomotion/TestLocomotionClass.h>
+#include <Locomotion/AdvancedDriveLocomotionClass.h>
+#include <Locomotion/AttachmentLocomotionClass.h>
 
 #include <unordered_set>
 
@@ -543,6 +530,21 @@ namespace detail
 	}
 
 	template <>
+	inline bool read<DirStruct>(DirStruct& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		double buffer;
+
+		if (parser.ReadDouble(pSection, pKey, &buffer))
+		{
+			const int raw = static_cast<int>(buffer * (65536.0 / 360.0) + 0.5);
+			value = DirStruct(std::clamp(raw, -65535, 65535));
+			return true;
+		}
+
+		return false;
+	}
+
+	template <>
 	inline bool read<Action>(Action& value, INI_EX& parser, const char* pSection, const char* pKey)
 	{
 		if (parser.ReadString(pSection, pKey))
@@ -575,6 +577,48 @@ namespace detail
 		return false;
 	}
 
+	inline bool parse_sequence(const char* str, Sequence& seq)
+	{
+		static const auto Sequences = {
+				"Ready", "Guard", "Prone", "Walk", "FireUp", "Down", "Crawl", "Up",
+				"FireProne", "Idle1", "Idle2", "Die1", "Die2", "Die3", "Die4", "Die5",
+				"Tread", "Swim", "WetIdle1", "WetIdle2", "WetDie1", "WetDie2", "WetAttack",
+				"Hover", "Fly", "Tumble", "FireFly", "Deploy", "Deployed", "DeployedFire",
+				"DeployedIdle", "Undeploy", "Cheer", "Paradrop", "AirDeathStart",
+				"AirDeathFalling", "AirDeathFinish", "Panic", "Shovel", "Carry",
+				"SecondaryFire", "SecondaryProne"
+		};
+		auto it = Sequences.begin();
+		for (auto i = 0u; i < Sequences.size(); ++i)
+		{
+			if (_strcmpi(str, *it++) == 0)
+			{
+				seq = static_cast<Sequence>(i);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	template <>
+	inline bool read<Sequence>(Sequence& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			Sequence seq;
+			if (detail::parse_sequence(parser.value(), seq))
+			{
+				value = seq;
+				return true;
+			}
+			else if (!parser.empty())
+			{
+				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a Sequence animation name");
+			}
+		}
+		return false;
+	}
+
 	template <>
 	inline bool read<DirType>(DirType& value, INI_EX& parser, const char* pSection, const char* pKey)
 	{
@@ -582,14 +626,17 @@ namespace detail
 
 		if (parser.ReadInteger(pSection, pKey, &buffer))
 		{
-			if (buffer <= (int)DirType::NorthWest && buffer >= (int)DirType::North)
+			unsigned int absValue = abs(buffer);
+			bool isNegative = buffer < 0;
+
+			if ((int)DirType::North <= absValue && absValue <= (int)DirType::Max)
 			{
-				value = static_cast<DirType>(buffer);
+				value = static_cast<DirType>(!isNegative ? absValue : (int)DirType::Max + 1 - absValue);
 				return true;
 			}
 			else
 			{
-				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a valid DirType (0-255).");
+				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a valid DirType (0-255 abs. value).");
 			}
 		}
 
@@ -808,6 +855,7 @@ namespace detail
 				{"ally", AffectedHouse::Allies},
 				{"enemies", AffectedHouse::Enemies},
 				{"enemy", AffectedHouse::Enemies},
+				{"neutral", AffectedHouse::Neutral},
 				{"team", AffectedHouse::Team},
 				{"others", AffectedHouse::NotOwner},
 				{"all", AffectedHouse::All},
@@ -946,6 +994,33 @@ namespace detail
 			return true;
 		}
 
+		return false;
+	}
+
+	template <>
+	inline bool read<PositionFollow>(PositionFollow& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			static const std::pair<const char*, PositionFollow> Names[] =
+			{
+				{"none", PositionFollow::None},
+				{"firer", PositionFollow::Firer},
+				{"target", PositionFollow::Target},
+				{"all", PositionFollow::All},
+			};
+
+			for (auto const& [name, val] : Names)
+			{
+				if (_strcmpi(parser.value(), name) == 0)
+				{
+					value = val;
+					return true;
+				}
+			}
+
+			Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a position follow mode (None, Firer, Target, All)");
+		}
 		return false;
 	}
 
@@ -1123,6 +1198,55 @@ namespace detail
 	}
 
 	template <>
+	inline bool read<StackingMode>(StackingMode& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			if (_strcmpi(parser.value(), "override") == 0)
+			{
+				value = StackingMode::Override;
+			}
+			if (_strcmpi(parser.value(), "setifzero") == 0)
+			{
+				value = StackingMode::SetIfZero;
+			}
+			else if (_strcmpi(parser.value(), "min") == 0)
+			{
+				value = StackingMode::Min;
+			}
+			else if (_strcmpi(parser.value(), "max") == 0)
+			{
+				value = StackingMode::Max;
+			}
+			else if (_strcmpi(parser.value(), "add") == 0)
+			{
+				value = StackingMode::Add;
+			}
+			else if (_strcmpi(parser.value(), "subtract") == 0)
+			{
+				value = StackingMode::Subtract;
+			}
+			else if (_strcmpi(parser.value(), "multiply") == 0)
+			{
+				value = StackingMode::Multiply;
+			}
+			else if (_strcmpi(parser.value(), "divide") == 0)
+			{
+				value = StackingMode::Divide;
+			}
+			else
+			{
+				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a stacking mode type");
+				return false;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	template <>
 	inline bool read<ChronoSparkleDisplayPosition>(ChronoSparkleDisplayPosition& value, INI_EX& parser, const char* pSection, const char* pKey)
 	{
 		if (parser.ReadString(pSection, pKey))
@@ -1225,6 +1349,8 @@ if(_strcmpi(parser.value(), #name) == 0){ value = __uuidof(name ## LocomotionCla
 #ifdef CUSTOM_LOCO_EXAMPLE_ENABLED // Add semantic parsing for loco
 			PARSE_IF_IS_PHOBOS_LOCO(Test);
 #endif
+			PARSE_IF_IS_PHOBOS_LOCO(AdvancedDrive);
+			PARSE_IF_IS_PHOBOS_LOCO(Attachment);
 
 #undef PARSE_IF_IS_PHOBOS_LOCO
 
@@ -1264,6 +1390,34 @@ if(_strcmpi(parser.value(), #name) == 0){ value = __uuidof(name ## LocomotionCla
 			else
 			{
 				Debug::INIParseFailed(pSection, pKey, str, "Expected an interpolation mode");
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template <>
+	inline bool read<EdgeType>(EdgeType& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			auto str = parser.value();
+			if (_strcmpi(str, "owner") == 0)
+			{
+				value = EdgeType::Owner;
+			}
+			else if (_strcmpi(str, "closest") == 0)
+			{
+				value = EdgeType::Closest;
+			}
+			else if (_strcmpi(str, "random") == 0)
+			{
+				value = EdgeType::Random;
+			}
+			else
+			{
+				Debug::INIParseFailed(pSection, pKey, str, "Expected an edge type");
 				return false;
 			}
 			return true;
@@ -1469,6 +1623,34 @@ if(_strcmpi(parser.value(), #name) == 0){ value = __uuidof(name ## LocomotionCla
 	}
 
 	template <>
+	inline bool read<AttachmentYSortPosition>(AttachmentYSortPosition& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			if (_strcmpi(parser.value(), "default") == 0)
+			{
+				value = AttachmentYSortPosition::Default;
+			}
+			else if (_strcmpi(parser.value(), "underparent") == 0)
+			{
+				value = AttachmentYSortPosition::UnderParent;
+			}
+			else if (_strcmpi(parser.value(), "overparent") == 0)
+			{
+				value = AttachmentYSortPosition::OverParent;
+			}
+			else
+			{
+				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected an attachment YSort position");
+				return false;
+			}
+			return true;
+		}
+
+		return false;
+	}
+
+	template <>
 	inline bool read<DisplayShowType>(DisplayShowType& value, INI_EX& parser, const char* pSection, const char* pKey)
 	{
 		if (parser.ReadString(pSection, pKey))
@@ -1624,6 +1806,34 @@ if(_strcmpi(parser.value(), #name) == 0){ value = __uuidof(name ## LocomotionCla
 			else if (!INIClass::IsBlank(pCur))
 				Debug::INIParseFailed(pSection, pKey, pCur);
 		}
+	}
+
+	template <>
+	inline bool read<PowerStatus>(PowerStatus& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			static const std::pair<const char*, PowerStatus> Names[] =
+			{
+				{"none", PowerStatus::None},
+				{"consumer", PowerStatus::Low},
+				{"low", PowerStatus::Low},
+				{"full", PowerStatus::Full},
+				{"normal", PowerStatus::Full},
+			};
+
+			for (auto const& [name, val] : Names)
+			{
+				if (_strcmpi(parser.value(), name) == 0)
+				{
+					value = val;
+					return true;
+				}
+			}
+
+			Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a valid PlayerPowerState (none, full, low|consumer");
+		}
+		return false;
 	}
 }
 
@@ -1827,6 +2037,44 @@ inline void ValueableVector<WarheadTypeClass*>::Read(INI_EX& parser, const char*
 	}
 }
 
+template <>
+inline void ValueableVector<Mission>::Read(INI_EX& parser, const char* pSection, const char* pKey)
+{
+	if (parser.ReadString(pSection, pKey))
+	{
+		this->clear();
+		char* str = parser.value();
+		char* context = nullptr;
+		for (char* cur = strtok_s(str, Phobos::readDelims, &context); cur; cur = strtok_s(nullptr, Phobos::readDelims, &context))
+		{
+			auto mission = MissionControlClass::FindIndex(cur);
+			if (mission != Mission::None)
+				this->push_back(mission);
+			else if (!INIClass::IsBlank(cur))
+				Debug::INIParseFailed(pSection, pKey, cur, "Invalid Mission name");
+		}
+	}
+}
+
+template <>
+inline void ValueableVector<Sequence>::Read(INI_EX& parser, const char* pSection, const char* pKey)
+{
+	if (parser.ReadString(pSection, pKey))
+	{
+		this->clear();
+		char* str = parser.value();
+		char* context = nullptr;
+		for (char* cur = strtok_s(str, Phobos::readDelims, &context); cur; cur = strtok_s(nullptr, Phobos::readDelims, &context))
+		{
+			Sequence seq;
+			if (detail::parse_sequence(cur, seq))
+				this->push_back(seq);
+			else if (!INIClass::IsBlank(cur))
+				Debug::INIParseFailed(pSection, pKey, cur, "Invalid Sequence name");
+		}
+	}
+}
+
 template <typename T>
 bool ValueableVector<T>::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
@@ -1926,6 +2174,31 @@ void __declspec(noinline) NullableVector<T>::Read(INI_EX& parser, const char* pS
 
 		if (non_default)
 			detail::parse_values<T>(*this, parser, pSection, pKey);
+	}
+}
+
+template <>
+inline void NullableVector<Mission>::Read(INI_EX& parser, const char* pSection, const char* pKey)
+{
+	if (parser.ReadString(pSection, pKey))
+	{
+		this->clear();
+		auto const non_default = _strcmpi(parser.value(), "<default>");
+		this->hasValue = non_default;
+
+		if (non_default)
+		{
+			char* str = parser.value();
+			char* context = nullptr;
+			for (char* cur = strtok_s(str, Phobos::readDelims, &context); cur; cur = strtok_s(nullptr, Phobos::readDelims, &context))
+			{
+				auto mission = MissionControlClass::FindIndex(cur);
+				if (mission != Mission::None)
+					this->push_back(mission);
+				else if (!INIClass::IsBlank(cur))
+					Debug::INIParseFailed(pSection, pKey, cur, "Invalid Mission name");
+			}
+		}
 	}
 }
 

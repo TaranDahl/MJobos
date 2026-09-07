@@ -9,94 +9,61 @@ on:
       - labeled
       - unlabeled
 env:
-  BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+  BASE_REF: ${{ github.event.pull_request.base.sha }}
 
 jobs:
   Changelog-Check:
     name: Changelog Mention
-    # If the No Documentation Needed label is set, then workflow will not be executed
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'No Documentation Needed') }}
+    # If the Skip Changelog label is set, then workflow will not be executed
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Skip Changelog') }}
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
             fetch-depth: 0
       - name: Check that Changelog has been updated
         run: |
           # Check that Changelog has been updated
-          if (git diff --name-only $(git merge-base origin/$BASE_BRANCH HEAD) | grep ^docs/Whats-New.md$)
+          if ! git diff --quiet $(git merge-base $BASE_REF HEAD) -- "整合包说明/更新改动说明.md";
           then
-            echo "Thank you for remembering to update the Changelog! 😋"
+            echo "感谢您记得更新变更日志！😋"
             exit 0
           else
-            echo "It looks like you forgot to update the Changelog! 🧐"
-            echo "Please, mention your changes in 'docs/Whats-New.md' or use [No Documentation Needed] label for your Pull Request."
-            exit 1
-          fi
-
-  Credits-Check:
-    name: Credits List Mention
-    # If the No Documentation Needed or Bugfix label is set, then workflow will not be executed
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'No Documentation Needed') && !contains(github.event.pull_request.labels.*.name, 'Bugfix') }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-            fetch-depth: 0
-      - name: Check that Credits List has been updated
-        run: |
-          # Check that Credits List has been updated
-          if (git diff --name-only $(git merge-base origin/$BASE_BRANCH HEAD) | grep ^CREDITS.md$)
-          then
-            echo "Thank you for remembering to update the Credits List! 😋"
-            exit 0
-          else
-            echo "It looks like you forgot to update the Credits List! 🧐"
-            echo "Please, mention your contribution in 'CREDITS.md' or use [No Documentation Needed] label for your Pull Request."
+            echo "你好像忘了更新变更日志！🧐"
+            echo "请在“整合包说明/更新改动说明”中提及您的更改。"
             exit 1
           fi
 
   Documentation-Check:
     name: Documentation for Changes
-    # If the No Documentation Needed or Bugfix label is set, then workflow will not be executed
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'No Documentation Needed') && !contains(github.event.pull_request.labels.*.name, 'Bugfix') }}
+    # If the Skip Docs label is set, then workflow will not be executed
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Skip Docs') }}
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
             fetch-depth: 0
       - name: Check that Documentation has been updated
         run: |
           # Check that Documentation has been updated
-          if (git diff --name-only $(git merge-base origin/$BASE_BRANCH HEAD) | \
-              grep \
-              -e ^docs/New-or-Enhanced-Logics.md$   \
-              -e ^docs/Fixed-or-Improved-Logics.md$ \
-              -e ^docs/AI-Scripting-and-Mapping.md$ \
-              -e ^docs/User-Interface.md$           \
-              -e ^docs/Interoperability.md$         \
-              -e ^docs/Miscellanous.md$             \
-          )
+          if ! git diff --quiet $(git merge-base $BASE_REF HEAD) -- "整合包说明/额外功能说明.md";
           then
-            echo "Thank you for remembering to add your changes to the docs! 😋"
+            echo "感谢您记得更新功能说明！😋"
             exit 0
           else
-            echo "It looks like you forgot to add your changes to the docs! 🧐"
-            echo "Please, document your changes or use [No Documentation Needed] label for your Pull Request."
+            echo "你好像忘了更新功能说明！🧐"
+            echo "请在“整合包说明/额外功能说明”中提及您的更改。"
             exit 1
           fi
 
   Interop-Version-Check:
     name: Interop API Version Updated
-    # If the No Documentation Needed label is set, then workflow will not be executed
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'No Documentation Needed') }}
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
             fetch-depth: 0
       - name: Check that Interop API version is updated
@@ -104,12 +71,12 @@ jobs:
           # Check if any files in src/Interop/ were modified (excluding Version.h itself for initial checks)
           CHANGED_FILES=$(git diff --name-only $(git merge-base origin/$BASE_BRANCH HEAD))
           INTEROP_MODIFIED=$(echo "$CHANGED_FILES" | grep -E "^src/Interop/.*\.(h|cpp)$" | grep -v "^src/Interop/Version\." || true)
-          
+
           if [ -z "$INTEROP_MODIFIED" ]; then
             echo "No Interop files modified. Skipping version check."
             exit 0
           fi
-          
+
           # If Interop files were modified, check if Version.h was also modified
           if echo "$CHANGED_FILES" | grep -q "^src/Interop/Version\.h$"; then
             echo "Thank you for updating the Interop API version! 😋"

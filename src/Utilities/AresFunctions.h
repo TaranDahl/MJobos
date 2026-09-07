@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <functional>
 #include "Constructs.h"
 
@@ -33,22 +33,29 @@ public:
 
 	static void(__stdcall* SpawnSurvivors)(FootClass* pThis, TechnoClass* pKiller, bool Select, bool PreventEscape);
 
+	static int(__thiscall* RequirementsMet)(void* pAresHouseExt, TechnoTypeClass* pType);
+
 	static bool(__thiscall* ReverseEngineer)(void* pAresHouseExt, TechnoTypeClass* pType);
 
 	static bool(__thiscall* IsTargetConstraintsEligible)(void*, HouseClass*, bool);
 
 	static void(__thiscall* UnitDeliveryStateMachine_Update)(void*);
 
-	// WarheadTypeExt::ExtData
+	static void(__thiscall* SetSpotlight)(void*, BuildingLightClass* pSpotlight);
+
+	// WarheadTypeExt
 	static bool(__thiscall* ApplyPermaMC)(void*, HouseClass* pSourceHouse, AbstractClass* pTarget);
 
 	static bool (*DetailsCurrentlyEnabled)();
 
+	static void(*SendPDPlane)(HouseClass* pOwner, CellClass* pDestination, AircraftTypeClass* pPlaneType, Iterator<TechnoTypeClass*> Types, Iterator<int> Nums);
+
 	static std::function<AresSWTypeExtData* (SuperWeaponTypeClass*)> SWTypeExtMap_Find;
 
 	static PhobosMap<ObjectClass*, AlphaShapeClass*>* AlphaExtMap;
+	static PhobosMap<BombClass*, WeaponTypeClass**>* BombExtMap;
 
-	// BuildingTypeExt::ExtData
+	// BuildingTypeExt
 	static void* (__thiscall* GetTunnel)(void*, HouseClass*);
 	static void(__thiscall* AddPassengerFromTunnel)(void*, BuildingClass*, FootClass*);
 

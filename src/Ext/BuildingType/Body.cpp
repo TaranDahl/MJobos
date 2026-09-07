@@ -1,12 +1,57 @@
-#include "Body.h"
+﻿#include "Body.h"
+
+#include <EventClass.h>
+#include <TacticalClass.h>
 
 #include <Ext/House/Body.h>
 #include <Ext/SWType/Body.h>
+#include <Ext/Scenario/Body.h>
 
 BuildingTypeExt::ExtContainer BuildingTypeExt::ExtMap;
 
+std::vector<CellStruct> BuildingTypeExt::BaseNormalCells;
+std::vector<TechnoClass*> BuildingTypeExt::CleanCheckedTechnos;
+std::vector<CellClass*> BuildingTypeExt::CleanCheckedCells;
+std::vector<CellClass*> BuildingTypeExt::CleanOptionalCells;
+std::vector<TechnoClass*> BuildingTypeExt::CleanReCheckedTechnos;
+std::vector<BuildingTypeExt::InfantryCountInCell> BuildingTypeExt::CleanInfantryCells;
+std::vector<BuildingTypeExt::TechnoWithDestination> BuildingTypeExt::CleanFinalOrder;
+std::vector<CellClass*> BuildingTypeExt::CleanDeleteCells;
+std::vector<TechnoClass*> BuildingTypeExt::CleanOptionalTechnos;
+std::unordered_map<int, int> BuildingTypeExt::PlaceCheckedCells;
+static bool InitStaticBuildingTypeContainers()
+{
+	BuildingTypeExt::BaseNormalCells.reserve(100);
+	BuildingTypeExt::BaseNormalCells.clear();
+
+	BuildingTypeExt::CleanCheckedTechnos.reserve(24);
+	BuildingTypeExt::CleanCheckedTechnos.clear();
+	BuildingTypeExt::CleanCheckedCells.reserve(24);
+	BuildingTypeExt::CleanCheckedCells.clear();
+	BuildingTypeExt::CleanOptionalCells.reserve(24);
+	BuildingTypeExt::CleanOptionalCells.clear();
+	BuildingTypeExt::CleanReCheckedTechnos.reserve(12);
+	BuildingTypeExt::CleanReCheckedTechnos.clear();
+	BuildingTypeExt::CleanInfantryCells.reserve(4);
+	BuildingTypeExt::CleanInfantryCells.clear();
+	BuildingTypeExt::CleanFinalOrder.reserve(24);
+	BuildingTypeExt::CleanFinalOrder.clear();
+	BuildingTypeExt::CleanDeleteCells.reserve(4);
+	BuildingTypeExt::CleanDeleteCells.clear();
+	BuildingTypeExt::CleanOptionalTechnos.reserve(4);
+	BuildingTypeExt::CleanOptionalTechnos.clear();
+
+	BuildingTypeExt::PlaceCheckedCells.reserve(400);
+	BuildingTypeExt::PlaceCheckedCells.clear();
+
+    return true;
+}
+bool BuildingTypeExt::ContainersInit = InitStaticBuildingTypeContainers();
+BuildingTypeExt::ExtContainer::ExtContainer() : Container("BuildingTypeClass") { }
+BuildingTypeExt::ExtContainer::~ExtContainer() = default;
+
 // Assuming SuperWeapon & SuperWeapon2 are used (for the moment)
-int BuildingTypeExt::ExtData::GetSuperWeaponCount() const
+int BuildingTypeExt::GetSuperWeaponCount() const
 {
 	// The user should only use SuperWeapon and SuperWeapon2 if the attached sw count isn't bigger than 2
 	const auto pThis = this->OwnerObject();
@@ -15,13 +60,13 @@ int BuildingTypeExt::ExtData::GetSuperWeaponCount() const
 	return count + this->SuperWeapons.size();
 }
 
-int BuildingTypeExt::ExtData::GetSuperWeaponIndex(const int index, HouseClass* pHouse) const
+int BuildingTypeExt::GetSuperWeaponIndex(const int index, HouseClass* pHouse) const
 {
 	const int idxSW = this->GetSuperWeaponIndex(index);
 
 	if (const auto pSuper = pHouse->Supers.GetItemOrDefault(idxSW))
 	{
-		const auto pExt = SWTypeExt::ExtMap.Find(pSuper->Type);
+		const auto pExt = SWTypeExt::Fetch(pSuper->Type);
 
 		if (!pExt->IsAvailable(pHouse))
 			return -1;
@@ -30,7 +75,7 @@ int BuildingTypeExt::ExtData::GetSuperWeaponIndex(const int index, HouseClass* p
 	return idxSW;
 }
 
-int BuildingTypeExt::ExtData::GetSuperWeaponIndex(const int index) const
+int BuildingTypeExt::GetSuperWeaponIndex(const int index) const
 {
 	const auto pThis = this->OwnerObject();
 
@@ -45,7 +90,7 @@ int BuildingTypeExt::ExtData::GetSuperWeaponIndex(const int index) const
 
 std::pair<int, int> BuildingTypeExt::GetEnhancedPower(BuildingTypeClass* pBuilding, int output, HouseClass* pHouse, BuildingClass* pPowerPlant)
 {
-	const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
+	const auto pHouseExt = HouseExt::Fetch(pHouse);
 	int amount = 0;
 	float factor = 1.0f;
 	std::map<int, int> applied; // index, count
@@ -56,7 +101,7 @@ std::pair<int, int> BuildingTypeExt::GetEnhancedPower(BuildingTypeClass* pBuildi
 			continue;
 
 		const auto pEnhancerType = pEnhancer->Type;
-		const auto pEnhancerTypeExt = BuildingTypeExt::ExtMap.Find(pEnhancerType);
+		const auto pEnhancerTypeExt = BuildingTypeExt::Fetch(pEnhancerType);
 
 		if (!pEnhancerTypeExt->PowerPlantEnhancer_Buildings.Contains(pBuilding))
 			continue;
@@ -86,7 +131,7 @@ std::pair<int, int> BuildingTypeExt::GetEnhancedPower(BuildingTypeClass* pBuildi
 
 void BuildingTypeExt::PlayBunkerSound(BuildingClass const* pThis, bool buildUp)
 {
-	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+	auto const pTypeExt = BuildingTypeExt::Fetch(pThis->Type);
 	auto const nSound = buildUp
 		? pTypeExt->BunkerWallsUpSound.Get(RulesClass::Instance->BunkerWallsUpSound)
 		: pTypeExt->BunkerWallsDownSound.Get(RulesClass::Instance->BunkerWallsDownSound);
@@ -95,20 +140,66 @@ void BuildingTypeExt::PlayBunkerSound(BuildingClass const* pThis, bool buildUp)
 		VocClass::PlayAt(nSound, pThis->Location);
 }
 
-int BuildingTypeExt::CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pType, HouseClass* pHouse)
+bool BuildingTypeExt::IsPoweredAnimBlocked(BuildingClass* pBuilding, bool powered, bool poweredLight, bool poweredEffect, bool poweredSpecial)
 {
-	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pType, pHouse);
+	auto const pType = pBuilding->Type;
 
-	if (upgrades != -1)
-		return upgrades;
+	if (!((pType->Powered && pType->PowerDrain > 0 && (powered || poweredLight || poweredEffect)) || (pType->PoweredSpecial && poweredSpecial)))
+		return false;
 
-	if (const auto pUndeploy = pType->UndeploysInto)
-		return pHouse->CountOwnedNow(pType) + pHouse->CountOwnedNow(pUndeploy);
-
-	return pHouse->CountOwnedNow(pType);
+	return pBuilding->CurrentMission != Mission::Construction
+		&& pBuilding->CurrentMission != Mission::Selling
+		&& !pBuilding->IsPowerOnline()
+		&& !BuildingExt::Fetch(pBuilding)->HasPowerFromMapFile;
 }
 
-int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse) // not including producing upgrades
+CellStruct BuildingTypeExt::GetWeaponFactoryDoor(BuildingClass* pThis)
+{
+	auto cell = pThis->GetMapCoords();
+	auto buffer = CoordStruct::Empty;
+	pThis->GetExitCoords(&buffer, 0);
+	const auto pType = pThis->Type;
+
+	switch (RulesExt::Global()->ExtendedWeaponsFactory ? BuildingTypeExt::Fetch(pType)->WeaponsFactory_Dir.Get() : 2)
+	{
+
+	case 0:
+	{
+		cell.X = static_cast<short>(buffer.X / Unsorted::LeptonsPerCell);
+		break;
+	}
+
+	case 2:
+	{
+		cell.X += static_cast<short>(pType->GetFoundationWidth() - 1);
+		cell.Y = static_cast<short>(buffer.Y / Unsorted::LeptonsPerCell);
+		break;
+	}
+
+	case 4:
+	{
+		cell.X = static_cast<short>(buffer.X / Unsorted::LeptonsPerCell);
+		cell.Y += static_cast<short>(pType->GetFoundationHeight(false) - 1);
+		break;
+	}
+
+	case 6:
+	{
+		cell.Y = static_cast<short>(buffer.Y / Unsorted::LeptonsPerCell);
+		break;
+	}
+
+	default:
+	{
+		break;
+	}
+
+	}
+
+	return cell;
+}
+
+int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass const* const pBuilding, HouseClass const* const pHouse) // not including producing upgrades
 {
 	int result = 0;
 	bool isUpgrade = false;
@@ -140,21 +231,1147 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass*
 			checkUpgrade(pTPowersUp);
 	}*/
 
-	for (auto const pTPowersUp : BuildingTypeExt::ExtMap.Find(pBuilding)->PowersUp_Buildings)
+	for (auto const pTPowersUp : BuildingTypeExt::Fetch(pBuilding)->PowersUp_Buildings)
 		checkUpgrade(pTPowersUp);
 
 	return isUpgrade ? result : -1;
 }
 
+BuildingTypeClass* BuildingTypeExt::GetAnotherPlacingType(size_t direction, bool onWater)
+{
+	const auto pType = this->OwnerObject();
 
-void BuildingTypeExt::ExtData::Initialize()
-{ }
+	if (pType->PlaceAnywhere || this->LimboBuild)
+		return nullptr;
+
+	const auto& types = onWater ? this->PlaceBuilding_OnWater : this->PlaceBuilding_OnLand;
+	const size_t size = types.size();
+
+	if (!size)
+		return nullptr;
+
+	direction = (direction + (16u / size)) & 0x1Fu;
+	const auto pAnotherType = types[static_cast<int>(direction * size / 32u)];
+
+	if (pAnotherType->BuildCat != pType->BuildCat
+		|| pAnotherType->PlaceAnywhere
+		|| BuildingTypeExt::Fetch(pAnotherType)->LimboBuild)
+	{
+		return nullptr;
+	}
+
+	return pAnotherType;
+}
+
+// Check whether can call the occupiers leave
+bool BuildingTypeExt::CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse)
+{
+	if (!pOccupierHouse || !pBuildingHouse)
+		return false;
+	else if (pOccupierHouse->IsAlliedWith(pBuildingHouse))
+		return true;
+	else if (SessionClass::IsCampaign() && pBuildingHouse->IsControlledByHuman() && pOccupierHouse->IsControlledByHuman())
+		return true;
+
+	return false;
+}
+
+// Force occupiers leave, return: whether it should stop right now
+bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno)
+{
+	// Step 1: Find the technos inside of the building place grid.
+	auto infantryCount = CellStruct::Empty;
+	BuildingTypeExt::CleanCheckedTechnos.clear();
+	BuildingTypeExt::CleanCheckedCells.clear();
+
+	for (auto pFoundation = pBuildingType->GetFoundationData(false); *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+	{
+		auto currentCell = topLeftCell + *pFoundation;
+
+		if (const auto pCell = MapClass::Instance.TryGetCellAt(currentCell))
+		{
+			for (auto pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
+			{
+				const auto absType = pObject->WhatAmI();
+
+				if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
+				{
+					const auto pFoot = static_cast<FootClass*>(pObject);
+
+					if (TechnoExt::DoesntOccupyCellAsChild(pFoot))
+						continue;
+
+					if (!TechnoTypeExt::Fetch(pFoot->GetTechnoType())->CanBeBuiltOn && pFoot != pExceptTechno) // No need to check house
+					{
+						if (pFoot->GetCurrentSpeed() <= 0 || !pFoot->Locomotor->Is_Moving())
+						{
+							if (absType == AbstractType::Infantry)
+								++infantryCount.X;
+
+							BuildingTypeExt::CleanCheckedTechnos.push_back(pFoot);
+						}
+					}
+				}
+			}
+
+			BuildingTypeExt::CleanCheckedCells.push_back(pCell);
+		}
+	}
+
+	if (BuildingTypeExt::CleanCheckedTechnos.size() <= 0) // All in moving
+		return false;
+
+	// Step 2: Find the cells around the building.
+	BuildingTypeExt::CleanOptionalCells.clear();
+
+	for (auto pFoundation = pBuildingType->FoundationOutside; *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+	{
+		auto searchCell = topLeftCell + *pFoundation;
+
+		if (const auto pSearchCell = MapClass::Instance.TryGetCellAt(searchCell))
+		{
+			if (!(pSearchCell->OccupationFlags & 0x80)
+				&& pSearchCell->IsClearToMove(SpeedType::Amphibious, true, true, -1, MovementZone::Amphibious, -1, false))
+			{
+				BuildingTypeExt::CleanOptionalCells.push_back(pSearchCell);
+			}
+		}
+	}
+
+	if (BuildingTypeExt::CleanOptionalCells.size() <= 0) // There is no place for scattering
+		return true;
+
+	// Step 3: Sort the technos by the distance out of the foundation.
+	std::sort(&BuildingTypeExt::CleanCheckedTechnos[0], &BuildingTypeExt::CleanCheckedTechnos[BuildingTypeExt::CleanCheckedTechnos.size()],
+		[](TechnoClass* pTechnoA, TechnoClass* pTechnoB)
+	{
+		int minA = INT_MAX;
+		int minB = INT_MAX;
+
+		for (const auto& pOptionalCell : BuildingTypeExt::CleanOptionalCells) // If there are many valid cells at start, it means most of occupiers will near to the edge
+		{
+			if (minA <= 65536) // If distance squared is lower or equal to 256^2, then no need to calculate any more because it is on the edge
+			{
+				if (minB <= 65536)
+					break;
+			}
+			else
+			{
+				auto curA = static_cast<int>(pTechnoA->GetMapCoords().DistanceFromSquared(pOptionalCell->MapCoords));
+
+				if (curA < minA)
+					minA = curA;
+
+				if (minB <= 65536)
+					continue;
+			}
+
+			auto curB = static_cast<int>(pTechnoB->GetMapCoords().DistanceFromSquared(pOptionalCell->MapCoords));
+
+			if (curB < minB)
+				minB = curB;
+		}
+
+		return minA > minB;
+	});
+
+	// Step 4: Core, successively find the farthest techno and its closest valid destination.
+	BuildingTypeExt::CleanReCheckedTechnos.clear();
+	BuildingTypeExt::CleanInfantryCells.clear();
+	BuildingTypeExt::CleanFinalOrder.clear();
+
+	do
+	{
+		// Step 4.1: Push the technos discovered just now back to the vector.
+		for (const auto& pRecheckedTechno : BuildingTypeExt::CleanReCheckedTechnos)
+		{
+			if (pRecheckedTechno->WhatAmI() == AbstractType::Infantry)
+				++infantryCount.X;
+
+			BuildingTypeExt::CleanCheckedTechnos.push_back(pRecheckedTechno);
+		}
+
+		BuildingTypeExt::CleanReCheckedTechnos.clear();
+
+		// Step 4.2: Check the techno vector.
+		for (const auto& pCheckedTechno : BuildingTypeExt::CleanCheckedTechnos)
+		{
+			// Step 4.2.1: Search the closest valid cell to be the destination.
+			const auto location = pCheckedTechno->GetMapCoords();
+			const auto pCheckedType = pCheckedTechno->GetTechnoType();
+			const bool isInfantry = pCheckedTechno->WhatAmI() == AbstractType::Infantry;
+			auto tryGetInfantryDestinationCell = [&]() -> CellClass*
+			{
+				if (isInfantry) // Try to maximizing cells utilization
+				{
+					if (BuildingTypeExt::CleanInfantryCells.size() && infantryCount.Y >= (infantryCount.X / 3 + (infantryCount.X % 3 ? 1 : 0)))
+					{
+						std::sort(&BuildingTypeExt::CleanInfantryCells[0], &BuildingTypeExt::CleanInfantryCells[BuildingTypeExt::CleanInfantryCells.size()],[location](InfantryCountInCell cellA, InfantryCountInCell cellB){
+							return cellA.Position->MapCoords.DistanceFromSquared(location) < cellB.Position->MapCoords.DistanceFromSquared(location);
+						});
+
+						for (auto& infantryCell : BuildingTypeExt::CleanInfantryCells)
+						{
+							if (infantryCell.Count < 3 && infantryCell.Position->IsClearToMove(pCheckedType->SpeedType, true, true, -1, pCheckedType->MovementZone, -1, false))
+							{
+								++infantryCell.Count;
+								return infantryCell.Position;
+							}
+						}
+					}
+				}
+
+				return nullptr;
+			};
+			auto pDestinationCell = tryGetInfantryDestinationCell();
+
+			if (!pDestinationCell)
+			{
+				std::sort(&BuildingTypeExt::CleanOptionalCells[0], &BuildingTypeExt::CleanOptionalCells[BuildingTypeExt::CleanOptionalCells.size()],[location](CellClass* pCellA, CellClass* pCellB){
+					return pCellA->MapCoords.DistanceFromSquared(location) < pCellB->MapCoords.DistanceFromSquared(location);
+				});
+				const auto minDistanceSquaredFactor = BuildingTypeExt::CleanOptionalCells[0]->MapCoords.DistanceFromSquared(location);
+				BuildingTypeExt::CleanDeleteCells.clear();
+
+				for (const auto& pOptionalCell : BuildingTypeExt::CleanOptionalCells)
+				{
+					if (!pDestinationCell) // First find a feasible destination
+					{
+						BuildingTypeExt::CleanOptionalTechnos.clear();
+						auto pObject = pOptionalCell->FirstObject;
+						bool valid = true;
+
+						for (; pObject; pObject = pObject->NextObject)
+						{
+							const auto absType = pObject->WhatAmI();
+
+							if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
+							{
+								const auto pCurTechno = static_cast<TechnoClass*>(pObject);
+
+								if (!BuildingTypeExt::CheckOccupierCanLeave(pHouse, pCurTechno->Owner))
+								{
+									BuildingTypeExt::CleanDeleteCells.push_back(pOptionalCell);
+									valid = false;
+									break;
+								}
+
+								BuildingTypeExt::CleanOptionalTechnos.push_back(pCurTechno);
+							}
+							// Other types will be checked by IsClearToMove
+						}
+
+						if (valid && pOptionalCell->IsClearToMove(pCheckedType->SpeedType, true, true, -1, pCheckedType->MovementZone, -1, false))
+						{
+							// Record the foots on the destination cell, they also need to be evacuated
+							for (const auto& pOptionalTechno : BuildingTypeExt::CleanOptionalTechnos)
+								BuildingTypeExt::CleanReCheckedTechnos.push_back(pOptionalTechno);
+
+							if (isInfantry) // Not need to remove it now
+							{
+								BuildingTypeExt::CleanInfantryCells.emplace_back(InfantryCountInCell{ pOptionalCell, 1 });
+								++infantryCount.Y;
+							}
+
+							pDestinationCell = pOptionalCell;
+
+							// Prioritize selecting empty cells
+							if (!pObject || pOptionalCell->MapCoords.DistanceFromSquared(location) > minDistanceSquaredFactor)
+								break;
+						}
+					}
+					else if (pOptionalCell->MapCoords.DistanceFromSquared(location) <= minDistanceSquaredFactor) // Not too far
+					{
+						// Only check empty cell
+						if (!pOptionalCell->FirstObject && pOptionalCell->IsClearToMove(pCheckedType->SpeedType, true, true, -1, pCheckedType->MovementZone, -1, false))
+						{
+							if (isInfantry) // Not need to remove it now
+							{
+								BuildingTypeExt::CleanInfantryCells.emplace_back(InfantryCountInCell{ pOptionalCell, 1 });
+								++infantryCount.Y;
+							}
+
+							pDestinationCell = pOptionalCell;
+							break;
+						}
+					}
+					else // End immediately if the distance is longer
+					{
+						break;
+					}
+				}
+
+				if (!pDestinationCell) // Can not build
+					return true;
+
+				for (const auto& pDeleteCell : BuildingTypeExt::CleanDeleteCells) // Mark the invalid cells
+				{
+					BuildingTypeExt::CleanCheckedCells.push_back(pDeleteCell);
+					BuildingTypeExt::CleanOptionalCells.erase(std::remove(BuildingTypeExt::CleanOptionalCells.begin(), BuildingTypeExt::CleanOptionalCells.end(), pDeleteCell), BuildingTypeExt::CleanOptionalCells.end());
+				}
+			}
+
+			// Step 4.2.2: Mark the cell and push back its surrounded cells, then prepare for the command.
+			if (std::find(BuildingTypeExt::CleanCheckedCells.begin(), BuildingTypeExt::CleanCheckedCells.end(), pDestinationCell) == BuildingTypeExt::CleanCheckedCells.end())
+				BuildingTypeExt::CleanCheckedCells.push_back(pDestinationCell);
+
+			if (std::find(BuildingTypeExt::CleanOptionalCells.begin(), BuildingTypeExt::CleanOptionalCells.end(), pDestinationCell) != BuildingTypeExt::CleanOptionalCells.end())
+			{
+				BuildingTypeExt::CleanOptionalCells.erase(std::remove(BuildingTypeExt::CleanOptionalCells.begin(), BuildingTypeExt::CleanOptionalCells.end(), pDestinationCell), BuildingTypeExt::CleanOptionalCells.end());
+				auto searchCell = pDestinationCell->MapCoords - CellStruct { 1, 1 };
+
+				for (int i = 0; i < 4; ++i)
+				{
+					for (int j = 0; j < 2; ++j)
+					{
+						if (const auto pSearchCell = MapClass::Instance.TryGetCellAt(searchCell))
+						{
+							if (std::find(BuildingTypeExt::CleanCheckedCells.begin(), BuildingTypeExt::CleanCheckedCells.end(), pSearchCell) == BuildingTypeExt::CleanCheckedCells.end()
+								&& std::find(BuildingTypeExt::CleanOptionalCells.begin(), BuildingTypeExt::CleanOptionalCells.end(), pSearchCell) == BuildingTypeExt::CleanOptionalCells.end()
+								&& !(pSearchCell->OccupationFlags & 0x80)
+								&& pSearchCell->IsClearToMove(SpeedType::Amphibious, true, true, -1, MovementZone::Amphibious, -1, false))
+							{
+								BuildingTypeExt::CleanOptionalCells.push_back(pSearchCell);
+							}
+						}
+
+						if (i % 2)
+							searchCell.Y += static_cast<short>((i / 2) ? -1 : 1);
+						else
+							searchCell.X += static_cast<short>((i / 2) ? -1 : 1);
+					}
+				}
+			}
+
+			BuildingTypeExt::CleanFinalOrder.emplace_back(TechnoWithDestination { pCheckedTechno, pDestinationCell });
+		}
+
+		BuildingTypeExt::CleanCheckedTechnos.clear();
+	}
+	while (BuildingTypeExt::CleanReCheckedTechnos.size());
+
+	// Step 5: Confirm command execution.
+	for (const auto& thisOrder : BuildingTypeExt::CleanFinalOrder)
+	{
+		const auto pCheckedTechno = thisOrder.Techno;
+		const auto pDestinationCell = thisOrder.Destination;
+		const auto absType = pCheckedTechno->WhatAmI();
+
+		if (absType == AbstractType::Infantry)
+		{
+			const auto pInfantry = static_cast<InfantryClass*>(pCheckedTechno);
+
+			if (pInfantry->IsDeployed())
+				pInfantry->PlayAnim(Sequence::Undeploy, true);
+
+			pInfantry->SetDestination(pDestinationCell, true);
+		}
+		else if (absType == AbstractType::Unit)
+		{
+			const auto pUnit = static_cast<UnitClass*>(pCheckedTechno);
+
+			if (pUnit->Deployed && !(pUnit->Deploying || pUnit->Undeploying))
+				pUnit->QueueMission(Mission::Unload, false);
+
+			pUnit->SetDestination(pDestinationCell, true);
+		}
+	}
+
+	return false;
+}
+
+void BuildingTypeExt::DrawAdjacentLines()
+{
+	const auto pType = abstract_cast<BuildingTypeClass*>(DisplayClass::Instance.CurrentBuildingType);
+
+	if (!pType)
+		return;
+
+	const auto adjacent = static_cast<short>(pType->Adjacent + 1);
+
+	if (adjacent <= 0)
+		return;
+
+	const auto foundation = CellStruct { pType->GetFoundationWidth(), pType->GetFoundationHeight(false) };
+
+	if (foundation == CellStruct::Empty)
+		return;
+
+	const auto topLeft = DisplayClass::Instance.CurrentFoundation_CenterCell + DisplayClass::Instance.CurrentFoundation_TopLeftOffset;
+	const auto min = CellStruct { static_cast<short>(topLeft.X - adjacent), static_cast<short>(topLeft.Y - adjacent) };
+	const auto max = CellStruct { static_cast<short>(topLeft.X + foundation.X + adjacent - 1), static_cast<short>(topLeft.Y + foundation.Y + adjacent - 1) };
+
+	auto rect = DSurface::Temp->GetRect();
+	rect.Height -= 32;
+
+	const auto offset = Unsorted::CurrentFrame % 15;
+	bool pattern[16] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
+
+	if (const auto pCell = MapClass::Instance.TryGetCellAt(min)) // Top
+	{
+		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
+		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
+		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
+
+		if (pair.second)
+		{
+			auto point = pair.first + Point2D { 0, -15 };
+			auto nextPoint = pair.first + Point2D { 29, -1 };
+			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
+
+			point = pair.first + Point2D { -1, -15 };
+			nextPoint = pair.first + Point2D { -30, -1 };
+			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
+		}
+	}
+
+	if (const auto pCell = MapClass::Instance.TryGetCellAt(CellStruct{ min.X, max.Y })) // Left
+	{
+		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
+		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
+		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
+
+		if (pair.second)
+		{
+			auto point = pair.first + Point2D { -30, 0 };
+			auto nextPoint = pair.first + Point2D { -1, 14 };
+			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
+
+			point = pair.first + Point2D { -30, -1 };
+			nextPoint = pair.first + Point2D { -1, -15 };
+			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
+		}
+	}
+
+	if (const auto pCell = MapClass::Instance.TryGetCellAt(max)) // Bottom
+	{
+		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
+		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
+		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
+
+		if (pair.second)
+		{
+			auto point = pair.first + Point2D { 0, 14 };
+			auto nextPoint = pair.first + Point2D { 29, 0 };
+			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
+
+			point = pair.first + Point2D { -1, 14 };
+			nextPoint = pair.first + Point2D { -30, 0 };
+			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
+		}
+	}
+
+	if (const auto pCell = MapClass::Instance.TryGetCellAt(CellStruct{ max.X, min.Y })) // Right
+	{
+		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
+		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
+		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
+
+		if (pair.second)
+		{
+			auto point = pair.first + Point2D { 29, 0 };
+			auto nextPoint = pair.first + Point2D { 0, 14 };
+			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
+
+			point = pair.first + Point2D { 29, -1 };
+			nextPoint = pair.first + Point2D { 0, -15 };
+			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
+		}
+	}
+}
+
+bool BuildingTypeExt::IsSameBuildingType(BuildingTypeClass* pType1, BuildingTypeClass* pType2)
+{
+	return ((pType1->BuildCat != BuildCat::Combat) == (pType2->BuildCat != BuildCat::Combat));
+}
+
+CellStruct BuildingTypeExt::SimulatePlacingAction(BuildingTypeClass* pType, CellStruct rallyCell, HouseClass* pHouse)
+{
+	if (pType->Adjacent <= 0)
+		return CellStruct::Empty;
+
+	// First, find the nearest base normal building of your own
+	auto startCell = CellStruct::Empty;
+	auto extraOffset = CellStruct::Empty;
+	{
+		auto distanceSquared = INT_MAX;
+		{
+			const auto& vecBlds = pHouse->Buildings;
+
+			if (vecBlds.Count > 0)
+			{
+				for (const auto& pBuilding : vecBlds)
+				{
+					const auto pBaseType = pBuilding->Type;
+
+					if (pBaseType->BaseNormal)
+					{
+						const auto mapCell = CellClass::Coord2Cell(pBuilding->GetCoords());
+						const auto newDistanceSquared = static_cast<int>(mapCell.DistanceFromSquared(rallyCell));
+
+						if (newDistanceSquared < distanceSquared)
+						{
+							startCell = mapCell;
+							extraOffset = CellStruct { pBaseType->GetFoundationWidth(), pBaseType->GetFoundationHeight(false) };
+							distanceSquared = newDistanceSquared;
+						}
+					}
+				}
+			}
+		}
+
+		if (RulesExt::Global()->CheckExtraBaseNormal)
+		{
+			const auto& vecUnits = ScenarioExt::Global()->BaseNormalTechnos;
+
+			if (!vecUnits.empty())
+			{
+				for (const auto& pUnitExt : vecUnits)
+				{
+					const auto pBase = pUnitExt->OwnerObject();
+
+					if (pHouse == pBase->Owner)
+					{
+						const auto mapCell = pBase->GetMapCoords();
+						const auto newDistanceSquared = static_cast<int>(mapCell.DistanceFromSquared(rallyCell));
+
+						if (newDistanceSquared < distanceSquared)
+						{
+							startCell = mapCell;
+							extraOffset = CellStruct { 1, 1 };
+							distanceSquared = newDistanceSquared;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (startCell == CellStruct::Empty)
+		return CellStruct::Empty;
+
+	// Calculate the nearest expandable cell to the rally point
+	const auto foundation = CellStruct { pType->GetFoundationWidth(), pType->GetFoundationHeight(false) };
+	const auto topLeftOffset = CellStruct { static_cast<short>(foundation.X / 2), static_cast<short>(foundation.Y / 2) };
+	const auto difference = rallyCell - startCell;
+	const auto absDifference = CellStruct { static_cast<short>(std::abs(difference.X)), static_cast<short>(std::abs(difference.Y)) };
+
+	auto cell = startCell - topLeftOffset;
+	auto dXRatio = 1.0;
+	auto dYRatio = 1.0;
+	auto rangeX = pType->Adjacent + 1 + (foundation.X + extraOffset.X) / 2;
+	auto rangeY = pType->Adjacent + 1 + (foundation.Y + extraOffset.Y) / 2;
+
+	if (rangeX < difference.X)
+		dXRatio = static_cast<double>(rangeX) / std::abs(difference.X);
+
+	if (rangeY < difference.Y)
+		dYRatio = static_cast<double>(rangeY) / std::abs(difference.Y);
+
+	cell += difference * Math::min(Math::min(dXRatio, dYRatio), 1.0);
+
+	// Calculate building spacing
+	auto buildGap = BuildingTypeExt::Fetch(pType)->AutoBuilding_Gap.Get(RulesExt::Global()->AutoBuilding_Gap);
+
+	if (pType->ProtectWithWall)
+		++buildGap;
+
+	// Conflict of conditions
+	if (pType->Adjacent < buildGap)
+		return CellStruct::Empty;
+
+	return BuildingTypeExt::NearbyPlacingLocation(pType, cell, pHouse, buildGap, true, true);
+}
+
+// Not fit with *ToTile*. And function called this that requires synchronization prohibits checking *shroud*
+CellStruct BuildingTypeExt::NearbyPlacingLocation(BuildingTypeClass* pType, CellStruct cell, HouseClass* pHouse, int buildGap, bool checkAdjacent, bool checkShroud)
+{
+	// Reduce performance consumption by recording cells that have already judged the conditions
+	// The key is cell index calculated by MapClass::GetCellIndex()
+	// The value is a flag group that only uses the last 8 bits
+	// The last four bits indicate availability, while the second last four bits indicate unavailability, otherwise unchecked
+	// 0x1/0x10: Basic ;0x2/0x20: Building ;0x4/0x40: BaseNormal(Adjacent) ;0x8/0x80: Shroud
+	BuildingTypeExt::PlaceCheckedCells.clear();
+	const auto baseLevel = MapClass::Instance.GetCellAt(cell)->Level;
+
+	// Basic
+	auto canExistHere = [&](CellStruct currentCell)
+	{
+		if (pType->PlaceAnywhere)
+			return true;
+
+		for (auto pFoundation = pType->GetFoundationData(true); *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+		{
+			const auto checkCell = currentCell + *pFoundation;
+			const auto cellIndex = MapClass::GetCellIndex(checkCell);
+			const auto flag = BuildingTypeExt::PlaceCheckedCells[cellIndex];
+
+			// All must be met
+			if (flag & 0xB0)
+				return false;
+			else if (flag & 0x1)
+				continue;
+
+			if (const auto pCell = MapClass::Instance.TryGetCellAt(checkCell))
+			{
+				if (std::abs(pCell->Level - baseLevel) <= 2 && pCell->CanThisExistHere(pType->SpeedType, pType, pHouse))
+				{
+					BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x1;
+					continue;
+				}
+			}
+
+			BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x10;
+			return false;
+		}
+
+		return true;
+	};
+
+	// Adjacent 0x4A8EB0
+	const auto width = pType->GetFoundationWidth();
+	const auto height = pType->GetFoundationHeight(false);
+	const auto pTypeExt = BuildingTypeExt::Fetch(pType);
+
+	if (RulesExt::Global()->CheckExtraBaseNormal)
+	{
+		const auto& baseNormalTechnos = ScenarioExt::Global()->BaseNormalTechnos;
+
+		if (baseNormalTechnos.size())
+		{
+			for (const auto& pTechnoExt : baseNormalTechnos)
+			{
+				const auto pTechno = pTechnoExt->OwnerObject();
+
+				if (!TechnoExt::IsActive(pTechno))
+					continue;
+
+				const auto pTechnoTypeExt = pTechnoExt->TypeExtData;
+				auto canBeBaseNormal = [&]()
+				{
+					const auto pOwner = pTechno->Owner;
+
+					if (pOwner == pHouse)
+						return pTechnoTypeExt->ExtraBaseNormal.Get();
+					else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(pHouse))
+						return pTechnoTypeExt->ExtraBaseForAllyBuilding.Get();
+
+					return false;
+				};
+
+				if (!canBeBaseNormal())
+					continue;
+
+				const auto& pExtraAllowed = pTypeExt->Adjacent_AllowedExtra;
+
+				if (pExtraAllowed.size() > 0 && !pExtraAllowed.Contains(pTechnoTypeExt->OwnerObject()))
+					continue;
+
+				const auto& pExtraDisallowed = pTypeExt->Adjacent_DisallowedExtra;
+
+				if (pExtraDisallowed.size() > 0 && pExtraDisallowed.Contains(pTechnoTypeExt->OwnerObject()))
+					continue;
+
+				BuildingTypeExt::PlaceCheckedCells[MapClass::GetCellIndex(pTechno->GetMapCoords())] |= 0x4;
+			}
+		}
+	}
+
+	const auto range = pType->Adjacent + 1;
+
+	auto canBuildHere = [&](CellStruct currentCell)
+	{
+		const auto maxX = currentCell.X + range + width;
+		const auto maxY = currentCell.Y + range + height;
+		const auto minX = currentCell.X - range;
+		const auto minY = currentCell.Y - range;
+
+		for (int x = minX; x < maxX; ++x)
+		{
+			for (int y = minY; y < maxY; ++y)
+			{
+				const auto checkCell = CellStruct { static_cast<short>(x), static_cast<short>(y) };
+				const auto cellIndex = MapClass::GetCellIndex(checkCell);
+				const auto flag = BuildingTypeExt::PlaceCheckedCells[cellIndex];
+
+				// Satisfy any one
+				if (flag & 0x4)
+					return true;
+				else if (flag & 0x40)
+					continue;
+
+				if (const auto pCell = MapClass::Instance.TryGetCellAt(checkCell))
+				{
+					if (const auto pCellBuilding = pCell->GetBuilding())
+					{
+						BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x20;
+
+						auto canBeBaseNormal = [&]()
+						{
+							const auto pOwner = pCellBuilding->Owner;
+
+							if (pOwner == pHouse)
+								return pCellBuilding->Type->BaseNormal;
+							else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(pHouse))
+								return pCellBuilding->Type->EligibileForAllyBuilding;
+
+							return false;
+						};
+
+						if (canBeBaseNormal() && (!BuildingTypeExt::Fetch(pCellBuilding->Type)->NoBuildAreaOnBuildup || pCellBuilding->CurrentMission != Mission::Construction))
+						{
+							auto const& pBuildingsAllowed = pTypeExt->Adjacent_Allowed;
+
+							if (pBuildingsAllowed.empty() || pBuildingsAllowed.Contains(pCellBuilding->Type))
+							{
+								auto const& pBuildingsDisallowed = pTypeExt->Adjacent_Disallowed;
+
+								if (pBuildingsDisallowed.empty() || !pBuildingsDisallowed.Contains(pCellBuilding->Type))
+								{
+									BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x4;
+									return true;
+								}
+							}
+						}
+					}
+					else
+					{
+						BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x2;
+					}
+				}
+				else
+				{
+					BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x20;
+				}
+
+				BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x40;
+			}
+		}
+
+		return false;
+	};
+
+	// Gap
+	auto canSplitHere = [&](CellStruct currentCell)
+	{
+		const auto maxX = currentCell.X + buildGap + width;
+		const auto maxY = currentCell.Y + buildGap + height;
+		const auto minX = currentCell.X - buildGap;
+		const auto minY = currentCell.Y - buildGap;
+
+		for (int x = minX; x < maxX; ++x)
+		{
+			for (int y = minY; y < maxY; ++y)
+			{
+				const auto checkCell = CellStruct { static_cast<short>(x), static_cast<short>(y) };
+				const auto cellIndex = MapClass::GetCellIndex(checkCell);
+				const auto flag = BuildingTypeExt::PlaceCheckedCells[cellIndex];
+
+				// All must be met
+				if (flag & 0xB0)
+					return false;
+				else if (flag & 0x2)
+					continue;
+
+				if (const auto pCell = MapClass::Instance.TryGetCellAt(checkCell))
+				{
+					if (!pCell->GetBuilding())
+					{
+						BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x2;
+						continue;
+					}
+				}
+
+				BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x20;
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	// Shroud 0x4A9070
+	auto canPlaceHere = [&](CellStruct currentCell)
+	{
+		const auto maxX = currentCell.X + width;
+		const auto maxY = currentCell.Y + height;
+		const auto minX = currentCell.X;
+		const auto minY = currentCell.Y;
+
+		for (int x = minX; x < maxX; ++x)
+		{
+			for (int y = minY; y < maxY; ++y)
+			{
+				const auto checkCell = CellStruct { static_cast<short>(x), static_cast<short>(y) };
+				const auto cellIndex = MapClass::GetCellIndex(checkCell);
+				const auto flag = BuildingTypeExt::PlaceCheckedCells[cellIndex];
+
+				// All must be met
+				if (flag & 0xB0)
+					return false;
+				else if (flag & 0x8)
+					continue;
+
+				auto coords = CellClass::Cell2Coord(checkCell);
+				coords.Z = MapClass::Instance.GetCellFloorHeight(coords);
+
+				if (MapClass::Instance.IsLocationShrouded(coords))
+				{
+					BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x80;
+					return false;
+				}
+
+				BuildingTypeExt::PlaceCheckedCells[cellIndex] |= 0x8;
+			}
+		}
+
+		return true;
+	};
+
+	auto isValidCellToPlace = [&](CellStruct currentCell)
+	{
+		// Can build when all conditions are met
+		return canExistHere(currentCell) && (!checkAdjacent || canBuildHere(currentCell))
+			&& (buildGap <= 0 || canSplitHere(currentCell)) && (!checkShroud || canPlaceHere(currentCell));
+	};
+
+	// Using a spiral search from inside out
+	if (isValidCellToPlace(cell))
+		return cell;
+
+	for (int n = 1; n <= 16; ++n) // r = 16
+	{
+		int x, y;
+
+		// Right side -> downward
+		x = cell.X + n;
+
+		for (y = cell.Y - n; y <= cell.Y + n - 1; ++y)
+		{
+			const CellStruct currentCell { static_cast<short>(x), static_cast<short>(y) };
+
+			if (isValidCellToPlace(currentCell))
+				return currentCell;
+		}
+
+		// Down side -> leftward
+		y = cell.Y + n;
+
+		for (x = cell.X + n; x >= cell.X - n + 1; --x)
+		{
+			const CellStruct currentCell { static_cast<short>(x), static_cast<short>(y) };
+
+			if (isValidCellToPlace(currentCell))
+				return currentCell;
+		}
+
+		// Left side -> upward
+		x = cell.X - n;
+
+		for (y = cell.Y + n; y >= cell.Y - n + 1; --y)
+		{
+			const CellStruct currentCell { static_cast<short>(x), static_cast<short>(y) };
+
+			if (isValidCellToPlace(currentCell))
+				return currentCell;
+		}
+
+		// Up side -> rightward
+		y = cell.Y - n;
+
+		for (x = cell.X - n; x <= cell.X + n - 1; ++x)
+		{
+			const CellStruct currentCell { static_cast<short>(x), static_cast<short>(y) };
+
+			if (isValidCellToPlace(currentCell))
+				return currentCell;
+		}
+	}
+
+	return CellStruct::Empty;
+}
+
+bool BuildingTypeExt::AutoPlaceBuilding(BuildingClass* pBuilding)
+{
+	const auto pType = pBuilding->Type;
+	const auto isDefense = pType->BuildCat == BuildCat::Combat;
+
+	if (isDefense ? !Phobos::Config::AutomaticPlacingCombatBuilding : !Phobos::Config::AutomaticPlacingBuilding)
+		return false;
+
+	const auto pTypeExt = BuildingTypeExt::Fetch(pType);
+
+	if (!pTypeExt->AutoBuilding.Get(RulesExt::Global()->AutoBuilding) || pType->LaserFence || pType->Gate || pType->ToTile)
+		return false;
+
+	const auto pHouse = pBuilding->Owner;
+
+	if (pHouse->Buildings.Count <= 0)
+		return false;
+
+	const auto pHouseExt = HouseExt::Fetch(pHouse);
+
+	auto getMapCell = [&pHouseExt](BuildingClass* pBuilding)
+	{
+		if (!pBuilding->IsAlive || pBuilding->Health <= 0 || !pBuilding->IsOnMap || pBuilding->InLimbo || pHouseExt->OwnsLimboDeliveredBuilding(pBuilding))
+			return CellStruct::Empty;
+
+		return pBuilding->GetMapCoords();
+	};
+
+	auto addPlaceEvent = [&pType, &pHouse](CellStruct cell)
+	{
+		const int placeType = MapClass::Instance.GetCellAt(cell)->LandType == LandType::Water;
+		const auto arrayIndex = pType->GetArrayIndex();
+		EventClass::OutList.Add(EventClass(pHouse->ArrayIndex, EventType::Place, AbstractType::Building, arrayIndex, placeType, cell));
+	};
+
+	if (pType->LaserFencePost || pType->Wall)
+	{
+		for (const auto& pOwned : pHouse->Buildings)
+		{
+			const auto pOwnedType = pOwned->Type;
+
+			if (!pOwnedType->ProtectWithWall)
+				continue;
+
+			const auto baseCell = getMapCell(pOwned);
+
+			if (baseCell == CellStruct::Empty)
+				continue;
+
+			const auto width = pOwnedType->GetFoundationWidth();
+			const auto height = pOwnedType->GetFoundationHeight(false);
+
+			for (int index = 0; index < 4; ++index)
+			{
+				const auto outsideCell = baseCell + CellStruct { (index & 1) ? width : static_cast<short>(-1), (index / 2) ? height : static_cast<short>(-1) };
+				const auto pCell = MapClass::Instance.TryGetCellAt(outsideCell);
+
+				if (pCell && pCell->CanThisExistHere(pOwnedType->SpeedType, pOwnedType, pHouse))
+				{
+					addPlaceEvent(outsideCell);
+					return true;
+				}
+			}
+
+			for (auto pFoundation = pOwnedType->FoundationOutside; *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+			{
+				const auto outsideCell = baseCell + *pFoundation;
+				const auto pCell = MapClass::Instance.TryGetCellAt(outsideCell);
+
+				if (pCell && pCell->CanThisExistHere(pOwnedType->SpeedType, pOwnedType, pHouse))
+				{
+					addPlaceEvent(outsideCell);
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+	else if (pType->PowersUpBuilding[0])
+	{
+		for (const auto& pOwned : pHouse->Buildings)
+		{
+			if (!pOwned->CanUpgradeBuilding(pType, pHouse))
+				continue;
+
+			const auto cell = getMapCell(pOwned);
+
+			if (cell == CellStruct::Empty || pOwned->CurrentMission == Mission::Selling)
+				continue;
+
+			addPlaceEvent(cell);
+			return true;
+		}
+
+		return false;
+	}
+
+	if (pHouse->ConYards.Count > 0)
+	{
+		auto tryBuildAt = [&pType, &pHouse, &addPlaceEvent](CellStruct baseCell)
+		{
+			if (baseCell == CellStruct::Empty)
+				return false;
+
+			const auto placeCell = BuildingTypeExt::SimulatePlacingAction(pType, baseCell, pHouse);
+
+			if (placeCell == CellStruct::Empty)
+				return false;
+
+			addPlaceEvent(placeCell);
+			return true;
+		};
+
+		std::vector<CellStruct> rallyCells;
+		rallyCells.reserve(pHouse->ConYards.Count);
+		CellStruct primaryCell = CellStruct::Empty;
+
+		for (auto pConYard : pHouse->ConYards)
+		{
+			auto pArchiveTarget = isDefense && BuildingTypeExt::Fetch(pConYard->Type)->HasSecondaryRallyPoint
+				? BuildingExt::Fetch(pConYard)->SecondaryArchiveTarget : pConYard->ArchiveTarget;
+
+			if (!pArchiveTarget)
+				pArchiveTarget = pConYard;
+
+			auto rallyCell = CellClass::Coord2Cell(pArchiveTarget->GetCoords());
+
+			if (rallyCell == CellStruct::Empty)
+				continue;
+
+			rallyCells.push_back(rallyCell);
+
+			if (pConYard->IsPrimaryFactory)
+				primaryCell = rallyCell;
+		}
+
+		if (tryBuildAt(primaryCell))
+			return true;
+
+		for (auto rallyCell : rallyCells)
+		{
+			if (tryBuildAt(rallyCell))
+				return true;
+		}
+	}
+
+	return false;
+}
+
+bool BuildingTypeExt::BuildLimboBuilding(BuildingClass* pBuilding)
+{
+	const auto pBuildingType = pBuilding->Type;
+
+	if (BuildingTypeExt::Fetch(pBuildingType)->LimboBuild)
+	{
+		EventClass::OutList.Add(EventClass(
+			pBuilding->Owner->ArrayIndex,
+			EventType::Place,
+			AbstractType::Building,
+			pBuildingType->GetArrayIndex(),
+			pBuildingType->Naval,
+			CellStruct { 1, 1 }
+		));
+
+		return true;
+	}
+
+	return false;
+}
+
+void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID)
+{
+	if (pBuilding || (pBuilding = static_cast<BuildingClass*>(pType->CreateObject(pOwner)), pBuilding))
+	{
+		// All of these are mandatory
+		pBuilding->InLimbo = false;
+		pBuilding->IsAlive = true;
+		pBuilding->IsOnMap = true;
+
+		// Jun 3, 2023 - Starkku: For reasons beyond my comprehension, the discovery logic is checked for certain logics like power drain/output in campaign only.
+		// Normally on unlimbo the buildings are revealed to current player if unshrouded or if game is a campaign and to non-player houses always.
+		// Because of the unique nature of LimboDelivered buildings, this has been adjusted to always reveal to the current player in singleplayer
+		// and to the owner of the building regardless, removing the shroud check from the equation since they don't physically exist
+		if (SessionClass::IsCampaign())
+			pBuilding->DiscoveredBy(HouseClass::CurrentPlayer);
+
+		pBuilding->DiscoveredBy(pOwner);
+
+		pOwner->RegisterGain(pBuilding, false);
+		pOwner->RecheckTechTree = true;
+		pOwner->RecheckPower = true;
+		pOwner->Buildings.AddItem(pBuilding);
+
+		// Different types of building logics
+		if (pType->ConstructionYard)
+			pOwner->ConYards.AddItem(pBuilding); // why would you do that????
+
+		if (pType->SecretLab)
+			pOwner->SecretLabs.AddItem(pBuilding);
+
+		auto const pBuildingExt = BuildingExt::Fetch(pBuilding);
+		auto const pOwnerExt = HouseExt::Fetch(pOwner);
+
+		if (!pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Buildings.empty()
+			&& (pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Amount != 0 || pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Factor != 1.0f))
+			pOwnerExt->PowerPlantEnhancers.push_back(pBuilding);
+
+		if (pType->FactoryPlant)
+		{
+			if (pBuildingExt->GetTypeExtData()->FactoryPlant_AllowTypes.size() > 0 || pBuildingExt->GetTypeExtData()->FactoryPlant_DisallowTypes.size() > 0)
+			{
+				pOwnerExt->RestrictedFactoryPlants.push_back(pBuilding);
+			}
+			else
+			{
+				pOwner->FactoryPlants.AddItem(pBuilding);
+				pOwner->CalculateCostMultipliers();
+			}
+		}
+
+		// BuildingClass::Place is already called in DiscoveredBy
+		// it added OrePurifier and xxxGainSelfHeal to House counter already
+
+		// LimboKill ID
+		pBuildingExt->LimboID = ID;
+
+		// Add building to list of owned limbo buildings
+		pOwnerExt->OwnedLimboDeliveredBuildings.push_back(pBuilding);
+		auto const pBldType = pBuilding->Type;
+
+		if (!pBldType->Insignificant && !pBldType->DontScore)
+			pOwnerExt->AddToLimboTracking(pBldType);
+
+		auto const pTechnoExt = TechnoExt::Fetch(pBuilding);
+		auto const pTechnoTypeExt = pTechnoExt->TypeExtData;
+
+		if (pTechnoTypeExt->AutoDeath_Behavior.isset())
+		{
+			ScenarioExt::Global()->AutoDeathObjects.push_back(pTechnoExt);
+
+			if (pTechnoTypeExt->AutoDeath_AfterDelay > 0)
+				pTechnoExt->AutoDeathTimer.Start(pTechnoTypeExt->AutoDeath_AfterDelay);
+		}
+	}
+}
+
+bool BuildingTypeExt::DeleteLimboBuilding(BuildingClass* pBuilding, int ID)
+{
+	const auto pBuildingExt = BuildingExt::Fetch(pBuilding);
+
+	if (pBuildingExt->LimboID != ID)
+		return false;
+
+	if (pBuildingExt->GetTypeExtData()->LimboBuildID == ID)
+	{
+		const auto pHouse = pBuilding->Owner;
+		const auto index = pBuilding->Type->ArrayIndex;
+
+		for (auto& pBaseNode : pHouse->Base.BaseNodes)
+		{
+			if (pBaseNode.BuildingTypeIndex == index)
+				pBaseNode.Placed = false;
+		}
+	}
+
+	return true;
+}
+
+void BuildingTypeExt::Initialize()
+{
+	TechnoTypeExt::Initialize();
+}
 
 // =============================
 // load / save
 
-void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
+void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 {
+	TechnoTypeExt::LoadFromINIFile(pINI);
+
 	auto pThis = this->OwnerObject();
 	const char* pSection = pThis->ID;
 	const char* pArtSection = pThis->ImageFile;
@@ -199,10 +1416,45 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->ConsideredVehicle.Read(exINI, pSection, "ConsideredVehicle");
 	this->SellBuildupLength.Read(exINI, pSection, "SellBuildupLength");
 	this->IsDestroyableObstacle.Read(exINI, pSection, "IsDestroyableObstacle");
+	this->Explodes_DuringBuildup.Read(exINI, pSection, "Explodes.DuringBuildup");
+
+	this->JustHasRallyPoint.Read(exINI, pSection, "JustHasRallyPoint");
+	this->JumpjetExitCoord.Read(exINI, pSection, "JumpjetExitCoord");
+	this->RallySpeedType.Read(exINI, pSection, "RallySpeedType");
+	this->RallyMovementZone.Read(exINI,pSection,"RallyMovementZone");
+
+	this->Cameo_ShouldCount.Read(exINI, pSection, "Cameo.ShouldCount");
+	this->AutoBuilding.Read(exINI, pSection, "AutoBuilding");
+	this->AutoBuilding_Gap.Read(exINI, pSection, "AutoBuilding.Gap");
+	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
+	this->LimboBuildID.Read(exINI, pSection, "LimboBuildID");
+	this->LaserFencePost_Fence.Read(exINI, pSection, "LaserFencePost.Fence");
+	this->PlaceBuilding_OnLand.Read(exINI, pSection, "PlaceBuilding.OnLand");
+	this->PlaceBuilding_OnWater.Read(exINI, pSection, "PlaceBuilding.OnWater");
+	if (this->PlaceBuilding_OnLand.size())
+	{
+		auto& vec = this->PlaceBuilding_OnLand_Unique;
+		vec = this->PlaceBuilding_OnLand;
+		std::sort(vec.begin(), vec.end());
+		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+	}
+	if (this->PlaceBuilding_OnWater.size())
+	{
+		auto& vec = this->PlaceBuilding_OnWater_Unique;
+		vec = this->PlaceBuilding_OnWater;
+		std::sort(vec.begin(), vec.end());
+		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+	}
+	this->PlaceBuilding_DirectionShape.Read(exINI, pSection, "PlaceBuilding.DirectionShape");
+	this->PlaceBuilding_DirectionPalette.LoadFromINI(pINI, pSection, "PlaceBuilding.DirectionPalette");
+	this->PlaceBuilding_Extra.Read(exINI, pSection, "PlaceBuilding.Extra");
+	this->CanBuildUnderUnits.Read(exINI, pSection, "CanBuildUnderUnits");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
 	this->FactoryPlant_MaxCount.Read(exINI, pSection, "FactoryPlant.MaxCount");
+
+	this->AggressiveStance_Exempt.Read(exINI, pSection, "AggressiveStance.Exempt");
 
 	this->Units_RepairRate.Read(exINI, pSection, "Units.RepairRate");
 	this->Units_RepairStep.Read(exINI, pSection, "Units.RepairStep");
@@ -210,12 +1462,17 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Units_UseRepairCost.Read(exINI, pSection, "Units.UseRepairCost");
 
 	this->NoBuildAreaOnBuildup.Read(exINI, pSection, "NoBuildAreaOnBuildup");
+	this->NoAlphaImageOnBuildup.Read(exINI, pSection, "NoAlphaImageOnBuildup");
 	this->Adjacent_Allowed.Read(exINI, pSection, "Adjacent.Allowed");
 	this->Adjacent_Disallowed.Read(exINI, pSection, "Adjacent.Disallowed");
+	this->Adjacent_AllowedExtra.Read(exINI, pSection, "Adjacent.AllowedExtra");
+	this->Adjacent_DisallowedExtra.Read(exINI, pSection, "Adjacent.DisallowedExtra");
 	this->Adjacent_Disallowed_Prohibit.Read(exINI, pSection, "Adjacent.Disallowed.Prohibit");
 	this->Adjacent_Disallowed_ProhibitDistance.Read(exINI, pSection, "Adjacent.Disallowed.ProhibitDistance");
 
 	this->BarracksExitCell.Read(exINI, pSection, "BarracksExitCell");
+
+	this->HasSecondaryRallyPoint.Read(exINI, pSection, "HasSecondaryRallyPoint");
 
 	this->Overpower_KeepOnline.Read(exINI, pSection, "Overpower.KeepOnline");
 	this->Overpower_ChargeWeapon.Read(exINI, pSection, "Overpower.ChargeWeapon");
@@ -228,11 +1485,15 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildingBunkerROFMult.Read(exINI, pSection, "BunkerROFMultMultiplier");
 	this->BunkerWallsUpSound.Read(exINI, pSection, "BunkerWallsUpSound");
 	this->BunkerWallsDownSound.Read(exINI, pSection, "BunkerWallsDownSound");
+	this->BunkerStateUpdateDelay.Read(exINI, pSection, "BunkerStateUpdateDelay");
 	this->BuildingRepairedSound.Read(exINI, pSection, "BuildingRepairedSound");
 	this->Refinery_UseStorage.Read(exINI, pSection, "Refinery.UseStorage");
+	this->AIBaseNormal.Read(exINI, pSection, "AIBaseNormal");
 	this->UndeploysInto_Sellable.Read(exINI, pSection, "UndeploysInto.Sellable");
 	this->BuildingRadioLink_SyncOwner.Read(exINI, pSection, "BuildingRadioLink.SyncOwner");
 	this->GuardRetryDelay.Read(exINI, pSection, "GuardRetryDelay");
+
+	this->AISellCapturedBuilding.Read(exINI, pSection, "AISellCapturedBuilding");
 
 	this->TurretAnim_IdleFrames.Read(exINI, pSection, "TurretAnim.IdleFrames");
 	this->TurretAnim_LowPowerIdleFrames.Read(exINI, pSection, "TurretAnim.LowPowerIdleFrames");
@@ -240,6 +1501,9 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->TurretAnim_LowPowerFiringFrames.Read(exINI, pSection, "TurretAnim.LowPowerFiringFrames");
 	this->TurretAnim_IdleRate.Read(exINI, pSection, "TurretAnim.IdleRate");
 	this->TurretAnim_FiringRate.Read(exINI, pSection, "TurretAnim.FiringRate");
+
+	this->StartFacing.Read(exINI, pSection, "StartFacing");
+	this->StartFacing_Random.Read(exINI, pSection, "StartFacing.Random");
 
 	if (pThis->PowersUpBuilding[0] == NULL && this->PowersUp_Buildings.size() > 0)
 	{
@@ -252,6 +1516,10 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		if (pPowerUpType && !this->PowersUp_Buildings.Contains(pPowerUpType))
 			this->PowersUp_Buildings.emplace_back(pPowerUpType);
 	}
+
+	this->SetTabBySelecting.Read(exINI, pSection, "SetTabBySelecting");
+
+	this->RevealToAll_Radius.Read(exINI, pSection, "RevealToAll.Radius");
 
 	if (pThis->NumberOfDocks > 0)
 	{
@@ -274,8 +1542,40 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 				this->AircraftDockingDirs[i] = nLandingDir.Get();
 		}
 	}
+	this->AircraftDockingDir_DefaultToPoseDir.Read(exArtINI, pArtSection, "AircraftDockingDir.DefaultToPoseDir");
 
-	this->Refinery_UseNormalActiveAnim.Read(exArtINI, pArtSection, "Refinery.UseNormalActiveAnim");
+	this->Bib_Dir.Read(exINI, pSection, "Bib.Dir");
+	this->Bib_Dir = Math::max(0, this->Bib_Dir) & 6; // Only accept 0,2,4,6
+	this->NumberImpassableRows_Dir.Read(exINI, pSection, "NumberImpassableRows.Dir");
+	this->NumberImpassableRows_Dir = Math::max(0, this->NumberImpassableRows_Dir) & 6; // Only accept 0,2,4,6
+	this->WeaponsFactory_Dir.Read(exINI, pSection, "WeaponsFactory.Dir");
+	this->WeaponsFactory_Dir = Math::max(0, this->WeaponsFactory_Dir) & 6; // Only accept 0,2,4,6
+
+	this->DeployFireDelay.Read(exINI, pSection, "DeployFireDelay");
+
+	auto& preProdAnim = pThis->GetBuildingAnim(BuildingAnimSlot::PreProduction);
+	preProdAnim.Powered = pArtINI->ReadBool(pArtSection, "PreProductionAnimPowered", preProdAnim.Powered);
+	preProdAnim.PoweredLight = pArtINI->ReadBool(pArtSection, "PreProductionAnimPoweredLight", preProdAnim.PoweredLight);
+	preProdAnim.PoweredEffect = pArtINI->ReadBool(pArtSection, "PreProductionAnimPoweredEffect", preProdAnim.PoweredEffect);
+	preProdAnim.PoweredSpecial = pArtINI->ReadBool(pArtSection, "PreProductionAnimPoweredSpecial", preProdAnim.PoweredSpecial);
+
+	auto& prodAnim = pThis->GetBuildingAnim(BuildingAnimSlot::Production);
+	prodAnim.Powered = pArtINI->ReadBool(pArtSection, "ProductionAnimPowered", prodAnim.Powered);
+	prodAnim.PoweredLight = pArtINI->ReadBool(pArtSection, "ProductionAnimPoweredLight", prodAnim.PoweredLight);
+	prodAnim.PoweredEffect = pArtINI->ReadBool(pArtSection, "ProductionAnimPoweredEffect", prodAnim.PoweredEffect);
+	prodAnim.PoweredSpecial = pArtINI->ReadBool(pArtSection, "ProductionAnimPoweredSpecial", prodAnim.PoweredSpecial);
+
+	this->RoofProductionAnim.Read(exArtINI, pArtSection, "RoofProductionAnim");
+	this->RoofProductionAnimDamaged.Read(exArtINI, pArtSection, "RoofProductionAnimDamaged");
+	this->RoofProductionAnimGarrisoned.Read(exArtINI, pArtSection, "RoofProductionAnimGarrisoned");
+	this->RoofProductionAnimX.Read(exArtINI, pArtSection, "RoofProductionAnimX");
+	this->RoofProductionAnimY.Read(exArtINI, pArtSection, "RoofProductionAnimY");
+	this->RoofProductionAnimZAdjust.Read(exArtINI, pArtSection, "RoofProductionAnimZAdjust");
+	this->RoofProductionAnimYSort.Read(exArtINI, pArtSection, "RoofProductionAnimYSort");
+	this->RoofProductionAnimPowered.Read(exArtINI, pArtSection, "RoofProductionAnimPowered");
+	this->RoofProductionAnimPoweredLight.Read(exArtINI, pArtSection, "RoofProductionAnimPoweredLight");
+	this->RoofProductionAnimPoweredEffect.Read(exArtINI, pArtSection, "RoofProductionAnimPoweredEffect");
+	this->RoofProductionAnimPoweredSpecial.Read(exArtINI, pArtSection, "RoofProductionAnimPoweredSpecial");
 
 	// Ares tag
 	this->SpyEffect_Custom.Read(exINI, pSection, "SpyEffect.Custom");
@@ -286,6 +1586,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		this->SpyEffect_VictimSuperWeapon.Read(exINI, pSection, "SpyEffect.VictimSuperWeapon");
 		this->SpyEffect_InfiltratorSuperWeapon.Read(exINI, pSection, "SpyEffect.InfiltratorSuperWeapon");
 	}
+	this->SpyEffect_RadarJamDuration.Read(exINI, pSection, "SpyEffect.RadarJamDuration");
 
 	if (pThis->MaxNumberOccupants > 10)
 	{
@@ -316,6 +1617,10 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	// Art
 	this->IsAnimDelayedBurst.Read(exArtINI, pArtSection, "IsAnimDelayedBurst");
 	this->ZShapePointMove_OnBuildup.Read(exArtINI, pArtSection, "ZShapePointMove.OnBuildup");
+	this->Refinery_UseNormalActiveAnim.Read(exArtINI, pArtSection, "Refinery.UseNormalActiveAnim");
+
+	// Ares 0.7
+	this->IsPassable.Read(exINI, pSection, "IsPassable");
 
 	// Ares 0.2
 	this->CloningFacility.Read(exINI, pSection, "CloningFacility");
@@ -324,18 +1629,21 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->RubbleIntact.Read(exINI, pSection, "Rubble.Intact");
 	this->RubbleIntactRemove.Read(exINI, pSection, "Rubble.Intact.Remove");
 
+	// Ares 0.E
+	this->Tunnel = exINI.ReadString(pSection, "Tunnel");
+
 	// Ares 3.0
 	this->UnitSell.Read(exINI, pSection, "UnitSell");
 }
 
-void BuildingTypeExt::ExtData::CompleteInitialization()
+void BuildingTypeExt::CompleteInitialization()
 {
 	auto const pThis = this->OwnerObject();
 	UNREFERENCED_PARAMETER(pThis);
 }
 
 template <typename T>
-void BuildingTypeExt::ExtData::Serialize(T& Stm)
+void BuildingTypeExt::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->PowersUp_Owner)
@@ -376,25 +1684,51 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SpyEffect_Custom)
 		.Process(this->SpyEffect_VictimSuperWeapon)
 		.Process(this->SpyEffect_InfiltratorSuperWeapon)
+		.Process(this->SpyEffect_RadarJamDuration)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
+		.Process(this->JustHasRallyPoint)
+		.Process(this->JumpjetExitCoord)
+		.Process(this->RallySpeedType)
+		.Process(this->RallyMovementZone)
+		.Process(this->Cameo_ShouldCount)
+		.Process(this->AutoBuilding)
+		.Process(this->AutoBuilding_Gap)
+		.Process(this->LimboBuild)
+		.Process(this->LimboBuildID)
+		.Process(this->LaserFencePost_Fence)
+		.Process(this->PlaceBuilding_OnLand)
+		.Process(this->PlaceBuilding_OnWater)
+		.Process(this->PlaceBuilding_OnLand_Unique)
+		.Process(this->PlaceBuilding_OnWater_Unique)
+		.Process(this->PlaceBuilding_DirectionShape)
+		.Process(this->PlaceBuilding_DirectionPalette)
+		.Process(this->PlaceBuilding_Extra)
+		.Process(this->CanBuildUnderUnits)
 		.Process(this->AircraftDockingDirs)
+		.Process(this->AircraftDockingDir_DefaultToPoseDir)
 		.Process(this->FactoryPlant_AllowTypes)
 		.Process(this->FactoryPlant_DisallowTypes)
 		.Process(this->FactoryPlant_MaxCount)
 		.Process(this->IsAnimDelayedBurst)
+		.Process(this->AggressiveStance_Exempt)
 		.Process(this->IsDestroyableObstacle)
+		.Process(this->Explodes_DuringBuildup)
 		.Process(this->Units_RepairRate)
 		.Process(this->Units_RepairStep)
 		.Process(this->Units_RepairPercent)
 		.Process(this->Units_UseRepairCost)
 		.Process(this->NoBuildAreaOnBuildup)
+		.Process(this->NoAlphaImageOnBuildup)
 		.Process(this->Adjacent_Allowed)
 		.Process(this->Adjacent_Disallowed)
+		.Process(this->Adjacent_AllowedExtra)
+		.Process(this->Adjacent_DisallowedExtra)
 		.Process(this->Adjacent_Disallowed_Prohibit)
 		.Process(this->Adjacent_Disallowed_ProhibitDistance)
 		.Process(this->BarracksExitCell)
+		.Process(this->HasSecondaryRallyPoint)
 		.Process(this->Overpower_KeepOnline)
 		.Process(this->Overpower_ChargeWeapon)
 		.Process(this->DisableDamageSound)
@@ -404,9 +1738,15 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildingBunkerROFMult)
 		.Process(this->BunkerWallsUpSound)
 		.Process(this->BunkerWallsDownSound)
+		.Process(this->BunkerStateUpdateDelay)
 		.Process(this->BuildingRepairedSound)
 		.Process(this->Refinery_UseNormalActiveAnim)
+		.Process(this->AIBaseNormal)
 		.Process(this->HasPowerUpAnim)
+		.Process(this->AISellCapturedBuilding)
+		.Process(this->Bib_Dir)
+		.Process(this->NumberImpassableRows_Dir)
+		.Process(this->WeaponsFactory_Dir)
 		.Process(this->UndeploysInto_Sellable)
 		.Process(this->BuildingRadioLink_SyncOwner)
 		.Process(this->GuardRetryDelay)
@@ -416,37 +1756,52 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->TurretAnim_LowPowerFiringFrames)
 		.Process(this->TurretAnim_IdleRate)
 		.Process(this->TurretAnim_FiringFrames)
+		.Process(this->StartFacing)
+		.Process(this->StartFacing_Random)
+		.Process(this->SetTabBySelecting)
+		.Process(this->RevealToAll_Radius)
+		.Process(this->DeployFireDelay)
+		.Process(this->RoofProductionAnim)
+		.Process(this->RoofProductionAnimDamaged)
+		.Process(this->RoofProductionAnimGarrisoned)
+		.Process(this->RoofProductionAnimX)
+		.Process(this->RoofProductionAnimY)
+		.Process(this->RoofProductionAnimZAdjust)
+		.Process(this->RoofProductionAnimYSort)
+		.Process(this->RoofProductionAnimPowered)
+		.Process(this->RoofProductionAnimPoweredLight)
+		.Process(this->RoofProductionAnimPoweredEffect)
+		.Process(this->RoofProductionAnimPoweredSpecial)
 
 		// Ares 0.2
 		.Process(this->CloningFacility)
 
+		// Ares 0.7
+		.Process(this->IsPassable)
+
 		// Ares 0.A
 		.Process(this->RubbleIntact)
 		.Process(this->RubbleIntactRemove)
+
+		// Ares 0.E
+		.Process(this->Tunnel)
 
 		// Ares 3.0
 		.Process(this->UnitSell)
 		;
 }
 
-void BuildingTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
+void BuildingTypeExt::LoadFromStream(PhobosStreamReader& Stm)
 {
-	Extension<BuildingTypeClass>::LoadFromStream(Stm);
+	TechnoTypeExt::LoadFromStream(Stm);
 	this->Serialize(Stm);
 }
 
-void BuildingTypeExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
+void BuildingTypeExt::SaveToStream(PhobosStreamWriter& Stm)
 {
-	Extension<BuildingTypeClass>::SaveToStream(Stm);
+	TechnoTypeExt::SaveToStream(Stm);
 	this->Serialize(Stm);
 }
-
-bool BuildingTypeExt::ExtContainer::Load(BuildingTypeClass* pThis, IStream* pStm)
-{
-	BuildingTypeExt::ExtData* pData = this->LoadKey(pThis, pStm);
-
-	return pData != nullptr;
-};
 
 bool BuildingTypeExt::LoadGlobals(PhobosStreamReader& Stm)
 {
@@ -461,9 +1816,7 @@ bool BuildingTypeExt::SaveGlobals(PhobosStreamWriter& Stm)
 // =============================
 // container
 
-BuildingTypeExt::ExtContainer::ExtContainer() : Container("BuildingTypeClass") { }
-
-BuildingTypeExt::ExtContainer::~ExtContainer() = default;
+// container facade defined at the top of this file
 
 // =============================
 // container hooks
@@ -472,48 +1825,32 @@ DEFINE_HOOK(0x45E50C, BuildingTypeClass_CTOR, 0x6)
 {
 	GET(BuildingTypeClass*, pItem, EAX);
 
-	BuildingTypeExt::ExtMap.TryAllocate(pItem);
+	BuildingTypeExt::ExtMap.Allocate(pItem);
 
 	return 0;
 }
 
-DEFINE_HOOK(0x45E707, BuildingTypeClass_DTOR, 0x6)
-{
-	GET(BuildingTypeClass*, pItem, ESI);
-
-	BuildingTypeExt::ExtMap.Remove(pItem);
-	return 0;
-}
-
-DEFINE_HOOK_AGAIN(0x465300, BuildingTypeClass_SaveLoad_Prefix, 0x5)
-DEFINE_HOOK(0x465010, BuildingTypeClass_SaveLoad_Prefix, 0x5)
-{
-	GET_STACK(BuildingTypeClass*, pItem, 0x4);
-	GET_STACK(IStream*, pStm, 0x8);
-
-	BuildingTypeExt::ExtMap.PrepareStream(pItem, pStm);
-
-	return 0;
-}
-
-DEFINE_HOOK(0x4652ED, BuildingTypeClass_Load_Suffix, 0x7)
-{
-	BuildingTypeExt::ExtMap.LoadStatic();
-	return 0;
-}
-
-DEFINE_HOOK(0x46536A, BuildingTypeClass_Save_Suffix, 0x7)
-{
-	BuildingTypeExt::ExtMap.SaveStatic();
-	return 0;
-}
-
+// The extension chain is read at the end of each concrete type class's LoadFromINI,
+// once every native field - inherited and own alike - has been parsed.
 //DEFINE_HOOK_AGAIN(0x464A56, BuildingTypeClass_LoadFromINI, 0xA)// Section dont exist!
 DEFINE_HOOK(0x464A49, BuildingTypeClass_LoadFromINI, 0xA)
 {
 	GET(BuildingTypeClass*, pItem, EBP);
 	GET_STACK(CCINIClass*, pINI, 0x364);
 
-	BuildingTypeExt::ExtMap.LoadFromINI(pItem, pINI);
+	if (auto const pExt = BuildingTypeExt::TryFetch(pItem))
+		pExt->LoadFromINI(pINI);
+
+	return 0;
+}
+
+// Late in every destructor body of the class, right before it chains into the
+// base destructor: the last point where the extension is no longer used.
+DEFINE_HOOK(0x45E732, BuildingTypeClass_DTOR, 0xE)
+{
+	GET(BuildingTypeClass*, pItem, ESI);
+
+	BuildingTypeExt::ExtMap.Remove(pItem);
+
 	return 0;
 }

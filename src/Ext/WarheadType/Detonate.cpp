@@ -1,11 +1,16 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/Anim/Body.h>
 #include <Ext/SWType/Body.h>
+#include <Ext/CaptureManager/Body.h>
 #include <Misc/FlyingStrings.h>
 #include <Utilities/Helpers.Alex.h>
 #include <Utilities/AresFunctions.h>
-#include <Ext/CaptureManager/Body.h>
+#include <Locomotion/ShiftLocomotionClass.h>
+#include <New/Entity/ShiftSchedule.h>
+#include <JumpjetLocomotionClass.h>
+#include <Locomotion/AStar/AStarClass.h>
+#include <cmath>
 
 #pragma region CreateGap Calls
 
@@ -23,10 +28,10 @@ static void __stdcall Sub_4ADCD0(char a1, DWORD a2)
 
 struct InvokerGuard
 {
-	WarheadTypeExt::ExtData* pExt;
+	WarheadTypeExt* pExt;
 	TechnoClass* pOldInvoker;
 
-	InvokerGuard(WarheadTypeExt::ExtData* pExt, TechnoClass* pInvoker)
+	InvokerGuard(WarheadTypeExt* pExt, TechnoClass* pInvoker)
 		: pExt(pExt), pOldInvoker(pExt->DamageAreaInvoker)
 	{
 		pExt->DamageAreaInvoker = pInvoker;
@@ -38,7 +43,7 @@ struct InvokerGuard
 	}
 };
 
-void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt::ExtData* pBulletExt, CoordStruct coords)
+void WarheadTypeExt::Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt* pBulletExt, CoordStruct coords)
 {
 	InvokerGuard guard(this, pOwner);
 	auto const pBullet = pBulletExt ? pBulletExt->OwnerObject() : nullptr;
@@ -122,7 +127,7 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 		{
 			if (const auto pSuper = pHouse->Supers.GetItem(swIdx))
 			{
-				const auto pSWExt = SWTypeExt::ExtMap.Find(pSuper->Type);
+				const auto pSWExt = SWTypeExt::Fetch(pSuper->Type);
 				const auto cell = CellClass::Coord2Cell(coords);
 
 				if (pHouse->CanTransactMoney(pSWExt->Money_Amount) && (!this->LaunchSW_RealLaunch || (pSuper->IsPresent && pSuper->IsReady && !pSuper->IsSuspended)))
@@ -158,10 +163,10 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 
 	if ((this->PossibleCellSpreadDetonate || this->Crit_CurrentChance > 0.0) && this->ApplyPerTargetEffectsOnDetonate.Get(RulesExt::Global()->ApplyPerTargetEffectsOnDetonate))
 	{
-		if (!this->Crit_ApplyChancePerTarget)
+		if (!this->Crit_ApplyChancePerTarget.Get(RulesExt::Global()->Crit_ApplyChancePerTarget))
 			this->Crit_RandomBuffer = ScenarioClass::Instance->Random.RandomDouble();
 
-		if (!this->ReturnWarhead_ApplyChancePerTarget)
+		if (!this->ReturnWarhead_ApplyChancePerTarget.Get(RulesExt::Global()->ReturnWarhead_ApplyChancePerTarget))
 			this->ReturnWarhead_RandomBuffer = ScenarioClass::Instance->Random.RandomDouble();
 
 		if (this->Crit_ActiveChanceAnims.size() > 0 && this->Crit_CurrentChance > 0.0)
@@ -174,28 +179,91 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 		{
 			auto const items = Helpers::Alex::getCellSpreadItemsExt(coords, cellSpread, true, this->CellSpread_Cylinder);
 
-			for (auto const pTarget : items)
-				this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+			if (this->Traction)
+			{
+				// Convert to vector for sorting (std::sort requires random access iterators)
+				std::vector<TechnoClass*> sortedItems(items.begin(), items.end());
+				std::sort(sortedItems.begin(), sortedItems.end(), [&coords](TechnoClass* a, TechnoClass* b)
+					{
+						return a->GetCoords().DistanceFromSquared(coords) < b->GetCoords().DistanceFromSquared(coords);
+					});
+
+				for (auto const pTarget : sortedItems)
+					this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+			}
+			else
+			{
+				for (auto const pTarget : items)
+					this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+			}
 		}
 		else if (pBullet)
 		{
 			if (const auto pTarget = abstract_cast<TechnoClass*>(pBullet->Target))
 			{
+				double distSq = 0.0;
+				auto bulletCoords = pBullet->GetCoords();
+				auto targetCoords = pTarget->GetCoords();
+
+				if (this->CellSpread_Cylinder)
+					distSq = Point2D{ bulletCoords.X - targetCoords.X, bulletCoords.Y - targetCoords.Y }.MagnitudeSquared();
+				else
+					distSq = bulletCoords.DistanceFromSquared(targetCoords);
+
 				// Jun 2, 2024 - Starkku: We should only detonate on the target if the bullet, at the moment of detonation is within acceptable distance of the target.
 				// Ares uses 64 leptons / quarter of a cell as a tolerance, so for sake of consistency we're gonna do the same here.
-				if (pBullet->DistanceFrom(pTarget) <= 64.0) // Unsorted::LeptonsPerCell / 4.0
+				if (distSq < ((Unsorted::LeptonsPerCell / 4.0) * (Unsorted::LeptonsPerCell / 4.0))
+					&& (this->AffectsAir && pTarget->IsInAir()
+					|| this->AffectsGround && pTarget->IsOnFloor()
+					|| this->AffectsUnderground && pTarget->InWhichLayer() == Layer::Underground))
+				{
 					this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+				}
 			}
 		}
 		else if (auto const pTarget = this->DamageAreaTarget)
 		{
-			if (coords.DistanceFromSquared(pTarget->GetCoords()) <= 4096.0) // (Unsorted::LeptonsPerCell / 4.0) * (Unsorted::LeptonsPerCell / 4.0)
+			if (coords.DistanceFromSquared(pTarget->GetCoords()) <= ((Unsorted::LeptonsPerCell / 4.0) * (Unsorted::LeptonsPerCell / 4.0)))
 				this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
 		}
 	}
+
+	if (this->LightChanging)
+	{
+		if (this->SetAmbientLight >= 0)
+		{
+			ScenarioClass::Instance->AmbientOriginal = this->SetAmbientLight;
+
+			if (!LightningStorm::Active)
+			{
+				ScenarioClass::Instance->AmbientCurrent = this->SetAmbientLight;
+				ScenarioClass::Instance->AmbientTarget = ScenarioClass::Instance->AmbientOriginal;
+			}
+		}
+
+		if (this->SetAmbientRed >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * this->SetAmbientRed, 10 * ScenarioClass::Instance->NormalLighting.Tint.Green, 10 * ScenarioClass::Instance->NormalLighting.Tint.Blue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Red = this->SetAmbientRed;
+		}
+
+		if (this->SetAmbientGreen >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * ScenarioClass::Instance->NormalLighting.Tint.Red, 10 * this->SetAmbientGreen, 10 * ScenarioClass::Instance->NormalLighting.Tint.Blue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Green = this->SetAmbientGreen;
+		}
+
+		if (this->SetAmbientBlue >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * ScenarioClass::Instance->NormalLighting.Tint.Red, 10 * ScenarioClass::Instance->NormalLighting.Tint.Green, 10 * this->SetAmbientBlue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Blue = this->SetAmbientBlue;
+		}
+
+		ScenarioClass::Instance->UpdateLighting();
+	}
 }
 
-void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget, const CoordStruct& coords, int damage, TechnoClass* pOwner, BulletExt::ExtData* pBulletExt, bool bulletWasIntercepted, int distance)
+void WarheadTypeExt::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget, const CoordStruct& coords, int damage, TechnoClass* pOwner, BulletExt* pBulletExt, bool bulletWasIntercepted, int distance)
 {
 	if (!pTarget || pTarget->InLimbo || !pTarget->IsAlive || !pTarget->Health || pTarget->IsSinking || pTarget->BeingWarpedOut)
 		return;
@@ -203,9 +271,12 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (!this->CanTargetHouse(pHouse, pTarget) || !this->CanAffectTarget(pTarget))
 		return;
 
-	// Put this at first since it can change the target's house
+	// Put these at first since they can change the target's house
 	if (this->RemoveMindControl)
 		pHouse = this->ApplyRemoveMindControl(pHouse, pTarget);
+
+	if (this->ChangeOwner)
+		this->ApplyOwnerChange(pHouse, pTarget);
 
 	// These can change the target's techno types
 	if (this->Convert_Pairs.size() > 0)
@@ -215,11 +286,17 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 		this->ApplyBuildingUndeploy(pTarget);
 
 	// Other one time effects
+	if (this->Ammo != 0)
+		this->ApplyAmmoModifier(pTarget);
+
 	if (this->RemoveDisguise)
 		this->ApplyRemoveDisguise(pTarget);
 
 	if (this->ReverseEngineer)
 		this->ApplyReverseEngineer(pHouse, pTarget);
+
+	if (this->ForceTrack)
+		this->ApplyForceTrack(pTarget);
 
 	if (this->ReturnWarhead && pOwner)
 		this->ApplyReturnWarhead(pHouse, pTarget, pOwner);
@@ -230,6 +307,13 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (this->Taunt && pOwner)
 		pTarget->Override_Mission(Mission::Attack, pOwner, nullptr);
 
+	// Apply knockup and traction effects
+	if (this->KnockUp)
+		this->ApplyKnockUp(pTarget);
+
+	if (this->Traction)
+		this->ApplyTraction(pTarget, coords);
+
 	// This might change the target's armor type
 	this->ApplyShieldModifiers(pTarget);
 
@@ -238,8 +322,11 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 		this->ApplyAttachEffects(pTarget, pHouse, pOwner);
 
 	// Put Crit at last since it might kill the target
-	if (this->Crit_CurrentChance > 0.0 && (!this->Crit_SuppressWhenIntercepted || !bulletWasIntercepted))
+	if (this->Crit_CurrentChance > 0.0 && (!this->Crit_SuppressWhenIntercepted.Get(RulesExt::Global()->Crit_SuppressWhenIntercepted) || !bulletWasIntercepted))
 		this->ApplyCrit(pHouse, pTarget, pOwner, pBulletExt);
+
+	if (this->Attachment_Transform.size() > 0)
+		this->ApplyAttachmentTransform(pHouse, pTarget);
 
 #ifdef LOCO_TEST_WARHEADS
 	if (this->InflictLocomotor)
@@ -251,13 +338,24 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 
 }
 
-void WarheadTypeExt::ExtData::ApplyReverseEngineer(HouseClass* pHouse, TechnoClass* pTarget)
+void WarheadTypeExt::ApplyForceTrack(TechnoClass* pTarget)
+{
+	if (const auto pFoot = abstract_cast<FootClass*, true>(pTarget))
+	{
+		const auto pLoco = pFoot->Locomotor;
+
+		if (!pLoco->Is_Moving())
+			pLoco->Force_Track(this->ForceTrack_Index, pFoot->Location + this->ForceTrack_Coord);
+	}
+}
+
+void WarheadTypeExt::ApplyReverseEngineer(HouseClass* pHouse, TechnoClass* pTarget)
 {
 	if (pHouse && !pHouse->Type->MultiplayPassive && AresFunctions::ReverseEngineer)
 		AresFunctions::ReverseEngineer(reinterpret_cast<void*>(pHouse->unknown_16084), pTarget->GetTechnoType());
 }
 
-void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
+void WarheadTypeExt::ApplyBuildingUndeploy(TechnoClass* pTarget)
 {
 	const auto pBuilding = abstract_cast<BuildingClass*, true>(pTarget);
 
@@ -359,9 +457,9 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 	pBuilding->Sell(1);
 }
 
-void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
+void WarheadTypeExt::ApplyShieldModifiers(TechnoClass* pTarget)
 {
-	auto const pTargetExt = TechnoExt::ExtMap.Find(pTarget);
+	auto const pTargetExt = TechnoExt::Fetch(pTarget);
 	auto& pShield = pTargetExt->Shield;
 	int shieldIndex = -1;
 	double ratio = 1.0;
@@ -400,7 +498,7 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
 
 		if (shieldType)
 		{
-			if (shieldType->Strength
+			if (shieldType->Strength > 0
 				&& (!pShield
 					|| (this->Shield_ReplaceNonRespawning
 						&& pShield->IsBrokenAndNonRespawning()
@@ -413,17 +511,11 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
 				if (this->Shield_ReplaceOnly && this->Shield_InheritStateOnReplace)
 				{
 					pShield->SetHP((int)(shieldType->Strength * ratio));
-
-					if (this->Shield_ReplaceOnly && this->Shield_InheritStateOnReplace)
-					{
-						pShield->SetHP((int)(shieldType->Strength * ratio));
-
-						if (pShield->GetHP() == 0)
-						{
-							pShield->SetRespawn(shieldType->Respawn_Rate, shieldType->Respawn, shieldType->Respawn_Rate,
-								shieldType->Respawn_RestartInCombat, -1, true, shieldType->Respawn_Anim);
-						}
-					}
+					// Value doesn't matter here, it's just for restarting timer
+					pShield->SetRespawn(0, shieldType->Respawn, shieldType->Respawn_Rate,
+						shieldType->Respawn_RestartInCombat, -1, true, shieldType->Respawn_Anim);
+					pShield->SetSelfHealing(0, shieldType->SelfHealing, shieldType->SelfHealing_Rate,
+						shieldType->SelfHealing_RestartInCombat, -1, true);
 				}
 			}
 		}
@@ -463,7 +555,7 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
 	}
 }
 
-void WarheadTypeExt::ExtData::ApplyRemoveDisguise(TechnoClass* pTarget)
+void WarheadTypeExt::ApplyRemoveDisguise(TechnoClass* pTarget)
 {
 	if (pTarget->IsDisguised())
 	{
@@ -474,27 +566,84 @@ void WarheadTypeExt::ExtData::ApplyRemoveDisguise(TechnoClass* pTarget)
 	}
 }
 
-HouseClass* WarheadTypeExt::ExtData::ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget)
+HouseClass* WarheadTypeExt::ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget)
 {
-	if (const auto pController = pTarget->MindControlledBy)
+	if (this->RemoveMindControl_OnVictim)
 	{
-		CaptureManagerExt::FreeUnit(pController->CaptureManager, pTarget, this->RemoveMindControl_Silent.Get(RulesExt::Global()->RemoveMindControl_Silent));
-		return pTarget->Owner;
+		if (const auto pController = pTarget->MindControlledBy)
+		{
+			CaptureManagerExt::FreeUnit(pController->CaptureManager, pTarget, this->RemoveMindControl_Silent.Get(RulesExt::Global()->RemoveMindControl_Silent));
+			pHouse = pTarget->Owner;
+		}
+	}
+
+	if (this->RemoveMindControl_OnController)
+	{
+		if (const auto pManager = pTarget->CaptureManager)
+			pManager->FreeAll();
 	}
 
 	return pHouse;
 }
 
-void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner, BulletExt::ExtData* pBulletExt)
+void WarheadTypeExt::ApplyOwnerChange(HouseClass* pHouse, TechnoClass* pTarget)
 {
-	const double dice = this->Crit_ApplyChancePerTarget || !this->ApplyPerTargetEffectsOnDetonate.Get(RulesExt::Global()->ApplyPerTargetEffectsOnDetonate) ? ScenarioClass::Instance->Random.RandomDouble() : this->Crit_RandomBuffer;
+	const bool isMindControl = this->ChangeOwner_SetAsMindControl;
+	const auto pType = pTarget->GetTechnoType();
+	const bool isImmune = (isMindControl && pType->ImmuneToPsionics) || pTarget->IsMindControlled();
+
+	if (!isImmune)
+	{
+		pTarget->SetOwningHouse(pHouse, true);
+
+		if (isMindControl)
+		{
+			pTarget->MindControlledByAUnit = true;
+
+			if (const auto pAnimType = this->ChangeOwner_MindControlAnim.Get())
+			{
+				CoordStruct location = pTarget->Location;
+				const bool isBld = pTarget->What_Am_I() == AbstractType::Building;
+
+				if (isBld)
+					location.Z += static_cast<BuildingClass*>(pTarget)->Type->Height * Unsorted::LevelHeight;
+				else
+					location.Z += pType->MindControlRingOffset;
+
+				if (const auto pOwnerAnim = GameCreate<AnimClass>(pAnimType, location))
+				{
+					pTarget->MindControlRingAnim = pOwnerAnim;
+					pOwnerAnim->SetOwnerObject(pTarget);
+
+					if (isBld)
+						pOwnerAnim->ZAdjust = -1024;
+				}
+			}
+		}
+	}
+}
+
+void WarheadTypeExt::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner, BulletExt* pBulletExt)
+{
+	if (this->InApplyCrit)
+		return;
+
+	struct InApplyCritGuard
+	{
+		WarheadTypeExt* P;
+		InApplyCritGuard(WarheadTypeExt* p) : P(p) { P->InApplyCrit = true; }
+		~InApplyCritGuard() { P->InApplyCrit = false; }
+	} guard(this);
+
+	const double dice = this->Crit_ApplyChancePerTarget.Get(RulesExt::Global()->Crit_ApplyChancePerTarget)
+		|| !this->ApplyPerTargetEffectsOnDetonate.Get(RulesExt::Global()->ApplyPerTargetEffectsOnDetonate) ? ScenarioClass::Instance->Random.RandomDouble() : this->Crit_RandomBuffer;
 
 	if (this->Crit_CurrentChance < dice)
 		return;
 
-	auto const pTargetExt = TechnoExt::ExtMap.Find(pTarget);
+	auto const pTargetExt = TechnoExt::Fetch(pTarget);
 
-	if (pTargetExt->TypeExtData->ImmuneToCrit)
+	if (pTargetExt->TypeExtData->ImmuneToCrit || TechnoExt::HasAdditionalAbility(pTarget, AdditionalAbility::CritImmune))
 		return;
 
 	auto const pSld = pTargetExt->Shield.get();
@@ -516,7 +665,7 @@ void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget
 
 	this->Crit_Active = true;
 
-	if (this->Crit_AnimOnAffectedTargets && this->Crit_AnimList.size())
+	if (this->Crit_AnimOnAffectedTargets.Get(RulesExt::Global()->Crit_AnimOnAffectedTargets) && this->Crit_AnimList.size())
 	{
 		if (!this->Crit_AnimList_CreateAll.Get(false))
 		{
@@ -525,7 +674,7 @@ void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget
 
 			auto const pAnim = GameCreate<AnimClass>(this->Crit_AnimList[idx], pTarget->Location);
 			AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse, nullptr, false, true);
-			AnimExt::ExtMap.Find(pAnim)->SetInvoker(pOwner, pHouse);
+			AnimExt::Fetch(pAnim)->SetInvoker(pOwner, pHouse);
 		}
 		else
 		{
@@ -533,14 +682,14 @@ void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget
 			{
 				auto const pAnim = GameCreate<AnimClass>(pType, pTarget->Location);
 				AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse, nullptr, false, true);
-				AnimExt::ExtMap.Find(pAnim)->SetInvoker(pOwner, pHouse);
+				AnimExt::Fetch(pAnim)->SetInvoker(pOwner, pHouse);
 			}
 		}
 	}
 
 	int damage = this->Crit_ExtraDamage.Get();
 
-	if (this->Crit_ExtraDamage_ApplyFirepowerMult)
+	if (this->Crit_ExtraDamage_ApplyFirepowerMult.Get(RulesExt::Global()->Crit_ExtraDamage_ApplyFirepowerMult))
 	{
 		if (pBulletExt)
 			damage = static_cast<int>(damage * pBulletExt->FirepowerMult);
@@ -559,9 +708,10 @@ void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget
 		pTarget->ReceiveDamage(&damage, 0, this->OwnerObject(), pOwner, false, false, pHouse);
 }
 
-void WarheadTypeExt::ExtData::ApplyReturnWarhead(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner)
+void WarheadTypeExt::ApplyReturnWarhead(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner)
 {
-	const double dice = this->ReturnWarhead_ApplyChancePerTarget || !this->ApplyPerTargetEffectsOnDetonate.Get(RulesExt::Global()->ApplyPerTargetEffectsOnDetonate) ? ScenarioClass::Instance->Random.RandomDouble() : this->ReturnWarhead_RandomBuffer;
+	const double dice = this->ReturnWarhead_ApplyChancePerTarget.Get(RulesExt::Global()->ReturnWarhead_ApplyChancePerTarget)
+		|| !this->ApplyPerTargetEffectsOnDetonate.Get(RulesExt::Global()->ApplyPerTargetEffectsOnDetonate) ? ScenarioClass::Instance->Random.RandomDouble() : this->ReturnWarhead_RandomBuffer;
 
 	if (this->ReturnWarhead_Chance < dice)
 		return;
@@ -581,17 +731,17 @@ void WarheadTypeExt::ExtData::ApplyReturnWarhead(HouseClass* pHouse, TechnoClass
 		pOwner->ReceiveDamage(&this->ReturnWarhead_Damage, 0, this->ReturnWarhead, pTarget, false, false, pTarget->Owner);
 }
 
-void WarheadTypeExt::ExtData::InterceptBullets(TechnoClass* pOwner, BulletClass* pInterceptor, const CoordStruct& coords)
+void WarheadTypeExt::InterceptBullets(TechnoClass* pOwner, BulletClass* pInterceptor, const CoordStruct& coords)
 {
-	const float cellSpread = this->OwnerObject()->CellSpread;
+	const double cellSpread = (double)this->OwnerObject()->CellSpread;
 
 	if (cellSpread == 0.0)
 	{
 		if (const auto pBullet = abstract_cast<BulletClass*>(pInterceptor->Target))
 		{
-			const auto pBulletExt = BulletExt::ExtMap.Find(pBullet);
+			const auto pBulletExt = BulletExt::Fetch(pBullet);
 
-			if (!pBulletExt->TypeExtData->Interceptable)
+			if (!pBulletExt->TypeExtData->Interceptable.Get(RulesExt::Global()->ProjectileInterceptable))
 				return;
 
 			// 1/8th of a cell as a margin of error if not Inviso interceptor.
@@ -601,14 +751,14 @@ void WarheadTypeExt::ExtData::InterceptBullets(TechnoClass* pOwner, BulletClass*
 	}
 	else
 	{
-		const double cellSpreadSq = cellSpread * cellSpread * 65536; // Unsorted::LeptonsPerCell * Unsorted::LeptonsPerCell
+		const double cellSpreadSq = 65536.0 * cellSpread * cellSpread; // Unsorted::LeptonsPerCell * Unsorted::LeptonsPerCell
 
 		for (const auto& pBullet : BulletClass::Array)
 		{
-			const auto pBulletExt = BulletExt::ExtMap.Find(pBullet);
+			const auto pBulletExt = BulletExt::Fetch(pBullet);
 
 			// Cells don't know about bullets that may or may not be located on them so it has to be this way.
-			if (!pBulletExt->TypeExtData->Interceptable || pBullet->SpawnNextAnim)
+			if (!pBulletExt->TypeExtData->Interceptable.Get(RulesExt::Global()->ProjectileInterceptable) || pBullet->SpawnNextAnim)
 				continue;
 
 			if (pBullet->Location.DistanceFromSquared(coords) <= cellSpreadSq)
@@ -617,17 +767,23 @@ void WarheadTypeExt::ExtData::InterceptBullets(TechnoClass* pOwner, BulletClass*
 	}
 }
 
-void WarheadTypeExt::ExtData::ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget)
+void WarheadTypeExt::ApplyAttachmentTransform(HouseClass* pHouse, TechnoClass* pTarget)
 {
-	const auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
+	const auto pTargetExt = TechnoExt::Fetch(pTarget);
 
-	if (!pTargetFoot)
-		return;
+	if (const auto pAttachment = pTargetExt->ParentAttachment)
+		AttachmentTransformGroup::Trasform(pAttachment, this->Attachment_Transform, pHouse);
 
-	TypeConvertGroup::Convert(pTargetFoot, this->Convert_Pairs, pHouse);
+	for (const auto& pAttachment : pTargetExt->ChildAttachments)
+		AttachmentTransformGroup::Trasform(pAttachment.get(), this->Attachment_Transform, pHouse);
 }
 
-void WarheadTypeExt::ExtData::ApplyLocomotorInfliction(TechnoClass* pTarget)
+void WarheadTypeExt::ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget)
+{
+	TypeConvertGroup::Convert(pTarget, this->Convert_Pairs, pHouse);
+}
+
+void WarheadTypeExt::ApplyLocomotorInfliction(TechnoClass* pTarget)
 {
 	auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
 
@@ -649,7 +805,7 @@ void WarheadTypeExt::ExtData::ApplyLocomotorInfliction(TechnoClass* pTarget)
 	LocomotionClass::ChangeLocomotorTo(pTargetFoot, inflictCLSID);
 }
 
-void WarheadTypeExt::ExtData::ApplyLocomotorInflictionReset(TechnoClass* pTarget)
+void WarheadTypeExt::ApplyLocomotorInflictionReset(TechnoClass* pTarget)
 {
 	auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
 
@@ -674,7 +830,7 @@ void WarheadTypeExt::ExtData::ApplyLocomotorInflictionReset(TechnoClass* pTarget
 	LocomotionClass::End_Piggyback(pTargetFoot->Locomotor);
 }
 
-void WarheadTypeExt::ExtData::ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker)
+void WarheadTypeExt::ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker)
 {
 	std::vector<int> dummy = std::vector<int>();
 	auto const& info = this->AttachEffects;
@@ -683,14 +839,17 @@ void WarheadTypeExt::ExtData::ApplyAttachEffects(TechnoClass* pTarget, HouseClas
 	AttachEffectClass::DetachByGroups(pTarget, info);
 }
 
-double WarheadTypeExt::ExtData::GetCritChance(TechnoClass* pFirer) const
+double WarheadTypeExt::GetCritChance(TechnoClass* pFirer) const
 {
 	double critChance = this->Crit_Chance;
 
 	if (!pFirer)
 		return critChance;
 
-	auto const pExt = TechnoExt::ExtMap.Find(pFirer);
+	auto const pExt = TechnoExt::Fetch(pFirer);
+
+	if (TechnoExt::HasAdditionalAbility(pFirer, AdditionalAbility::CritChance))
+		critChance = critChance * Math::max(pExt->TypeExtData->VeteranCritChance.Get(RulesExt::Global()->VeteranCritChance), 0);
 
 	if (!pExt->AE.HasCritModifiers)
 		return critChance;
@@ -725,7 +884,7 @@ double WarheadTypeExt::ExtData::GetCritChance(TechnoClass* pFirer) const
 	return critChance + extraChance;
 }
 
-void WarheadTypeExt::ExtData::ApplyPenetratesTransport(TechnoClass* pTarget, TechnoClass* pInvoker, HouseClass* pInvokerHouse, const CoordStruct& coords, int damage, int distance)
+void WarheadTypeExt::ApplyPenetratesTransport(TechnoClass* pTarget, TechnoClass* pInvoker, HouseClass* pInvokerHouse, const CoordStruct& coords, int damage, int distance)
 {
 	auto& passengers = pTarget->Passengers;
 	auto passenger = passengers.GetFirstPassenger();
@@ -733,7 +892,7 @@ void WarheadTypeExt::ExtData::ApplyPenetratesTransport(TechnoClass* pTarget, Tec
 	if (!passenger)
 		return;
 
-	const auto pTargetTypeExt = TechnoExt::ExtMap.Find(pTarget)->TypeExtData;
+	const auto pTargetTypeExt = TechnoExt::Fetch(pTarget)->TypeExtData;
 	const auto pTargetType = pTargetTypeExt->OwnerObject();
 
 	if (this->PenetratesTransport_Level <= pTargetTypeExt->PenetratesTransport_Level.Get(RulesExt::Global()->PenetratesTransport_Level))
@@ -763,7 +922,7 @@ void WarheadTypeExt::ExtData::ApplyPenetratesTransport(TechnoClass* pTarget, Tec
 			while (passenger)
 			{
 				const auto nextPassenger = abstract_cast<FootClass*>(passenger->NextObject);
-				const auto pPassengerTypeExt = TechnoExt::ExtMap.Find(passenger)->TypeExtData;
+				const auto pPassengerTypeExt = TechnoExt::Fetch(passenger)->TypeExtData;
 				const auto pPassengerType = pPassengerTypeExt->OwnerObject();
 
 				if (this->PenetratesTransport_Level > pPassengerTypeExt->PenetratesTransport_Level.Get(RulesExt::Global()->PenetratesTransport_Level))
@@ -791,7 +950,7 @@ void WarheadTypeExt::ExtData::ApplyPenetratesTransport(TechnoClass* pTarget, Tec
 			{
 				const auto nextPassenger = abstract_cast<FootClass*>(passenger->NextObject);
 
-				if (this->PenetratesTransport_Level > TechnoExt::ExtMap.Find(passenger)->TypeExtData->PenetratesTransport_Level.Get(RulesExt::Global()->PenetratesTransport_Level))
+				if (this->PenetratesTransport_Level > TechnoExt::Fetch(passenger)->TypeExtData->PenetratesTransport_Level.Get(RulesExt::Global()->PenetratesTransport_Level))
 				{
 					passenger->SetLocation(transporterCoords);
 					int applyDamage = adjustedDamage;
@@ -820,7 +979,7 @@ void WarheadTypeExt::ExtData::ApplyPenetratesTransport(TechnoClass* pTarget, Tec
 			--poorBastardIdx;
 		}
 
-		const auto pPassengerTypeExt = TechnoExt::ExtMap.Find(passenger)->TypeExtData;
+		const auto pPassengerTypeExt = TechnoExt::Fetch(passenger)->TypeExtData;
 		const auto pPassengerType = pPassengerTypeExt->OwnerObject();
 
 		if (this->PenetratesTransport_Level <= pPassengerTypeExt->PenetratesTransport_Level.Get(RulesExt::Global()->PenetratesTransport_Level))
@@ -866,4 +1025,238 @@ void WarheadTypeExt::ExtData::ApplyPenetratesTransport(TechnoClass* pTarget, Tec
 		if (cleanSound != -1)
 			VocClass::PlayAt(cleanSound, transporterCoords);
 	}
+}
+
+void WarheadTypeExt::ApplyKnockUp(TechnoClass* pTarget)
+{
+	if (!this->KnockUp)
+		return;
+
+	auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
+
+	if (!pTargetFoot)
+		return;
+
+	// same locomotor? no point to change
+	CLSID targetCLSID { };
+	CLSID inflictCLSID = __uuidof(ShiftLocomotionClass);
+	auto pLoco = pTargetFoot->Locomotor;
+	IPersistPtr pLocoPersist = pLoco;
+	if (SUCCEEDED(pLocoPersist->GetClassID(&targetCLSID)) && targetCLSID == inflictCLSID)
+		return;
+
+	// prevent endless piggyback
+	IPiggybackPtr pTargetPiggy = pTargetFoot->Locomotor;
+	if (pTargetPiggy != nullptr && pTargetPiggy->Is_Piggybacking())
+		return;
+
+	bool isAirUnit = ShiftLocomotionClass::IsAirLoco(pLoco);
+
+	// Calculate the reverse direction of PrimaryFacing
+	DirStruct facing = pTargetFoot->PrimaryFacing.Current();
+
+	// Convert facing to a unit vector
+	double angleRad = -facing.GetRadian<65536>();
+	double dx = Math::cos(angleRad);
+	double dy = Math::sin(angleRad);
+
+	// Opposite direction
+	dx = -dx;
+	dy = -dy;
+
+	// Calculate end position based on range
+	int range = this->KnockUp_Range.Get();
+	CoordStruct knockUpOffset;
+	knockUpOffset.X = static_cast<int>(range * dx);
+	knockUpOffset.Y = static_cast<int>(range * dy);
+	knockUpOffset.Z = 0;
+
+	// Check bridge at destination - if there's a bridge, use bridge height
+	CoordStruct destCoords;
+
+	if (isAirUnit)
+	{
+		destCoords = pTargetFoot->GetCoords() + knockUpOffset;
+		destCoords.Z = pTargetFoot->GetHeight() + MapClass::Instance.GetCellAt(destCoords)->GetCoordsWithBridge().Z;
+	}
+	else
+	{
+		destCoords = pTargetFoot->GetCoords() + knockUpOffset;
+		auto destCellCoords = MapClass::Instance.GetCellAt(destCoords)->GetCoords();
+		auto currentCellCoords = pTargetFoot->GetCell()->GetCoords();
+		auto currentCrd = pTargetFoot->GetCoords();
+		destCoords = destCellCoords + (currentCrd - currentCellCoords);
+		destCoords.Z = pTargetFoot->GetHeight() + MapClass::Instance.GetCellAt(destCoords)->GetCoordsWithBridge().Z;
+	}
+
+	destCoords = ShiftLocomotionClass::FindShiftDestination(pTargetFoot, destCoords);
+
+	if (destCoords != CoordStruct::Empty)
+	{
+		// Create shift schedule
+		auto sampleStart = ShiftSchedule::Sample(
+			pTargetFoot->GetCoords(),
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, false);
+
+		auto sampleEnd = ShiftSchedule::Sample(
+			destCoords,
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, true);
+
+		auto params = ParabolaParams(this->KnockUp_Angle.Get(), this->KnockUp_Speed.Get());
+		auto schedule = ParabolaShiftSchedule(sampleStart, sampleEnd, &params);
+
+		// Queue the shift
+		auto pExt = TechnoExt::Fetch(pTargetFoot);
+		pExt->QueuedShift = std::make_unique<ParabolaShiftSchedule>(schedule);
+
+		// Change locomotor
+		LocomotionClass::ChangeLocomotorTo(pTargetFoot, inflictCLSID);
+	}
+}
+
+void WarheadTypeExt::ApplyTraction(TechnoClass* pTarget, const CoordStruct& coords)
+{
+	if (!this->Traction)
+		return;
+
+	auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
+
+	if (!pTargetFoot)
+		return;
+
+	if (coords == CoordStruct::Empty)
+		return;
+
+	// same locomotor? no point to change
+	CLSID targetCLSID { };
+	CLSID inflictCLSID = __uuidof(ShiftLocomotionClass);
+	IPersistPtr pLocoPersist = pTargetFoot->Locomotor;
+	if (SUCCEEDED(pLocoPersist->GetClassID(&targetCLSID)) && targetCLSID == inflictCLSID)
+		return;
+
+	// prevent endless piggyback
+	IPiggybackPtr pTargetPiggy = pTargetFoot->Locomotor;
+	if (pTargetPiggy != nullptr && pTargetPiggy->Is_Piggybacking())
+		return;
+
+	int tractionSpeed = this->Traction_Speed.Get();
+	int tractionRange = this->Traction_Range.Get();
+
+	if (tractionSpeed <= 0 || tractionRange <= 0)
+		return;
+
+	CoordStruct startCoords = pTargetFoot->GetCoords();
+	auto startCell = MapClass::Instance.GetCellAt(startCoords);
+	auto offset = startCoords - startCell->GetCoordsWithBridge();
+
+	CoordStruct destCoords = startCoords;
+	auto destMapCrd = startCell->MapCoords;
+	int tractionRangeUnused = tractionRange;
+
+	for (; tractionRangeUnused > 0;)
+	{
+		double bestCos = 0;
+		double bestCost = std::numeric_limits<double>::max();
+		std::vector<size_t> bestDirs;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			auto calcStepResult = [&](CellStruct currentMapCrd) -> std::pair<double, double>
+				{
+					auto dirOffset = CellSpread::GetNeighbourOffset(i);
+					auto nextMapCrd = currentMapCrd + dirOffset;
+					auto nextCell = MapClass::Instance.GetCellAt(nextMapCrd);
+
+					if (pTarget->IsCellOccupied(nextCell, FacingType::None, -1, nullptr, true) != Move::OK)
+						return { 0.0, std::numeric_limits<double>::max() };
+
+					auto dirOffsetCrd = Point2D(dirOffset.X * Unsorted::LeptonsPerCell, dirOffset.Y * Unsorted::LeptonsPerCell);
+					auto dirDelta = dirOffsetCrd.Magnitude();
+					auto tractionVector = coords - CellClass::Cell2Coord(currentMapCrd);
+					auto tractionVector2D = Point2D(tractionVector.X, tractionVector.Y);
+					auto angleCos = Point2D(dirOffsetCrd.X, dirOffsetCrd.Y).AngleCosTo(tractionVector2D);
+
+					if (angleCos <= 0)
+						return { angleCos, std::numeric_limits<double>::max() };
+
+					return { angleCos, dirDelta / angleCos };
+				};
+
+			auto stepResult = calcStepResult(destMapCrd);
+			auto angleCos = stepResult.first;
+			auto cost = stepResult.second;
+
+			if (cost > tractionRangeUnused)
+				continue;
+
+			if (angleCos > bestCos)
+			{
+				bestCos = angleCos;
+				bestCost = cost;
+				bestDirs.clear();
+				bestDirs.push_back(i);
+			}
+			else if (angleCos == bestCos)
+			{
+				if (cost > bestCost)
+				{
+					bestCost = cost;
+					bestDirs.clear();
+					bestDirs.push_back(i);
+				}
+				else if (cost == bestCost)
+				{
+					bestDirs.push_back(i);
+				}
+			}
+		}
+
+		// If no valid direction found, exit the loop
+		if (bestDirs.empty())
+			break;
+
+		// Randomly select one of the best directions if multiple exist
+		size_t selectedDir = bestDirs[ScenarioClass::Instance->Random.RandomRanged(0, bestDirs.size() - 1)];
+		// Move one step in the selected direction
+		auto dirOffset = CellSpread::GetNeighbourOffset(selectedDir);
+		destMapCrd += dirOffset;
+		tractionRangeUnused -= static_cast<int>(bestCost);
+	}
+
+	if (destMapCrd != startCell->MapCoords)
+	{
+		// Convert final map coordinates back to world coordinates
+		destCoords = MapClass::Instance.GetCellAt(destMapCrd)->GetCoordsWithBridge() + offset;
+
+		// Create linear shift schedule for traction
+		auto sampleStart = ShiftSchedule::Sample(
+			startCoords,
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, false);
+
+		auto sampleEnd = ShiftSchedule::Sample(
+			destCoords,
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, true);
+
+		auto params = LinearParams { tractionSpeed };
+		auto schedule = LinearShiftSchedule(sampleStart, sampleEnd, &params);
+
+		auto pExt = TechnoExt::Fetch(pTargetFoot);
+		pExt->QueuedShift = std::make_unique<LinearShiftSchedule>(schedule);
+
+		// Change locomotor
+		LocomotionClass::ChangeLocomotorTo(pTargetFoot, inflictCLSID);
+	}
+}
+
+void WarheadTypeExt::ExtData::ApplyAmmoModifier(TechnoClass* pTarget)
+{
+	const int maxAmmo = pTarget->GetTechnoType()->Ammo;
+	int newCurrentAmmo = this->Ammo + pTarget->Ammo;
+
+	newCurrentAmmo = newCurrentAmmo < 0 ? 0 : newCurrentAmmo;
+	pTarget->Ammo = newCurrentAmmo > maxAmmo ? maxAmmo : newCurrentAmmo;
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "SWColumnClass.h"
 #include "ToggleSWButtonClass.h"
 #include <CommandClass.h>
@@ -12,6 +12,7 @@ public:
 	void InitClear();
 	void InitIO();
 
+	void DrawInfo() const;
 	bool AddButton(int superIdx);
 	void SortButtons();
 

@@ -1,4 +1,4 @@
-#include "FrameByFrame.h"
+﻿#include "FrameByFrame.h"
 
 #include <Utilities/Debug.h>
 #include <Utilities/GeneralUtils.h>

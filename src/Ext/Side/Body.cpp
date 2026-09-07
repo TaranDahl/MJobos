@@ -1,8 +1,8 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 SideExt::ExtContainer SideExt::ExtMap;
 
-void SideExt::ExtData::Initialize()
+void SideExt::Initialize()
 {
 	const char* pID = this->OwnerObject()->ID;
 
@@ -18,7 +18,7 @@ void SideExt::ExtData::Initialize()
 		this->MessageTextColor = 21;
 };
 
-void SideExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
+void SideExt::LoadFromINIFile(CCINIClass* pINI)
 {
 	auto pThis = this->OwnerObject();
 	const char* pSection = pThis->ID;
@@ -55,13 +55,19 @@ void SideExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->SuperWeaponSidebar_TopPCX.Read(pINI, pSection, "SuperWeaponSidebar.TopPCX");
 	this->SuperWeaponSidebar_CenterPCX.Read(pINI, pSection, "SuperWeaponSidebar.CenterPCX");
 	this->SuperWeaponSidebar_BottomPCX.Read(pINI, pSection, "SuperWeaponSidebar.BottomPCX");
+	this->SelectedInfo_Main.Read(exINI, pSection, "SelectedInfo.Main");
+	this->SelectedInfo_Buff.Read(exINI, pSection, "SelectedInfo.Buff");
+	this->SelectedInfo_Button.Read(exINI, pSection, "SelectedInfo.Button");
+	this->SelectedInfo_Bottom.Read(exINI, pSection, "SelectedInfo.Bottom");
+	this->SelectedInfo_Toggle.Read(exINI, pSection, "SelectedInfo.Toggle");
+	this->SelectedInfo_Palette.LoadFromINI(pINI, pSection, "SelectedInfo.Palette");
 }
 
 // =============================
 // load / save
 
 template <typename T>
-void SideExt::ExtData::Serialize(T& Stm)
+void SideExt::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->ArrayIndex)
@@ -93,18 +99,24 @@ void SideExt::ExtData::Serialize(T& Stm)
 		.Process(this->SuperWeaponSidebar_TopPCX)
 		.Process(this->SuperWeaponSidebar_CenterPCX)
 		.Process(this->SuperWeaponSidebar_BottomPCX)
+		.Process(this->SelectedInfo_Main)
+		.Process(this->SelectedInfo_Buff)
+		.Process(this->SelectedInfo_Button)
+		.Process(this->SelectedInfo_Bottom)
+		.Process(this->SelectedInfo_Toggle)
+		.Process(this->SelectedInfo_Palette)
 		;
 }
 
-void SideExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
+void SideExt::LoadFromStream(PhobosStreamReader& Stm)
 {
-	Extension<SideClass>::LoadFromStream(Stm);
+	AbstractTypeExt::LoadFromStream(Stm);
 	this->Serialize(Stm);
 }
 
-void SideExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
+void SideExt::SaveToStream(PhobosStreamWriter& Stm)
 {
-	Extension<SideClass>::SaveToStream(Stm);
+	AbstractTypeExt::SaveToStream(Stm);
 	this->Serialize(Stm);
 }
 
@@ -145,35 +157,12 @@ DEFINE_HOOK(0x6A499F, SideClass_SDDTOR, 0x6)
 	return 0;
 }
 
-DEFINE_HOOK_AGAIN(0x6A48A0, SideClass_SaveLoad_Prefix, 0x5)
-DEFINE_HOOK(0x6A4780, SideClass_SaveLoad_Prefix, 0x6)
-{
-	GET_STACK(SideClass*, pItem, 0x4);
-	GET_STACK(IStream*, pStm, 0x8);
-
-	SideExt::ExtMap.PrepareStream(pItem, pStm);
-
-	return 0;
-}
-
-DEFINE_HOOK(0x6A488B, SideClass_Load_Suffix, 0x6)
-{
-	SideExt::ExtMap.LoadStatic();
-	return 0;
-}
-
-DEFINE_HOOK(0x6A48FC, SideClass_Save_Suffix, 0x5)
-{
-	SideExt::ExtMap.SaveStatic();
-	return 0;
-}
-
 DEFINE_HOOK(0x679A10, SideClass_LoadAllFromINI, 0x5)
 {
 	GET_STACK(CCINIClass*, pINI, 0x4);
 
 	for (auto const pSide : SideClass::Array)
-		SideExt::ExtMap.Find(pSide)->LoadFromINI(pINI);
+		SideExt::Fetch(pSide)->LoadFromINI(pINI);
 
 	return 0;
 }

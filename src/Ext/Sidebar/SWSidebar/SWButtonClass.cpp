@@ -1,4 +1,4 @@
-#include "SWButtonClass.h"
+﻿#include "SWButtonClass.h"
 #include "SWSidebarClass.h"
 #include <EventClass.h>
 #include <CCToolTip.h>
@@ -25,9 +25,11 @@ SWButtonClass::~SWButtonClass()
 
 bool SWButtonClass::Draw(bool forced)
 {
-	if (!forced)
-		return false;
+	return false;
+}
 
+void SWButtonClass::DrawInfo() const
+{
 	const auto pSurface = DSurface::Composite;
 	auto bounds = pSurface->GetRect();
 	Point2D location = { this->X, this->Y };
@@ -36,7 +38,7 @@ bool SWButtonClass::Draw(bool forced)
 	const auto pCurrent = HouseClass::CurrentPlayer;
 	const auto pSuper = pCurrent->Supers[this->SuperIndex];
 	const auto pType = pSuper->Type;
-	const auto pSWExt = SWTypeExt::ExtMap.Find(pType);
+	const auto pSWExt = SWTypeExt::Fetch(pType);
 
 	// support for pcx cameos
 	if (const auto pPCXCameo = pSWExt->SidebarPCX.GetSurface())
@@ -128,8 +130,6 @@ bool SWButtonClass::Draw(bool forced)
 		Point2D loc = { location.X, location.Y };
 		pSurface->DrawSHP(FileSystem::SIDEBAR_PAL, FileSystem::GCLOCK2_SHP, pSuper->AnimStage() + 1, &loc, &bounds, BlitterFlags::bf_400 | BlitterFlags::TransLucent50, 0, 0, ZGradient::Ground, 1000, 0, nullptr, 0, 0, 0);
 	}
-
-	return true;
 }
 
 void SWButtonClass::OnMouseEnter()
@@ -181,8 +181,8 @@ bool SWButtonClass::LaunchSuper() const
 	const auto pCurrent = HouseClass::CurrentPlayer;
 	const auto pSuper = pCurrent->Supers[this->SuperIndex];
 	const auto pType = pSuper->Type;
-	const auto pSWExt = SWTypeExt::ExtMap.Find(pType);
-	const bool manual = !pSWExt->SW_ManualFire && pSWExt->SW_AutoFire;
+	const auto pSWExt = SWTypeExt::Fetch(pType);
+	const bool manual = !pSWExt->SW_ManualFire;
 	const bool unstoppable = pType->UseChargeDrain && pSuper->ChargeDrainState == ChargeDrainState::Draining && pSWExt->SW_Unstoppable;
 
 	if (!pSuper->CanFire() && !manual)

@@ -1,4 +1,4 @@
-#include "CreateUnitTypeClass.h"
+﻿#include "CreateUnitTypeClass.h"
 
 void CreateUnitTypeClass::LoadFromINI(CCINIClass* pINI, const char* pSection)
 {

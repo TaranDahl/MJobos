@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include <ScenarioClass.h>
 
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
+#include <Ext/Cell/Body.h>
 #include <Ext/Techno/Body.h>
 
 struct ExtendedVariable
@@ -30,11 +31,23 @@ public:
 		std::map<int, CellStruct> Waypoints;
 		std::map<int, ExtendedVariable> Variables[2]; // 0 for local, 1 for global
 
-		std::vector<TechnoExt::ExtData*> AutoDeathObjects;
-		std::vector<TechnoExt::ExtData*> TransportReloaders; // Objects that can reload ammo in limbo
+		std::vector<TechnoExt*> AutoDeathObjects;
+		std::vector<TechnoExt*> TransportReloaders; // Objects that can reload ammo in limbo
 
 		bool SWSidebar_Enable;
 		std::vector<int> SWSidebar_Indices;
+
+		int CanBuildNowCount;
+		DWORD OwnerBitfield_BuildingType;
+		DWORD OwnerBitfield_InfantryType;
+		DWORD OwnerBitfield_VehicleType;
+		DWORD OwnerBitfield_NavyType;
+		DWORD OwnerBitfield_AircraftType;
+
+		std::vector<TechnoExt*> BaseNormalTechnos;
+		std::vector<TechnoExt*> OwnedUniqueTechnos;
+
+		std::set<int> Smudges;
 
 		std::vector<std::wstring> RecordMessages;
 
@@ -42,13 +55,21 @@ public:
 		PhobosFixedString<64u> DefaultLS800BkgdName;
 		PhobosFixedString<64u> DefaultLS800BkgdPal;
 
-		std::vector<TechnoExt::ExtData*> LimboLaunchers;
+		std::vector<TechnoExt*> LimboLaunchers;
+
+		std::map<int, int> TriggerTypePlayerAtXOwners; // TriggerTypeClass ArrayIndex -> Player slot index
 
 		DynamicVectorClass<TechnoClass*> UndergroundTracker; // Technos that are underground.
 		DynamicVectorClass<TechnoClass*> SpecialTracker; // For special purposes, like tracking technos that are forced moving. Currently unused.
 		DynamicVectorClass<TechnoClass*> FallingDownTracker; // Technos that are falling down, parachutes and land technos falling from bridge.
 
 		int EVAIndex;
+
+		int FiringAnimUpdateCount;
+
+		int MissionTimer_Type;
+		int MissionTimer_Variable;
+		bool MissionTimer_Reverse;
 
 		ExtData(ScenarioClass* OwnerObject) : Extension<ScenarioClass>(OwnerObject)
 			, ShowBriefing { false }
@@ -59,15 +80,29 @@ public:
 			, TransportReloaders {}
 			, SWSidebar_Enable { true }
 			, SWSidebar_Indices {}
+			, CanBuildNowCount { 0 }
+			, OwnerBitfield_BuildingType { 0 }
+			, OwnerBitfield_InfantryType { 0 }
+			, OwnerBitfield_VehicleType { 0 }
+			, OwnerBitfield_NavyType { 0 }
+			, OwnerBitfield_AircraftType { 0 }
+			, BaseNormalTechnos {}
+			, OwnedUniqueTechnos {}
+			, Smudges {}
 			, RecordMessages {}
 			, DefaultLS640BkgdName {}
 			, DefaultLS800BkgdName {}
 			, DefaultLS800BkgdPal {}
 			, LimboLaunchers {}
+			, TriggerTypePlayerAtXOwners {}
 			, UndergroundTracker {}
 			, SpecialTracker {}
 			, FallingDownTracker {}
 			, EVAIndex { -2 }
+			, FiringAnimUpdateCount { 0 }
+			, MissionTimer_Type { 0 }
+			, MissionTimer_Variable { 0 }
+			, MissionTimer_Reverse { false }
 		{ }
 
 		static void SetVariableToByID(bool bIsGlobal, int nIndex, char bState);
@@ -79,13 +114,12 @@ public:
 
 		virtual void LoadFromINIFile(CCINIClass* pINI) override;
 
-		virtual void InvalidatePointer(void* ptr, bool bRemoved) override { }
-
 		virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 
 		void UpdateAutoDeathObjectsInLimbo();
 		void UpdateTransportReloaders();
+		void RegisterAutoDeath(TechnoClass* pTechno);
 	private:
 		template <typename T>
 		void Serialize(T& Stm);
@@ -113,10 +147,4 @@ public:
 	{
 		Allocate(ScenarioClass::Instance);
 	}
-
-	static void PointerGotInvalid(void* ptr, bool removed)
-	{
-		Global()->InvalidatePointer(ptr, removed);
-	}
-
 };

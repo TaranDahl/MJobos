@@ -1,5 +1,6 @@
-#include "Body.h"
+﻿#include "Body.h"
 
+#include <Ext/Rules/Body.h>
 
 // Passable TerrainTypes Hook #1 - Do not set occupy bits.
 DEFINE_HOOK(0x71C110, TerrainClass_SetOccupyBit_PassableTerrain, 0x6)
@@ -8,9 +9,13 @@ DEFINE_HOOK(0x71C110, TerrainClass_SetOccupyBit_PassableTerrain, 0x6)
 
 	GET(TerrainClass*, pThis, ECX);
 
-	auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pThis->Type);
+	auto const pType = pThis->Type;
+	auto const pTypeExt = TerrainTypeExt::Fetch(pType);
+	bool const isPassable = pType->SpawnsTiberium
+		? pTypeExt->IsPassable.Get(RulesExt::Global()->Tibtree_IsPassable)
+		: pTypeExt->IsPassable.Get(RulesExt::Global()->Terrain_IsPassable);
 
-	if (pTypeExt->IsPassable)
+	if (isPassable)
 		return Skip;
 
 	return 0;
@@ -30,7 +35,13 @@ DEFINE_HOOK(0x7002E9, TechnoClass_WhatAction_PassableTerrain, 0x5)
 
 	if (const auto pTerrain = abstract_cast<TerrainClass*, true>(pTarget))
 	{
-		if (!isForceFire && TerrainTypeExt::ExtMap.Find(pTerrain->Type)->IsPassable)
+		auto const pType = pTerrain->Type;
+		auto const pTypeExt = TerrainTypeExt::Fetch(pType);
+		bool const isPassable = pType->SpawnsTiberium
+			? pTypeExt->IsPassable.Get(RulesExt::Global()->Tibtree_IsPassable)
+			: pTypeExt->IsPassable.Get(RulesExt::Global()->Terrain_IsPassable);
+
+		if (!isForceFire && isPassable)
 		{
 			R->EBP(Action::Move);
 			return ReturnAction;
@@ -48,9 +59,13 @@ DEFINE_HOOK(0x483DDF, CellClass_CheckPassability_PassableTerrain, 0x6)
 	GET(CellClass*, pThis, EDI);
 	GET(TerrainClass*, pTerrain, ESI);
 
-	auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+	auto const pType = pTerrain->Type;
+	auto const pTypeExt = TerrainTypeExt::Fetch(pTerrain->Type);
+	bool const isPassable = pType->SpawnsTiberium
+		? pTypeExt->IsPassable.Get(RulesExt::Global()->Tibtree_IsPassable)
+		: pTypeExt->IsPassable.Get(RulesExt::Global()->Terrain_IsPassable);
 
-	if (pTypeExt->IsPassable)
+	if (isPassable)
 	{
 		pThis->Passability = PassabilityType::Passable;
 		return ReturnFromFunction;
@@ -68,88 +83,17 @@ DEFINE_HOOK(0x73FB71, UnitClass_CanEnterCell_PassableTerrain, 0x6)
 
 	if (auto const pTerrain = abstract_cast<TerrainClass*>(pTarget))
 	{
-		auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+		auto const pType = pTerrain->Type;
+		auto const pTypeExt = TerrainTypeExt::Fetch(pTerrain->Type);
+		bool const isPassable = pType->SpawnsTiberium
+			? pTypeExt->IsPassable.Get(RulesExt::Global()->Tibtree_IsPassable)
+			: pTypeExt->IsPassable.Get(RulesExt::Global()->Terrain_IsPassable);
 
-		if (pTypeExt->IsPassable)
+		if (isPassable)
 			return SkipTerrainChecks;
 	}
 
 	return 0;
-}
-
-// Buildable-upon TerrainTypes Hook #1 - Allow placing buildings on top of them.
-// DEFINE_HOOK(0x73FEC1, UnitClass_WhatAction_DeploysIntoDesyncFix, 0x6) in Hooks.DeploysInto.cpp
-
-// Buildable-upon TerrainTypes Hook #2 - Draw laser fence placement even if they are on the way.
-DEFINE_HOOK(0x6D57C1, TacticalClass_DrawLaserFencePlacement_BuildableTerrain, 0x9)
-{
-	enum { ContinueChecks = 0x6D57D2, DontDraw = 0x6D59A6 };
-
-	GET(CellClass*, pCell, ESI);
-
-	if (auto const pTerrain = pCell->GetTerrain(false))
-		return TerrainTypeExt::ExtMap.Find(pTerrain->Type)->CanBeBuiltOn ? ContinueChecks : DontDraw;
-
-	return ContinueChecks;
-}
-
-// Buildable-upon TerrainTypes Hook #3 - Remove them when buildings are placed on them.
-DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableTerrain, 0x6)
-{
-	GET(ObjectClass*, pObject, EDI);
-	GET(CellClass*, pCell, EAX);
-
-	if (pObject->WhatAmI() == AbstractType::Building)
-	{
-		if (auto const pTerrain = pCell->GetTerrain(false))
-		{
-			if (TerrainTypeExt::ExtMap.Find(pTerrain->Type)->CanBeBuiltOn)
-			{
-				pCell->RemoveContent(pTerrain, false);
-				TerrainTypeExt::Remove(pTerrain);
-			}
-		}
-	}
-
-	return 0;
-}
-
-// Buildable-upon TerrainTypes Hook #4 -> Allow placing walls on top of terrain
-DEFINE_HOOK(0x5FD2B6, OverlayClass_Unlimbo_SkipTerrainCheck, 0x9)
-{
-	enum { Unlimbo = 0x5FD2CA, NoUnlimbo = 0x5FD2C3 };
-
-	GET(CellClass* const, pCell, EAX);
-
-	if (!Game::IsActive)
-		return Unlimbo;
-
-	if (auto const pTerrain = pCell->GetTerrain(false))
-	{
-		if (!TerrainTypeExt::ExtMap.Find(pTerrain->Type)->CanBeBuiltOn)
-			return NoUnlimbo;
-
-		pCell->RemoveContent(pTerrain, false);
-		TerrainTypeExt::Remove(pTerrain);
-	}
-
-	return Unlimbo;
-}
-
-// Buildable-upon TerrainTypes Hook #5 -> Ignore when flushing building foundations for placement.
-DEFINE_HOOK(0x45EF3A, BuildingTypeClass_FlushForPlacement_BuildableTerrain, 0x7)
-{
-	enum { Disallow = 0x45F00B, Continue = 0x45EF4A };
-
-	GET(ObjectClass* const, pObject, ESI);
-
-	if (auto const pTerrain = abstract_cast<TerrainClass*>(pObject))
-	{
-		if (!TerrainTypeExt::ExtMap.Find(pTerrain->Type)->CanBeBuiltOn)
-			return Disallow;
-	}
-
-	return Continue;
 }
 
 #pragma region FindBuildLocation
@@ -163,7 +107,7 @@ namespace FindBuildLocationTemp
 static bool __fastcall MapClass_IsAreaFree_Wrapper(MapClass* pThis, void* _, RectangleStruct* pRect, int houseID)
 {
 	FindBuildLocationTemp::EvaluatingBuildLocation = true;
-	bool result = pThis->IsAreaFree(pRect, houseID);
+	const bool result = pThis->IsAreaFree(pRect, houseID);
 	FindBuildLocationTemp::EvaluatingBuildLocation = false;
 	return result;
 }
@@ -177,9 +121,9 @@ DEFINE_HOOK(0x586780, MapClass_IsAreaFree, 0x7)
 
 	GET(MapClass*, pThis, ECX);
 	GET_STACK(RectangleStruct*, pRect, 0x4);
-	GET_STACK(int, houseID, 0x8);
+	GET_STACK(const int, houseID, 0x8);
 
-	int mask = houseID >= 0 ? 1 << houseID : 0;
+	const int mask = houseID >= 0 ? 1 << houseID : 0;
 
 	for (int x = pRect->X; x < pRect->X + pRect->Width; x++)
 	{
@@ -191,7 +135,13 @@ DEFINE_HOOK(0x586780, MapClass_IsAreaFree, 0x7)
 
 			if (pTerrain)
 			{
-				if (!FindBuildLocationTemp::EvaluatingBuildLocation || !TerrainTypeExt::ExtMap.Find(pTerrain->Type)->CanBeBuiltOn)
+				auto const pType = pTerrain->Type;
+				auto const pTypeExt = TerrainTypeExt::Fetch(pType);
+				bool const canBuild = pType->SpawnsTiberium
+					? pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Tibtree_CanBeBuiltOn)
+					: pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Terrain_CanBeBuiltOn);
+
+				if (!FindBuildLocationTemp::EvaluatingBuildLocation || !canBuild)
 				{
 					R->EAX(false);
 					return ReturnFromFunction;

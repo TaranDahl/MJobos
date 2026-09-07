@@ -1,4 +1,4 @@
-#include "ToggleDesignatorRange.h"
+﻿#include "ToggleDesignatorRange.h"
 
 #include <Utilities/GeneralUtils.h>
 

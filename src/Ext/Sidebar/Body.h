@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <SidebarClass.h>
 
@@ -21,8 +21,6 @@ public:
 
 		virtual ~ExtData() = default;
 
-		virtual void InvalidatePointer(void* ptr, bool bRemoved) override { }
-
 		virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 	private:
@@ -37,6 +35,7 @@ public:
 	static IStream* g_pStm;
 
 	static SHPStruct* TabProducingProgress[4];
+	static SHPStruct* AutoBuildingMark[2];
 
 	static void Allocate(SidebarClass* pThis);
 	static void Remove(SidebarClass* pThis);
@@ -49,11 +48,6 @@ public:
 	static void Clear()
 	{
 		Allocate(&SidebarClass::Instance);
-	}
-
-	static void PointerGotInvalid(void* ptr, bool removed)
-	{
-		Global()->InvalidatePointer(ptr, removed);
 	}
 
 	static bool __stdcall AresTabCameo_RemoveCameo(BuildType* pItem);

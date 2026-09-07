@@ -1,4 +1,4 @@
-#include <Ext/Rules/Body.h>
+﻿#include <Ext/Rules/Body.h>
 
 DEFINE_HOOK(0x6B9D9C, RGB_PCX_Loader, 0x7)
 {

@@ -1,11 +1,9 @@
-#include "Body.h"
-
-#include <Ext/Building/Body.h>
+﻿#include <Ext/Building/Body.h>
 #include <Ext/House/Body.h>
 
 bool BuildingTypeExt::CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner)
 {
-	auto const pUpgradeExt = BuildingTypeExt::ExtMap.TryFind(pUpgradeType);
+	auto const pUpgradeExt = BuildingTypeExt::TryFetch(pUpgradeType);
 	if (pUpgradeExt && EnumFunctions::CanTargetHouse(pUpgradeExt->PowersUp_Owner, pUpgradeOwner, pBuilding->Owner))
 	{
 		auto const pType = pBuilding->Type;
@@ -67,53 +65,76 @@ DEFINE_HOOK(0x4408EB, BuildingClass_Unlimbo_UpgradeBuildings, 0xA)
 }
 
 #pragma region UpgradesInteraction
-
+/*
 static int BuildLimitRemaining(HouseClass const* const pHouse, BuildingTypeClass const* const pItem)
 {
 	const int BuildLimit = pItem->BuildLimit;
 
 	if (BuildLimit >= 0)
-		return BuildLimit - BuildingTypeExt::GetUpgradesAmount(const_cast<BuildingTypeClass*>(pItem), const_cast<HouseClass*>(pHouse));
+		return BuildLimit - BuildingTypeExt::GetUpgradesAmount(pItem, pHouse);
 	else
 		return -BuildLimit - pHouse->CountOwnedEver(pItem);
 }
 
-static int CheckBuildLimit(HouseClass const* const pHouse, BuildingTypeClass const* const pItem, bool const includeQueued)
+static CanBuildResult CheckBuildLimit(HouseClass const* const pHouse, BuildingTypeClass const* const pItem, bool const includeQueued)
 {
-	enum { NotReached = 1, ReachedPermanently = -1, ReachedTemporarily = 0 };
-
 	const int BuildLimit = pItem->BuildLimit;
 	const int Remaining = BuildLimitRemaining(pHouse, pItem);
 
 	if (BuildLimit >= 0 && Remaining <= 0)
-		return (includeQueued && FactoryClass::FindByOwnerAndProduct(pHouse, pItem)) ? NotReached : ReachedPermanently;
+		return (includeQueued && FactoryClass::FindByOwnerAndProduct(pHouse, pItem)) ? CanBuildResult::Buildable : CanBuildResult::Unbuildable;
 
-	return Remaining > 0 ? NotReached : ReachedTemporarily;
+	return Remaining > 0 ? CanBuildResult::Buildable : CanBuildResult::TemporarilyUnbuildable;
+}
+*/
+CanBuildResult CheckExBuildLimit(HouseClass* pHouse, TechnoTypeClass* pItem, bool includeInProduction, CanBuildResult defaultResult)
+{
+	if (!pItem || pItem->BuildLimit < 0 || !TechnoTypeExt::Fetch(pItem)->ThisIsAJumpjet)
+		return defaultResult;
 
+	if (pItem->WhatAmI() == AbstractType::UnitType)
+		return CanBuildResult::Unbuildable;
+
+	const auto pJumpjetType = TechnoTypeExt::Fetch(pItem)->ThisIsAJumpjet;
+
+	if (!pJumpjetType)
+		return defaultResult;
+
+	int count = pHouse->CountOwnedNow(pJumpjetType);
+
+	if (includeInProduction)
+	{
+		if (const auto pFactory = pHouse->Primary_ForAircraft)
+			count += pFactory->CountTotal(pItem);
+	}
+
+	return pItem->BuildLimit <= count ? CanBuildResult::TemporarilyUnbuildable : defaultResult;
 }
 
-DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
+DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x3)
 {
-	GET(HouseClass const* const, pThis, ECX);
-	GET_STACK(TechnoTypeClass const* const, pItem, 0x4);
-	GET_STACK(bool const, buildLimitOnly, 0x8);
-	GET_STACK(bool const, includeInProduction, 0xC);
-	GET(CanBuildResult const, resultOfAres, EAX);
+	GET(HouseClass* const, pThis, ECX);
+	GET_STACK(TechnoTypeClass* const, pItem, 0x4);
+	GET_STACK(const bool, buildLimitOnly, 0x8);
+	GET_STACK(const bool, includeInProduction, 0xC);
+	GET(CanBuildResult, canBuild, EAX); // resultOfAres
 
-	if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
+	if (canBuild == CanBuildResult::Buildable)
 	{
-		if (resultOfAres == CanBuildResult::Buildable && BuildingTypeExt::ExtMap.Find(pBuilding)->PowersUp_Buildings.size() > 0)
-			R->EAX(CheckBuildLimit(pThis, pBuilding, includeInProduction));
+		if (auto const pBuildingType = abstract_cast<BuildingTypeClass*>(pItem))
+		{
+			if (BuildingTypeExt::Fetch(pBuildingType)->PowersUp_Buildings.size() > 0)
+				canBuild = HouseExt::BuildLimitGroupUpgradeCheck(pThis, pItem, buildLimitOnly, includeInProduction);
+		}
 	}
 
-	if (resultOfAres == CanBuildResult::Buildable)
-	{
-		R->EAX(HouseExt::BuildLimitGroupCheck(pThis, pItem, buildLimitOnly, includeInProduction));
+	if (canBuild == CanBuildResult::Buildable)
+		canBuild = CheckExBuildLimit(pThis, pItem, includeInProduction, canBuild);
 
-		if (HouseExt::ReachedBuildLimit(pThis, pItem, true))
-			R->EAX(CanBuildResult::TemporarilyUnbuildable);
-	}
+	if (!buildLimitOnly && includeInProduction && pThis == HouseClass::CurrentPlayer) // Eliminate any non-producible calls
+		canBuild = TechnoTypeExt::CheckAlwaysExistCameo(pItem, canBuild);
 
+	R->EAX(canBuild);
 	return 0;
 }
 
@@ -143,7 +164,7 @@ DEFINE_HOOK(0x464749, BuildingTypeClass_ReadINI_PowerUpAnims, 0x6)
 
 	GET(BuildingTypeClass*, pThis, EBP);
 
-	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis);
+	auto const pTypeExt = BuildingTypeExt::Fetch(pThis);
 	auto const pINI = &CCINIClass::INI_Art;
 
 	int index = 1;
@@ -200,7 +221,7 @@ DEFINE_HOOK(0x440988, BuildingClass_Unlimbo_UpgradeAnims, 0x7)
 	GET(BuildingClass*, pThis, ESI);
 	GET(BuildingClass*, pTarget, EDI);
 
-	auto const pTargetExt = BuildingExt::ExtMap.Find(pTarget);
+	auto const pTargetExt = BuildingExt::Fetch(pTarget);
 	auto const pType = pThis->Type;
 	pTargetExt->PoweredUpToLevel = pTarget->UpgradeLevel + 1;
 	int animIndex = pTarget->UpgradeLevel;
@@ -214,7 +235,7 @@ DEFINE_HOOK(0x440988, BuildingClass_Unlimbo_UpgradeAnims, 0x7)
 	auto const animData = &pTarget->Type->BuildingAnim[animIndex];
 
 	// Only copy image name to BuildingType anim struct if theres no explicit PowersUpAnim for this level.
-	if (!pTargetExt->TypeExtData->HasPowerUpAnim[animIndex])
+	if (!pTargetExt->GetTypeExtData()->HasPowerUpAnim[animIndex])
 		strncpy(animData->Anim, pType->ImageFile, 16u);
 
 	return SkipGameCode;
@@ -226,50 +247,13 @@ DEFINE_HOOK(0x451630, BuildingClass_CreateUpgradeAnims_AnimIndex, 0x7)
 
 	GET(BuildingClass*, pThis, EBP);
 
-	const int animIndex = BuildingExt::ExtMap.Find(pThis)->PoweredUpToLevel - 1;
+	const int animIndex = BuildingExt::Fetch(pThis)->PoweredUpToLevel - 1;
 
 	if (animIndex)
 	{
 		R->EAX(animIndex);
 		return SkipGameCode;
 	}
-
-	return 0;
-}
-
-// Don't allow upgrade anims to be created if building is not upgraded or they require power to be shown and the building isn't powered.
-static __forceinline bool AllowUpgradeAnim(BuildingClass* pBuilding, BuildingAnimSlot anim)
-{
-	auto const pType = pBuilding->Type;
-
-	if (pType->Upgrades != 0 && anim >= BuildingAnimSlot::Upgrade1 && anim <= BuildingAnimSlot::Upgrade3 && !pBuilding->Anims[int(anim)])
-	{
-		const int animIndex = BuildingExt::ExtMap.Find(pBuilding)->PoweredUpToLevel - 1;
-
-		if (animIndex < 0 || (int)anim != animIndex)
-			return false;
-
-		auto const animData = pType->BuildingAnim[int(anim)];
-
-		if (((pType->Powered && pType->PowerDrain > 0 && (animData.PoweredLight || animData.PoweredEffect)) || (pType->PoweredSpecial && animData.PoweredSpecial))
-			&& !(pBuilding->CurrentMission != Mission::Construction && pBuilding->CurrentMission != Mission::Selling && pBuilding->IsPowerOnline()))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-DEFINE_HOOK(0x45189D, BuildingClass_AnimUpdate_Upgrades, 0x6)
-{
-	enum { SkipAnim = 0x451B2C };
-
-	GET(BuildingClass*, pThis, ESI);
-	GET_STACK(BuildingAnimSlot, anim, STACK_OFFSET(0x34, 0x8));
-
-	if (!AllowUpgradeAnim(pThis, anim))
-		return SkipAnim;
 
 	return 0;
 }

@@ -1,4 +1,4 @@
-#include "DamageDisplay.h"
+﻿#include "DamageDisplay.h"
 
 #include <Utilities/GeneralUtils.h>
 
