@@ -35,8 +35,6 @@ public:
 
 	static int(__thiscall* RequirementsMet)(void* pAresHouseExt, TechnoTypeClass* pType);
 
-	static bool(__thiscall* ReverseEngineer)(void* pAresHouseExt, TechnoTypeClass* pType);
-
 	static bool(__thiscall* IsTargetConstraintsEligible)(void*, HouseClass*, bool);
 
 	static void(__thiscall* UnitDeliveryStateMachine_Update)(void*);
@@ -58,6 +56,10 @@ public:
 	// BuildingTypeExt
 	static void* (__thiscall* GetTunnel)(void*, HouseClass*);
 	static void(__thiscall* AddPassengerFromTunnel)(void*, BuildingClass*, FootClass*);
+
+	// HouseExt
+	static bool(__thiscall* ReverseEngineer)(void*, TechnoTypeClass* pType);
+	static InfantryTypeClass* (__thiscall* GetCrew)(void*);
 
 	// VoxClass
 	static int(__stdcall* FindEVAIndex)(const char* buffer);
