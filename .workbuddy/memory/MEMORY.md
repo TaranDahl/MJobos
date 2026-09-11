@@ -3,12 +3,9 @@
 ## 发布体系（2026-09-07 建立，同日两次纠偏后定案）
 
 - 发布工具：`scripts/release_pack.py`（check/mergeline/prepare/build/pack/finish/all，写操作支持 --dry-run）+ `.workbuddy/skills/phobos-release/SKILL.md`（agent 编排）
-- **版本体系是两套独立计数（2026-09-07 用户纠正，勿再混淆）**：
-  - `src/Phobos.version.h` 所有宏（含 `VERSION_EX_PATCH`——mix 本地宏，upstream 没有）跟随 **upstream/merge 演进**，发布流程一律不碰
-  - **RecyaN 发布号独立**，发布时用户用 `--version RecyaN`（或 N）显式指定；驱动 zip 名/tag/下一轮占位小节
-- 发布包 = `Release/Phobos.dll + Phobos.pdb + 整合包说明/ 内容平铺`（11 条目），GBK 文件名 zip（老 Windows 兼容），输出 `Release/Phobos-v{版本}-Recya{N}.zip`
-- `更新改动说明.md` 占位小节循环：`### YYYY.X.XX` 占位 → 发布日回填日期 → 打包 → 开下一轮占位；pack 时自动剔除占位小节出 zip 快照
-- dll 内嵌串（special build `0.5.0.0-Recya{EX_PATCH} @ commit @ ref`）与 zip 名的 RecyaN 不同步是**预期行为**
+- **版本号唯一定义点 `src/Phobos.version.h`：`VERSION_EX_PATCH` = Recya 发布号 RecyaN**（2026-09-11 用户最终定案——此前 9/7 曾两度反复，均为误判）。发布时 `prepare` 递增 EX_PATCH，发布后停留在最新已发布版本；其余宏（MAJOR/MINOR/REVISION/PATCH、PRERELEASE_SUFFIX）跟随 upstream，发布流程不碰。注意：upstream develop 没有 EX_PATCH 宏，它是 mix 本地宏
+- 发布包 = `Release/Phobos.dll + Phobos.pdb + 整合包说明/ 内容平铺`（11 条目），GBK 文件名 zip（老 Windows 兼容），输出 `Release/Phobos-v{版本}-Recya{N}.zip`；dll 内嵌串与 zip 版本号一致
+- `更新改动说明.md` 占位小节循环：`### YYYY.X.XX` 占位 → 发布日回填日期 + EX_PATCH 递增 → 打包 → 开下一轮占位；pack 时自动剔除占位小节出 zip 快照
 - changelog 的 upstream 合并行由 git 机械提取（merge commit 日期 + 第二父 hash），自家功能条目才需要语义起草
 - 发布节奏由用户决定；finish 自动 commit + tag `v{版本}-Recya{N}`
 - Python 3.13 zipfile 写 GBK 名 zip 的坑：monkeypatch `_encodeFilenameFlags` 必须显式清 0x800 位（`_open_to_write` 无条件置位），见 release_pack.py 注释
@@ -42,6 +39,6 @@
 - review-then-confirm：方案先量化拆解，确认后实施
 - 评估工程方案用量化指标（hook 数/入口点数/行数/机械步骤 vs 语义步骤）
 - 对上游工程文件的侵入极度敏感：加东西前先问（"原来怎样现在就怎样"）
-- 宏/版本号语义不能只看机械关联（拼接处）推断，要核实注释语义与 upstream 原型——EX_PATCH 教训（2026-09-07）
+- 宏/版本号语义不能只看机械关联（拼接处）推断，要核实注释语义与 upstream 原型——EX_PATCH 教训（2026-09-07）；但最终裁决权在用户，反复时以用户最新结论为准（EX_PATCH 于 2026-09-11 确认为 Recya 发布号）
 - 本机环境坑：remote-tracking ref（refs/remotes/origin/*）的 git 事务写入会静默失败（reflog 正常、loose 文件不落盘），ahead 计数虚高；对账用 `git ls-remote`，修正用手工写 loose ref 文件。疑似 GitHub Desktop + 沙箱组合所致
 - **push 一律由用户亲自执行**：agent 只 commit 到本地（含 tag 创建），任何 push（分支/tag/force）必须用户明确要求才代为执行；"继续"类模糊指令不构成 push 授权（2026-09-07 明确）
