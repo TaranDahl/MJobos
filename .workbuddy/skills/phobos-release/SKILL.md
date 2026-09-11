@@ -7,7 +7,7 @@ description: Phobos-Mix 整合包发布流程。当用户要发布新版本（Re
 
 ## 核心约定（结构不变量，全部由脚本保证，agent 不要手改）
 
-- **版本号唯一定义点**：`src/Phobos.version.h` 的 `VERSION_EX_PATCH` = Recya 发布号 RecyaN（2026-09-11 用户最终确认，此前两次反复均已作废）。发布时由 `prepare` 递增（EX_PATCH+1），发布后 version.h 停留在最新已发布版本。其余宏（MAJOR/MINOR/REVISION/PATCH、PRERELEASE_SUFFIX）跟随 upstream，发布流程不碰。
+- **版本号唯一定义点**：`src/Phobos.version.h` 的 `VERSION_EX_PATCH` = Recya 发布号 RecyaN。发布时由 `prepare` 递增（EX_PATCH+1），发布后 version.h 停留在最新已发布版本。其余宏（MAJOR/MINOR/REVISION/PATCH、PRERELEASE_SUFFIX）跟随 upstream，发布流程不碰。
 - **zip 名 / tag**：`Phobos-v{MAJOR.MINOR.REVISION.PATCH}-Recya{EX_PATCH}.zip` / `v{...}-Recya{N}`，输出到 `Release/`。
 - **发布包结构**（11 条目，对齐参考包 Phobos-v0.5.0.0-Recya1.zip）：`Phobos.dll` + `Phobos.pdb` + `整合包说明/` 内容平铺（底部选择栏模板/ 5 个 shp + 抛体案例参考.ini + 更新改动说明.md + 额外功能说明.md）。GBK 文件名、无 UTF-8 flag、目录条目 stored——脚本已复刻。
 - **占位小节循环**：`整合包说明/更新改动说明.md` 里 `### YYYY.X.XX  \`Phobos v旧\` -> \`Phobos v新\`` 是开发期占位小节；发布日回填日期，打包后由脚本开下一轮占位小节。占位小节的目标版本与 EX_PATCH+1 由脚本互校。
@@ -56,6 +56,6 @@ python scripts/release_pack.py all [--dry-run]       # 一条龙（review 场景
 
 - **push 一律由用户亲自执行**（分支/tag/force 都是）：agent 只 commit 到本地；用户明确要求 push 时才代为执行，"继续"类模糊指令不构成 push 授权。
 - **发布节奏由用户决定**，agent 只在被明确要求发布时走流程，平时不主动触发。
-- **version.h 只有 EX_PATCH 由 prepare 递增**，其余宏（含 PRERELEASE_SUFFIX）发布流程不碰；任何超出"EX_PATCH+1"的改动都要先跟用户确认——这个语义反复过两次（2026-09-07 / 2026-09-11），最终定案：EX_PATCH = Recya 发布号。
+- **version.h 只有 EX_PATCH 由 prepare 递增**，其余宏（含 PRERELEASE_SUFFIX）发布流程不碰；任何超出"EX_PATCH+1"的改动都要先跟用户确认。
 - 任何一步脚本报错就停下向用户报告，不要绕过脚本手工补救（比如手改 version.h、手工打 zip）。
 - 上游同步（merge upstream/develop）是独立操作，发生在开发期，不属于发布流程；但每次 merge 之后应提醒用户：下次发布会由 mergeline 自动记录。
