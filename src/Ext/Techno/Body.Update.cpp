@@ -1,4 +1,4 @@
-﻿// methods used in TechnoClass_AI hooks or anything similar
+// methods used in TechnoClass_AI hooks or anything similar
 #include <Ext/Rules/Body.h>
 #include <Ext/Anim/Body.h>
 #include <Ext/Bullet/Body.h>
@@ -1428,6 +1428,46 @@ void TechnoExt::UpdateTypeData(TechnoTypeClass* pCurrentType)
 	this->TypeExtData = pNewTypeExt;
 
 	this->UpdateSelfOwnedAttachEffects();
+
+	// Reset ExtraBaseNormal
+	if (RulesExt::Global()->CheckExtraBaseNormal)
+	{
+		if (pOldTypeExt->ExtraBaseNormal)
+		{
+			if (!pNewTypeExt->ExtraBaseNormal)
+			{
+				auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
+				vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+			}
+		}
+		else if (pNewTypeExt->ExtraBaseNormal)
+		{
+			auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
+
+			if (std::find(vec.begin(), vec.end(), this) == vec.end())
+				vec.push_back(this);
+		}
+	}
+
+	// Reset UniqueTechno
+	if (pOwner->IsControlledByCurrentPlayer())
+	{
+		if (pOldTypeExt->UniqueTechno)
+		{
+			if (!pNewTypeExt->UniqueTechno)
+			{
+				auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
+				vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+			}
+		}
+		else if (pNewTypeExt->UniqueTechno)
+		{
+			auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
+
+			if (std::find(vec.begin(), vec.end(), this) == vec.end())
+				vec.push_back(this);
+		}
+	}
 
 	if (auto const pShield = this->Shield.get())
 		pShield->ConvertCheck(pCurrentType);
