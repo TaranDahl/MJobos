@@ -667,7 +667,8 @@ static bool IsAllowedSplitsTarget(TechnoClass* pSource, HouseClass* pOwner, Weap
 			|| !EnumFunctions::IsCellEligible(pTarget->GetCell(), pWeaponExt->CanTarget, true, true)
 			|| !EnumFunctions::IsTechnoEligible(pTarget, pWeaponExt->CanTarget)
 			|| !pWeaponExt->IsHealthInThreshold(pTarget)
-			|| !pWeaponExt->IsVeterancyInThreshold(pTarget))
+			|| !pWeaponExt->IsVeterancyInThreshold(pTarget)
+			|| pWeaponExt->IsTargetImmuneToAttributes(pTarget))
 		{
 			return false;
 		}

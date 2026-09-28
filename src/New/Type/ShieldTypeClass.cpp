@@ -1,5 +1,7 @@
 #include "ShieldTypeClass.h"
 
+#include <New/Type/AttributeClass.h>
+
 template<>
 const char* Enumerable<ShieldTypeClass>::GetMainSection()
 {
@@ -83,6 +85,7 @@ void ShieldTypeClass::LoadFromINI(CCINIClass* pINI)
 
 	this->ImmuneToBerserk.Read(exINI, pSection, "ImmuneToBerserk");
 	this->ImmuneToCrit.Read(exINI, pSection, "ImmuneToCrit");
+	AttributeClass::ParseFromINI(pINI, pSection, this->Attributes);
 
 	this->Tint_Color.Read(exINI, pSection, "Tint.Color");
 	this->Tint_Intensity.Read(exINI, pSection, "Tint.Intensity");
@@ -142,6 +145,7 @@ void ShieldTypeClass::Serialize(T& Stm)
 		.Process(this->Pips_HideIfNoStrength)
 		.Process(this->ImmuneToBerserk)
 		.Process(this->ImmuneToCrit)
+		.Process(this->Attributes)
 		.Process(this->Tint_Color)
 		.Process(this->Tint_Intensity)
 		.Process(this->Tint_VisibleToHouses)

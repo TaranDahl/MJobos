@@ -144,6 +144,9 @@ public:
 	bool RequiresAnimUpdate;
 	bool RestrictedArmorMultiplier;
 
+	// sorted indices of attributes assigned to this type
+	std::vector<int> Attributes;
+
 	AttachEffectTypeClass(const char* const pTitle) : Enumerable<AttachEffectTypeClass>(pTitle)
 		, Duration { 0 }
 		, Duration_ApplyFirepowerMult { false }

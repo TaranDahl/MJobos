@@ -24,6 +24,8 @@ BulletTypeClass* BulletTypeExt::GetDefaultBulletType()
 
 void BulletTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 {
+	ObjectTypeExt::LoadFromINIFile(pINI);
+
 	auto pThis = this->OwnerObject();
 	const char* pSection = pThis->ID;
 	INI_EX exINI(pINI);

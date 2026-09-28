@@ -9,6 +9,7 @@
 #include <Ext/UnitType/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <New/Type/InsigniaTypeClass.h>
+#include <New/Type/AttributeClass.h>
 
 #include <Utilities/AresHelper.h>
 
@@ -752,6 +753,8 @@ WeaponTypeClass* TechnoTypeExt::GetWeaponType(TechnoTypeClass* pThis, int weapon
 
 void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 {
+	ObjectTypeExt::LoadFromINIFile(pINI);
+
 	auto pThis = this->OwnerObject();
 	const char* pSection = pThis->ID;
 	INI_EX exINI(pINI);
@@ -802,6 +805,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->Promote_IncludeSpawns.Read(exINI, pSection, "Promote.IncludeSpawns");
 	this->ImmuneToCrit.Read(exINI, pSection, "ImmuneToCrit");
+	AttributeClass::ParseFromINI(pINI, pSection, "ImmuneToAttribute", this->ImmuneToAttributes);
 	this->MultiMindControl_ReleaseVictim.Read(exINI, pSection, "MultiMindControl.ReleaseVictim");
 	this->NoManualMove.Read(exINI, pSection, "NoManualMove");
 	this->InitialStrength.Read(exINI, pSection, "InitialStrength");
@@ -1503,6 +1507,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->Harvester_Counted)
 		.Process(this->Promote_IncludeSpawns)
 		.Process(this->ImmuneToCrit)
+		.Process(this->ImmuneToAttributes)
 		.Process(this->MultiMindControl_ReleaseVictim)
 		.Process(this->CameoPriority)
 		.Process(this->AltCameoPCX)

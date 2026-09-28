@@ -376,6 +376,7 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 				|| !EnumFunctions::CanTargetHouse(pWeaponExt->CanTargetHouses, pThis->Owner, pTargetTechno->Owner)
 				|| !pWeaponExt->IsHealthInThreshold(pTargetTechno)
 				|| !pWeaponExt->IsVeterancyInThreshold(pTargetTechno)
+				|| pWeaponExt->IsTargetImmuneToAttributes(pTargetTechno)
 				|| !pWeaponExt->HasRequiredAttachedEffects(pTargetTechno, pThis))
 			{
 				return CannotFire;

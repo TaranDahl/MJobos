@@ -59,6 +59,8 @@ public:
 	Valueable<bool> Pips_HideIfNoStrength;
 	Valueable<bool> ImmuneToCrit;
 	Valueable<bool> ImmuneToBerserk;
+	// sorted indices of attributes assigned to this shield type
+	std::vector<int> Attributes;
 
 	Nullable<ColorStruct> Tint_Color;
 	Valueable<double> Tint_Intensity;

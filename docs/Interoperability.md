@@ -97,6 +97,9 @@ When an API is deprecated, its function stub is retained but with a fatal error 
 | ScenarioExt  | Variables_SetLocal_Phobos                  | `[1.1.0, ∞)`  | Active |
 | ScenarioExt  | Variables_GetGlobal_Phobos                 | `[1.1.0, ∞)`  | Active |
 | ScenarioExt  | Variables_SetGlobal_Phobos                 | `[1.1.0, ∞)`  | Active |
+| AbstractExt  | Abstract_GetAttributeIndices_Phobos        | `[1.3.0, ∞)`  | Active |
+| AbstractExt  | Abstract_GetAttributeNames_Phobos          | `[1.3.0, ∞)`  | Active |
+| Attribute    | Attribute_GetCount_Phobos                  | `[1.3.0, ∞)`  | Active |
 
 ### AttachEffect
 
@@ -205,7 +208,75 @@ Transfers all attached effects from source to target.
 - Returns `S_OK` on success.
 - Fails with `E_POINTER` when: pSource or pTarget is null.
 
+### Attribute
+
+#### Attribute_GetCount_Phobos
+
+**Availability:** `[1.3.0, ∞)`
+
+```cpp
+HRESULT Attribute_GetCount_Phobos(int* pCount)
+```
+
+Gets the total number of attributes registered in the global attribute registry. Attribute indices are always in the range `[0, count)`.
+
+- Parameters:
+  - pCount: Receives the number of registered attributes.
+- Returns `S_OK` on success.
+- Fails with `E_POINTER` when: pCount is null.
+
+See the [Attribute System](New-or-Enhanced-Logics.md#attribute-system) for the INI tags that populate the registry.
+
 ## Vanilla class extension
+
+### AbstractExt
+
+#### Abstract_GetAttributeIndices_Phobos
+
+**Availability:** `[1.3.0, ∞)`
+
+```cpp
+HRESULT Abstract_GetAttributeIndices_Phobos(AbstractClass* pThis, int* pOutIndices, int maxCount, int* pCount)
+```
+
+Gets the attribute indices assigned to an object. Instances (e.g Technos and Bullets) copy the attribute list of their type on creation.
+
+- Parameters:
+  - pThis: Pointer to the object.
+  - pOutIndices: Buffer receiving the attribute indices, or null to only query the count.
+  - maxCount: Capacity of pOutIndices in elements, ignored when pOutIndices is null.
+  - pCount: Receives the total number of attributes.
+- Returns `S_OK` on success, including when only the count was queried.
+- Fails with `E_POINTER` when: pThis or pCount is null.
+- Fails with `E_FAIL` when: the object has no extension object.
+
+- Notes:
+  - Two-phase usage: call once with pOutIndices = null to obtain the required count via pCount, then call again with a buffer of at least that size.
+  - If the buffer capacity is smaller than the total count, only the first maxCount indices are written (safe truncation).
+  - The returned indices are in range `[0, count)` where count is given by `Attribute_GetCount_Phobos`.
+
+#### Abstract_GetAttributeNames_Phobos
+
+**Availability:** `[1.3.0, ∞)`
+
+```cpp
+HRESULT Abstract_GetAttributeNames_Phobos(AbstractClass* pThis, const char** pOutNames, int maxCount, int* pCount)
+```
+
+Gets the attribute names assigned to an object.
+
+- Parameters:
+  - pThis: Pointer to the object.
+  - pOutNames: Buffer receiving the attribute name pointers, or null to only query the count.
+  - maxCount: Capacity of pOutNames in elements, ignored when pOutNames is null.
+  - pCount: Receives the total number of attributes.
+- Returns `S_OK` on success, including when only the count was queried.
+- Fails with `E_POINTER` when: pThis or pCount is null.
+- Fails with `E_FAIL` when: the object has no extension object.
+
+- Notes:
+  - Two-phase usage and truncation behave the same as `Abstract_GetAttributeIndices_Phobos`.
+  - The returned pointers reference strings in the global attribute registry and stay valid until the registry is cleared (rules INI reload). Returned names are lowercase.
 
 ### TechnoExt
 

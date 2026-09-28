@@ -601,6 +601,7 @@ public:
 	bool IsHealthInThreshold(TechnoClass* pTarget) const;
 	bool IsVeterancyInThreshold(TechnoClass* pTarget) const;
 	bool IsInvokerAllowed(TechnoClass* pTarget, TechnoClass* pInvoker) const;
+	bool IsTargetImmuneToAttributes(TechnoClass* pTarget) const;
 
 	virtual ~WarheadTypeExt() = default;
 	virtual void LoadFromINIFile(CCINIClass* pINI) override;

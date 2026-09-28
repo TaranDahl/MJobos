@@ -1,6 +1,7 @@
 #include "Body.h"
 #include <Ext/Bullet/Body.h>
 #include <Ext/Techno/Body.h>
+#include <Ext/TechnoType/Body.h>
 
 #include <Utilities/AresFunctions.h>
 
@@ -54,6 +55,19 @@ bool WeaponTypeExt::IsVeterancyInThreshold(TechnoClass* pTarget) const
 	return EnumFunctions::CanTargetVeterancy(this->CanTargetVeterancy, pTarget);
 }
 
+bool WeaponTypeExt::IsTargetImmuneToAttributes(TechnoClass* pTarget) const
+{
+	const auto& attributes = this->GetAttributes();
+
+	if (attributes.empty())
+		return false;
+
+	const auto& immuneTo = TechnoTypeExt::Fetch(pTarget->GetTechnoType())->ImmuneToAttributes;
+
+	return std::find_first_of(attributes.begin(), attributes.end(),
+		immuneTo.begin(), immuneTo.end()) != attributes.end();
+}
+
 void WeaponTypeExt::Initialize()
 {
 	this->RadType = RadTypeClass::FindOrAllocate(GameStrings::Radiation);
@@ -78,6 +92,8 @@ int WeaponTypeExt::GetBurstDelay(int burstIndex) const
 
 void WeaponTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 {
+	AbstractTypeExt::LoadFromINIFile(pINI);
+
 	auto pThis = this->OwnerObject();
 	const char* pSection = pThis->ID;
 	INI_EX exINI(pINI);

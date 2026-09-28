@@ -227,7 +227,9 @@
     <ClCompile Include="src\Ext\WeaponType\Hooks.Bomb.cpp" />
     <ClCompile Include="src\Ext\WeaponType\Hooks.DiskLaserRadius.cpp" />
     <!-- src\Interop -->
+    <ClCompile Include="src\Interop\AbstractExt.cpp" />
     <ClCompile Include="src\Interop\AttachEffect.cpp" />
+    <ClCompile Include="src\Interop\Attribute.cpp" />
     <ClCompile Include="src\Interop\BulletExt.cpp" />
     <ClCompile Include="src\Interop\EventExt.cpp" />
     <ClCompile Include="src\Interop\TechnoExt.cpp" />
@@ -269,6 +271,7 @@
     <ClCompile Include="src\New\Entity\LaserTrailClass.cpp" />
     <ClCompile Include="src\New\Entity\ShieldClass.cpp" />
     <!-- src\New\Type -->
+    <ClCompile Include="src\New\Type\AttributeClass.cpp" />
     <ClCompile Include="src\New\Type\AttachEffectTypeClass.cpp" />
     <ClCompile Include="src\New\Type\BannerTypeClass.cpp" />
     <ClCompile Include="src\New\Type\DigitalDisplayTypeClass.cpp" />
@@ -387,7 +390,9 @@
     <ClInclude Include="src\Ext\WarheadType\Body.h" />
     <ClInclude Include="src\Ext\WeaponType\Body.h" />
     <!-- src\Interop -->
+    <ClInclude Include="src\Interop\AbstractExt.h" />
     <ClInclude Include="src\Interop\AttachEffect.h" />
+    <ClInclude Include="src\Interop\Attribute.h" />
     <ClInclude Include="src\Interop\BulletExt.h" />
     <ClInclude Include="src\Interop\EventExt.h" />
     <ClInclude Include="src\Interop\TechnoExt.h" />
@@ -411,6 +416,7 @@
     <ClInclude Include="src\New\Entity\LaserTrailClass.h" />
     <ClInclude Include="src\New\Entity\ShieldClass.h" />
     <!-- src\New\Type -->
+    <ClInclude Include="src\New\Type\AttributeClass.h" />
     <ClInclude Include="src\New\Type\AttachEffectTypeClass.h" />
     <ClInclude Include="src\New\Type\BannerTypeClass.h" />
     <ClInclude Include="src\New\Type\DigitalDisplayTypeClass.h" />

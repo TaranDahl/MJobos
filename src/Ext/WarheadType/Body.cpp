@@ -1,6 +1,7 @@
 #include "Body.h"
 
 #include <Ext/Techno/Body.h>
+#include <Ext/TechnoType/Body.h>
 
 WarheadTypeExt::ExtContainer WarheadTypeExt::ExtMap;
 
@@ -90,6 +91,19 @@ bool WarheadTypeExt::IsInvokerAllowed(TechnoClass* pTarget, TechnoClass* pInvoke
 	}
 }
 
+bool WarheadTypeExt::IsTargetImmuneToAttributes(TechnoClass* pTarget) const
+{
+	const auto& attributes = this->GetAttributes();
+
+	if (attributes.empty())
+		return false;
+
+	const auto& immuneTo = TechnoTypeExt::Fetch(pTarget->GetTechnoType())->ImmuneToAttributes;
+
+	return std::find_first_of(attributes.begin(), attributes.end(),
+		immuneTo.begin(), immuneTo.end()) != attributes.end();
+}
+
 // Checks if Warhead can affect target that might or might be currently invulnerable.
 bool WarheadTypeExt::CanAffectInvulnerable(TechnoClass* pTarget) const
 {
@@ -150,6 +164,8 @@ DamageAreaResult WarheadTypeExt::DamageAreaWithTarget(const CoordStruct& coords,
 
 void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 {
+	AbstractTypeExt::LoadFromINIFile(pINI);
+
 	auto pThis = this->OwnerObject();
 	const char* pSection = pThis->ID;
 	INI_EX exINI(pINI);
