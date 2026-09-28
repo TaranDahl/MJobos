@@ -1,6 +1,8 @@
 #include "AttachEffectTypeClass.h"
 
 #include <Ext/Rules/Body.h>
+#include <New/Type/AttributeClass.h>
+
 #include <Ext/TEvent/Body.h>
 
 // Used to match groups names to AttachEffectTypeClass instances. Do not iterate due to undetermined order being prone to desyncs.
@@ -266,6 +268,7 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	{
 		this->RestrictedArmorMultiplier = false;
 	}
+	AttributeClass::ParseFromINI(pINI, pSection, this->Attributes);
 }
 
 template <typename T>
@@ -359,6 +362,7 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->Animation_DrawOffsets)
 		.Process(this->RequiresRecalculation)
 		.Process(this->RequiresAnimUpdate)
+		.Process(this->Attributes)
 		;
 }
 

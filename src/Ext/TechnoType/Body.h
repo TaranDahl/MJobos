@@ -72,6 +72,8 @@ public:
 	Nullable<bool> Harvester_Counted;
 	Nullable<bool> Promote_IncludeSpawns;
 	Valueable<bool> ImmuneToCrit;
+	// sorted indices of attributes this unit type is immune to
+	std::vector<int> ImmuneToAttributes;
 	Nullable<bool> MultiMindControl_ReleaseVictim;
 	Valueable<int> CameoPriority;
 	PhobosPCXFile AltCameoPCX;

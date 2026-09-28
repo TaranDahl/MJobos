@@ -604,6 +604,29 @@ When using `Convert` or `(Un)DeploysInto` to change TechnoType, shield interacti
 - Whenever a shield is passed between TechnoTypes, its current strength will be adjusted to the same percentage through before and after, and most of the properties will be transferred. Notice that the timers for warhead modifiers and combat delay will not be reset to the same percentage; they keep their remaining time as‑is, for simplicity.
 ```
 
+### Attribute System
+
+- Types can be tagged with arbitrary named labels (**attributes**) using the numbered `AttributeList` tags. Attribute names are case-insensitive and are registered into a global registry shared by all types.
+  - `AttributeListN` (where N is an integer starting from 0, without gaps) adds attributes to a type. Multiple numbered entries are combined, and each entry accepts a comma-separated list of attribute names.
+  - Attributes can be queried from external code through the [Interoperability](Interoperability.md) APIs (available since Interop API 1.3.0).
+
+In `rulesmd.ini`:
+```ini
+[SOMETHING]               ; TechnoType, WarheadType, WeaponType, BulletType, AttachEffectType or ShieldType
+AttributeListN=           ; comma-separated attribute names
+```
+
+### Attribute Immunity
+
+- TechnoTypes can be made completely immune to Warheads carrying specific attributes through the numbered `ImmuneToAttribute` tags. If the attacking WarheadType's attributes share **any** attribute with the target's `ImmuneToAttribute` list, the target is fully immune to that Warhead — damage and effects are negated entirely, and the weapon is skipped by weapon selection.
+  - Warheads without any attributes are never affected by this immunity.
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]              ; TechnoType
+ImmuneToAttributeN=       ; comma-separated attribute names
+```
+
 ## Aircraft
 
 ### Custom cruise missiles

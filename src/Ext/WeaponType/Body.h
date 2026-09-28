@@ -229,6 +229,7 @@ public:
 	bool HasRequiredAttachedEffects(TechnoClass* pTechno, TechnoClass* pFirer) const;
 	bool IsHealthInThreshold(TechnoClass* pTarget) const;
 	bool IsVeterancyInThreshold(TechnoClass* pTarget) const;
+	bool IsTargetImmuneToAttributes(TechnoClass* pTarget) const;
 
 	virtual ~WeaponTypeExt() = default;
 

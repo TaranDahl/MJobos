@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <unordered_map>
+#include <vector>
 
 #include <CCINIClass.h>
 #include <SwizzleManagerClass.h>
@@ -57,6 +58,16 @@ class AbstractExt
 	size_t ContainerIndex { SIZE_MAX };
 
 public:
+	// sorted indices of attributes assigned to this object
+	std::vector<int> Attributes;
+
+	// access to the attributes assigned to this object; override this to provide
+	// dynamic attributes, the base implementation just reads the static copy above
+	virtual const std::vector<int>& GetAttributes() const
+	{
+		return this->Attributes;
+	}
+
 	// every extension pointer lives in the unused AbstractClass::unknown_18 field
 	static constexpr size_t ExtPointerOffset = 0x18;
 
@@ -139,11 +150,13 @@ public:
 	virtual inline void SaveToStream(PhobosStreamWriter& Stm)
 	{
 		Stm.Save(this->Initialized);
+		Stm.Process(this->Attributes);
 	}
 
 	virtual inline void LoadFromStream(PhobosStreamReader& Stm)
 	{
 		Stm.Load(this->Initialized);
+		Stm.Process(this->Attributes);
 	}
 
 	// on load the extension is constructed with the save-time owner pointer;

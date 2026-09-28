@@ -38,6 +38,7 @@ void BulletExt::InitializeState()
 
 	this->CurrentStrength = pType->Strength;
 	this->TypeExtData = BulletTypeExt::Fetch(pType);
+	this->Attributes = this->TypeExtData->Attributes;
 
 	if (!pType->Inviso)
 		this->InitializeLaserTrails();
@@ -372,7 +373,7 @@ DEFINE_HOOK(0x46A4FB, BulletClass_Shrapnel_Targeting, 0x6)
 			if (!pWeaponExt->SkipWeaponPicking)
 			{
 				if (!EnumFunctions::CanTargetHouse(pWeaponExt->CanTargetHouses, pOwner, pTechno->Owner) || !EnumFunctions::IsTechnoEligible(pTechno, pWeaponExt->CanTarget)
-					|| !pWeaponExt->IsHealthInThreshold(pTechno) || !pWeaponExt->IsVeterancyInThreshold(pTechno) || !pWeaponExt->HasRequiredAttachedEffects(pTechno, pSource))
+					|| !pWeaponExt->IsHealthInThreshold(pTechno) || !pWeaponExt->IsVeterancyInThreshold(pTechno) || pWeaponExt->IsTargetImmuneToAttributes(pTechno) || !pWeaponExt->HasRequiredAttachedEffects(pTechno, pSource))
 				{
 					return SkipObject;
 				}

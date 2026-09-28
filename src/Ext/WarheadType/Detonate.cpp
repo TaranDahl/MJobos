@@ -203,6 +203,9 @@ void WarheadTypeExt::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget,
 	if (!this->CanTargetHouse(pHouse, pTarget) || !this->CanAffectTarget(pTarget))
 		return;
 
+	if (this->IsTargetImmuneToAttributes(pTarget))
+		return;
+
 	// Put these at first since they can change the target's house
 	if (this->RemoveMindControl)
 		pHouse = this->ApplyRemoveMindControl(pHouse, pTarget);

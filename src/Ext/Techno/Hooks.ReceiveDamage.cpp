@@ -26,7 +26,8 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	if (!pWHExt->IsHealthInThreshold(pThis)
 	|| !pWHExt->IsVeterancyInThreshold(pThis)
 	|| (!pWHExt->AffectsNeutral && pThis->Owner->IsNeutral())
-	|| !pWHExt->IsInvokerAllowed(pThis, pAttacker))
+	|| !pWHExt->IsInvokerAllowed(pThis, pAttacker)
+	|| pWHExt->IsTargetImmuneToAttributes(pThis))
 	{
 		damage = 0;
 		return 0;
