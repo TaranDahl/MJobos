@@ -1,8 +1,17 @@
-#include "Body.h"
+﻿#include "Body.h"
 #include "SWSidebar/SWSidebarClass.h"
+#include "UniqueButton/UniqueTechnoColumnClass.h"
+#include "SelectedButton/SelectedInfoClass.h"
 
 #include <Ext/Side/Body.h>
+#include <Ext/House/Body.h>
+#include <Ext/TechnoType/Body.h>
+#include <Ext/Scenario/Body.h>
+#include <Utilities/Macro.h>
+#include <Utilities/ShapeTextPrinter.h>
 #include <Misc/MessageColumn.h>
+#include <WWMouseClass.h>
+#include <UI/UIRoot.h>
 
 DEFINE_HOOK(0x6A593E, SidebarClass_InitForHouse_AdditionalFiles, 0x5)
 {
@@ -12,6 +21,12 @@ DEFINE_HOOK(0x6A593E, SidebarClass_InitForHouse_AdditionalFiles, 0x5)
 	{
 		sprintf_s(filename, "tab%02dpp.shp", i);
 		SidebarExt::TabProducingProgress[i] = GameCreate<SHPReference>(filename);
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		sprintf_s(filename, "tab%02dabm.shp", i);
+		SidebarExt::AutoBuildingMark[i] = GameCreate<SHPReference>(filename);
 	}
 
 	return 0;
@@ -28,15 +43,29 @@ DEFINE_HOOK(0x6A5EA1, SidebarClass_UnloadShapes_AdditionalFiles, 0x5)
 		}
 	}
 
+	for (int i = 0; i < 2; i++)
+	{
+		if (SidebarExt::AutoBuildingMark[i])
+		{
+			GameDelete(SidebarExt::AutoBuildingMark[i]);
+			SidebarExt::AutoBuildingMark[i] = nullptr;
+		}
+	}
+
 	return 0;
 }
 
-DEFINE_HOOK(0x6A6EB1, SidebarClass_DrawIt_ProducingProgress, 0x6)
+namespace SidebarAutoBuildingMark
+{
+	unsigned int DrawnTimes = 0;
+}
+
+DEFINE_HOOK(0x6A6EB1, SidebarClass_DrawIt, 0x6)
 {
 	if (Phobos::UI::ProducingProgress_Show)
 	{
 		const auto pPlayer = HouseClass::CurrentPlayer;
-		const auto pSideExt = SideExt::ExtMap.Find(SideClass::Array.GetItem(HouseClass::CurrentPlayer->SideIndex));
+		const auto pSideExt = SideExt::Fetch(SideClass::Array.GetItem(HouseClass::CurrentPlayer->SideIndex));
 		const int XOffset = pSideExt->Sidebar_GDIPositions ? 29 : 32;
 		const int XBase = (pSideExt->Sidebar_GDIPositions ? 26 : 20) + pSideExt->Sidebar_ProducingProgress_Offset.Get().X;
 		const int YBase = 197 + pSideExt->Sidebar_ProducingProgress_Offset.Get().Y;
@@ -77,6 +106,78 @@ DEFINE_HOOK(0x6A6EB1, SidebarClass_DrawIt_ProducingProgress, 0x6)
 		}
 	}
 
+	auto drawAutoBuildingMark = [&](int tabIndex)
+		{
+			if (const auto pShp = SidebarExt::AutoBuildingMark[tabIndex])
+			{
+				const int frame = pShp->Frames ? (SidebarAutoBuildingMark::DrawnTimes % pShp->Frames) : 0;
+				const auto pSideExt = SideExt::Fetch(SideClass::Array.GetItem(HouseClass::CurrentPlayer->SideIndex));
+				const int XOffset = pSideExt->Sidebar_GDIPositions ? 29 : 32;
+				const int XBase = (pSideExt->Sidebar_GDIPositions ? 26 : 20);
+				const int YBase = 197;
+				const auto position = Point2D { XBase + tabIndex * XOffset, YBase };
+				RectangleStruct sidebarRect = DSurface::Sidebar->GetRect();
+				DSurface::Sidebar->DrawSHP(FileSystem::ANIM_PAL, pShp, frame, &position,
+					&sidebarRect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+			}
+		};
+	if (Phobos::Config::AutomaticPlacingBuilding)
+		drawAutoBuildingMark(0);
+	if (Phobos::Config::AutomaticPlacingCombatBuilding)
+		drawAutoBuildingMark(1);
+	SidebarAutoBuildingMark::DrawnTimes++;
+
+	return 0;
+}
+
+// Add right click for structure and combat tab button.
+DEFINE_HOOK(0x6A4CEE, SidebarClass_InitTabButtons_RightButton, 0x5)
+{
+	GET(ShapeButtonClass*, pButton, ECX);
+
+	new (pButton) ShapeButtonClass();
+
+	GET(int, leftCount, EDI);
+
+	if (leftCount >= 3)
+		pButton->Flags |= GadgetFlag::RightPress | GadgetFlag::RightRelease;
+
+	return R->Origin() + 0x5;
+}
+
+DEFINE_HOOK(0x6A7904, SidebarClass_Update_ToggleAutoBuilding, 0x5)
+{
+	GET(int, keyCode, EAX);
+
+	int clickedTabIdx = keyCode - ((int)WWKey::Button | (int)WWKey::RightClick | 203);
+
+	if (Phobos::Config::AutomaticPlacingBuilding || Phobos::Config::AutomaticPlacingCombatBuilding)
+		SidebarClass::Instance.SidebarBackgroundNeedsRedraw = true;
+
+	// Right clicked on the tab button.
+	if (clickedTabIdx == 0 || clickedTabIdx == 1)
+	{
+		if (clickedTabIdx != SidebarClass::Instance.ActiveTabIndex)
+		{
+			auto& pClickedButton = SidebarClass::TabButtons[clickedTabIdx];
+			pClickedButton.MarkRedraw();
+			pClickedButton.IsPressed = false;
+			pClickedButton.IsOn = false;
+		}
+
+		if (clickedTabIdx == 0)
+			Phobos::Config::AutomaticPlacingBuilding = !Phobos::Config::AutomaticPlacingBuilding;
+		else // if (clickedTabIdx == 1)
+			Phobos::Config::AutomaticPlacingCombatBuilding = !Phobos::Config::AutomaticPlacingCombatBuilding;
+
+		const int tabIndex = SidebarClass::Instance.ActiveTabIndex;
+		if (!tabIndex || tabIndex == 1)
+		{
+			SidebarClass::Instance.SidebarBackgroundNeedsRedraw = true;
+			SidebarClass::Instance.RepaintSidebar(tabIndex);
+		}
+	}
+
 	return 0;
 }
 
@@ -97,6 +198,173 @@ DEFINE_HOOK(0x72FCB5, InitSideRectangles_CenterBackground, 0x5)
 	return 0;
 }
 
+#pragma region MarkRedraw
+
+DEFINE_HOOK(0x4F92DD, HouseClass_Update_RedrawSidebarWhenRecheckTechTree, 0x5)
+{
+	SidebarClass::Instance.SidebarBackgroundNeedsRedraw = true;
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region DrawGreyCameoExtraCover
+
+DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
+{
+	GET(const bool, greyCameo, EBX);
+	GET(const int, destX, ESI);
+	GET(const int, destY, EBP);
+	GET_STACK(const RectangleStruct, boundingRect, STACK_OFFSET(0x48C, -0x3E0));
+	GET_STACK(TechnoTypeClass* const, pType, STACK_OFFSET(0x48C, -0x458));
+
+	const auto position = Point2D { destX + 30, destY + 24 };
+	const auto pRulesExt = RulesExt::Global();
+	const auto& frames = pRulesExt->Cameo_OverlayFrames;
+	const auto frameSize = frames.size();
+
+	if (greyCameo && frameSize > 2) // Only draw extras over grey cameos
+	{
+		auto frame = frames[2];
+		const auto pTypeExt = TechnoTypeExt::TryFetch(pType);
+
+		if (frameSize > 3 && pTypeExt && pTypeExt->IsGreyCameoForCurrentPlayer)
+		{
+			if (const auto CameoPCX = pTypeExt->GreyCameoPCX.GetSurface())
+			{
+				auto drawRect = RectangleStruct { destX, destY, 60, 48 };
+				PCX::Instance.BlitToSurface(&drawRect, DSurface::Sidebar, CameoPCX);
+			}
+
+			frame = frames[3];
+		}
+
+		if (frame >= 0)
+		{
+			DSurface::Sidebar->DrawSHP(
+				pRulesExt->Cameo_OverlayPalette.GetOrDefaultConvert(FileSystem::PALETTE_PAL),
+				pRulesExt->Cameo_OverlayShapes,
+				frame,
+				&position,
+				&boundingRect,
+				BlitterFlags(0x600),
+				0, 0,
+				ZGradient::Ground,
+				1000, 0, 0, 0, 0, 0);
+		}
+	}
+
+	if (const auto pBuildingType = abstract_cast<BuildingTypeClass*>(pType)) // Only count owned buildings
+	{
+		const auto pTypeExt = BuildingTypeExt::Fetch(pBuildingType);
+
+		if ((pBuildingType->BuildCat != BuildCat::Combat ? Phobos::Config::AutomaticPlacingBuilding : Phobos::Config::AutomaticPlacingCombatBuilding)
+			&& frameSize > 1 && frames[1] >= 0
+			&& !greyCameo
+			&& pTypeExt->AutoBuilding.Get(RulesExt::Global()->AutoBuilding))
+		{
+			DSurface::Sidebar->DrawSHP(
+				pRulesExt->Cameo_OverlayPalette.GetOrDefaultConvert(FileSystem::PALETTE_PAL),
+				pRulesExt->Cameo_OverlayShapes,
+				frames[1],
+				&position,
+				&boundingRect,
+				BlitterFlags(0x600),
+				0, 0,
+				ZGradient::Ground,
+				1000, 0, 0, 0, 0, 0);
+		}
+
+		const bool existShape = frameSize && frames[0] >= 0;
+		const bool statistics = Phobos::Config::ShowBuildingStatistics
+			&& pTypeExt->Cameo_ShouldCount.Get(pBuildingType->BuildCat != BuildCat::Combat || pBuildingType->BuildLimit != INT_MAX);
+
+		if (existShape || statistics)
+		{
+			auto getBuildingCount = [pBuildingType, pTypeExt]()
+			{
+				if (!pTypeExt->PlaceBuilding_Extra)
+					return HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer, pBuildingType, true);
+
+				int count = 0;
+
+				for (auto& pOtherType : pTypeExt->PlaceBuilding_OnLand_Unique)
+					count += HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer, pOtherType, true);
+
+				for (auto& pOtherType : pTypeExt->PlaceBuilding_OnWater_Unique)
+					count += HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer, pOtherType, true);
+
+				return count;
+			};
+
+			if (const int count = getBuildingCount())
+			{
+				if (existShape)
+				{
+					DSurface::Sidebar->DrawSHP(
+						pRulesExt->Cameo_OverlayPalette.GetOrDefaultConvert(FileSystem::PALETTE_PAL),
+						pRulesExt->Cameo_OverlayShapes,
+						frames[0],
+						&position,
+						&boundingRect,
+						BlitterFlags(0x600),
+						0, 0,
+						ZGradient::Ground,
+						1000, 0, 0, 0, 0, 0);
+				}
+
+				if (statistics)
+				{
+					GET_STACK(RectangleStruct, surfaceRect, STACK_OFFSET(0x48C, -0x438));
+
+					const COLORREF color = Drawing::RGB_To_Int(Drawing::TooltipColor);
+					const TextPrintType printType = TextPrintType::Background | TextPrintType::FullShadow | TextPrintType::Point8;
+					auto textPosition = Point2D { destX, destY + 1 };
+
+					wchar_t text[0x20];
+					swprintf_s(text, L"%d", count);
+					DSurface::Sidebar->DrawTextA(text, &surfaceRect, &textPosition, color, 0, printType);
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region ObserverDiplomacyHouses
+
+DEFINE_HOOK(0x6A557A, SidebarClass_Init_IO_RecordDiplomacyHouses1, 0x5)
+{
+	enum { SkipGameCode = 0x6A5830, ContinueGameCode = 0x6A558D };
+
+	const GameMode mode = SessionClass::Instance.GameMode;
+
+	return (mode == GameMode::Skirmish || mode == GameMode::LAN || mode == GameMode::Internet) ? ContinueGameCode : SkipGameCode;
+}
+
+DEFINE_HOOK(0x6A55BF, SidebarClass_Init_IO_RecordDiplomacyHouses2, 0x7)
+{
+	enum { ContinueLoop = 0x6A55CF, BreakLoop = 0x6A55C8 };
+
+	GET(HouseClass*, pHouse, EAX);
+
+	return (pHouse->IsHumanPlayer || HouseClass::CurrentPlayer == HouseClass::Observer) ? BreakLoop : ContinueLoop;
+}
+
+DEFINE_HOOK(0x6A57F6, SidebarClass_Init_IO_RecordDiplomacyHouses3, 0x7)
+{
+	enum { ContinueLoop = 0x6A580E, MeetCondition = 0x6A57FF };
+
+	GET(HouseClass*, pHouse, EAX);
+
+	return (pHouse->IsHumanPlayer || HouseClass::CurrentPlayer == HouseClass::Observer) ? MeetCondition : ContinueLoop;
+}
+
+#pragma endregion
+
 #pragma region NewButtonsRelated
 
 DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SkipOnNewButtons, 0x7)
@@ -105,13 +373,18 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SkipOnNewButtons, 0x7)
 
 	return (SWSidebarClass::IsEnabled() && SWSidebarClass::Instance.CurrentColumn
 		|| SWSidebarClass::Instance.ToggleButton && SWSidebarClass::Instance.ToggleButton->IsHovering
-		|| MessageColumnClass::Instance.IsBlocked())
+		|| UniqueTechnoColumnClass::Instance.Hovering >= 0
+		|| SelectedInfoClass::Instance.IsHovering
+		|| MessageColumnClass::Instance.IsBlocked()
+		|| UIExt::UIRoot::Instance().IsBlockingAt(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y))
 		? DoNothing : 0;
 }
 
 DEFINE_HOOK(0x6A5082, SidebarClass_InitClear_InitializeNewButtons, 0x5)
 {
 	SWSidebarClass::Instance.InitClear();
+	UniqueTechnoColumnClass::Instance.InitClear();
+	SelectedInfoClass::Instance.InitClear();
 	MessageColumnClass::Instance.InitClear();
 	return 0;
 }
@@ -119,6 +392,8 @@ DEFINE_HOOK(0x6A5082, SidebarClass_InitClear_InitializeNewButtons, 0x5)
 DEFINE_HOOK(0x6A5839, SidebarClass_InitIO_InitializeNewButtons, 0x5)
 {
 	SWSidebarClass::Instance.InitIO();
+	UniqueTechnoColumnClass::Instance.InitIO();
+	SelectedInfoClass::Instance.InitIO();
 	MessageColumnClass::Instance.InitIO();
 	return 0;
 }

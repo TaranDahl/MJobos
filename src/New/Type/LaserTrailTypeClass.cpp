@@ -1,4 +1,4 @@
-#include "LaserTrailTypeClass.h"
+﻿#include "LaserTrailTypeClass.h"
 
 template<>
 const char* Enumerable<LaserTrailTypeClass>::GetMainSection()

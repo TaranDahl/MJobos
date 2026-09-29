@@ -1,48 +1,70 @@
-// Issue #5 Permanently stationary units
+﻿// Issue #5 Permanently stationary units
 // Author: Starkku
 
-#include <Ext/Techno/Body.h>
+#include "Body.h"
 
 DEFINE_HOOK(0x740A93, UnitClass_Mission_Move_DisallowMoving, 0x6)
 {
+	enum { QueueGuardInstead = 0x740AEF, ReturnTrue = 0x740AFD, ContinueCheck = 0x0 };
+
 	GET(UnitClass*, pThis, ESI);
 
-	return TechnoExt::CannotMove(pThis) ? 0x740AEF : 0;
+	if (TechnoExt::HasAttachmentLoco(pThis))
+	{
+		auto const pExt = TechnoExt::Fetch(pThis);
+		if (pExt->ParentAttachment)
+		{
+			auto const& pParent = pExt->ParentAttachment->Parent;
+			if (pThis->PlanningToken && pThis->PlanningToken->PlanningNodes.Count
+				&& pParent->PlanningToken && pParent->PlanningToken->PlanningNodes.Count
+				&& pThis->PlanningToken->PlanningNodes[0] == pParent->PlanningToken->PlanningNodes[0])
+			{
+				return ReturnTrue;
+			}
+		}
+		pThis->EnterIdleMode(false, true);
+		return ReturnTrue;
+	}
+
+	// skips this->IsHarvesting = 0, may backfire somewhere - Kerbiter
+	return UnitExt::CannotMove(pThis)
+		? QueueGuardInstead
+		: ContinueCheck;
 }
 
 DEFINE_HOOK(0x741AA7, UnitClass_Assign_Destination_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, EBP);
 
-	return TechnoExt::CannotMove(pThis) ? 0x743173 : 0;
+	return UnitExt::CannotMove(pThis) || TechnoExt::HasAttachmentLoco(pThis) ? 0x743173 : 0;
 }
 
 DEFINE_HOOK(0x743B4B, UnitClass_Scatter_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, EBP);
 
-	return TechnoExt::CannotMove(pThis) ? 0x74408E : 0;
+	return UnitExt::CannotMove(pThis) || TechnoExt::HasAttachmentLoco(pThis) ? 0x74408E : 0;
 }
 
 DEFINE_HOOK(0x74038F, UnitClass_What_Action_ObjectClass_DisallowMoving_1, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
-	return TechnoExt::CannotMove(pThis) ? 0x7403A3 : 0;
+	return UnitExt::CannotMove(pThis) ? 0x7403A3 : 0;
 }
 
 DEFINE_HOOK(0x7403B7, UnitClass_What_Action_ObjectClass_DisallowMoving_2, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
-	return TechnoExt::CannotMove(pThis) ? 0x7403C1 : 0;
+	return UnitExt::CannotMove(pThis) ? 0x7403C1 : 0;
 }
 
 DEFINE_HOOK(0x740709, UnitClass_What_Action_DisallowMoving_1, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
-	return TechnoExt::CannotMove(pThis) ? 0x740727 : 0;
+	return UnitExt::CannotMove(pThis) ? 0x740727 : 0;
 }
 
 DEFINE_HOOK(0x740744, UnitClass_What_Action_DisallowMoving_2, 0x6)
@@ -52,7 +74,7 @@ DEFINE_HOOK(0x740744, UnitClass_What_Action_DisallowMoving_2, 0x6)
 	GET(UnitClass*, pThis, ESI);
 	GET_STACK(const Action, result, 0x30);
 
-	if (TechnoExt::CannotMove(pThis))
+	if (UnitExt::CannotMove(pThis))
 	{
 		if (result == Action::Move)
 			return ReturnNoMove;
@@ -66,26 +88,27 @@ DEFINE_HOOK(0x740744, UnitClass_What_Action_DisallowMoving_2, 0x6)
 	return 0;
 }
 
+// Makes the vehicle keep it's current turret heading without snapping back to neutral position
 DEFINE_HOOK(0x736B60, UnitClass_Rotation_AI_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
-	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
-	return (pTypeExt->TurretResponse.isset() ? !pTypeExt->TurretResponse.Get() : TechnoExt::CannotMove(pThis)) ? 0x736AFB : 0;
+	const auto pTypeExt = UnitTypeExt::Fetch(pThis->Type);
+	return (pTypeExt->TurretResponse.isset() ? !pTypeExt->TurretResponse.Get() : UnitExt::CannotMove(pThis)) ? 0x736AFB : 0;
 }
 
 DEFINE_HOOK(0x73891D, UnitClass_Active_Click_With_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
-	return TechnoExt::CannotMove(pThis) ? 0x738927 : 0;
+	return UnitExt::CannotMove(pThis) ? 0x738927 : 0;
 }
 
 DEFINE_HOOK(0x73EFC4, UnitClass_Mission_Hunt_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
-	if (TechnoExt::CannotMove(pThis))
+	if (UnitExt::CannotMove(pThis))
 	{
 		pThis->QueueMission(Mission::Guard, false);
 		pThis->NextMission();
@@ -99,13 +122,13 @@ DEFINE_HOOK(0x73EFC4, UnitClass_Mission_Hunt_DisallowMoving, 0x6)
 
 // 3 Sep, 2025 - Starkku: Separated from above, do not change to guard mission
 // and only handle the target acquisition part of area guard for immobile units.
-DEFINE_HOOK(0x744103, UnitClass_Mission_AreaGuard_DisallowMoving, 0x6) 
+DEFINE_HOOK(0x744103, UnitClass_Mission_AreaGuard_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
-	if (TechnoExt::CannotMove(pThis))
+	if (UnitExt::CannotMove(pThis))
 	{
-		if (pThis->CanPassiveAcquireTargets() && pThis->TargetingTimer.Completed()) 
+		if (pThis->CanPassiveAcquireTargets() && pThis->TargetingTimer.Completed())
 			pThis->TargetAndEstimateDamage(pThis->Location, ThreatType::Range);
 
 		int delay = 1;
@@ -129,7 +152,7 @@ DEFINE_HOOK(0x74132B, UnitClass_GetFireError_DisallowMoving, 0x7)
 	GET(UnitClass*, pThis, ESI);
 	GET(const FireError, result, EAX);
 
-	if (result == FireError::RANGE && TechnoExt::CannotMove(pThis))
+	if (result == FireError::RANGE && UnitExt::CannotMove(pThis))
 		R->EAX(FireError::ILLEGAL);
 
 	return 0;
@@ -146,7 +169,7 @@ DEFINE_HOOK(0x7414E0, UnitClass_ApproachTarget_DisallowMoving, 0xA)
 
 	int weaponIndex = -1;
 
-	if (TechnoExt::CannotMove(pThis))
+	if (UnitExt::CannotMove(pThis))
 	{
 		const auto pTarget = pThis->Target;
 		weaponIndex = pThis->SelectWeapon(pTarget);
@@ -186,7 +209,7 @@ DEFINE_HOOK(0x6F7CE2, TechnoClass_CanAutoTargetObject_DisallowMoving, 0x6)
 
 	if (const auto pUnit = abstract_cast<UnitClass*, true>(pThis))
 	{
-		if (TechnoExt::CannotMove(pUnit))
+		if (UnitExt::CannotMove(pUnit))
 		{
 			R->EAX(pUnit->GetFireError(pTarget, weaponIndex, true));
 			return 0x6F7CEE;
@@ -204,7 +227,7 @@ DEFINE_HOOK(0x7088E3, TechnoClass_ShouldRetaliate_DisallowMoving, 0x6)
 
 	if (const auto pUnit = abstract_cast<UnitClass*, true>(pThis))
 	{
-		if (TechnoExt::CannotMove(pUnit))
+		if (UnitExt::CannotMove(pUnit))
 		{
 			R->Stack(STACK_OFFSET(0x18, 0x4), weaponIndex);
 			R->EAX(pUnit->GetFireError(pTarget, weaponIndex, true));

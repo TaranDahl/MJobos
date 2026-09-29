@@ -1,4 +1,4 @@
-#include <Ext/TechnoType/Body.h>
+#include <Ext/UnitType/Body.h>
 
 DEFINE_HOOK(0x73C7AC, UnitClass_DrawAsSHP_DrawTurret_TintFix, 0x6)
 {
@@ -20,13 +20,13 @@ DEFINE_HOOK(0x73C7AC, UnitClass_DrawAsSHP_DrawTurret_TintFix, 0x6)
 	GET_STACK(const int, extraLight, STACK_OFFSET(0x128, 0x1C));
 
 	const bool tooBigToFitUnderBridge = pType->TooBigToFitUnderBridge
-		&& reinterpret_cast<bool(__thiscall*)(TechnoClass*)>(0x703B10)(pThis) && !reinterpret_cast<int(__thiscall*)(TechnoClass*)>(0x703E70)(pThis);
+		&& pThis->IsNearBridge() && !reinterpret_cast<int(__thiscall*)(TechnoClass*)>(0x703E70)(pThis);
 	const int zAdjust = tooBigToFitUnderBridge ? -16 : 0;
 	const ZGradient zGradient = tooBigToFitUnderBridge ? ZGradient::Ground : pThis->GetZGradient();
 
 	pThis->Draw_A_SHP(pShape, bodyFrameIdx, &location, &bounds, 0, 256, zAdjust, zGradient, 0, extraLight, 0, 0, 0, 0, 0, 0);
 
-	const auto pTurretShape = TechnoTypeExt::ExtMap.Find(pType)->TurretShape;
+	const auto pTurretShape = UnitTypeExt::Fetch(pType)->TurretShape;
 	const int StartFrame = pTurretShape ? 0 : (pType->WalkFrames * pType->Facings);
 
 	if (pTurretShape)
@@ -61,7 +61,7 @@ DEFINE_HOOK(0x73CCF4, UnitClass_DrawSHP_FacingsB_TurretShape, 0xA)
 	GET(UnitClass*, pThis, EBP);
 	GET(UnitTypeClass*, pType, ECX);
 
-	const auto pTurretShape = TechnoTypeExt::ExtMap.Find(pType)->TurretShape;
+	const auto pTurretShape = UnitTypeExt::Fetch(pType)->TurretShape;
 	const int StartFrame = pTurretShape ? 0 : (pType->WalkFrames * pType->Facings);
 	const int frameIdx = pThis->SecondaryFacing.Current().GetFacing<32>(4) + StartFrame;
 

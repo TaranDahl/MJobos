@@ -1,10 +1,9 @@
-#include <Helpers/Macro.h>
+﻿#include <Helpers/Macro.h>
 #include <WWMessageBox.h>
 #include <LoadOptionsClass.h>
 #include <ThemeClass.h>
 #include <CCToolTip.h>
 #include <GameOptionsClass.h>
-#include <GScreenClass.h>
 #include <EvadeClass.h>
 
 namespace RetryDialogFlag

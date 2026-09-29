@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 double WeaponTypeExt::OldRadius = DiskLaserClass::Radius;
 // 0x4A6CF0 :
@@ -24,7 +24,7 @@ DEFINE_HOOK(0x4A757B, DiskLaser_Circle, 0x6)
 {
 	GET(WeaponTypeClass*, pWeapon, EDX);
 
-	auto const pTypeData = WeaponTypeExt::ExtMap.TryFind(pWeapon);
+	auto const pTypeData = WeaponTypeExt::TryFetch(pWeapon);
 
 	if (pTypeData && WeaponTypeExt::OldRadius != pTypeData->DiskLaser_Radius)
 	{

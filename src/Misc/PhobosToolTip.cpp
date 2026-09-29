@@ -1,4 +1,4 @@
-#include "PhobosToolTip.h"
+﻿#include "PhobosToolTip.h"
 
 #include <GameOptionsClass.h>
 #include <CCToolTip.h>
@@ -7,7 +7,10 @@
 #include <Ext/Side/Body.h>
 #include <Ext/Surface/Body.h>
 #include <Ext/House/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
+#include <Ext/Sidebar/UniqueButton/UniqueTechnoColumnClass.h>
+#include <Ext/Sidebar/SelectedButton/SelectedInfoClass.h>
 
 #include <sstream>
 #include <iomanip>
@@ -19,14 +22,21 @@ inline bool PhobosToolTip::IsEnabled() const
 	return Phobos::UI::ExtendedToolTips;
 }
 
-inline const wchar_t* PhobosToolTip::GetUIDescription(TechnoTypeExt::ExtData* pData) const
+inline const wchar_t* PhobosToolTip::GetUIDescription(TechnoTypeExt* pData) const
 {
 	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription.Get().empty()
 		? pData->UIDescription.Get().Text
 		: nullptr;
 }
 
-inline const wchar_t* PhobosToolTip::GetUIDescription(SWTypeExt::ExtData* pData) const
+inline const wchar_t* PhobosToolTip::GetUnbuildableUIDescription(TechnoTypeExt* pData) const
+{
+	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription_Unbuildable.Get().empty()
+		? pData->UIDescription_Unbuildable.Get().Text
+		: nullptr;
+}
+
+inline const wchar_t* PhobosToolTip::GetUIDescription(SWTypeExt* pData) const
 {
 	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription.Get().empty()
 		? pData->UIDescription.Get().Text
@@ -76,7 +86,7 @@ inline int PhobosToolTip::GetPower(TechnoTypeClass* pType) const
 			if (!Phobos::Config::UnitPowerDrain)
 				return 0;
 
-			const auto pExt = TechnoTypeExt::ExtMap.Find(pType);
+			const auto pExt = TechnoTypeExt::Fetch(pType);
 			return pExt->Power;
 		}
 	case AbstractType::BuildingType:
@@ -123,7 +133,7 @@ void PhobosToolTip::HelpText_Techno(TechnoTypeClass* pType)
 	if (!pType)
 		return;
 
-	auto const pData = TechnoTypeExt::ExtMap.Find(pType);
+	auto const pData = TechnoTypeExt::Fetch(pType);
 
 	const int nBuildTime = TickTimeToSeconds(this->GetBuildTime(pType));
 	const int nSec = nBuildTime % 60;
@@ -150,6 +160,12 @@ void PhobosToolTip::HelpText_Techno(TechnoTypeClass* pType)
 	if (auto const pDesc = this->GetUIDescription(pData))
 		oss << L"\n" << pDesc;
 
+	if (pData->IsGreyCameoForCurrentPlayer)
+	{
+		if (auto pExDesc = this->GetUnbuildableUIDescription(pData))
+			oss << L"\n" << pExDesc;
+	}
+
 	this->TextBuffer = oss.str();
 }
 
@@ -157,7 +173,7 @@ void PhobosToolTip::HelpText_Super(int swidx)
 {
 	auto const pSuper = HouseClass::CurrentPlayer->Supers.Items[swidx];
 	auto const pType = pSuper->Type;
-	auto const pData = SWTypeExt::ExtMap.Find(pType);
+	auto const pData = SWTypeExt::Fetch(pType);
 
 	std::wostringstream oss;
 	oss << pType->UIName;
@@ -189,7 +205,7 @@ void PhobosToolTip::HelpText_Super(int swidx)
 		showSth = true;
 	}
 
-	auto const& sw_ext = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SuperExts[swidx];
+	auto const& sw_ext = HouseExt::Fetch(HouseClass::CurrentPlayer)->SuperExts[swidx];
 	const int sw_shots = pData->SW_Shots;
 	const int remain_shots = pData->SW_Shots - sw_ext.ShotCount;
 	if (sw_shots > 0)
@@ -253,6 +269,25 @@ DEFINE_HOOK(0x4AE51E, DisplayClass_GetToolTip_HelpText, 0x6)
 			R->EAX(0);
 			return ApplyToolTip;
 		}
+	}
+
+	const auto uniqueIndex = UniqueTechnoColumnClass::Instance.Hovering;
+
+	if (uniqueIndex >= 0)
+	{
+		auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
+
+		if (uniqueIndex < static_cast<int>(vec.size()))
+		{
+			R->EAX(vec[uniqueIndex]->TypeExtData->OwnerObject()->UIName);
+			return ApplyToolTip;
+		}
+	}
+
+	if (SelectedInfoClass::Instance.IsHovering)
+	{
+		R->EAX(0);
+		return ApplyToolTip;
 	}
 
 	return 0;
@@ -425,7 +460,7 @@ DEFINE_HOOK(0x478FDC, CCToolTip_Draw2_FillRect, 0x5)
 	const int nPlayerSideIndex = ScenarioClass::Instance->PlayerSideIndex;
 	if (auto const pSide = SideClass::Array.GetItemOrDefault(nPlayerSideIndex))
 	{
-		if (auto const pData = SideExt::ExtMap.TryFind(pSide))
+		if (auto const pData = SideExt::TryFetch(pSide))
 		{
 			// Could this flag be lazy?
 			if (isCameo)

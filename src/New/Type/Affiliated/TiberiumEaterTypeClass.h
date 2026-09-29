@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <Utilities/TemplateDef.h>
 
@@ -15,6 +15,7 @@ public:
 	ValueableVector<AnimTypeClass*> Anims {};
 	NullableVector<AnimTypeClass*> Anims_Tiberiums[4] {};
 	Valueable<bool> AnimMove { true };
+	Valueable<bool> UnderEMP { false };
 
 	TiberiumEaterTypeClass() = default;
 

@@ -4,7 +4,7 @@ This page describes every change in Phobos that wasn't categorized into a proper
 
 ## Blowfish Dependency
 
-`BLOWFISH.DLL` is no longer required to start the game.
+- `BLOWFISH.DLL` is no longer required to start the game.
 
 ## Developer tools
 
@@ -49,20 +49,23 @@ SaveVariablesOnScenarioEnd=false    ; boolean
 ### Semantic locomotor aliases
 
 - It's now possible to write locomotor aliases instead of their CLSIDs in the `Locomotor` tag value. Use the table below to find the needed alias for a locomotor.
+  - The feature is also supported for Phobos locomotors.
 
-| *Alias* | *CLSID*                                  |
-|--------:|:----------------------------------------:|
-|Drive    | `{4A582741-9839-11d1-B709-00A024DDAFD1}` |
-|Hover    | `{4A582742-9839-11d1-B709-00A024DDAFD1}` |
-|Tunnel   | `{4A582743-9839-11d1-B709-00A024DDAFD1}` |
-|Walk     | `{4A582744-9839-11d1-B709-00A024DDAFD1}` |
-|DropPod  | `{4A582745-9839-11d1-B709-00A024DDAFD1}` |
-|Fly      | `{4A582746-9839-11d1-B709-00A024DDAFD1}` |
-|Teleport | `{4A582747-9839-11d1-B709-00A024DDAFD1}` |
-|Mech     | `{55D141B8-DB94-11d1-AC98-006008055BB5}` |
-|Ship     | `{2BEA74E1-7CCA-11d3-BE14-00104B62A16C}` |
-|Jumpjet  | `{92612C46-F71F-11d1-AC9F-006008055BB5}` |
-|Rocket   | `{B7B49766-E576-11d3-9BD9-00104B972FE8}` |
+| *Alias*     | *CLSID*                                  |
+|------------:|:----------------------------------------:|
+|Drive        | `{4A582741-9839-11d1-B709-00A024DDAFD1}` |
+|Hover        | `{4A582742-9839-11d1-B709-00A024DDAFD1}` |
+|Tunnel       | `{4A582743-9839-11d1-B709-00A024DDAFD1}` |
+|Walk         | `{4A582744-9839-11d1-B709-00A024DDAFD1}` |
+|DropPod      | `{4A582745-9839-11d1-B709-00A024DDAFD1}` |
+|Fly          | `{4A582746-9839-11d1-B709-00A024DDAFD1}` |
+|Teleport     | `{4A582747-9839-11d1-B709-00A024DDAFD1}` |
+|Mech         | `{55D141B8-DB94-11d1-AC98-006008055BB5}` |
+|Ship         | `{2BEA74E1-7CCA-11d3-BE14-00104B62A16C}` |
+|Jumpjet      | `{92612C46-F71F-11d1-AC9F-006008055BB5}` |
+|Rocket       | `{B7B49766-E576-11d3-9BD9-00104B972FE8}` |
+|AdvancedDrive| `{4A582751-9839-11d1-B709-00A024DDAFD1}` |
+|Attachment   | `{C5D54B98-8C98-4275-8CE4-EF75CB0CBE3E}` |
 
 ```{note}
 `Chrono` is not a standard Alias, but since the default behavior of using `Teleport` will be triggered when the value of `Locomotor` is incorrect, the result of the operation will appear as if `Chrono` has taken effect.
@@ -109,10 +112,10 @@ InsigniaType.PassengersN=                ; InsigniaType
 In `rulesmd.ini`:
 ```ini
 [General]
-CustomGS=false              ; boolean
-CustomGSN.ChangeInterval=-1 ; integer >= 1
-CustomGSN.ChangeDelay=N     ; integer between 0 and 6
-CustomGSN.DefaultDelay=N    ; integer between 0 and 6
+CustomGS=false               ; boolean
+CustomGSN.ChangeInterval=-1  ; integer >= 1
+CustomGSN.ChangeDelay=N      ; integer between 0 and 6
+CustomGSN.DefaultDelay=N     ; integer between 0 and 6
 ; where N = 0, 1, 2, 3, 4, 5, 6
 ```
 
@@ -269,15 +272,35 @@ This feature may noticeably increase game loading time, depending on the size of
 
 ### Turning off/on in-game exception handling
 
-You can turn on/off the exception handler of the game's main loop using the following command line arg: `-ExceptionHandler=boolean` where `boolean` is `(true|false|yes|no|1|0)`.
+- You can turn on/off the exception handler of the game's main loop using the following command line arg: `-ExceptionHandler=boolean` where `boolean` is `(true|false|yes|no|1|0)`.
+
+- When the exception handler is enabled, Phobos replaces the game's own crash handling (and Ares', if present) with its own exception handler, ported from [Vinifera](https://github.com/Vinifera-Developers/Vinifera). When the game crashes, it will:
+  - create a per-crash folder `debug\snapshot-<timestamp>\` and write into it a detailed crash report (`except.txt`) with registers, call stacks, a stack dump and the list of loaded modules, a minidump (`crashdump.dmp`) and a copy of the debug log (if one is found). This is the same folder layout Ares uses, so the CnCNet client will also fold `debug.log` and `syringe.log` into it;
+  - show a dialog displaying the crash report, with buttons to quit, break into an attached debugger, or additionally save a full memory dump (`fulldump.dmp`, into the same folder) - large, but the most useful to developers.
+
+- Crash folders older than 5 days are cleaned up automatically. The `-FullCrashDump` command line arg makes the automatically written minidump a full memory dump (useful for unattended setups).
+
+- Crash reports can be enriched with extra information:
+  - If a `gamemd.pdb` file is present in the game directory, it is used to resolve game addresses to symbol names in the call stacks. `Phobos.pdb` (shipped with devbuilds and nightlies) is picked up automatically for Phobos's own addresses.
+  - If a `gamemd.edb` exception database file is present in the game directory, its description for the faulting address (if any) is included in the report under "Additional information". The format is shared with Vinifera: one entry per line, `;` starts a comment.
+
+```text
+; address,can-continue,ignore,description (the two flags are parsed but not used)
+0x7BAEA1,0,0,A common crash in DSurface::GetPixel.
+0x5D6C21,0,0,The map is likely missing waypoint 90.
+```
 
 ```{note}
-In **debug** builds the in-game exception handler is **turned off** by default.
+The exception handler is enabled by default in all builds, including debug builds. An attached debugger still receives exceptions first, so this does not interfere with debugging; pass `-ExceptionHandler=false` if you want crashes to bypass the handler entirely.
 ```
 
 ```{warning}
 The CnCNet 5 spawner uses the main loop exception handler for fixes. If you get any issues (crashes, bugs) in combination with that then please first test with the exception handler enabled.
 ```
+
+### Visual styles
+
+- gamemd.exe ships without an application manifest, so its windows bind the old Common Controls v5 and render in the Windows 9x style. Phobos now activates its embedded Common Controls v6 manifest for the lifetime of the process, so windows created by the game and Phobos - dialogs, message boxes and the crash dialog - render with modern visual styles.
 
 ## Player colors
 

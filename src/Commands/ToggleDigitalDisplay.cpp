@@ -1,4 +1,4 @@
-#include "ToggleDigitalDisplay.h"
+﻿#include "ToggleDigitalDisplay.h"
 
 #include <Utilities/GeneralUtils.h>
 

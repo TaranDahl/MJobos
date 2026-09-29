@@ -1,4 +1,4 @@
-#include "ToggleSWSidebar.h"
+﻿#include "ToggleSWSidebar.h"
 
 #include <Utilities/GeneralUtils.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>

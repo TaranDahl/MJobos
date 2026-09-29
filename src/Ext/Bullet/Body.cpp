@@ -1,19 +1,404 @@
-#include "Body.h"
+﻿#include "Body.h"
+#include "Trajectories\PhobosVirtualTrajectory.h"
 
 #include <Ext/Anim/Body.h>
 #include <Ext/RadSite/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Ext/Cell/Body.h>
 #include <Ext/EBolt/Body.h>
+#include <Ext/Techno/Body.h>
 #include <New/Entity/LaserTrailClass.h>
+
+namespace LaserRT
+{
+	void SetLaserTrackingData(LaserDrawClass* pLaser, TechnoClass* pShooter, AbstractClass* pTarget, int weaponIdx, PositionFollow mode, bool ignoreShooter);
+}
 
 BulletExt::ExtContainer BulletExt::ExtMap;
 
-void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, BulletClass* pInterceptor)
+BulletExt::~BulletExt()
+{
+	if (RulesExt::Global()->VHPScan_Enhanced)
+	{
+		if (const auto pTarget = abstract_cast<TechnoClass*>(this->OwnerObject()->Target))
+			TechnoExt::Fetch(pTarget)->BulletsTargetingMeCount--;
+	}
+
+	if (this->GroupIndex != -1)
+	{
+		if (const auto pMap = this->TrajectoryGroup)
+		{
+			auto& groupData = (*pMap)[this->TypeExtData->OwnerObject()];
+			auto& vec = groupData.Bullets;
+			vec.erase(std::remove(vec.begin(), vec.end(), this->OwnerObject()->UniqueID), vec.end());
+			groupData.ShouldUpdate = true;
+		}
+	}
+
+	if (const auto pTraj = this->Trajectory.get())
+	{
+		const auto flag = pTraj->Flag();
+
+		if (flag == TrajectoryFlag::Engrave || flag == TrajectoryFlag::Tracing)
+		{
+			if (auto& pLaser = static_cast<VirtualTrajectory*>(pTraj)->Laser)
+			{
+				pLaser->Duration = 0;
+				pLaser = nullptr;
+			}
+		}
+	}
+}
+
+void BulletExt::InitializeOnUnlimbo()
+{
+	const auto pBullet = this->OwnerObject();
+	const auto pBulletExt = BulletExt::Fetch(pBullet);
+	const auto pBulletTypeExt = pBulletExt->TypeExtData;
+
+	// Without a target, the game will inevitably crash before, so no need to check here
+	const auto pTarget = pBullet->Target;
+
+	// Due to various ways of firing weapons, the true firer may have already died
+	const auto pFirer = pBullet->Owner;
+
+	// Set additional warhead and weapon count
+	pBulletExt->ProximityImpact = pBulletTypeExt->ProximityImpact;
+	pBulletExt->DisperseCycle = pBulletTypeExt->DisperseCycle;
+
+	// Record the status of the target
+	pBulletExt->TargetIsTechno = (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None;
+	pBulletExt->TargetIsInAir = (pTarget->AbstractFlags & AbstractFlags::Object) ? (static_cast<ObjectClass*>(pTarget)->GetHeight() > Unsorted::CellHeight) : false;
+	int damage = pBullet->Health;
+
+	// Record some information of weapon
+	if (const auto pWeapon = pBullet->WeaponType)
+	{
+		pBulletExt->AttenuationRange = pWeapon->Range;
+
+		if (pBulletTypeExt->ApplyRangeModifiers && pFirer)
+			pBulletExt->AttenuationRange = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pFirer);
+
+		damage = pWeapon->Damage;
+	}
+
+	// Set basic damage
+	pBulletExt->ProximityDamage = pBulletTypeExt->ProximityDamage.Get(damage);
+	pBulletExt->PassDetonateDamage = pBulletTypeExt->PassDetonateDamage.Get(damage);
+
+	// Record some information of firer
+	if (pFirer)
+	{
+		pBulletExt->FirepowerMult = TechnoExt::GetCurrentFirepowerMultiplier(pFirer);
+
+		// Obtain the launch location
+		pBulletExt->GetTechnoFLHCoord();
+
+		// Check trajectory capacity
+		if (pBulletTypeExt->CreateCapacity >= 0)
+			BulletExt::CheckExceededCapacity(pFirer, pBullet->Type, pBulletExt);
+	}
+	else
+	{
+		pBulletExt->NotMainWeapon = true;
+
+		if (pBulletTypeExt->CreateCapacity >= 0)
+			pBulletExt->Status |= TrajectoryStatus::Vanish;
+	}
+
+	// Initialize additional warheads
+	if (pBulletTypeExt->PassDetonate)
+		pBulletExt->PassDetonateTimer.Start(pBulletTypeExt->PassDetonateInitialDelay);
+
+	// Initialize additional weapons
+	if (!pBulletTypeExt->DisperseWeapons.empty() && !pBulletTypeExt->DisperseCounts.empty() && pBulletExt->DisperseCycle)
+	{
+		pBulletExt->DisperseCount = pBulletTypeExt->DisperseCounts[0];
+		pBulletExt->DisperseTimer.Start(pBulletTypeExt->DisperseInitialDelay);
+	}
+}
+
+bool BulletExt::CheckOnEarlyUpdate()
+{
+	// Update group index for members by themselves
+	if (this->TrajectoryGroup)
+		this->UpdateGroupIndex();
+
+	// In the phase of playing PreImpactAnim
+	if (this->OwnerObject()->SpawnNextAnim)
+		return false;
+
+	// The previous check requires detonation at this time
+	if (this->Status & (TrajectoryStatus::Detonate | TrajectoryStatus::Vanish))
+		return true;
+
+	// Check the remaining existence time
+	if (this->LifeDurationTimer.Completed())
+		return true;
+
+	// Check if the firer's target can be synchronized, the target may have been changed here
+	if (this->CheckSynchronize())
+		return true;
+
+	// Check if the target needs to be changed, the target may have been changed here
+	if (this->TypeExtData->RetargetRadius && this->BulletRetargetTechno())
+		return true;
+
+	// After the new target is confirmed, check if the tolerance time has ended
+	if (this->CheckNoTargetLifeTime())
+		return true;
+
+	// Fire weapons or warheads
+	if (this->FireAdditionals())
+		return true;
+
+	// Detonate extra warhead on the obstacle after the pass through check is completed
+	this->DetonateOnObstacle();
+	return false;
+}
+
+void BulletExt::CheckOnPreDetonate()
+{
+	const auto pBullet = this->OwnerObject();
+	const auto pBulletTypeExt = this->TypeExtData;
+
+	// Special circumstances, similar to airburst behavior
+	if (pBulletTypeExt->DisperseEffectiveRange.Get() < 0)
+		this->PrepareDisperseWeapon();
+
+	if (!(this->Status & TrajectoryStatus::Vanish))
+	{
+		if (!pBulletTypeExt->PeacefulVanish.Get(pBulletTypeExt->ProximityImpact || pBulletTypeExt->DisperseCycle))
+		{
+			// Calculate the current damage
+			pBullet->Health = this->GetTrueDamage(pBullet->Health, true);
+			return;
+		}
+
+		this->Status |= TrajectoryStatus::Vanish;
+	}
+
+	// To skip all extra effects, no damage, no anims...
+	pBullet->Health = 0;
+	pBullet->Limbo();
+	pBullet->UnInit();
+}
+
+// Launch additional weapons and warheads
+bool BulletExt::FireAdditionals()
+{
+	const auto pType = this->TypeExtData;
+
+	// Detonate the warhead at the current location
+	if (pType->PassDetonate)
+		this->PassWithDetonateAt();
+
+	// Detonate the warhead on the technos passing through
+	if (this->ProximityImpact != 0 && pType->ProximityRadius.Get() > 0)
+		this->PrepareForDetonateAt();
+
+	// Launch additional weapons towards the target
+	if (!this->DisperseTimer.Completed())
+		return false;
+
+	const auto pBullet = this->OwnerObject();
+	const double range = static_cast<double>(pType->DisperseEffectiveRange.Get());
+
+	// Weapons can only be fired when the distance is close enough
+	if (range < 0.0 || range > 0.0 && pBullet->TargetCoords.DistanceFromSquared(pBullet->Location) > range * range)
+		return false;
+
+	// Fire after checking the orientation
+	const auto pTraj = this->Trajectory.get();
+	return (!pTraj || pTraj->OnFacingCheck()) && this->PrepareDisperseWeapon();
+}
+
+// Detonate a extra warhead on the obstacle then detonate bullet itself
+void BulletExt::DetonateOnObstacle()
+{
+	const auto pDetonateAt = this->ExtraCheck;
+
+	// Obstacles were detected in the current frame here
+	if (!pDetonateAt)
+		return;
+
+	// Slow down and reset the target
+	this->ExtraCheck = nullptr;
+	const auto pBullet = this->OwnerObject();
+
+	// Set the new target so that the snap function can take effect
+	pBullet->SetTarget(pDetonateAt);
+
+	if (const auto pTraj = this->Trajectory.get())
+	{
+		const double speed = pTraj->MovingSpeed;
+		const double distanceSq = pDetonateAt->GetCoords().DistanceFromSquared(pBullet->Location);
+
+		// Check whether need to slow down
+		if (speed && distanceSq < speed * speed)
+			pTraj->MultiplyBulletVelocity(sqrt(distanceSq) / speed, true);
+		else
+			this->Status |= TrajectoryStatus::Detonate;
+	}
+
+	// Need to cause additional damage?
+	if (!this->ProximityImpact)
+		return;
+
+	// Detonate extra warhead
+	const auto pFirer = pBullet->Owner;
+	const auto pOwner = pFirer ? pFirer->Owner : BulletExt::Fetch(pBullet)->FirerHouse;
+	this->ProximityDetonateAt(pOwner, pDetonateAt);
+}
+
+// Synchronization target inspection
+bool BulletExt::CheckSynchronize()
+{
+	const auto pBullet = this->OwnerObject();
+	const auto pType = this->TypeExtData;
+
+	// Find the outermost transporter
+	const auto pFirer = BulletExt::GetSurfaceFirer(pBullet->Owner);
+
+	// Synchronize to the target of the firer
+	if (pType->Synchronize && pFirer)
+	{
+		auto pTarget = pFirer->Target;
+
+		// Check should detonate when changing target
+		if (pBullet->Target != pTarget && !pType->NoTargetLifeTime)
+			return true;
+
+		// Check if the target can be synchronized
+		if (pTarget && (pTarget->IsInAir() != this->TargetIsInAir))
+			pTarget = nullptr;
+
+		// Replace with a new target
+		pBullet->SetTarget(pTarget);
+	}
+
+	return false;
+}
+
+// Tolerance timer inspection
+bool BulletExt::CheckNoTargetLifeTime()
+{
+	const auto pBullet = this->OwnerObject();
+	const auto pType = this->TypeExtData;
+
+	// Check should detonate when no target
+	if (!pBullet->Target && !pType->NoTargetLifeTime)
+		return true;
+
+	// Update timer
+	if (pBullet->Target)
+	{
+		this->NoTargetLifeTimer.Stop();
+	}
+	else if (pType->NoTargetLifeTime > 0)
+	{
+		if (this->NoTargetLifeTimer.Completed())
+			return true;
+		else if (!this->NoTargetLifeTimer.IsTicking())
+			this->NoTargetLifeTimer.Start(pType->NoTargetLifeTime);
+	}
+
+	return false;
+}
+
+// Update trajectory capacity group index
+void BulletExt::UpdateGroupIndex()
+{
+	const auto pBullet = this->OwnerObject();
+	auto& groupData = (*this->TrajectoryGroup)[pBullet->Type];
+
+	// Should update group index
+	if (groupData.ShouldUpdate)
+	{
+		if (const int size = static_cast<int>(groupData.Bullets.size()))
+		{
+			for (int i = 0; i < size; ++i)
+			{
+				if (groupData.Bullets[i] == pBullet->UniqueID)
+				{
+					this->GroupIndex = i;
+					break;
+				}
+			}
+
+			// If is the last member, reset flag to false
+			if (this->GroupIndex == size - 1)
+				groupData.ShouldUpdate = false;
+		}
+		else
+		{
+			groupData.ShouldUpdate = false;
+		}
+	}
+
+	return;
+}
+
+bool BulletExt::HasVirtualTrajectories(TechnoClass* pTechno)
+{
+	if (const auto pMap = TechnoExt::Fetch(pTechno)->TrajectoryGroup)
+	{
+		for (const auto& [pBulletType, group] : pMap->GetValues())
+		{
+			if (const auto pTrajType = BulletTypeExt::Fetch(pBulletType)->TrajectoryType.get())
+			{
+				const auto flag = pTrajType->Flag();
+
+				if (flag == TrajectoryFlag::Engrave || flag == TrajectoryFlag::Tracing)
+				{
+					if (!group.Bullets.empty())
+						return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+// Check and set the group
+bool BulletExt::CheckExceededCapacity(TechnoClass* pTechno, BulletTypeClass* pBulletType, BulletExt* pBulletExt)
+{
+	const auto pTechnoExt = TechnoExt::Fetch(pTechno);
+
+	if (!pTechnoExt->TrajectoryGroup)
+		pTechnoExt->TrajectoryGroup = std::make_shared<PhobosMap<BulletTypeClass*, BulletGroupData>>();
+
+	// Get shared container
+	auto& group = (*pTechnoExt->TrajectoryGroup)[pBulletType].Bullets;
+	const auto size = static_cast<int>(group.size());
+
+	if (!pBulletExt)
+		return size >= BulletTypeExt::Fetch(pBulletType)->CreateCapacity;
+
+	pBulletExt->TrajectoryGroup = pTechnoExt->TrajectoryGroup;
+
+	// Check trajectory capacity
+	if (size >= pBulletExt->TypeExtData->CreateCapacity)
+	{
+		// Peaceful vanish
+		pBulletExt->Status |= TrajectoryStatus::Vanish;
+		return true;
+	}
+	else
+	{
+		// Increase trajectory count
+		pBulletExt->GroupIndex = size;
+		group.push_back(pBulletExt->OwnerObject()->UniqueID);
+		return false;
+	}
+}
+
+void BulletExt::InterceptBullet(TechnoClass* pSource, BulletClass* pInterceptor)
 {
 	const auto pThis = this->OwnerObject();
 	auto pTypeExt = this->TypeExtData;
-	const auto pInterceptorType = BulletExt::ExtMap.Find(pInterceptor)->InterceptorTechnoType->InterceptorType.get();
+	const auto pInterceptorType = BulletExt::Fetch(pInterceptor)->InterceptorTechnoType->InterceptorType.get();
 
 	if (!pTypeExt->Armor.isset())
 	{
@@ -57,7 +442,7 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, BulletClass* pInt
 		{
 			pThis->Speed = pWeaponOverride->Speed;
 			pThis->Type = pWeaponOverride->Projectile;
-			pTypeExt = BulletTypeExt::ExtMap.Find(pThis->Type);
+			pTypeExt = BulletTypeExt::Fetch(pThis->Type);
 			this->TypeExtData = pTypeExt;
 
 			if (this->LaserTrails.size())
@@ -67,13 +452,13 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, BulletClass* pInt
 				this->InitializeLaserTrails();
 
 			// Lose target if the current bullet is no longer interceptable.
-			if (pSource && (!pTypeExt->Interceptable || (pTypeExt->Armor.isset() && GeneralUtils::GetWarheadVersusArmor(pInterceptor->WH, pTypeExt->Armor.Get()) == 0.0)))
+			if (pSource && (!pTypeExt->Interceptable.Get(RulesExt::Global()->ProjectileInterceptable) || (pTypeExt->Armor.isset() && GeneralUtils::GetWarheadVersusArmor(pInterceptor->WH, pTypeExt->Armor.Get()) == 0.0)))
 				pSource->SetTarget(nullptr);
 		}
 	}
 }
 
-void BulletExt::ExtData::ApplyRadiationToCell(CellStruct cell, int spread, int radLevel)
+void BulletExt::ApplyRadiationToCell(CellStruct cell, int spread, int radLevel)
 {
 	const auto pCell = MapClass::Instance.TryGetCellAt(cell);
 
@@ -82,14 +467,14 @@ void BulletExt::ExtData::ApplyRadiationToCell(CellStruct cell, int spread, int r
 
 	const auto pThis = this->OwnerObject();
 	const auto pWeapon = pThis->GetWeaponType();
-	const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+	const auto pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
 	const auto pRadType = pWeaponExt->RadType;
-	const auto pCellExt = CellExt::ExtMap.Find(pCell);
+	const auto pCellExt = CellExt::Fetch(pCell);
 
 	const auto it = std::find_if(pCellExt->RadSites.cbegin(), pCellExt->RadSites.cend(),
 		[=](const auto pSite)
 		{
-			const auto pRadExt = RadSiteExt::ExtMap.Find(pSite);
+			const auto pRadExt = RadSiteExt::Fetch(pSite);
 
 			if (pRadExt->Type != pRadType || spread != pSite->Spread)
 				return false;
@@ -103,7 +488,7 @@ void BulletExt::ExtData::ApplyRadiationToCell(CellStruct cell, int spread, int r
 
 	if (it != pCellExt->RadSites.cend())
 	{
-		const auto pRadExt = RadSiteExt::ExtMap.Find(*it);
+		const auto pRadExt = RadSiteExt::Fetch(*it);
 		// Handle It
 		pRadExt->Add(std::min(radLevel, pRadType->GetLevelMax() - (*it)->GetRadLevel()));
 		return;
@@ -113,13 +498,13 @@ void BulletExt::ExtData::ApplyRadiationToCell(CellStruct cell, int spread, int r
 	RadSiteExt::CreateInstance(cell, spread, radLevel, pWeaponExt, pThisHouse, pThis->Owner);
 }
 
-void BulletExt::ExtData::InitializeLaserTrails()
+void BulletExt::InitializeLaserTrails()
 {
 	if (this->LaserTrails.size())
 		return;
 
 	auto const pThis = this->OwnerObject();
-	auto const pTypeExt = BulletTypeExt::ExtMap.Find(pThis->Type);
+	auto const pTypeExt = BulletTypeExt::Fetch(pThis->Type);
 	auto const pOwner = pThis->Owner ? pThis->Owner->Owner : nullptr;
 	this->LaserTrails.reserve(pTypeExt->LaserTrail_Types.size());
 
@@ -146,12 +531,13 @@ inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, HouseClass* pHo
 	if (animCounts <= 0)
 		return;
 
+	const auto pTraj = BulletExt::Fetch(pBullet)->Trajectory.get();
+	const auto velocityRadian = pTraj ? Math::atan2(pTraj->MovingVelocity.Y , pTraj->MovingVelocity.X) : Math::atan2(pBullet->Velocity.Y , pBullet->Velocity.X);
 	const auto pFirer = pBullet->Owner;
 	const auto pAnimType = pWeapon->Anim[(animCounts % 8 == 0) // Have direction
-		? (static_cast<int>((Math::atan2(pBullet->Velocity.Y , pBullet->Velocity.X) / Math::TwoPi + 1.5) * animCounts - (animCounts / 8) + 0.5) % animCounts) // Calculate direction
+		? (static_cast<int>((velocityRadian / Math::TwoPi + 1.5) * animCounts - (animCounts / 8) + 0.5) % animCounts) // Calculate direction
 		: ScenarioClass::Instance->Random.RandomRanged(0 , animCounts - 1)]; // Simple random;
 /*
-	const auto velocityRadian = Math::atan2(pBullet->Velocity.Y , pBullet->Velocity.X);
 	const auto ratioOfRotateAngle = velocityRadian / Math::TwoPi;
 	const auto correctRatioOfRotateAngle = ratioOfRotateAngle + 1.5; // Correct the Y-axis in reverse and ensure that the ratio is a positive number
 	const auto animIndex = correctRatioOfRotateAngle * animCounts;
@@ -165,7 +551,7 @@ inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, HouseClass* pHo
 	const auto pAnim = GameCreate<AnimClass>(pAnimType, pBullet->SourceCoords);
 
 	AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse, nullptr, false, true);
-	AnimExt::ExtMap.Find(pAnim)->SetInvoker(pFirer, pHouse);
+	AnimExt::Fetch(pAnim)->SetInvoker(pFirer, pHouse);
 
 	if (pAttach)
 	{
@@ -202,12 +588,22 @@ inline void BulletExt::SimulatedFiringLaser(BulletClass* pBullet, HouseClass* pH
 	if (!pWeapon->IsLaser)
 		return;
 
-	const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+	if (const auto pTrajType = BulletTypeExt::Fetch(pWeapon->Projectile)->TrajectoryType.get())
+	{
+		const auto flag = pTrajType->Flag();
+
+		if (flag == TrajectoryFlag::Engrave || flag == TrajectoryFlag::Tracing)
+			return;
+	}
+
+	const auto pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
+
+	LaserDrawClass* pLaser = nullptr;
 
 	if (pWeapon->IsHouseColor || pWeaponExt->Laser_IsSingleColor)
 	{
 		const auto black = ColorStruct { 0, 0, 0 };
-		const auto pLaser = GameCreate<LaserDrawClass>(pBullet->SourceCoords, BulletExt::GetTargetCoordsForFiring(pBullet),
+		pLaser = GameCreate<LaserDrawClass>(pBullet->SourceCoords, BulletExt::GetTargetCoordsForFiring(pBullet),
 			((pWeapon->IsHouseColor && pHouse) ? pHouse->LaserColor : pWeapon->LaserInnerColor), black, black, pWeapon->LaserDuration);
 
 		pLaser->IsHouseColor = true;
@@ -216,12 +612,33 @@ inline void BulletExt::SimulatedFiringLaser(BulletClass* pBullet, HouseClass* pH
 	}
 	else
 	{
-		const auto pLaser = GameCreate<LaserDrawClass>(pBullet->SourceCoords, BulletExt::GetTargetCoordsForFiring(pBullet),
+		pLaser = GameCreate<LaserDrawClass>(pBullet->SourceCoords, BulletExt::GetTargetCoordsForFiring(pBullet),
 			pWeapon->LaserInnerColor, pWeapon->LaserOuterColor, pWeapon->LaserOuterSpread, pWeapon->LaserDuration);
 
 		pLaser->IsHouseColor = false;
 		pLaser->Thickness = 3;
 		pLaser->IsSupported = false;
+	}
+
+	// LaserPositionUpdate
+	if (pLaser)
+	{
+		auto mode = pWeaponExt->LaserPositionUpdate;
+		const bool isSplit = BulletExt::Fetch(pBullet)->IsSplitFromAirburst;
+
+		if (isSplit)
+		{
+			if (mode == PositionFollow::Firer)
+				mode = PositionFollow::None;
+			else if (mode == PositionFollow::All)
+				mode = PositionFollow::Target;
+		}
+
+		if (mode != PositionFollow::None)
+		{
+			auto const pTarget = abstract_cast<ObjectClass*>(pBullet->Target);
+			LaserRT::SetLaserTrackingData(pLaser, pBullet->Owner, pTarget, 0, mode, isSplit);
+		}
 	}
 }
 
@@ -238,7 +655,7 @@ inline void BulletExt::SimulatedFiringElectricBolt(BulletClass* pBullet)
 	pBolt->AlternateColor = pWeapon->IsAlternateColor;
 
 	const auto targetCoords = BulletExt::GetTargetCoordsForFiring(pBullet);
-	const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+	const auto pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
 	int zAdjust = pWeaponExt->EBoltZAdjust.Get(RulesExt::Global()->EBoltZAdjust);
 
 	const auto pOwner = pBullet->Owner;
@@ -251,7 +668,7 @@ inline void BulletExt::SimulatedFiringElectricBolt(BulletClass* pBullet)
 
 	pBolt->Fire(pBullet->SourceCoords, targetCoords, zAdjust);
 
-	if (const auto particle = WeaponTypeExt::ExtMap.Find(pWeapon)->Bolt_ParticleSystem.Get(RulesClass::Instance->DefaultSparkSystem))
+	if (const auto particle = WeaponTypeExt::Fetch(pWeapon)->Bolt_ParticleSystem.Get(RulesClass::Instance->DefaultSparkSystem))
 		GameCreate<ParticleSystemClass>(particle, targetCoords, nullptr, nullptr, CoordStruct::Empty, nullptr);
 }
 
@@ -270,7 +687,7 @@ inline void BulletExt::SimulatedFiringRadBeam(BulletClass* pBullet, HouseClass* 
 	pRadBeam->SetCoordsSource(pBullet->SourceCoords);
 	pRadBeam->SetCoordsTarget(BulletExt::GetTargetCoordsForFiring(pBullet));
 
-	const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+	const auto pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
 
 	pRadBeam->Color = (pWeaponExt->Beam_IsHouseColor && pHouse) ? pHouse->LaserColor
 		: pWeaponExt->Beam_Color.Get(isTemporal ? RulesClass::Instance->ChronoBeamColor : RulesClass::Instance->RadColor);
@@ -293,11 +710,11 @@ void BulletExt::SimulatedFiringUnlimbo(BulletClass* pBullet, HouseClass* pHouse,
 {
 	// Initialize bullet characteristics such as weapon type, range, house etc.
 	const auto pType = pBullet->Type;
-	const int projectileRange = WeaponTypeExt::ExtMap.Find(pWeapon)->ProjectileRange.Get();
+	const int projectileRange = WeaponTypeExt::Fetch(pWeapon)->ProjectileRange.Get();
 	auto velocity = BulletVelocity::Empty;
 	pBullet->WeaponType = pWeapon;
 	pBullet->Range = projectileRange;
-	BulletExt::ExtMap.Find(pBullet)->FirerHouse = pHouse;
+	BulletExt::Fetch(pBullet)->FirerHouse = pHouse;
 
 	if (pType->FirersPalette)
 		pBullet->InheritedColor = pHouse->ColorSchemeIndex;
@@ -457,7 +874,7 @@ void BulletExt::Detonate(const CoordStruct& coords, TechnoClass* pOwner, int dam
 	auto const pBullet = pType->CreateBullet(pTarget, pOwner, damage, pWarhead, 100, isBright);
 	pBullet->WeaponType = pWeapon;
 
-	auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
+	auto const pBulletExt = BulletExt::Fetch(pBullet);
 	pBulletExt->IsInstantDetonation = true;
 
 	if (pFiringHouse)
@@ -472,7 +889,7 @@ void BulletExt::Detonate(const CoordStruct& coords, TechnoClass* pOwner, int dam
 // load / save
 
 template <typename T>
-void BulletExt::ExtData::Serialize(T& Stm)
+void BulletExt::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->TypeExtData)
@@ -487,21 +904,66 @@ void BulletExt::ExtData::Serialize(T& Stm)
 		.Process(this->ParabombFallRate)
 		.Process(this->IsInstantDetonation)
 		.Process(this->FirepowerMult)
+		.Process(this->IsSplitFromAirburst)
+		.Process(this->DistanceTraveled)
 
-		.Process(this->Trajectory) // Keep this shit at last
+		.Process(this->Trajectory)
+		.Process(this->DispersedTrajectory)
+		.Process(this->LifeDurationTimer)
+		.Process(this->NoTargetLifeTimer)
+		.Process(this->RetargetTimer)
+		.Process(this->FirepowerMult)
+		.Process(this->AttenuationRange)
+		.Process(this->TargetIsInAir)
+		.Process(this->TargetIsTechno)
+		.Process(this->NotMainWeapon)
+		.Process(this->Status)
+		.Process(this->FLHCoord)
+		.Process(this->TrajectoryGroup)
+		.Process(this->GroupIndex)
+		.Process(this->PassDetonateDamage)
+		.Process(this->PassDetonateTimer)
+		.Process(this->ProximityImpact)
+		.Process(this->ProximityDamage)
+		.Process(this->ExtraCheck)
+		.Process(this->Casualty)
+		.Process(this->DisperseIndex)
+		.Process(this->DisperseCount)
+		.Process(this->DisperseCycle)
+		.Process(this->DisperseTimer)
 		;
 }
 
-void BulletExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
+void BulletExt::LoadFromStream(PhobosStreamReader& Stm)
 {
-	Extension<BulletClass>::LoadFromStream(Stm);
+	ObjectExt::LoadFromStream(Stm);
 	this->Serialize(Stm);
 }
 
-void BulletExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
+void BulletExt::SaveToStream(PhobosStreamWriter& Stm)
 {
-	Extension<BulletClass>::SaveToStream(Stm);
+	ObjectExt::SaveToStream(Stm);
 	this->Serialize(Stm);
+}
+
+bool BulletGroupData::Load(PhobosStreamReader& stm, bool registerForChange)
+{
+	return this->Serialize(stm);
+}
+
+bool BulletGroupData::Save(PhobosStreamWriter& stm) const
+{
+	return const_cast<BulletGroupData*>(this)->Serialize(stm);
+}
+
+template <typename T>
+bool BulletGroupData::Serialize(T& stm)
+{
+	return stm
+		.Process(this->Bullets)
+		.Process(this->Angle)
+		.Process(this->ShouldUpdate)
+		.Success();
 }
 
 // =============================
@@ -526,30 +988,9 @@ DEFINE_HOOK(0x4664BA, BulletClass_CTOR, 0x5)
 DEFINE_HOOK(0x4665E9, BulletClass_DTOR, 0xA)
 {
 	GET(BulletClass*, pItem, ESI);
+
 	BulletExt::ExtMap.Remove(pItem);
-	return 0;
-}
-
-DEFINE_HOOK_AGAIN(0x46AFB0, BulletClass_SaveLoad_Prefix, 0x8)
-DEFINE_HOOK(0x46AE70, BulletClass_SaveLoad_Prefix, 0x5)
-{
-	GET_STACK(BulletClass*, pItem, 0x4);
-	GET_STACK(IStream*, pStm, 0x8);
-
-	BulletExt::ExtMap.PrepareStream(pItem, pStm);
 
 	return 0;
 }
 
-DEFINE_HOOK_AGAIN(0x46AF97, BulletClass_Load_Suffix, 0x7)
-DEFINE_HOOK(0x46AF9E, BulletClass_Load_Suffix, 0x7)
-{
-	BulletExt::ExtMap.LoadStatic();
-	return 0;
-}
-
-DEFINE_HOOK(0x46AFC4, BulletClass_Save_Suffix, 0x3)
-{
-	BulletExt::ExtMap.SaveStatic();
-	return 0;
-}

@@ -23,12 +23,22 @@ You can use the improved vanilla font which can be found on [Phobos supplementar
 
 In `rulesmd.ini`:
 ```ini
-[SOMESIDE]             ; Side
-IngameScore.WinTheme=  ; Soundtrack theme ID
-IngameScore.LoseTheme= ; Soundtrack theme ID
+[SOMESIDE]              ; Side
+IngameScore.WinTheme=   ; Soundtrack theme ID
+IngameScore.LoseTheme=  ; Soundtrack theme ID
 ```
 
 ## Battle screen UI/UX
+
+### Allow chat box in singleplayer
+
+- In vanilla, the in-game chat box is disabled in singleplayer scenarios. You can now enable it by setting `[General] -> AllowChatBoxInSinglePlayer` to true.
+
+In `rulesmd.ini`:
+```ini
+[General]
+AllowChatBoxInSinglePlayer=false  ; boolean
+```
 
 ### Allow draw SuperWeapon timer as percentage
 
@@ -60,6 +70,21 @@ HealthBar.Hide=false                 ; boolean
 HealthBar.HidePips=false             ; boolean
 HealthBar.Permanent=false            ; boolean
 HealthBar.Permanent.PipScale=false   ; boolean
+```
+
+### Customize the step limit of the credits indicator
+
+- In vanilla, the Credits Indicator in the sidebar increases by at most 143 points per frame, and now you can customize this limit.
+  - If set to a value less than or equal to 0, the upper limit will be removed.
+
+In `uimd.ini`:
+```ini
+[Sidebar]
+CreditsIndicator.MaxStep=143  ; integer
+```
+
+```{note}
+The game first takes the absolute value of the difference between the actual credits and the current value, then divides it by 8, and then clamps this value to the limit set here. If you wish to disable this smoothing effect, set [`CreditsIndicator.Smooth=false`](User-Interface.md#disable-the-credits-indicator-smooth-transition).
 ```
 
 ### Digital display
@@ -124,6 +149,7 @@ Buildings.DefaultDigitalDisplayTypes=          ; List of DigitalDisplayTypes
 Infantry.DefaultDigitalDisplayTypes=           ; List of DigitalDisplayTypes
 Vehicles.DefaultDigitalDisplayTypes=           ; List of DigitalDisplayTypes
 Aircraft.DefaultDigitalDisplayTypes=           ; List of DigitalDisplayTypes
+DigitalDisplay.Health.FakeAtDisguise=true      ; boolean
 
 [SOMEDIGITALDISPLAYTYPE]                       ; DigitalDisplayType
 ; Generic
@@ -137,7 +163,7 @@ Anchor.Vertical=top                            ; Vertical position enumeration (
 Anchor.Building=top                            ; Hexagon vertex enumeration (top|lefttop|leftbottom|bottom|rightbottom|righttop)
 Percentage=false                               ; boolean
 HideMaxValue=false                             ; boolean
-VisibleToHouses=owner                          ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+VisibleToHouses=owner                          ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|neutral|all)
 VisibleToHouses.Observer=true                  ; boolean
 VisibleInSpecialState=true                     ; boolean
 ValueScaleDivisor=                             ; integer
@@ -157,7 +183,7 @@ Shape.PercentageFrame=false                    ; boolean
 [SOMETECHNO]                                   ; TechnoType
 DigitalDisplay.Disable=false                   ; boolean
 DigitalDisplayTypes=                           ; List of DigitalDisplayTypes
-DigitalDisplay.Health.FakeAtDisguise=true      ; boolean
+DigitalDisplay.Health.FakeAtDisguise=          ; boolean, default to [AudioVisual] -> DigitalDisplay.Health.FakeAtDisguise
 ```
 
 In `RA2MD.INI`:
@@ -184,6 +210,20 @@ The arrangement of static images on the plane is entirely up to you to draw free
 
 Of course, this is just the implementation method. To balance freedom with efficiency - that is, how to efficiently draw the patterns you need - you still need to independently explore a workflow that suits you.
 ````
+
+### Disable the credits indicator smooth transition
+
+- In vanilla, the Credits Indicator has a smooth transition effect when the displayed credit value approaches the actual credit value. Now you can disable this effect, allowing the change step to always follow the value of [`CreditsIndicator.MaxStep`](User-Interface.md#customize-the-step-limit-of-the-credits-indicator).
+
+In `uimd.ini`:
+```ini
+[Sidebar]
+CreditsIndicator.Smooth=true  ; boolean
+```
+
+```{hint}
+For example, if you want to make the credits update immediately without a transition process by setting `CreditsIndicator.MaxStep=0`, then you should also set `CreditsIndicator.Smooth=false`; otherwise, the displayed credit value will still change in the form of an exponential approximation function.
+```
 
 ### Flashing Technos on selecting
 
@@ -308,7 +348,7 @@ Palette=palette.pal                     ; filename with .pal extension
 Frames=                                 ; List of integer, default 1,1,1 for infantry, 0,0,0 for vehicle and aircraft
 Offset=0,0                              ; integers - horizontal, vertical
 Translucency=0                          ; translucency level (0/25/50/75)
-VisibleToHouses=all                     ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+VisibleToHouses=all                     ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|neutral|all)
 VisibleToHouses.Observer=true           ; boolean
 DrawAboveTechno=true                    ; boolean
 GroundShape=                            ; filename with .shp extension
@@ -358,6 +398,27 @@ In `RA2MD.INI`:
 ```ini
 [Phobos]
 ShowDesignatorRange=false             ; boolean
+```
+
+### Show game time
+
+- A timer can be displayed to show how many time has passed since game starts.
+  - Both `[Phobos] -> ShowGameTime` and `[General] -> ShowGameTime` need to be set to true to enable the timer.
+  - The timer will be shown in the format of `TXT_GAMETIME hh:mm:ss`. For localization add `TXT_GAMETIME` into your `.csf` file.
+  - `ShowGameTime.BoardOpacity` can be used to set the opacitiy of background for game time display.
+  - Observer can't see this timer since they've already gotten one on the top of sidebar.
+
+In `rulesmd.ini`:
+```ini
+[General]
+ShowGameTime=true              ; boolean
+```
+
+In `RA2MD.INI`:
+```ini
+[Phobos]
+ShowGameTime=false             ; boolean
+ShowGameTime.BoardOpacity=40   ; integer
 ```
 
 ### SuperWeapon ShowTimer sorting
@@ -459,32 +520,80 @@ HideShakeEffects=false       ; boolean
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
-DisplayIncome=false       ; boolean
-DisplayIncome.Delay=15    ; integer
-DisplayIncome.Houses=all  ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-DisplayIncome.AllowAI=yes ; boolean
+DisplayIncome=false        ; boolean
+DisplayIncome.Delay=15     ; integer
+DisplayIncome.Houses=all   ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|neutral|all)
+DisplayIncome.AllowAI=yes  ; boolean
 
-[SOMEBUILDING]            ; BuildingType
-DisplayIncome=            ; boolean, defaults to [AudioVisual] -> DisplayIncome
-DisplayIncome.Delay=15    ; integer, defaults to [AudioVisual] -> DisplayIncome.Delay
-DisplayIncome.Houses=     ; Affected House Enumeration, defaults to [AudioVisual] -> DisplayIncome.Houses
-DisplayIncome.Offset=0,0  ; X,Y, pixels relative to default
+[SOMEBUILDING]             ; BuildingType
+DisplayIncome=             ; boolean, defaults to [AudioVisual] -> DisplayIncome
+DisplayIncome.Delay=15     ; integer, defaults to [AudioVisual] -> DisplayIncome.Delay
+DisplayIncome.Houses=      ; Affected House Enumeration, defaults to [AudioVisual] -> DisplayIncome.Houses
+DisplayIncome.Offset=0,0   ; X,Y, pixels relative to default
 ```
 
-### Show power plant enhancer range
+### Show Some Progress
 
-- It is possible to show range of power plant enhancer when placing a building.
+- You can now let the buildings with factories draw an extra bar below HP bar to show the progress of production by setting `FactoryProgressDisplay=true`, and buildings with main superweapon to show the progress of the superweapon by setting `MainSWProgressDisplay=true`. Besides, you can also let the technos draw its invulnerable timer when Iron Curtain or Force Shield is applied on by setting `InvulnerableDisplay=true`, and draw its temporal life timer when temporal weapon is targeting on it by setting `TemporalLifeDisplay=true`. Note that though you can select a SHP file for these displays to draw the pips, the background of the non-buildings' bar and the buildings' empty pip will always draw like the vanilla game, and the palette is always use the PALETTE.pal .
 
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
-ShowPowerPlantEnhancerRange=true   ; boolean
+FactoryProgressDisplay=false                  ; boolean
+FactoryProgressDisplay.Offset=0,0             ; integers - horizontal, vertical
+FactoryProgressDisplay.Pips=3                 ; integer, zero-based frame index
+MainSWProgressDisplay=false                   ; boolean
+MainSWProgressDisplay.Offset=0,0              ; integers - horizontal, vertical
+MainSWProgressDisplay.Pips=5                  ; integer, zero-based frame index
+InvulnerableDisplay=false                     ; boolean
+InvulnerableDisplay.Others.Offset=0,0         ; integers - horizontal, vertical
+InvulnerableDisplay.Buildings.Offset=0,0      ; integers - horizontal, vertical
+InvulnerableDisplay.Others.Pips=17,18         ; integer, zero-based frame index - ForceShield, IronCurtain
+InvulnerableDisplay.Buildings.Pips=5,4        ; integer, zero-based frame index - ForceShield, IronCurtain
+TemporalLifeDisplay=false                     ; boolean
+TemporalLifeDisplay.Others.Offset=0,0         ; integers - horizontal, vertical
+TemporalLifeDisplay.Buildings.Offset=0,0      ; integers - horizontal, vertical
+TemporalLifeDisplay.Others.Pips=17            ; integer, zero-based frame index
+TemporalLifeDisplay.Buildings.Pips=5          ; integer, zero-based frame index
+ProgressDisplay.Others.PipsShape=PIPS.shp     ; filename - including the .shp extension
+ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp extension
 ```
 
-In `RA2MD.INI`:
+### More display styles for placing grids
+
+- This feature is highly compatible with `ExtendedBuildingPlacing`. If set `DrawAdjacentBoundary` to true, it will display the four corners of the `Adjacent` boundary. If set `PlacementGrid.Expand` to true, it will display the placing grids with `place.shp` and following corresponding frame number.
+  - `PlacementGrid.LandFrames` controls the placing grids frames on non-water cell. The three numbers respectively represent "Some technos that can command departure have occupied this area", "This cell is actually beyond the scope, but there is still at least one cell inside the entire region" and "Here is no problem, everything is OK".
+  - `PlacementGrid.WaterFrames` controls the placing grids frames on water cell. Each item corresponds to the same as above.
+
+In `ra2md.ini`:
 ```ini
 [Phobos]
-ShowPowerPlantEnhancerRange=false  ; boolean
+DrawAdjacentBoundary=false       ; boolean
+```
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+PlacementGrid.Expand=false       ; boolean
+PlacementGrid.LandFrames=1,0,0   ; integer, zero-based frame index - have technos, near boundary, is normal
+PlacementGrid.WaterFrames=1,0,0  ; integer, zero-based frame index - have technos, near boundary, is normal
+```
+
+### Set sidebar tab by selecting factory
+
+- You can choose the corresponding type of factory to switch the sidebar tab by setting `SetTabBySelectingFactory=true`.
+  - `SetTabBySelecting` can be used to define which tab to switch to when this building (which need not be a factory) is selected.
+    - Normal values: 0 (buildings tab), 1 (arsenal tab), 2 (infantry tab), 3 (vehicle tab).
+    - Negative values: automatically match according to the selected building's `Factory`. For `Factory=BuildingType`, if the current tab is 0, switch to 1; otherwise switch to 0.
+    - Other values (values greater than or equal to 4): do nothing, i.e., disable this effect.
+
+In `rulesmd.ini`:
+```ini
+[General]
+SetTabBySelectingFactory=false  ; boolean
+
+[SOMEBUILDING]                  ; BuildingType
+SetTabBySelecting=-1            ; integer, index of tab
 ```
 
 ## Hotkey Commands
@@ -536,6 +645,106 @@ For this command to work in multiplayer - you need to use a version of [YRpp spa
   - These vanilla CSF entries will be used: `TXT_SAVING_GAME`, `TXT_GAME_WAS_SAVED` and `TXT_ERROR_SAVING_GAME`.
   - The save should be looks like `Allied Mission 25: Esther's Money - QuickSaved`.
 
+### `[ ]` Exclusive SW Sidebar Shortcuts
+
+- Switches visible/invisible [this](#Exclusive-sidebar-for-superweapons).
+- For localization add `TXT_EX_SW_SWITCH` and `TXT_EX_SW_SWITCH_DESC` into your `.csf` file.
+- And Select the SWs in this exclusive sidebar.
+- For localization add `TXT_EX_SW_BUTTON_XX` and `TXT_EX_SW_BUTTON_XX_DESC` into your `.csf` file. (`XX` -> `03`, `10` .etc)
+
+### `[ ]` Toggle Aggressive Stance
+
+- Switches on/off aggressive stance for selected units and structures.
+  - Much like how the deploy command work on G.I.s. If all selected technos that may toggle aggressive stance are already aggressive stance, they will exit it, otherwise they will enter it.
+- Under aggressive stance, units and structures will target unarmed enemy buildings if no enemy units or defensive structures can be targeted.
+  - Aggressive stance does not reset even when the techno changes ownership.
+  - Aggressive stance has no effect if the techno is controlled by the AI.
+  - The passengers of open-topped transports will obey the aggressive stance configuration of the transports.
+  - Aggressive stance doesn't make a unit aggressively attack if `CanPassiveAquire=no`. However they will obey aggressive stance when ordered to attack-move.
+- Techno types can have further customizations about aggressive stance.
+  - A techno type can be made aggressive stance by default by `AggressiveStance=true`.
+  - A techno type can be disallowed to toggle its aggressive stance by `AggressiveStance.Togglable=false`.
+    - `AggressiveStance.Togglable` is default to false for engineers, agents, and technos without a weapon and is not open-topped. It is default to true for anything else.
+  - A building type can be the exempt of aggressive stance by setting `AggressiveStance.Exempt=true`, in which case units under aggressive stance will try to not attack it as if the units were not under aggressive stance. However, they will still attack the building if it was a defensive structure or an occupied civilian structure.
+  - Upon enter aggressive stance, `VoiceEnterAggressiveStance` will be played. If not defined, `VoiceAttack` will be played.
+  - Upon exit aggressive stance, `VoiceExitAggressiveStance` will be played. If not defined, no voice will be played.
+- For localization, add the following keys into your `.csf` file.
+  - `TXT_AGGRESSIVE_STANCE`: The name of the command.
+  - `TXT_AGGRESSIVE_STANCE_DESC`: The description of the command.
+  - `MSG:AGGRESSIVE_STANCE_ON`: The message to be displayed when units enter aggressive stance. May have `%i` inside to display how many units are affected.
+  - `MSG:AGGRESSIVE_STANCE_OFF`: The message to be displayed when units exit aggressive stance. May have `%i` inside to display how many units are affected.
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                           ; TechnoType
+AggressiveStance=false                 ; boolean
+AggressiveStance.Togglable=            ; boolean
+AggressiveStance.Exempt=false          ; boolean
+VoiceEnterAggressiveStance=            ; sound entry
+VoiceExitAggressiveStance=             ; sound entry
+```
+
+### `[ ]` Manual Reload
+
+- Manually empty and reload ammo if [CanManualReload=true](New-or-Enhanced-Logics.md#Manually-empty-and-reload-ammo).
+- For localization add `TXT_MANUAL_RELOAD` and `TXT_MANUAL_RELOAD_DESC` into your `.csf` file.
+
+### `[ ]` Auto Building
+
+- Switches on/off [auto building mode](New-or-Enhanced-Logics.md#Automatic-placing-the-building-product).
+- For localization add `TXT_AUTO_BUILD` and `TXT_AUTO_BUILD_DESC` into your `.csf` file.
+
+### `[ ]` Distribution Mode Spread / Filter / Enable
+
+- Now you can change the click action by using `AllowSwitchNoMoveCommand` hotkey. If the behavior to be executed by the current techno is different from the behavior displayed by the mouse, and the behavior to be executed will make the techno move near the target, the behavior will be replaced with area guard. Regardless of whether or not switch hotkey is used, default behavior can be changed through `DefaultApplyNoMoveCommand`.
+- Now you can also change the click action when hold down the specific hotkey if enabled `AllowDistributionCommand`. The new behavior is like using the selected objects one by one to click on each target within the range.
+- `AllowDistributionCommand.SpreadMode` & `AllowDistributionCommand.FilterMode` allow you to set spread range and target filter by hotkeys, which default to `DefaultDistributionSpreadMode` and `DefaultDistributionFilterMode`.
+  - When the range is 0, it is the original default behavior of the game. The range can be adjusted to 4, 8 or 16 cells by another shortcut key. You can also adjust this by using the mouse wheel while holding down the specific hotkey if `AllowDistributionCommand.SpreadModeScroll` set to true;
+    - The targets within the range will be allocated equally to the selected technos. Only when the behavior to be performed by the current techno is the same as that displayed by the mouse will it be allocated. Otherwise, it will return to the original default behavior of the game (it will not be effective for technos in the air). This will display a range ring.
+  - When the filter is `None`, it is the default behavior of the game. If the range is not zero at this time, a green ring will be displayed. You can adjust the filter mode to:
+    - `Like` - only targets with the same armor type (Completely identical `Armor`) will be selected among the targets allocated in the range. At this time, a blue ring will be displayed.
+    - `Type` - only targets of the same type (like infantries, vehicles or buildings) will be selected among the targets allocated in the range. At this time, a yellow ring will be displayed.
+    - `Name` - only targets of the same name (or with the same `GroupAs`) will be selected among the targets allocated in the range. At this time, a red ring will be displayed.
+- `AllowDistributionCommand.AffectsAllies` & `AllowDistributionCommand.AffectsEnemies` allow the distribution command to work on allies (including owner) or enemies target. If picking a target that's not eligible, it'll fallback to vanilla command.
+- It's possible to add a button for distribution mode in the bottom bar by adding `DistributionMode` in the `ButtonList` of `AdvancedCommandBar` and `MultiplayerAdvancedCommandBar`.
+  - The positions of each button are hardcoded, so it'll only decide whether enable this button or not. Distribute Mode button is now always listed after all the vanilla ones.
+  - The asset of these buttons should be added in `sidec0x.mix` files which correspond to different sides, with the name `button12.shp`.
+- For localization add `TXT_SWITCH_NOMOVE`, `TXT_DISTR_SPREAD`, `TXT_DISTR_FILTER`, `TXT_DISTR_HOLDDOWN`, `TXT_SWITCH_NOMOVE_DESC`, `TXT_DISTR_SPREAD_DESC`, `TXT_DISTR_FILTER_DESC`, `TXT_DISTR_HOLDDOWN_DESC`, `MSG:DistributionModeOn`, `MSG:DistributionModeOff`, `TIP:DistributionMode` into your `.csf` file.
+
+In `rulesmd.ini`:
+```ini
+[GlobalControls]
+AllowSwitchNoMoveCommand=false                      ; boolean
+AllowDistributionCommand=false                      ; boolean
+AllowDistributionCommand.SpreadMode=true            ; boolean
+AllowDistributionCommand.SpreadModeScroll=true      ; boolean
+AllowDistributionCommand.FilterMode=true            ; boolean
+AllowDistributionCommand.AffectsAllies=true         ; boolean
+AllowDistributionCommand.AffectsEnemies=true        ; boolean
+
+[AudioVisual]
+StartDistributionModeSound=                         ; sound entry
+EndDistributionModeSound=                           ; sound entry
+AddDistributionModeCommandSound=                    ; sound entry
+```
+
+In `ra2md.ini`:
+```ini
+[Phobos]
+DefaultApplyNoMoveCommand=true                      ; boolean
+DefaultDistributionSpreadMode=2                     ; integer, 0 - r=0 , 1 - r=4 , 2 - r=8 , 3 - r=16
+DefaultDistributionFilterMode=2                     ; integer, 0 - None , 1 - Like , 2 - Type , 3 - Name
+```
+
+In `uimd.ini`:
+```ini
+[AdvancedCommandBar]
+ButtonList=[Button1],DistributionMode,[ButtonX]     ; List of button entry
+
+[MultiplayerAdvancedCommandBar]
+ButtonList=[Button1],DistributionMode,[ButtonX]     ; List of button entry
+```
+
 ### `[ ]` Toggle Message Label
 
 - Switches on/off [Task subtitles' label in the middle of the screen](#task-subtitles-display-in-the-middle-of-the-screen).
@@ -545,6 +754,19 @@ For this command to work in multiplayer - you need to use a version of [YRpp spa
 
 - Deselect 1 or 5 object(s) from current selected objects.
 - For localization add `TXT_DESELECT`, `TXT_DESELECT_DESC`, `TXT_DESELECT5` and `TXT_DESELECT5_DESC` into your `.csf` file.
+
+### `[ ]` Select Captured Units
+
+- Select the units within the current screen that are captured by non-permanent mind-controller.
+- Enable the hotkey by setting `SelectCapturedKeyEnabled` to true.
+- If selected any unit, `MSG:SelectCaptured` is logged on the left-top of the screen, otherwise `MSG:NothingSelected` is logged.
+- For localization add `MSG:SelectCaptured`, `TXT_SELECT_CAPTURED` and `TXT_SELECT_CAPTURED_DESC` into your `.csf` file.
+
+In `rulesmd.ini`:
+```ini
+[GlobalControls]
+SelectCapturedKeyEnabled=false    ; boolean
+```
 
 ## Loading screen
 
@@ -567,16 +789,29 @@ DisableEmptySpawnPositions=false  ; boolean
 
 ### Skip saving game on starting a new campaign
 
-When starting a new campaign, the game automatically saves the game. Now you can decide whether you want that to happen or not.
+- When starting a new campaign, the game automatically saves the game. Now you can decide whether you want that to happen or not.
 
 In `RA2MD.INI`:
 ```ini
 [Phobos]
-SaveGameOnScenarioStart=true ; boolean
+SaveGameOnScenarioStart=true  ; boolean
 ```
 
-## Sidebar / Battle UI
+### Change the scrolling action of the sidebar
 
+- Allow players to decide for themselves:
+  - Whether can use mouse wheel to scroll sidebar strip when the mouse is not on it by `ScrollSidebarStripInTactical` .
+  - Whether can use mouse wheel to scroll sidebar strip when pressing Ctrl by `ScrollSidebarStripWhenHoldCtrl`, Alt by `ScrollSidebarStripWhenHoldAlt`, or Shift by `ScrollSidebarStripWhenHoldShift`.
+
+In `RA2MD.ini`:
+
+```ini
+[Phobos]
+ScrollSidebarStripInTactical=true     ; boolean
+ScrollSidebarStripWhenHoldAlt=true    ; boolean
+ScrollSidebarStripWhenHoldCtrl=true   ; boolean
+ScrollSidebarStripWhenHoldShift=true  ; boolean
+```
 
 ### Allow replacing vanilla repairing with togglable auto repairing
 
@@ -641,6 +876,49 @@ In `rulesmd.ini`:
 ```ini
 [AudioVisual]
 MissingCameo=XXICON.SHP  ; filename - including the .shp/.pcx extension
+```
+
+### Show cameo when unbuildable
+
+- A setting that allows you to preview information. This feature can be used as before, playing "new construction options" and clearing the specific production queue when prerequisites loss.
+  - `Cameo.AlwaysExist` controls whether you can see the cameo when the prerequisite have not satisfied (`TechnoLevel`, `Owner` & `Cameo.RequiredHouses`, `RequiredHouses`, `ForbiddenHouses`, `FactoryOwners`, `StolenTech`, `SecretLab` and `RequiredTheaters`, etc should be satisfied, if the `Cameo.OverrideTechnos` is met, it will override the `Owner` & `Cameo.RequiredHouses` conditions). Defaults to `[AudioVisual]` -> `Cameo.AlwaysExist`.
+    - `Cameo.RequiredHouses` determines whether to add a condition together with `Owner` for `Cameo.AlwaysExist` check when the value is not empty. Suitable for situations where cameo is no need to be modified in games.
+    - `Cameo.OverrideTechnos` determines whether the cameo can also be displayed when you own one of these technos when the value is not empty. Suitable for situations where cameo need to be dynamically modified in games.
+  - `ShowBuildingStatistics` controls whether the number of buildings of this type that you currently own needs to be displayed in the upper left corner of the building cameo (requires the cameo exist).
+    - `Cameo.ShouldCount` controls whether this type of building need to count if `ShowBuildingStatistics=true`. Default to check if building's own `BuildCat` is not `Combat` or `BuildLimit` is set.
+  - `Cameo.OverlayShapes` controls the drawn image file.
+    - `Cameo.OverlayFrames` controls which frame in `Cameo.OverlayShapes` to draw in four different situations: currently owned this building type, can automatically build this building, grey cameo and have its prerequisite, grey cameo but have no prerequisite (The second situation requires `AutoBuilding` to be true, the last situation requires `Cameo.AlwaysExist` to be true). When set to a negative number, it means that there is no need to draw under the corresponding conditions.
+    - `Cameo.OverlayPalette` the color palette used when drawing `Cameo.OverlayShapes`.
+  - The `UIDescription.Unbuildable` is like `UIDescription`, but this only appearing when the techno is truly unbuildable.
+
+In `ra2md.ini`:
+```ini
+[Phobos]
+ShowBuildingStatistics=false     ; boolean
+```
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+Cameo.AlwaysExist=false          ; boolean
+Cameo.OverlayShapes=pips.shp     ; filename - including the .shp extension
+Cameo.OverlayFrames=             ; integer - owned this building, can automatically build, grey and have its prerequisite, grey but have no prerequisite
+Cameo.OverlayPalette=palette.pal ; filename - including the .pal extension
+
+[SOMETECHNO]                     ; TechnoType
+Cameo.AlwaysExist=               ; boolean
+Cameo.RequiredHouses=            ; list of house types
+Cameo.OverrideTechnos=           ; List of TechnoTypes
+UIDescription.Unbuildable=       ; CSF entry key
+
+[SOMEBUILDING]                   ; BuildingType
+Cameo.ShouldCount=               ; boolean
+```
+
+In `artmd.ini`:
+```ini
+[SOMETECHNO]                     ; TechnoType
+GreyCameoPCX=                    ; PCX filename - including the .pcx extension
 ```
 
 ### Harvester counter

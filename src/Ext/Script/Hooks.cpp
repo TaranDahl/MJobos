@@ -1,10 +1,10 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 DEFINE_HOOK(0x6E9443, TeamClass_AI, 0x8)
 {
 	GET(TeamClass*, pTeam, ESI);
 
-	auto const pTeamData = TeamExt::ExtMap.Find(pTeam);
+	auto const pTeamData = TeamExt::Fetch(pTeam);
 
 	// Force a line jump. This should support vanilla YR Actions
 	if (pTeamData->ForceJump_InitialCountdown > 0 && pTeamData->ForceJump_Countdown.Expired())
@@ -122,6 +122,70 @@ DEFINE_HOOK(0x6F01B0, TMission_ChronoShiftToTarget_SuperWeapons, 0x6)
 	R->EBX(pSuperCSphere);
 
 	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x6ECCF3, TeamClass_UpdateScriptAction16_UsePhobosTargeting, 0x7)
+{
+	enum { UseWaypoint = 0, UsePhobosTargetResult = 0x6ECCFF, FuncRet = 0x6ECE4B };
+
+	GET(int, scriptArg, ECX);
+	GET(TeamClass* const, pThis, EDI);
+
+	if (scriptArg >= 0)
+		return UseWaypoint;
+
+	auto const pTeamData = TeamExt::Fetch(pThis);
+	// Find the Leader
+	auto pLeaderUnit = pTeamData->TeamLeader;
+
+	if (!ScriptExt::IsUnitAvailable(pLeaderUnit, true))
+	{
+		pLeaderUnit = ScriptExt::FindTheTeamLeader(pThis);
+		pTeamData->TeamLeader = pLeaderUnit;
+	}
+
+	CellClass* pCell = nullptr;
+	scriptArg = -scriptArg;
+	int TargetType = -1;
+	int targetMask = -1;
+	int targetArg = scriptArg % 256;
+	scriptArg /= 256;
+	int calcThreatMode = scriptArg % 8;
+	scriptArg /= 8;
+	bool pickAllies = scriptArg % 2;
+	scriptArg /= 2;
+	bool useAITargetType = scriptArg % 2;
+	scriptArg /= 2;
+	bool needAttackableByLeader = scriptArg % 2;
+	scriptArg /= 2;
+
+	if (useAITargetType)
+		TargetType = targetArg;
+	else
+		targetMask = targetArg;
+
+	auto selectedTarget = ScriptExt::FindBestObject(pLeaderUnit, targetMask, calcThreatMode, pickAllies, TargetType, -1, needAttackableByLeader);
+	pCell = selectedTarget ? selectedTarget->GetCell() : nullptr;
+
+	if (!pCell)
+	{
+		for (auto pUnit = pThis->FirstUnit; pUnit; pUnit = pUnit->NextTeamMember)
+		{
+			if (pUnit && pUnit->IsAlive && pUnit->Health > 0 && !pUnit->InLimbo)
+			{
+				pUnit->SetTarget(nullptr);
+				//pUnit->SetDestination(nullptr, false);
+				//pUnit->QueueMission(Mission::Guard, true);
+			}
+		}
+
+		pThis->StepCompleted = true;
+
+		return FuncRet;
+	}
+
+	R->EAX(pCell);
+	return UsePhobosTargetResult;
 }
 
 DEFINE_HOOK_AGAIN(0x6F0304, TMission_ChronoShiftToTarget_SWIndex, 0x6)

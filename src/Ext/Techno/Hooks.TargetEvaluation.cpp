@@ -1,5 +1,7 @@
-#include "Body.h"
+﻿#include "Body.h"
+
 #include <Interop/TechnoExt.h>
+#include <Ext/BuildingType/Body.h>
 
 // Cursor & target acquisition stuff not directly tied to other features can go here.
 
@@ -9,7 +11,7 @@ DEFINE_HOOK(0x7098B9, TechnoClass_TargetSomethingNearby_AutoFire, 0x6)
 {
 	GET(TechnoClass* const, pThis, ESI);
 
-	const auto pExt = TechnoExt::ExtMap.Find(pThis)->TypeExtData;
+	const auto pExt = TechnoExt::Fetch(pThis)->TypeExtData;
 
 	if (pExt->AutoTargetOwnPosition)
 	{
@@ -44,7 +46,7 @@ DEFINE_HOOK(0x6F9C67, TechnoClass_GreatestThreat_MapZoneSetContext, 0x5)
 {
 	GET(TechnoClass*, pThis, ESI);
 
-	auto const pTypeExt = TechnoExt::ExtMap.Find(pThis)->TypeExtData;
+	auto const pTypeExt = TechnoExt::Fetch(pThis)->TypeExtData;
 	MapZoneTemp::zoneScanType = pTypeExt->TargetZoneScanType;
 
 	return 0;
@@ -180,7 +182,7 @@ DEFINE_HOOK(0x4DF3A0, FootClass_UpdateAttackMove_SelectNewTarget, 0x6)
 {
 	GET(FootClass* const, pThis, ECX);
 
-	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto pExt = TechnoExt::Fetch(pThis);
 
 	if (pExt->TypeExtData->AttackMove_UpdateTarget.Get(RulesExt::Global()->AttackMove_UpdateTarget)
 		&& CheckAttackMoveCanResetTarget(pThis))
@@ -204,17 +206,28 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 	// if (!pThis->Owner->IsControlledByHuman())
 	//	return CanTarget;
 
-	if (!pThis->MegaMissionIsAttackMove())
-		return ContinueCheck;
+	GET(TechnoClass*, pTarget, ESI);
 
-	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	if (pTarget->WhatAmI() == AbstractType::Building)
+	{
+		// Fallback to unmodded behavior if the building is an exempt of aggressive stance.
+		if (BuildingTypeExt::Fetch(static_cast<BuildingClass*>(pTarget)->Type)->AggressiveStance_Exempt)
+			return ContinueCheck;
 
-	return pExt->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive) ? CanTarget : ContinueCheck;
+		if (TechnoExt::Fetch(pThis)->GetAggressiveStance())
+			return CanTarget;
+	}
+
+	if (pThis->MegaMissionIsAttackMove())
+	{
+		if (TechnoExt::Fetch(pThis)->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive))
+			return CanTarget;
+	}
+
+	return ContinueCheck;
 }
 
 #pragma endregion
-
-#pragma region HealingWeapons
 
 #pragma region TechnoClass_EvaluateObject
 
@@ -238,7 +251,7 @@ static double __fastcall HealthRatio_Wrapper(TechnoClass* pTechno)
 
 	if (result >= 1.0)
 	{
-		const auto pExt = TechnoExt::ExtMap.Find(pTechno);
+		const auto pExt = TechnoExt::Fetch(pTechno);
 
 		if (const auto pShieldData = pExt->Shield.get())
 		{
@@ -277,7 +290,7 @@ public:
 
 		if (const auto pTechno = abstract_cast<TechnoClass*>(pObj))
 		{
-			const auto pExt = TechnoExt::ExtMap.Find(pTechno);
+			const auto pExt = TechnoExt::Fetch(pTechno);
 
 			if (const auto pShieldData = pExt->Shield.get())
 			{
@@ -358,8 +371,37 @@ DEFINE_FUNCTION_JUMP(VTABLE, 0x7EB418, InfantryClass__GetFireError_Wrapper)
 static Action __fastcall UnitClass__WhatAction_Wrapper(UnitClass* pThis, void* _, ObjectClass* pObj, bool ignoreForce)
 {
 	AresScheme::Prefix(pThis, pObj, -1, false);
-	auto const result = pThis->UnitClass::MouseOverObject(pObj, ignoreForce);
+	auto result = pThis->UnitClass::MouseOverObject(pObj, ignoreForce);
 	AresScheme::Suffix();
+
+	auto const pExt = TechnoExt::Fetch(pThis);
+	if (!pExt->ParentAttachment)
+		return result;
+
+	switch (result)
+	{
+	case Action::Repair:
+		result = Action::NoRepair;
+		break;
+
+	case Action::Self_Deploy:
+		if (pThis->Type->DeploysInto)
+			result = Action::NoDeploy;
+		break;
+
+	case Action::Sabotage:
+	case Action::Capture:
+	case Action::Enter:
+		result = Action::NoEnter;
+		break;
+
+	case Action::GuardArea:
+	case Action::AttackMoveNav:
+	case Action::Move:
+		result = Action::NoMove;
+		break;
+	}
+
 	return result;
 }
 DEFINE_FUNCTION_JUMP(VTABLE, 0x7F5CE4, UnitClass__WhatAction_Wrapper)
@@ -369,9 +411,29 @@ static Action __fastcall InfantryClass__WhatAction_Wrapper(InfantryClass* pThis,
 	AresScheme::Prefix(pThis, pObj, -1, pThis->Type->Engineer);
 	auto const result = pThis->InfantryClass::MouseOverObject(pObj, ignoreForce);
 	AresScheme::Suffix();
+
 	return result;
 }
 DEFINE_FUNCTION_JUMP(VTABLE, 0x7EB0CC, InfantryClass__WhatAction_Wrapper)
+
+#pragma region CeaseFireStance
+
+DEFINE_HOOK(0x6F8DFD, TechnoClass_SelectAutoTarget_CeaseFireStance, 0x5)
+{
+	enum { FuncReturn = 0x6F8E38 };
+	GET(TechnoClass*, pThis, ESI);
+	GET_STACK(ThreatType, flags, STACK_OFFSET(0x6C, 0x4));
+	return TechnoExt::Fetch(pThis)->GetCeaseFireStance()
+		&& (((flags & ThreatType::Range) != ThreatType::Normal) || ((flags & ThreatType::Area) != ThreatType::Normal)) // Cease fire don't work for script auto targeting.
+		? FuncReturn : 0;
+}
+
+DEFINE_HOOK(0x708AC5, TechnoClass_CanRetaliateToAttacker_CeaseFireStance, 0x5)
+{
+	enum { FuncReturn = 0x708B17 };
+	GET(TechnoClass*, pThis, ESI);
+	return TechnoExt::Fetch(pThis)->GetCeaseFireStance() ? FuncReturn : 0;
+}
 
 #pragma endregion
 
@@ -382,7 +444,7 @@ static inline bool IsAThreatToMe(TechnoClass* const pTechno, AbstractClass* cons
 {
 	if (const auto pTechnoTarget = abstract_cast<TechnoClass*>(pTarget))
 	{
-		auto pTypeExt = TechnoExt::ExtMap.Find(pTechnoTarget)->TypeExtData;
+		const auto pTypeExt = TechnoExt::Fetch(pTechnoTarget)->TypeExtData;
 
 		if (pTypeExt->AlwaysConsideredThreat)
 			return true;
@@ -432,15 +494,15 @@ DEFINE_HOOK(0x70CF87, TechnoClass_ThreatCoefficient_CanAttackMeThreatBonus, 0x9)
 	GET(TechnoClass* const, pTarget, ESI);
 	REF_STACK(double, totalThreat, STACK_OFFSET(0x58, -0x48));
 
-	auto pExt = TechnoExt::ExtMap.Find(pThis);
-	auto pTypeExt = pExt->TypeExtData;
+	const auto pExt = TechnoExt::Fetch(pThis);
+	const auto pTypeExt = pExt->TypeExtData;
 
 	if (!pTypeExt->ExtraThreat_Enabled)
 		return 0;
 
 	auto ApplyIsThreatBonus = [pTypeExt, pThis, pTarget, &totalThreat]()
 		{
-			double bonus = pTypeExt->ExtraThreat_IsThreat.Get(RulesExt::Global()->ExtraThreat_IsThreat);
+			const double bonus = pTypeExt->ExtraThreat_IsThreat.Get(RulesExt::Global()->ExtraThreat_IsThreat);
 
 			if (bonus == 0.0)
 				return;
@@ -454,10 +516,10 @@ DEFINE_HOOK(0x70CF87, TechnoClass_ThreatCoefficient_CanAttackMeThreatBonus, 0x9)
 
 	auto ApplyInRangeBonus = [pTypeExt, pThis, pTarget, &totalThreat]()
 		{
-			double bonus1 = pTypeExt->ExtraThreat_InRange.Get(RulesExt::Global()->ExtraThreat_InRange);
-			double dist = pThis->DistanceFrom(pTarget) / 256.0;
-			double bonus2 = dist * pTypeExt->ExtraThreatCoefficient_InRangeDistance.Get(RulesExt::Global()->ExtraThreatCoefficient_InRangeDistance);
-			double bonus = bonus1 + bonus2;
+			const double bonus1 = pTypeExt->ExtraThreat_InRange.Get(RulesExt::Global()->ExtraThreat_InRange);
+			const double dist = pThis->DistanceFrom(pTarget) / 256.0;
+			const double bonus2 = dist * pTypeExt->ExtraThreatCoefficient_InRangeDistance.Get(RulesExt::Global()->ExtraThreatCoefficient_InRangeDistance);
+			const double bonus = bonus1 + bonus2;
 
 			if (bonus == 0.0)
 				return;
@@ -471,25 +533,25 @@ DEFINE_HOOK(0x70CF87, TechnoClass_ThreatCoefficient_CanAttackMeThreatBonus, 0x9)
 
 	auto ApplyFacingBonus = [pTypeExt, pThis, pTarget, &totalThreat]()
 		{
-			auto pFacing = GetFireFacing(pThis);
+			const auto pFacing = GetFireFacing(pThis);
 
 			if (!pFacing)
 				return;
 
-			double bonus = pTypeExt->ExtraThreatCoefficient_Facing.Get(RulesExt::Global()->ExtraThreatCoefficient_Facing);
+			const double bonus = pTypeExt->ExtraThreatCoefficient_Facing.Get(RulesExt::Global()->ExtraThreatCoefficient_Facing);
 
 			if (bonus == 0.0)
 				return;
 
 			DirStruct dir = DirStruct();
-			int deltaFacing = 32768 - std::abs(std::abs(pThis->GetTargetDirection(&dir, pTarget)->Raw - pFacing->Current().Raw) - 32768);
+			const int deltaFacing = 32768 - std::abs(std::abs(pThis->GetTargetDirection(&dir, pTarget)->Raw - pFacing->Current().Raw) - 32768);
 			totalThreat += deltaFacing * bonus;
 		};
 	ApplyFacingBonus();
 
 	auto ApplyLastTargetDistanceBonus = [pExt, pTypeExt, pThis, pTarget, &totalThreat]()
 		{
-			double bonus = pTypeExt->ExtraThreatCoefficient_DistanceToLastTarget.Get(RulesExt::Global()->ExtraThreatCoefficient_DistanceToLastTarget);
+			const double bonus = pTypeExt->ExtraThreatCoefficient_DistanceToLastTarget.Get(RulesExt::Global()->ExtraThreatCoefficient_DistanceToLastTarget);
 
 			if (bonus == 0.0)
 				return;
@@ -497,7 +559,7 @@ DEFINE_HOOK(0x70CF87, TechnoClass_ThreatCoefficient_CanAttackMeThreatBonus, 0x9)
 			if (pExt->LastTargetCrd == CoordStruct::Empty)
 				return;
 
-			double distToLastTarget = pTarget->GetCoords().DistanceFrom(pExt->LastTargetCrd) / 256.0;
+			const double distToLastTarget = pTarget->GetCoords().DistanceFrom(pExt->LastTargetCrd) / 256.0;
 			totalThreat += distToLastTarget * bonus;
 		};
 	ApplyLastTargetDistanceBonus();
@@ -509,6 +571,5 @@ DEFINE_HOOK(0x70CF87, TechnoClass_ThreatCoefficient_CanAttackMeThreatBonus, 0x9)
 
 	return 0;
 }
-
 
 #pragma endregion

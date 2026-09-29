@@ -1,5 +1,6 @@
-#include <PreviewClass.h>
+﻿#include <PreviewClass.h>
 #include <ThemeClass.h>
+#include <FPSCounter.h>
 
 #include <Ext/House/Body.h>
 #include <Ext/Side/Body.h>
@@ -75,6 +76,29 @@ DEFINE_HOOK(0x641EE0, PreviewClass_ReadPreview, 0x6)
 	return 0x64203D;
 }
 
+DEFINE_HOOK(0x4A26E8, CreditClass_AI_SmoothDisable, 0x6)
+{
+	if (!Phobos::UI::CreditsIndicator_Smooth)
+		return 0x4A26F0;
+	else
+		return 0;
+}
+
+DEFINE_HOOK(0x4A2729, CreditClass_AI_CreditsStepClamp, 0x5)
+{
+	enum { Continue = 0x4A2735 };
+
+    const int maxStep = Phobos::UI::CreditsIndicator_MaxStep;
+    if (maxStep <= 0)
+        return Continue;
+
+    GET(const int, current, EAX);
+
+    R->EAX(Math::min(current, maxStep));
+
+    return Continue;
+}
+
 DEFINE_HOOK(0x4A25E0, CreditsClass_GraphicLogic_HarvesterCounter, 0x7)
 {
 	auto const pPlayer = HouseClass::CurrentPlayer;
@@ -85,7 +109,7 @@ DEFINE_HOOK(0x4A25E0, CreditsClass_GraphicLogic_HarvesterCounter, 0x7)
 
 	if (Phobos::UI::HarvesterCounter_Show && Phobos::Config::ShowHarvesterCounter)
 	{
-		const auto pSideExt = SideExt::ExtMap.Find(SideClass::Array.GetItem(pPlayer->SideIndex));
+		const auto pSideExt = SideExt::Fetch(SideClass::Array.GetItem(pPlayer->SideIndex));
 		wchar_t counter[0x20];
 		const int nActive = HouseExt::ActiveHarvesterCount(pPlayer);
 		const int nTotal = HouseExt::TotalHarvesterCount(pPlayer);
@@ -113,7 +137,7 @@ DEFINE_HOOK(0x4A25E0, CreditsClass_GraphicLogic_HarvesterCounter, 0x7)
 
 	if (Phobos::UI::PowerDelta_Show && Phobos::Config::ShowPowerDelta && pPlayer->Buildings.Count)
 	{
-		const auto pSideExt = SideExt::ExtMap.Find(SideClass::Array.GetItem(pPlayer->SideIndex));
+		const auto pSideExt = SideExt::Fetch(SideClass::Array.GetItem(pPlayer->SideIndex));
 		wchar_t counter[0x20];
 
 		ColorStruct clrToolTip;
@@ -151,7 +175,7 @@ DEFINE_HOOK(0x4A25E0, CreditsClass_GraphicLogic_HarvesterCounter, 0x7)
 
 	if (Phobos::UI::WeedsCounter_Show && Phobos::Config::ShowWeedsCounter)
 	{
-		const auto pSideExt = SideExt::ExtMap.Find(SideClass::Array.GetItem(pPlayer->SideIndex));
+		const auto pSideExt = SideExt::Fetch(SideClass::Array.GetItem(pPlayer->SideIndex));
 		wchar_t counter[0x20];
 		const ColorStruct clrToolTip = pSideExt->Sidebar_WeedsCounter_Color.Get(Drawing::TooltipColor);
 
@@ -199,18 +223,28 @@ DEFINE_HOOK(0x6A8463, StripClass_OperatorLessThan_CameoPriority, 0x5)
 	GET_STACK(const int, idxRight, STACK_OFFSET(0x1C, 0x10));
 	GET_STACK(const AbstractType, rttiLeft, STACK_OFFSET(0x1C, 0x4));
 	GET_STACK(const AbstractType, rttiRight, STACK_OFFSET(0x1C, 0xC));
-	const auto pLeftTechnoExt = TechnoTypeExt::ExtMap.TryFind(pLeft);
-	const auto pRightTechnoExt = TechnoTypeExt::ExtMap.TryFind(pRight);
+	const auto pLeftTechnoExt = TechnoTypeExt::TryFetch(pLeft);
+	const auto pRightTechnoExt = TechnoTypeExt::TryFetch(pRight);
 	const auto pLeftSWExt = (rttiLeft == AbstractType::Special || rttiLeft == AbstractType::Super || rttiLeft == AbstractType::SuperWeaponType)
-		? SWTypeExt::ExtMap.TryFind(SuperWeaponTypeClass::Array.GetItem(idxLeft)) : nullptr;
+		? SWTypeExt::TryFetch(SuperWeaponTypeClass::Array.GetItem(idxLeft)) : nullptr;
 	const auto pRightSWExt = (rttiRight == AbstractType::Special || rttiRight == AbstractType::Super || rttiRight == AbstractType::SuperWeaponType)
-		? SWTypeExt::ExtMap.TryFind(SuperWeaponTypeClass::Array.GetItem(idxRight)) : nullptr;
+		? SWTypeExt::TryFetch(SuperWeaponTypeClass::Array.GetItem(idxRight)) : nullptr;
 
 	if ((pLeftTechnoExt || pLeftSWExt) && (pRightTechnoExt || pRightSWExt))
 	{
-		const int leftPriority = pLeftTechnoExt ? pLeftTechnoExt->CameoPriority : pLeftSWExt->CameoPriority;
-		const int rightPriority = pRightTechnoExt ? pRightTechnoExt->CameoPriority : pRightSWExt->CameoPriority;
 		enum { rTrue = 0x6A8692, rFalse = 0x6A86A0 };
+
+		const auto ownerBits = 1u << HouseClass::CurrentPlayer->Type->ArrayIndex2;
+		const auto leftBits = pLeftTechnoExt ? pLeftTechnoExt->CameoPriority_Houses : pLeftSWExt->CameoPriority_Houses;
+		const auto rightBits = pRightTechnoExt ? pRightTechnoExt->CameoPriority_Houses : pRightSWExt->CameoPriority_Houses;
+
+		if ((leftBits & ownerBits) && (!(rightBits & ownerBits)))
+			return rTrue;
+		else if ((!(leftBits & ownerBits)) && (rightBits & ownerBits))
+			return rFalse;
+
+		const auto leftPriority = pLeftTechnoExt ? pLeftTechnoExt->CameoPriority : pLeftSWExt->CameoPriority;
+		const auto rightPriority = pRightTechnoExt ? pRightTechnoExt->CameoPriority : pRightSWExt->CameoPriority;
 
 		if (leftPriority > rightPriority)
 			return rTrue;
@@ -337,7 +371,7 @@ DEFINE_HOOK(0x683E41, ScenarioClass_Start_ShowBriefing, 0x6)
 	{
 		const SideClass* pSide = SideClass::Array.GetItemOrDefault(ScenarioClass::Instance->PlayerSideIndex);
 
-		if (const auto pSideExt = SideExt::ExtMap.TryFind(pSide))
+		if (const auto pSideExt = SideExt::TryFetch(pSide))
 			theme = pSideExt->BriefingTheme;
 	}
 
@@ -440,6 +474,20 @@ DEFINE_FUNCTION_JUMP(CALL, 0x63B17F, Fake_HouseIsAlliedWith);
 DEFINE_FUNCTION_JUMP(CALL, 0x63B1BA, Fake_HouseIsAlliedWith);
 DEFINE_FUNCTION_JUMP(CALL, 0x63B2CE, Fake_HouseIsAlliedWith);
 
+DEFINE_HOOK(0x4F4480, GScreenClass_DrawOnTop_Start, 0x8)
+{
+	enum { SkipDraw = 0x4F45A8 };
+
+	auto shouldSkipDraw = []() -> bool
+		{
+			return Phobos::Config::SkipFrameDelay
+				&& FPSCounter::CurrentFrameRate < static_cast<size_t>(RulesClass::Instance->DetailMinFrameRateNormal)
+				&& !(Unsorted::CurrentFrame % Phobos::Config::SkipFrameDelay);
+		};
+
+	return shouldSkipDraw() ? SkipDraw : 0;
+}
+
 DEFINE_HOOK(0x69A317, SessionClass_PlayerColorIndexToColorSchemeIndex, 0x0)
 {
 	GET_STACK(int, index, 0x4);
@@ -514,6 +562,7 @@ namespace DrawTimerTemp
 {
 	bool AdjustLocation = false;
 	bool IsPercentage = false;
+	bool IsDigit = false;
 	double Percentage = 0.0;
 	int TimeLeft = 0;
 }
@@ -523,12 +572,65 @@ DEFINE_HOOK(0x6D3D10, TacticalClass_Render_BeforeAll, 0x6)
 	using namespace DrawTimerTemp;
 	AdjustLocation = false;
 	IsPercentage = false;
+	IsDigit = false;
 	return 0;
 }
 
 DEFINE_HOOK(0x6D4992, TacticalClass_Render_DrawMissionTimer_TimeLeft, 0x6)
 {
 	DrawTimerTemp::TimeLeft = R->EDX<int>();
+	DrawTimerTemp::IsPercentage = false;
+	DrawTimerTemp::IsDigit = false;
+
+	switch (ScenarioExt::Global()->MissionTimer_Type)
+	{
+	case 1:
+	{
+		DrawTimerTemp::IsPercentage = true;
+		const int totalTime = ScenarioExt::Global()->MissionTimer_Variable;
+		if (ScenarioExt::Global()->MissionTimer_Reverse)
+			DrawTimerTemp::Percentage = totalTime > 0 ? static_cast<double>(DrawTimerTemp::TimeLeft) / totalTime : 1.0;
+		else
+			DrawTimerTemp::Percentage = totalTime > 0 ? static_cast<double>(totalTime - DrawTimerTemp::TimeLeft) / totalTime : 1.0;
+		break;
+	}
+	case 2:
+	{
+		if (ScenarioExt::Global()->MissionTimer_Reverse)
+			DrawTimerTemp::TimeLeft = ScenarioExt::Global()->MissionTimer_Variable - DrawTimerTemp::TimeLeft;
+		DrawTimerTemp::IsDigit = true;
+		break;
+	}
+	case 3:
+	{
+		DrawTimerTemp::IsDigit = true;
+		const auto& variables = ScenarioExt::Global()->Variables[0];
+		const auto& it = variables.find(ScenarioExt::Global()->MissionTimer_Variable);
+		if (it != variables.end())
+			DrawTimerTemp::TimeLeft = it->second.Value;
+		else
+			DrawTimerTemp::TimeLeft = 0;
+		break;
+	}
+	case 4:
+	{
+		DrawTimerTemp::IsDigit = true;
+		const auto& variables = ScenarioExt::Global()->Variables[1];
+		const auto& it = variables.find(ScenarioExt::Global()->MissionTimer_Variable);
+		if (it != variables.end())
+			DrawTimerTemp::TimeLeft = it->second.Value;
+		else
+			DrawTimerTemp::TimeLeft = 0;
+		break;
+	}
+	default:
+	{
+		if (ScenarioExt::Global()->MissionTimer_Reverse)
+			DrawTimerTemp::TimeLeft = ScenarioExt::Global()->MissionTimer_Variable - DrawTimerTemp::TimeLeft;
+		break;
+	}
+	}
+
 	return 0;
 }
 
@@ -539,15 +641,16 @@ DEFINE_HOOK(0x6D4A10, TacticalClass_Render_DrawSuperTimer_PercentageTimer, 0x6)
 	GET(SuperClass*, pSuper, ECX);
 
 	DrawTimerTemp::IsPercentage = false;
+	DrawTimerTemp::IsDigit = false;
 	const int timeLeft = pSuper->RechargeTimer.GetTimeLeft();
-	const auto pSWTypeExt = SWTypeExt::ExtMap.Find(pSuper->Type);
+	const auto pSWTypeExt = SWTypeExt::Fetch(pSuper->Type);
 
 	if (pSWTypeExt->ShowTimer_Percentage.Get(RulesExt::Global()->SuperWeaponTimer_Percentage))
 	{
 		DrawTimerTemp::IsPercentage = true;
 		const int recharge = pSuper->GetRechargeTime();
-		const double percentage = DrawTimerTemp::Percentage = std::min(static_cast<double>(recharge - timeLeft) / recharge, 1.0);
-		R->ESI(percentage >= 1.0 ? 0 : 15);
+		const double percentage = DrawTimerTemp::Percentage = recharge > 0 ? std::min(static_cast<double>(recharge - timeLeft) / recharge, 1.0) : 1.0;
+		R->ESI(percentage == 1.0 ? 0 : 15);
 	}
 	else
 	{
@@ -570,6 +673,8 @@ static int __fastcall TacticalClass_DrawTimer_swprintf(wchar_t* pBuffer, size_t 
 
 	if (IsPercentage)
 		return swprintf(pBuffer, bufferCount, L"%.2lf%s", Percentage * 100, L"%%");
+	else if (IsDigit)
+		return swprintf(pBuffer, bufferCount, L"%d", TimeLeft);
 	else
 		return swprintf(pBuffer, bufferCount, L"%02d:%02d", TimeLeft / 60 % 60, TimeLeft % 60);
 }
@@ -619,7 +724,7 @@ DEFINE_HOOK(0x6DBEA3, TacticalClass_DrawRadialIndicator_Building_Extras, 0x7)
 
 	if (Phobos::Config::ShowPowerPlantEnhancerRange && RulesExt::Global()->ShowPowerPlantEnhancerRange)
 	{
-		const auto pCurrentExt = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer);
+		const auto pCurrentExt = HouseExt::Fetch(HouseClass::CurrentPlayer);
 		const auto center = DisplayClass::Instance.CurrentFoundation_CenterCell;
 
 		for (const auto pEnhancer : pCurrentExt->PowerPlantEnhancers)
@@ -627,7 +732,7 @@ DEFINE_HOOK(0x6DBEA3, TacticalClass_DrawRadialIndicator_Building_Extras, 0x7)
 			if (!TechnoExt::IsActive(pEnhancer) || pEnhancer->InLimbo || !pEnhancer->HasPower)
 				continue;
 
-			const auto pEnhancerTypeExt = BuildingTypeExt::ExtMap.Find(pEnhancer->Type);
+			const auto pEnhancerTypeExt = BuildingTypeExt::Fetch(pEnhancer->Type);
 			const int range = pEnhancerTypeExt->PowerPlantEnhancer_Range.Get() / Unsorted::LeptonsPerCell;
 
 			if (range <= 0 || !pEnhancerTypeExt->PowerPlantEnhancer_Buildings.Contains(pCurrentBuilding->Type))
@@ -635,7 +740,7 @@ DEFINE_HOOK(0x6DBEA3, TacticalClass_DrawRadialIndicator_Building_Extras, 0x7)
 
 			CoordStruct enhancerCoords = pEnhancer->GetCoords();
 
-			if (center.DistanceFrom(CellClass::Coord2Cell(enhancerCoords)) > range * 1.5)
+			if (center.DistanceFromSquared(CellClass::Coord2Cell(enhancerCoords)) > range * range * 2.25) // 1.5 * 1.5
 				continue;
 
 			enhancerCoords.Z = MapClass::Instance.GetCellFloorHeight(enhancerCoords);

@@ -1,20 +1,4 @@
-#include "InterceptorTypeClass.h"
-
-InterceptorTypeClass::InterceptorTypeClass(TechnoTypeClass* OwnedBy)
-	: OwnerType { OwnedBy }
-	, TargetingDelay { 1 }
-	, CanTargetHouses { AffectedHouse::Enemies }
-	, GuardRange {}
-	, MinimumGuardRange {}
-	, GuardRange_IsCylindrical { false }
-	, Weapon { 0 }
-	, ApplyFirepowerMult { true }
-	, DeleteOnIntercept {}
-	, WeaponOverride {}
-	, WeaponReplaceProjectile { false }
-	, WeaponCumulativeDamage { false }
-	, KeepIntact { false }
-{ }
+﻿#include "InterceptorTypeClass.h"
 
 void InterceptorTypeClass::LoadFromINI(CCINIClass* pINI, const char* pSection)
 {
@@ -46,7 +30,6 @@ template <class T>
 bool InterceptorTypeClass::Serialize(T& stm)
 {
 	return stm
-		.Process(this->OwnerType)
 		.Process(this->TargetingDelay)
 		.Process(this->CanTargetHouses)
 		.Process(this->GuardRange)
