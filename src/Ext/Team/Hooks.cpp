@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 #include <Utilities/AresHelper.h>
 #include <Ext/Techno/Body.h>

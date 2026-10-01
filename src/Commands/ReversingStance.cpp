@@ -1,4 +1,4 @@
-﻿#include "ReversingStance.h"
+#include "ReversingStance.h"
 
 #include "Ext/Unit/Body.h"
 #include <Ext/Event/Body.h>

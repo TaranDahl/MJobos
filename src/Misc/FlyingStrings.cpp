@@ -1,4 +1,4 @@
-﻿#include "FlyingStrings.h"
+#include "FlyingStrings.h"
 #include <Phobos.h>
 #include <Phobos.CRT.h>
 #include <BitFont.h>

@@ -1,4 +1,4 @@
-﻿#include <IsometricTileTypeClass.h>
+#include <IsometricTileTypeClass.h>
 
 #include "Body.h"
 

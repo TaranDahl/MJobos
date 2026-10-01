@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 DEFINE_HOOK(0x47F71D, CellClass_DrawOverlay_ZAdjust, 0x5)
 {

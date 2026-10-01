@@ -1,4 +1,4 @@
-﻿#include "Dummy.h"
+#include "Dummy.h"
 
 #include <MessageListClass.h>
 #include <Utilities/Debug.h>

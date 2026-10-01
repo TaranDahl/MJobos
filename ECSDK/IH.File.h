@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <CCFileClass.h>
 #include "SyringeEx.h"
 #include "IH.Initial.h"

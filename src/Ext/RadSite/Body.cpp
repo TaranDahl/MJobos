@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 #include <Notifications.h>
 
 #include <New/Type/RadTypeClass.h>

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <Phobos.version.h>
 #include <Windows.h>
 

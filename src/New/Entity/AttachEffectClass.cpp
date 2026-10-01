@@ -1,4 +1,4 @@
-﻿#include "AttachEffectClass.h"
+#include "AttachEffectClass.h"
 
 #include <Ext/Anim/Body.h>
 #include <Ext/Techno/Body.h>

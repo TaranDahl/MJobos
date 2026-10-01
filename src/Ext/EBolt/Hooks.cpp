@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 #include <Ext/Techno/Body.h>
 #include <Ext/WeaponType/Body.h>

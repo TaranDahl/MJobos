@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 DEFINE_HOOK(0x68BCC0, ScenarioClass_Get_Waypoint_Location, 0xB)
 {

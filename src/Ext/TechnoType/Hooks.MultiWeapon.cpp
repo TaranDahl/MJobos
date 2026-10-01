@@ -1,4 +1,4 @@
-﻿#include <Ext/Techno/Body.h>
+#include <Ext/Techno/Body.h>
 
 DEFINE_HOOK(0x7128B2, TechnoTypeClass_ReadINI_MultiWeapon, 0x6)
 {

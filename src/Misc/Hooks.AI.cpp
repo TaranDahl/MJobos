@@ -1,4 +1,4 @@
-﻿#include <New/Entity/AttachmentClass.h>
+#include <New/Entity/AttachmentClass.h>
 
 #include <Ext/Scenario/Body.h>
 #include <Ext/TerrainType/Body.h>

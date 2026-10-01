@@ -1,4 +1,4 @@
-﻿#include "BannerClass.h"
+#include "BannerClass.h"
 
 #include <Drawing.h>
 

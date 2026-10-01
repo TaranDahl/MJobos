@@ -1,4 +1,4 @@
-﻿#include "AStarClass.h"
+#include "AStarClass.h"
 
 #ifdef ENABLE_ASTAR_REIMPL
 

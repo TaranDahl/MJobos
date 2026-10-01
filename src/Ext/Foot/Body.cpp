@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 #include <Kamikaze.h>
 #include <JumpjetLocomotionClass.h>

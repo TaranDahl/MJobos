@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <EventClass.h>
 #include <TargetClass.h>
 #include <HouseClass.h>

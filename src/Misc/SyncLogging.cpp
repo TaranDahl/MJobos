@@ -1,4 +1,4 @@
-﻿#include "SyncLogging.h"
+#include "SyncLogging.h"
 
 #include <Helpers/Macro.h>
 #include <EventClass.h>

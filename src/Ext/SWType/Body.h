@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <Ext/Building/Body.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

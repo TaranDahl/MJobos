@@ -1,4 +1,4 @@
-﻿#include "PhobosToolTip.h"
+#include "PhobosToolTip.h"
 
 #include <GameOptionsClass.h>
 #include <CCToolTip.h>

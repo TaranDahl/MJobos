@@ -1,4 +1,4 @@
-﻿#include <EventClass.h>
+#include <EventClass.h>
 #include <TunnelLocomotionClass.h>
 #include <JumpjetLocomotionClass.h>
 

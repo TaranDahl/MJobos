@@ -1,4 +1,4 @@
-﻿// by TaranDahl
+// by TaranDahl
 
 #include "ShiftLocomotionClass.h"
 

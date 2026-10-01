@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <TeamClass.h>
 
 #include <Ext/TeamType/Body.h>

@@ -1,4 +1,4 @@
-﻿#include <Utilities/TemplateDef.h>
+#include <Utilities/TemplateDef.h>
 
 #include <CRC.h>
 

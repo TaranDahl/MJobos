@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 #include <Ext/AircraftType/Body.h>
 #include <Ext/BuildingType/Body.h>

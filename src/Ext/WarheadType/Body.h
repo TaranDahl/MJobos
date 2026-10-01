@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <WarheadTypeClass.h>
 #include <Ext/Techno/Body.h>
 #include <Utilities/Container.h>

@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 OverlayTypeExt::ExtContainer OverlayTypeExt::ExtMap;
 

@@ -1,4 +1,4 @@
-﻿#include "SelectCaptured.h"
+#include "SelectCaptured.h"
 
 #include <Utilities/GeneralUtils.h>
 #include <Utilities/Debug.h>

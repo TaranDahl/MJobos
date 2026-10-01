@@ -1,4 +1,4 @@
-﻿#include "SyringeEx.h"
+#include "SyringeEx.h"
 #include <YRPP.h>
 
 

@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 #include <ThemeClass.h>
 
 // Ingame music switch when defeated

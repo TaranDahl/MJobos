@@ -1,4 +1,4 @@
-﻿#include <GameOptionsClass.h>
+#include <GameOptionsClass.h>
 #include <FPSCounter.h>
 
 #include <Ext/WarheadType/Body.h>

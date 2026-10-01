@@ -1,4 +1,4 @@
-﻿#include <JumpjetLocomotionClass.h>
+#include <JumpjetLocomotionClass.h>
 #include <TunnelLocomotionClass.h>
 #include <Utilities/AresHelper.h>
 #include <Ext/Unit/Body.h>

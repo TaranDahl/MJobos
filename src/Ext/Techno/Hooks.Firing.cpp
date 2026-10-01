@@ -1,4 +1,4 @@
-﻿#include <Ext/Anim/Body.h>
+#include <Ext/Anim/Body.h>
 #include <Ext/Building/Body.h>
 #include <Ext/Bullet/Body.h>
 #include <Ext/Infantry/Body.h>

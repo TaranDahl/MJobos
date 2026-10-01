@@ -1,4 +1,4 @@
-﻿#include "BombardTrajectory.h"
+#include "BombardTrajectory.h"
 
 #include <Ext/Anim/Body.h>
 #include <Ext/Bullet/Body.h>

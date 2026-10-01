@@ -1,4 +1,4 @@
-﻿#include "SWColumnClass.h"
+#include "SWColumnClass.h"
 #include "SWSidebarClass.h"
 
 SWColumnClass::SWColumnClass(int maxButtons, int x, int y, int width, int height)

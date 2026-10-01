@@ -1,4 +1,4 @@
-﻿#include <Ext/Foot/Body.h>
+#include <Ext/Foot/Body.h>
 #include <Ext/InfantryType/Body.h>
 
 // Unsorted methods

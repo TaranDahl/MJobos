@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 #include <Interop/TechnoExt.h>
 #include <Ext/BuildingType/Body.h>

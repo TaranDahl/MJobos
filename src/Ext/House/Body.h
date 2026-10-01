@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <HouseClass.h>
 
 #include <Ext/HouseType/Body.h>

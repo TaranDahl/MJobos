@@ -1,4 +1,4 @@
-﻿#include <PreviewClass.h>
+#include <PreviewClass.h>
 #include <ThemeClass.h>
 #include <FPSCounter.h>
 

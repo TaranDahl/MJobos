@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 VoxelAnimExt::ExtContainer VoxelAnimExt::ExtMap;
 

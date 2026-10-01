@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 #include <DriveLocomotionClass.h>
 #include <ShipLocomotionClass.h>

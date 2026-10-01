@@ -1,4 +1,4 @@
-﻿#include "Phobos.h"
+#include "Phobos.h"
 
 #include <GameOptionsClass.h>
 

@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 #include <Utilities/Debug.h>
 #include <Ext/House/Body.h>

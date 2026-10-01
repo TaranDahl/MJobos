@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "SWButtonClass.h"
 #include <Ext/Side/Body.h>
 #include <Ext/Scenario/Body.h>

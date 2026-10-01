@@ -1,4 +1,4 @@
-﻿#include "NextIdleHarvester.h"
+#include "NextIdleHarvester.h"
 
 #include <Utilities/GeneralUtils.h>
 #include <Ext/Techno/Body.h>

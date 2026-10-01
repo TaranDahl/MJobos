@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <OverlayTypeClass.h>
 
 #include <Ext/ObjectType/Body.h>

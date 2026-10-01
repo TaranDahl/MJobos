@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <Ext/TechnoType/Body.h>
 #include <Ext/Bullet/Body.h>

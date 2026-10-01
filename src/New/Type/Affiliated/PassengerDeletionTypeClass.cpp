@@ -1,4 +1,4 @@
-﻿#include "PassengerDeletionTypeClass.h"
+#include "PassengerDeletionTypeClass.h"
 
 std::pair<bool, bool> PassengerDeletionTypeClass::CanParse(INI_EX exINI, const char* pSection)
 {

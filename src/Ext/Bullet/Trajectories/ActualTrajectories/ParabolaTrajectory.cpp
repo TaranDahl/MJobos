@@ -1,4 +1,4 @@
-﻿#include "ParabolaTrajectory.h"
+#include "ParabolaTrajectory.h"
 
 #include <Ext/Bullet/Body.h>
 #include <Ext/WarheadType/Body.h>

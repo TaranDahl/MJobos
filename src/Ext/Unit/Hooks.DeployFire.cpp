@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 DEFINE_HOOK(0x4C77E4, EventClass_Execute_DeployCommand, 0x6)
 {

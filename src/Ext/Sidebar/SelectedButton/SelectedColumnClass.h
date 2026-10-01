@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <GadgetClass.h>
 
 class SelectedColumnClass : public GadgetClass

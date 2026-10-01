@@ -1,4 +1,4 @@
-﻿#include <Utilities/AresHelper.h>
+#include <Utilities/AresHelper.h>
 #include <Ext/Techno/Body.h>
 
 class ExtSelection

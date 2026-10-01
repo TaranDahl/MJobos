@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "SWColumnClass.h"
 #include "ToggleSWButtonClass.h"
 #include <CommandClass.h>

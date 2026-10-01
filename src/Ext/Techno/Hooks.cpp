@@ -1,4 +1,4 @@
-﻿#include <TunnelLocomotionClass.h>
+#include <TunnelLocomotionClass.h>
 
 #include <Ext/Aircraft/Body.h>
 #include <Ext/Anim/Body.h>

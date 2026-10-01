@@ -1,4 +1,4 @@
-﻿#include "AresFunctions.h"
+#include "AresFunctions.h"
 #include "AresHelper.h"
 #include "Patch.h"
 

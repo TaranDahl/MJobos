@@ -1,4 +1,4 @@
-﻿#include "SWSidebarClass.h"
+#include "SWSidebarClass.h"
 
 #include <Ext/House/Body.h>
 

@@ -1,4 +1,4 @@
-﻿#include <Utilities/AresHelper.h>
+#include <Utilities/AresHelper.h>
 #include <Utilities/AresFunctions.h>
 #include <Utilities/Helpers.Alex.h>
 

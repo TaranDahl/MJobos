@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <SideClass.h>
 
 #include <Ext/AbstractType/Body.h>

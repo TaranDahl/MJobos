@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 #include "Trajectories\PhobosVirtualTrajectory.h"
 
 #include <Ext/Anim/Body.h>

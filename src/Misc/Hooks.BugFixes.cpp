@@ -1,4 +1,4 @@
-﻿#include <AircraftTrackerClass.h>
+#include <AircraftTrackerClass.h>
 #include <EventClass.h>
 #include <HoverLocomotionClass.h>
 #include <JumpjetLocomotionClass.h>

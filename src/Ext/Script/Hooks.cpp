@@ -1,4 +1,4 @@
-﻿#include "Body.h"
+#include "Body.h"
 
 DEFINE_HOOK(0x6E9443, TeamClass_AI, 0x8)
 {

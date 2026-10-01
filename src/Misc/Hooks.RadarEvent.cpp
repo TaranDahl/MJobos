@@ -1,4 +1,4 @@
-﻿#include <RadarEventClass.h>
+#include <RadarEventClass.h>
 #include <Ext/Rules/Body.h>
 #include <Utilities/Macro.h>
 

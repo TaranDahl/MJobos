@@ -1,4 +1,4 @@
-﻿#include <Ext/WeaponType/Body.h>
+#include <Ext/WeaponType/Body.h>
 #include <Ext/Techno/Body.h>
 #include <Helpers/Macro.h>
 #include <Utilities/GeneralUtils.h>

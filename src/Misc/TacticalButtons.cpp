@@ -1,4 +1,4 @@
-﻿#include "TacticalButtons.h"
+#include "TacticalButtons.h"
 
 #include <SuperClass.h>
 #include <AircraftClass.h>
