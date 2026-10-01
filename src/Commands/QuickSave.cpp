@@ -1,4 +1,4 @@
-#include "QuickSave.h"
+﻿#include "QuickSave.h"
 
 #include <EventClass.h>
 #include <Utilities/GeneralUtils.h>

@@ -1,4 +1,4 @@
-#include <Ext/WeaponType/Body.h>
+﻿#include <Ext/WeaponType/Body.h>
 #include <Ext/Building/Body.h>
 
 // Reimplements the game function with few changes / optimizations
@@ -55,7 +55,7 @@ static bool IsChasing(TechnoClass* pThis, AbstractClass* pTarget)
 
 	const auto pFootTarget = abstract_cast<FootClass*>(pTarget);
 
-	if (!pFootTarget || !pFootTarget->Locomotor.GetInterfacePtr()->Is_Really_Moving_Now())
+	if (!pFootTarget || !pFootTarget->Locomotor->Is_Really_Moving_Now())
 		return false;
 
 	return true;
@@ -65,7 +65,7 @@ static bool IsMovingFire(TechnoClass* pThis)
 {
 	const auto pFoot = abstract_cast<FootClass*>(pThis);
 
-	if (!pFoot || !pFoot->Locomotor.GetInterfacePtr()->Is_Really_Moving_Now())
+	if (!pFoot || !pFoot->Locomotor->Is_Really_Moving_Now())
 		return false;
 
 	return true;
@@ -303,10 +303,12 @@ DEFINE_HOOK(0x4D5FBD, FootClass_ApproachTarget_BeforeSearching, 0xA)
 			const int distance = (pThis->IsInAir() || pWeapon->Projectile->Arcing || pThis->WhatAmI() == AircraftClass::AbsID)
 				? pThis->DistanceFrom(pThis->Target)
 				: pThis->DistanceFrom3D(pThis->Target);
-			ApproachTargetTemp::FromMaximumRange = distance >= pWeapon->MinimumRange;
 
-			if (!ApproachTargetTemp::FromMaximumRange)
+			if (distance < pWeapon->MinimumRange)
+			{
+				ApproachTargetTemp::FromMaximumRange = false;
 				searchRange = 204;
+			}
 		}
 	}
 

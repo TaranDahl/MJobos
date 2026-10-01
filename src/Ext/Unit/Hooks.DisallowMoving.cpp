@@ -1,27 +1,49 @@
-// Issue #5 Permanently stationary units
+﻿// Issue #5 Permanently stationary units
 // Author: Starkku
 
 #include "Body.h"
 
 DEFINE_HOOK(0x740A93, UnitClass_Mission_Move_DisallowMoving, 0x6)
 {
+	enum { QueueGuardInstead = 0x740AEF, ReturnTrue = 0x740AFD, ContinueCheck = 0x0 };
+
 	GET(UnitClass*, pThis, ESI);
 
-	return UnitExt::CannotMove(pThis) ? 0x740AEF : 0;
+	if (TechnoExt::HasAttachmentLoco(pThis))
+	{
+		auto const pExt = TechnoExt::Fetch(pThis);
+		if (pExt->ParentAttachment)
+		{
+			auto const& pParent = pExt->ParentAttachment->Parent;
+			if (pThis->PlanningToken && pThis->PlanningToken->PlanningNodes.Count
+				&& pParent->PlanningToken && pParent->PlanningToken->PlanningNodes.Count
+				&& pThis->PlanningToken->PlanningNodes[0] == pParent->PlanningToken->PlanningNodes[0])
+			{
+				return ReturnTrue;
+			}
+		}
+		pThis->EnterIdleMode(false, true);
+		return ReturnTrue;
+	}
+
+	// skips this->IsHarvesting = 0, may backfire somewhere - Kerbiter
+	return UnitExt::CannotMove(pThis)
+		? QueueGuardInstead
+		: ContinueCheck;
 }
 
 DEFINE_HOOK(0x741AA7, UnitClass_Assign_Destination_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, EBP);
 
-	return UnitExt::CannotMove(pThis) ? 0x743173 : 0;
+	return UnitExt::CannotMove(pThis) || TechnoExt::HasAttachmentLoco(pThis) ? 0x743173 : 0;
 }
 
 DEFINE_HOOK(0x743B4B, UnitClass_Scatter_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, EBP);
 
-	return UnitExt::CannotMove(pThis) ? 0x74408E : 0;
+	return UnitExt::CannotMove(pThis) || TechnoExt::HasAttachmentLoco(pThis) ? 0x74408E : 0;
 }
 
 DEFINE_HOOK(0x74038F, UnitClass_What_Action_ObjectClass_DisallowMoving_1, 0x6)
@@ -66,6 +88,7 @@ DEFINE_HOOK(0x740744, UnitClass_What_Action_DisallowMoving_2, 0x6)
 	return 0;
 }
 
+// Makes the vehicle keep it's current turret heading without snapping back to neutral position
 DEFINE_HOOK(0x736B60, UnitClass_Rotation_AI_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
@@ -99,13 +122,13 @@ DEFINE_HOOK(0x73EFC4, UnitClass_Mission_Hunt_DisallowMoving, 0x6)
 
 // 3 Sep, 2025 - Starkku: Separated from above, do not change to guard mission
 // and only handle the target acquisition part of area guard for immobile units.
-DEFINE_HOOK(0x744103, UnitClass_Mission_AreaGuard_DisallowMoving, 0x6) 
+DEFINE_HOOK(0x744103, UnitClass_Mission_AreaGuard_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
 
 	if (UnitExt::CannotMove(pThis))
 	{
-		if (pThis->CanPassiveAcquireTargets() && pThis->TargetingTimer.Completed()) 
+		if (pThis->CanPassiveAcquireTargets() && pThis->TargetingTimer.Completed())
 			pThis->TargetAndEstimateDamage(pThis->Location, ThreatType::Range);
 
 		int delay = 1;

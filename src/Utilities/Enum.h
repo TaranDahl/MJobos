@@ -1,4 +1,4 @@
-#pragma region Ares Copyrights
+﻿#pragma region Ares Copyrights
 /*
  *Copyright (c) 2008+, All Ares Contributors
  *All rights reserved.
@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <Phobos.h>
 #include <cstddef>
 #include <GeneralDefinitions.h>
 
@@ -260,6 +261,13 @@ enum class DamageDisplayType
 	Regular = 0,
 	Shield = 1,
 	Intercept = 2
+};
+
+enum class AttachmentYSortPosition : unsigned char
+{
+	Default = 0,
+	UnderParent = 1,
+	OverParent = 2
 };
 
 enum class StackingMode

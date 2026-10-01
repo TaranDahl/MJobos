@@ -1,4 +1,4 @@
-#include <Ext/Anim/Body.h>
+﻿#include <Ext/Anim/Body.h>
 #include <Ext/Building/Body.h>
 #include <Ext/Bullet/Body.h>
 #include <Ext/Infantry/Body.h>
@@ -14,7 +14,7 @@
 
 DEFINE_HOOK(0x6F3339, TechnoClass_WhatWeaponShouldIUse_Interceptor, 0x8)
 {
-	enum { SkipGameCode = 0x6F3341, ReturnValue = 0x6F3406 };
+	enum { ContinueCheck = 0x6F3341, SkipGameCode = 0x6F3379, ReturnValue = 0x6F3406 };
 
 	GET(TechnoClass*, pThis, ESI);
 	GET_STACK(AbstractClass*, pTarget, STACK_OFFSET(0x18, 0x4));
@@ -33,14 +33,14 @@ DEFINE_HOOK(0x6F3339, TechnoClass_WhatWeaponShouldIUse_Interceptor, 0x8)
 
 	// Restore overridden instructions.
 	R->EAX(pType);
-
-	return SkipGameCode;
+	return ContinueCheck;
 }
 
 DEFINE_HOOK(0x6F3360, TechnoClass_WhatWeaponShouldIUse_MultiWeapon, 0x6)
 {
-	GET(TechnoTypeClass*, pType, EAX);
 	enum { SkipGameCode = 0x6F3379 };
+
+	GET(TechnoTypeClass*, pType, EAX);
 
 	if (TechnoTypeExt::Fetch(pType)->MultiWeapon.Get()
 		&& (pType->WhatAmI() != AbstractType::UnitType || !pType->Gunner))
@@ -312,7 +312,7 @@ DEFINE_HOOK(0x5218F3, InfantryClass_WhatWeaponShouldIUse_DeployFireWeapon, 0x6)
 #pragma region TechnoClass_GetFireError
 DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 {
-	enum { CannotFire = 0x6FCB7E };
+	enum { CannotFire = 0x6FCB7E, TemporarilyCannotFire = 0x6FCD0E };
 
 	GET(TechnoClass*, pThis, ESI);
 	GET(WeaponTypeClass*, pWeapon, EDI);
@@ -322,14 +322,17 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 	// Checking for nullptr is not required here, since the game has already executed them before calling the hook  -- Belonit
 	const auto pWH = pWeapon->Warhead;
 	const auto pWHExt = WarheadTypeExt::Fetch(pWH);
-	const int nMoney = pWHExt->TransactMoney;
+	const int money = pWHExt->TransactMoney;
 
-	if (nMoney < 0 && pThis->Owner->Available_Money() < -nMoney)
+	if (money < 0 && pThis->Owner->Available_Money() < -money)
 		return CannotFire;
 
+	const auto pBulletType = pWeapon->Projectile;
+	const auto pBulletTypeExt = BulletTypeExt::Fetch(pBulletType);
+
 	// AAOnly doesn't need to be checked if LandTargeting=1.
-	if (pThis->GetTechnoType()->LandTargeting != LandTargetingType::Land_Not_OK && pWeapon->Projectile->AA
-		&& pTarget && !pTarget->IsInAir() && BulletTypeExt::Fetch(pWeapon->Projectile)->AAOnly)
+	if (pThis->GetTechnoType()->LandTargeting != LandTargetingType::Land_Not_OK && pBulletType->AA
+		&& pTarget && !pTarget->IsInAir() && pBulletTypeExt->AAOnly)
 	{
 		return CannotFire;
 	}
@@ -393,6 +396,9 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 				return CannotFire;
 		}
 	}
+
+	if (pBulletTypeExt->CreateCapacity >= 0 && BulletExt::CheckExceededCapacity(pThis, pBulletType))
+		return (pWeapon->Damage >= 0 || (pTargetTechno && pTargetTechno->GetHealthPercentage() < RulesClass::Instance->ConditionGreen)) ? TemporarilyCannotFire : CannotFire;
 
 	return 0;
 }
@@ -510,6 +516,28 @@ DEFINE_HOOK(0x6FC689, TechnoClass_CanFire_LandNavalTarget, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x51C9B8, InfantryClass_CanFire_OnMoving1, 0x17)
+{
+	enum { CheckPass = 0x51C9CF, CheckNotPass = 0x51CAFA };
+
+	GET(InfantryClass*, pThis, EBX);
+
+	const auto pTypeExt = TechnoTypeExt::Fetch(pThis->Type);
+
+	return (pTypeExt->FiringByPassMovingCheck || pThis->SpeedPercentage <= 0.1) ? CheckPass : CheckNotPass;
+}
+
+DEFINE_HOOK(0x51CAAC, InfantryClass_CanFire_OnMoving2, 0x13)
+{
+	enum { CheckPass = 0x51CACD, CheckNotPass = 0x51CABF };
+
+	GET(InfantryClass*, pThis, EBX);
+
+	const auto pTypeExt = TechnoTypeExt::Fetch(pThis->Type);
+
+	return (pTypeExt->FiringByPassMovingCheck || !pThis->Locomotor->Is_Moving_Now()) ? CheckPass : CheckNotPass;
+}
+
 // Skips bridge-related coord checks to allow AA to target air units while both are on a bridge.
 DEFINE_HOOK(0x6FCBE6, TechnoClass_CanFire_BridgeAAFix, 0x6)
 {
@@ -528,7 +556,7 @@ DEFINE_HOOK(0x6FC749, TechnoClass_CanFire_AntiUnderground, 0x5)
 	enum { Illegal = 0x6FC86A, GoOtherChecks = 0x6FC762 };
 
 	GET(const Layer, layer, EAX);
-	GET(WeaponTypeClass*, pWeapon, EDI);
+	GET(WeaponTypeClass* const, pWeapon, EDI);
 
 	switch (layer)
 	{
@@ -626,12 +654,46 @@ DEFINE_HOOK(0x6FDD7D, TechnoClass_FireAt_UpdateWeaponType, 0x5)
 	return 0;
 }
 
+DEFINE_HOOK(0x6FE312, TechnoClass_FireAt_InitialDamage, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+	GET(WeaponTypeClass* const, pWeapon, EBX);
+	GET(int, damage, EDI);
+
+	auto const pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
+
+	if (pWeaponExt->AddtionalDamage_GattlingValue)
+		damage += static_cast<int>(pThis->GattlingValue * pWeaponExt->AddtionalDamage_GattlingValue_Mult);
+
+	R->EDI(damage);
+	return 0;
+}
+
+DEFINE_HOOK(0x6FF8F1, TechnoClass_FireAt_AfterFire, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+	GET(WeaponTypeClass* const, pWeapon, EBX);
+
+	if (pThis->GetTechnoType()->IsGattling)
+	{
+		auto const pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
+
+		if (pWeaponExt->ResetGattlingValue)
+		{
+			pThis->CurrentGattlingStage = 0;
+			pThis->GattlingRateDown(0);
+		}
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_BeforeTruelyFire, 0x6)
 {
 	enum { SkipFiring = 0x6FDE03 };
 
 	GET(TechnoClass* const, pThis, ESI);
-//	GET(AbstractClass* const, pTarget, EDI);
+	GET(AbstractClass* const, pTarget, EDI);
 	GET(WeaponTypeClass* const, pWeapon, EBX);
 	GET_BASE(const int, weaponIndex, 0xC);
 
@@ -696,6 +758,17 @@ DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_BeforeTruelyFire, 0x6)
 				if (attachEffect->FiringCount >= pType->DiscardOn_Firing_Count)
 					attachEffect->ShouldBeDiscarded = true;
 			}
+		}
+	}
+
+	if (pWeaponExt->AttachEffect_Enable)
+	{
+		if (const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget))
+		{
+			auto const& info = pWeaponExt->AttachEffects;
+			AttachEffectClass::Attach(pTargetTechno, pThis->Owner, pThis, pWeapon->Warhead, info);
+			AttachEffectClass::Detach(pTargetTechno, info);
+			AttachEffectClass::DetachByGroups(pTargetTechno, info);
 		}
 	}
 
@@ -924,6 +997,50 @@ DEFINE_HOOK(0x6FF2BE, TechnoClass_FireAt_BurstOffsetFix, 0x6)
 	return 0x6FF2D1;
 }
 
+DEFINE_HOOK_AGAIN(0x6FE71C, TechnoClass_Fire_BallisticScatterPhobos, 0x6);
+DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
+{
+	GET_STACK(BulletTypeClass*, pProjectile, 0x68);
+	GET(TechnoClass*, pThis, ESI);
+	GET_BASE(AbstractClass*, pTarget, 0x8);
+	GET_STACK(WeaponTypeClass*, pWeapon, STACK_OFFSET(0xB0, -0x70));
+
+	auto pExt = BulletTypeExt::Fetch(pProjectile);
+
+	bool shouldScatter = ScenarioClass::Instance->Random.RandomRanged(0, 100) <= pExt->BallisticScatter_Chance * 100;
+
+	if (!shouldScatter)
+	{
+		R->EAX(0);
+		return 0;
+	}
+
+	// defaults for !FlakScatter || Inviso
+	const int globalScatter = RulesClass::Instance->BallisticScatter;
+	int min = pExt->BallisticScatter_Min.Get(Leptons(globalScatter / 2));
+	int max = pExt->BallisticScatter_Max.Get(Leptons(globalScatter));
+
+	if (pExt->BallisticScatter_IncreaseByRange)
+	{
+		const int minInMinRange = pExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
+		const int minInMaxRange = pExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
+		const int maxInMinRange = pExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
+		const int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
+		const int minRange = pExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+		const int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+		const int deltaRange = maxRange - minRange;
+		const int deltaRangeReal = static_cast<int>((pTarget->GetCoords() - pThis->GetCoords()).Magnitude()) - minRange;
+		const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / static_cast<double>(deltaRange)), 0, 1);
+		min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
+		max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
+	}
+
+	int scatter = ScenarioClass::Instance->Random.RandomRanged(min, max);
+
+	R->EAX(scatter);
+	return 0;
+}
+
 static inline void SetChargeTurretDelay(TechnoClass* pThis, int rearmDelay, WeaponTypeClass* pWeapon)
 {
 	pThis->ChargeTurretDelay = rearmDelay;
@@ -1049,6 +1166,8 @@ DEFINE_HOOK(0x6F3AEB, TechnoClass_GetFLH, 0x6)
 			if (pThis->CurrentBurstIndex % 2 != 0)
 				flh.Y = -flh.Y;
 		}
+
+		TechnoExt::Fetch(pThis)->LastWeaponFLH = flh;
 	}
 	else
 	{
@@ -1059,6 +1178,14 @@ DEFINE_HOOK(0x6F3AEB, TechnoClass_GetFLH, 0x6)
 
 		if (!pTypeExt->AlternateFLH_OnTurret.Get(RulesExt::Global()->AlternateFLH_OnTurret))
 			allowOnTurret = false;
+
+		auto pCurrentPassenger = pThis->Passengers.GetFirstPassenger();
+
+		for (int i = 0; i < index && pCurrentPassenger; i++)
+			pCurrentPassenger = abstract_cast<FootClass*>(pCurrentPassenger->NextObject);
+
+		if (pCurrentPassenger)
+			TechnoExt::Fetch(pCurrentPassenger)->LastWeaponFLH = flh;
 	}
 
 	int turIdx = -1;
@@ -1326,7 +1453,7 @@ DEFINE_HOOK(0x4D5A34, FootClass_ApproachTarget_StopWhenInRange, 0x6)
 				pJumpjetLoco->MaxSpeed = 0;
 				pJumpjetLoco->State = JumpjetLocomotionClass::State::Hovering;
 			}*/
-			
+
 			pThis->StopMoving();
 			pThis->AbortMotion();
 		}

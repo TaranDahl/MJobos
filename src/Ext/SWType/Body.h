@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <Ext/Building/Body.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
@@ -62,6 +62,7 @@ public:
 
 	Valueable<CSFText> UIDescription;
 	Valueable<int> CameoPriority;
+	DWORD CameoPriority_Houses;
 	ValueableVector<BuildingTypeClass*> LimboDelivery_Types;
 	ValueableVector<int> LimboDelivery_IDs;
 	ValueableVector<float> LimboDelivery_RollChances;
@@ -99,6 +100,7 @@ public:
 	std::vector<ValueableVector<int>> SW_Next_RandomWeightsData;
 	std::vector<ValueableVector<int>> SW_Link_RandomWeightsData;
 
+	std::vector<AttachmentTransformGroup> Attachment_Transform;
 	std::vector<TypeConvertGroup> Convert_Pairs;
 
 	Valueable<bool> UseWeeds;
@@ -161,6 +163,7 @@ public:
 		, Message_FirerColor { false }
 		, UIDescription {}
 		, CameoPriority { 0 }
+		, CameoPriority_Houses { 0 }
 		, LimboDelivery_Types {}
 		, LimboDelivery_IDs {}
 		, LimboDelivery_RollChances {}
@@ -182,6 +185,7 @@ public:
 		, SW_Next_RandomWeightsData {}
 		, ShowTimer_Priority { 0 }
 		, ShowTimer_Percentage { false }
+		, Attachment_Transform {}
 		, Convert_Pairs {}
 		, ShowDesignatorRange { true }
 		, TabIndex { 1 }
@@ -231,8 +235,9 @@ public:
 	void ApplyLimboDelivery(HouseClass* pHouse);
 	void ApplyLimboKill(HouseClass* pHouse);
 	void ApplyDetonation(HouseClass* pHouse, const CellStruct& cell);
-	void ApplySWNext(SuperClass* pSW, const CellStruct& cell);
-	void ApplyTypeConversion(SuperClass* pSW);
+	void ApplySWNext(HouseClass* pHouse, const CellStruct& cell);
+	void ApplyAttachmentTransform(HouseClass* pHouse);
+	void ApplyTypeConversion(HouseClass* pHouse);
 	void HandleEMPulseLaunch(SuperClass* pSW, const CellStruct& cell) const;
 	std::vector<BuildingClass*> GetEMPulseCannons(HouseClass* pOwner, const CellStruct& cell) const;
 	std::pair<double, double> GetEMPulseCannonRange(BuildingClass* pBuilding) const;

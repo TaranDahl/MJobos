@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/House/Body.h>
 #include <Ext/WarheadType/Body.h>
@@ -26,10 +26,13 @@ void SWTypeExt::FireSuperWeaponExt(SuperClass* pSW, const CellStruct& cell)
 		pTypeExt->ApplyDetonation(pHouse, cell);
 
 	if (pTypeExt->SW_Next.size() > 0)
-		pTypeExt->ApplySWNext(pSW, cell);
+		pTypeExt->ApplySWNext(pHouse, cell);
+
+	if (pTypeExt->Attachment_Transform.size() > 0)
+		pTypeExt->ApplyAttachmentTransform(pHouse);
 
 	if (pTypeExt->Convert_Pairs.size() > 0)
-		pTypeExt->ApplyTypeConversion(pSW);
+		pTypeExt->ApplyTypeConversion(pHouse);
 
 	if (pTypeExt->SW_Link.size() > 0)
 		pTypeExt->ApplyLinkedSW(pSW);
@@ -95,79 +98,7 @@ static inline void LimboCreate(BuildingTypeClass* pType, HouseClass* pOwner, int
 			return;
 	}
 
-	if (auto const pBuilding = static_cast<BuildingClass*>(pType->CreateObject(pOwner)))
-	{
-		// All of these are mandatory
-		pBuilding->InLimbo = false;
-		pBuilding->IsAlive = true;
-		pBuilding->IsOnMap = true;
-
-		// Jun 3, 2023 - Starkku: For reasons beyond my comprehension, the discovery logic is checked for certain logics like power drain/output in campaign only.
-		// Normally on unlimbo the buildings are revealed to current player if unshrouded or if game is a campaign and to non-player houses always.
-		// Because of the unique nature of LimboDelivered buildings, this has been adjusted to always reveal to the current player in singleplayer
-		// and to the owner of the building regardless, removing the shroud check from the equation since they don't physically exist
-		if (SessionClass::IsCampaign())
-			pBuilding->DiscoveredBy(HouseClass::CurrentPlayer);
-
-		pBuilding->DiscoveredBy(pOwner);
-
-		pOwner->RegisterGain(pBuilding, false);
-		pOwner->RecheckTechTree = true;
-		pOwner->RecheckPower = true;
-		pOwner->Buildings.AddItem(pBuilding);
-
-		// Different types of building logics
-		if (pType->ConstructionYard)
-			pOwner->ConYards.AddItem(pBuilding); // why would you do that????
-
-		if (pType->SecretLab)
-			pOwner->SecretLabs.AddItem(pBuilding);
-
-		auto const pBuildingExt = BuildingExt::Fetch(pBuilding);
-		auto const pOwnerExt = HouseExt::Fetch(pOwner);
-
-		if (!pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Buildings.empty()
-			&& (pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Amount != 0 || pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Factor != 1.0f))
-			pOwnerExt->PowerPlantEnhancers.push_back(pBuilding);
-
-		if (pType->FactoryPlant)
-		{
-			if (pBuildingExt->GetTypeExtData()->FactoryPlant_AllowTypes.size() > 0 || pBuildingExt->GetTypeExtData()->FactoryPlant_DisallowTypes.size() > 0)
-			{
-				pOwnerExt->RestrictedFactoryPlants.push_back(pBuilding);
-			}
-			else
-			{
-				pOwner->FactoryPlants.AddItem(pBuilding);
-				pOwner->CalculateCostMultipliers();
-			}
-		}
-
-		// BuildingClass::Place is already called in DiscoveredBy
-		// it added OrePurifier and xxxGainSelfHeal to House counter already
-
-		// LimboKill ID
-		pBuildingExt->LimboID = ID;
-
-		// Add building to list of owned limbo buildings
-		pOwnerExt->OwnedLimboDeliveredBuildings.push_back(pBuilding);
-		auto const pBldType = pBuilding->Type;
-
-		if (!pBldType->Insignificant && !pBldType->DontScore)
-			pOwnerExt->AddToLimboTracking(pBldType);
-
-		auto const pTechnoExt = TechnoExt::Fetch(pBuilding);
-		auto const pTechnoTypeExt = pTechnoExt->TypeExtData;
-
-		if (pTechnoTypeExt->AutoDeath_Behavior.isset())
-		{
-			ScenarioExt::Global()->AutoDeathObjects.push_back(pTechnoExt);
-
-			if (pTechnoTypeExt->AutoDeath_AfterDelay > 0)
-				pTechnoExt->AutoDeathTimer.Start(pTechnoTypeExt->AutoDeath_AfterDelay);
-		}
-
-	}
+	BuildingTypeExt::CreateLimboBuilding(nullptr, pType, pOwner, ID);
 }
 
 void SWTypeExt::ApplyLimboDelivery(HouseClass* pHouse)
@@ -255,6 +186,17 @@ void SWTypeExt::ApplyLimboKill(HouseClass* pHouse)
 		if (!pBuildingType->Insignificant && !pBuildingType->DontScore)
 			HouseExt::Fetch(pBuilding->Owner)->RemoveFromLimboTracking(pBuildingType);
 
+		if (BuildingTypeExt::Fetch(pBuildingType)->LimboBuildID == BuildingExt::Fetch(pBuilding)->LimboID)
+		{
+			const int index = pBuilding->Type->ArrayIndex;
+
+			for (auto& pBaseNode : pBuilding->Owner->Base.BaseNodes)
+			{
+				if (pBaseNode.BuildingTypeIndex == index)
+					pBaseNode.Placed = false;
+			}
+		}
+
 		pBuilding->Stun();
 		pBuilding->Limbo();
 		pBuilding->RegisterDestruction(nullptr);
@@ -302,12 +244,11 @@ void SWTypeExt::ApplyDetonation(HouseClass* pHouse, const CellStruct& cell)
 	}
 }
 
-void SWTypeExt::ApplySWNext(SuperClass* pSW, const CellStruct& cell)
+void SWTypeExt::ApplySWNext(HouseClass* pHouse, const CellStruct& cell)
 {
 	// SW.Next proper launching mechanic
 	auto LaunchTheSW = [=](const int swIdxToLaunch)
 		{
-			const auto pHouse = pSW->Owner;
 			if (const auto pSuper = pHouse->Supers.GetItem(swIdxToLaunch))
 			{
 				const auto pNextTypeExt = SWTypeExt::Fetch(pSuper->Type);
@@ -347,10 +288,16 @@ void SWTypeExt::ApplySWNext(SuperClass* pSW, const CellStruct& cell)
 	}
 }
 
-void SWTypeExt::ApplyTypeConversion(SuperClass* pSW)
+void SWTypeExt::ApplyAttachmentTransform(HouseClass* pHouse)
 {
-	for (const auto pTargetFoot : FootClass::Array)
-		TypeConvertGroup::Convert(pTargetFoot, this->Convert_Pairs, pSW->Owner);
+	for (const auto& pAttachment : AttachmentClass::Array)
+		AttachmentTransformGroup::Trasform(pAttachment, this->Attachment_Transform, pHouse);
+}
+
+void SWTypeExt::ApplyTypeConversion(HouseClass* pHouse)
+{
+	for (const auto pTarget : TechnoClass::Array)
+		TypeConvertGroup::Convert(pTarget, this->Convert_Pairs, pHouse);
 }
 
 void SWTypeExt::HandleEMPulseLaunch(SuperClass* pSW, const CellStruct& cell) const
@@ -500,7 +447,7 @@ void SWTypeExt::ApplyActivatedMessage(SuperClass* pSW) const
 
 	if (pMessage->Get().empty())
 		return;
-		
+
 	MessageListClass::Instance.PrintMessage(
 		pMessage->Get(),
 		RulesClass::Instance->MessageDelay,

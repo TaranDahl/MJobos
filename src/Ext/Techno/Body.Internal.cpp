@@ -1,4 +1,4 @@
-#include <Ext/Foot/Body.h>
+﻿#include <Ext/Foot/Body.h>
 #include <Ext/InfantryType/Body.h>
 
 // Unsorted methods
@@ -90,10 +90,7 @@ CoordStruct TechnoExt::GetFLHAbsoluteCoords(TechnoClass* pThis, const CoordStruc
 CoordStruct TechnoExt::GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound)
 {
 	FLHFound = false;
-	CoordStruct FLH = CoordStruct::Empty;
-
 	auto const pExt = TechnoExt::Fetch(pThis)->TypeExtData;
-
 	auto const pInf = abstract_cast<InfantryClass*, true>(pThis);
 	std::span<std::vector<CoordStruct>> pickedFLHs = pExt->WeaponBurstFLHs;
 
@@ -124,13 +121,14 @@ CoordStruct TechnoExt::GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FL
 		else if (pInf->Crawling && pInfTypeExt->CrouchedWeaponBurstFLHs.size() > 0)
 			pickedFLHs = pInfTypeExt->CrouchedWeaponBurstFLHs;
 	}
-	if ((int)pickedFLHs[weaponIndex].size() > pThis->CurrentBurstIndex)
+	if (static_cast<int>(pickedFLHs.size()) > weaponIndex // weaponIndex >= 0 has been confirmed before call
+		&& pickedFLHs[weaponIndex].size() > static_cast<size_t>(pThis->CurrentBurstIndex))
 	{
 		FLHFound = true;
-		FLH = pickedFLHs[weaponIndex][pThis->CurrentBurstIndex];
+		return pickedFLHs[weaponIndex][pThis->CurrentBurstIndex];
 	}
 
-	return FLH;
+	return CoordStruct::Empty;
 }
 
 void TechnoExt::InitializeDisplayInfo(TechnoTypeClass* pType)

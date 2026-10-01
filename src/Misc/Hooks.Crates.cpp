@@ -1,4 +1,4 @@
-#include <Ext/UnitType/Body.h>
+﻿#include <Ext/UnitType/Body.h>
 
 DEFINE_HOOK(0x56BD8B, MapClass_PlaceRandomCrate_Sampling, 0x5)
 {

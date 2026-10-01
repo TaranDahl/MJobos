@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 DEFINE_HOOK_AGAIN(0x6D9134, TacticalClass_RenderLayers_DrawBefore, 0x5)// BuildingClass
 DEFINE_HOOK(0x6D9076, TacticalClass_RenderLayers_DrawBefore, 0x5)// FootClass
@@ -151,6 +151,44 @@ DEFINE_HOOK(0x6F534E, TechnoClass_DrawExtras_Insignia, 0x5)
 	}
 
 	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x6F5EE3, TechnoClass_DrawExtras_DrawAboveHealth, 0x9)
+{
+	GET(TechnoClass*, pThis, EBP);
+	GET_STACK(RectangleStruct*, pBounds, STACK_OFFSET(0x98, 0x8));
+
+	const auto pCell = MapClass::Instance.TryGetCellAt(pThis->GetCenterCoords());
+
+	if ((pCell && !pCell->IsFogged() && !pCell->IsShrouded()) || pThis->IsSelected || pThis->IsMouseHovering)
+	{
+		const auto absType = pThis->WhatAmI();
+
+		if (absType == AbstractType::Building)
+		{
+			const auto pBuilding = static_cast<BuildingClass*>(pThis);
+			const auto basePosition = TechnoExt::GetBuildingSelectBracketPosition(pBuilding, pBuilding->Type, BuildingSelectBracketPosition::Top);
+
+			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, true, false);
+			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, true, false);
+
+			if (!pThis->Owner->IsNeutral())
+			{
+				TechnoExt::DrawSuperProgress(pBuilding, pBounds, basePosition);
+				TechnoExt::DrawFactoryProgress(pBuilding, pBounds, basePosition);
+			}
+		}
+		else
+		{
+			const bool isInfantry = absType == AbstractType::Infantry;
+			const auto basePosition = TechnoExt::GetFootSelectBracketPosition(pThis, Anchor(HorizontalPosition::Left, VerticalPosition::Top), isInfantry);
+
+			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, false, isInfantry);
+			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, false, isInfantry);
+		}
+	}
+
+	return 0;
 }
 
 DEFINE_HOOK(0x709B2E, TechnoClass_DrawPips_Sizes, 0x5)

@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 #include <Notifications.h>
 
 #include <New/Type/RadTypeClass.h>
@@ -93,7 +93,7 @@ void RadSiteExt::CreateLight()
 	//=========Blue
 	const double blue = Math::min(((1000 * radcolor.B) / 255) * tintFactor, 2000.0);
 
-	TintStruct nTintBuffer { Game::F2I(red) ,Game::F2I(green) ,Game::F2I(blue) };
+	const TintStruct nTintBuffer { Game::F2I(red) ,Game::F2I(green) ,Game::F2I(blue) };
 	pThis->Tint = nTintBuffer;
 
 	if (pThis->LightSource)
@@ -172,6 +172,12 @@ void RadSiteExt::Serialize(T& Stm)
 		.Process(this->RadInvoker)
 		.Process(this->LightDirty)
 		;
+}
+
+void RadSiteExt::OnDetach(TechnoClass* pTarget, bool removed)
+{
+	if (removed)
+		AnnounceInvalidPointer(this->RadInvoker, pTarget);
 }
 
 void RadSiteExt::LoadFromStream(PhobosStreamReader& Stm)

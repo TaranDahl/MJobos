@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <Ext/TechnoType/Body.h>
 #include <Ext/SWType/Body.h>
@@ -12,6 +12,7 @@ public:
 
 private:
 	inline const wchar_t* GetUIDescription(TechnoTypeExt* pData) const;
+	inline const wchar_t* GetUnbuildableUIDescription(TechnoTypeExt* pData) const;
 	inline const wchar_t* GetUIDescription(SWTypeExt* pData) const;
 	inline int GetBuildTime(TechnoTypeClass* pType) const;
 	inline int GetPower(TechnoTypeClass* pType) const;

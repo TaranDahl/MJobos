@@ -1,4 +1,4 @@
-#include "AttachEffectTypeClass.h"
+﻿#include "AttachEffectTypeClass.h"
 
 #include <Ext/TEvent/Body.h>
 

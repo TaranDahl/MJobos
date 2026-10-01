@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/ParticleSystemType/Body.h>
 #include <Ext/WeaponType/Body.h>
@@ -286,17 +286,26 @@ DEFINE_HOOK(0x6FF660, TechnoClass_FireAt_ObstacleCellUnset, 0x6)
 	return 0;
 }
 
+namespace LaserZapContext
+{
+	TechnoClass* pThis = nullptr;
+}
+
+DEFINE_HOOK(0x6FD210, TechnoClass_LaserZap_SetContext, 0x7)
+{
+	GET(TechnoClass*, pThis, ECX);
+	LaserZapContext::pThis = pThis;
+	return 0;
+}
+
 // Allow drawing single color lasers with thickness.
 DEFINE_HOOK(0x6FD446, TechnoClass_LaserZap_IsSingleColor, 0x7)
 {
 	GET(WeaponTypeClass* const, pWeapon, ECX);
 	GET(LaserDrawClass* const, pLaser, EAX);
 
-	if (auto const pWeaponExt = WeaponTypeExt::TryFetch(pWeapon))
-	{
-		if (!pLaser->IsHouseColor && pWeaponExt->Laser_IsSingleColor)
-			pLaser->IsHouseColor = true;
-	}
+	if (WeaponTypeExt::Fetch(pWeapon)->Laser_IsSingleColor)
+		pLaser->IsHouseColor = true;
 
 	// Fixes drawing thick lasers for non-PrismSupport building-fired lasers.
 	pLaser->IsSupported = pLaser->Thickness > 3;

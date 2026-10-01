@@ -1,4 +1,4 @@
-#include "TiberiumEaterTypeClass.h"
+﻿#include "TiberiumEaterTypeClass.h"
 
 void TiberiumEaterTypeClass::LoadFromINI(CCINIClass* pINI, const char* pSection)
 {

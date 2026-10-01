@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/Scenario/Body.h>
 #include <Ext/Techno/Body.h>
@@ -703,6 +703,25 @@ DEFINE_HOOK(0x425060, AnimClass_Expire_ScorchFlamer, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x5F4B7A, ObjectClass_DrawIfVisible_OnScreenCheck, 0x5)
+{
+	enum { Draw = 0x5F4B88, NoDraw = 0x5F4B7F };
+
+	GET(AbstractType, absType, EAX);
+	GET(ObjectClass*, pThis, ESI);
+
+	if (absType == AbstractType::ParticleSystem)
+		return Draw;
+
+	if (auto pAnim = abstract_cast<AnimClass*>(pThis))
+	{
+		if (AnimTypeExt::Fetch(pAnim->Type)->RenderIfOutOfScreen)
+			return Draw;
+	}
+
+	return NoDraw;
+}
 
 DEFINE_HOOK(0x4250E1, AnimClass_Middle_CraterDestroyTiberium, 0x6)
 {

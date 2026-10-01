@@ -1,11 +1,16 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/Anim/Body.h>
 #include <Ext/SWType/Body.h>
+#include <Ext/CaptureManager/Body.h>
 #include <Misc/FlyingStrings.h>
 #include <Utilities/Helpers.Alex.h>
 #include <Utilities/AresFunctions.h>
-#include <Ext/CaptureManager/Body.h>
+#include <Locomotion/ShiftLocomotionClass.h>
+#include <New/Entity/ShiftSchedule.h>
+#include <JumpjetLocomotionClass.h>
+#include <Locomotion/AStar/AStarClass.h>
+#include <cmath>
 
 #pragma region CreateGap Calls
 
@@ -174,24 +179,87 @@ void WarheadTypeExt::Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt
 		{
 			auto const items = Helpers::Alex::getCellSpreadItemsExt(coords, cellSpread, true, this->CellSpread_Cylinder);
 
-			for (auto const pTarget : items)
-				this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+			if (this->Traction)
+			{
+				// Convert to vector for sorting (std::sort requires random access iterators)
+				std::vector<TechnoClass*> sortedItems(items.begin(), items.end());
+				std::sort(sortedItems.begin(), sortedItems.end(), [&coords](TechnoClass* a, TechnoClass* b)
+					{
+						return a->GetCoords().DistanceFromSquared(coords) < b->GetCoords().DistanceFromSquared(coords);
+					});
+
+				for (auto const pTarget : sortedItems)
+					this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+			}
+			else
+			{
+				for (auto const pTarget : items)
+					this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+			}
 		}
 		else if (pBullet)
 		{
 			if (const auto pTarget = abstract_cast<TechnoClass*>(pBullet->Target))
 			{
+				double distSq = 0.0;
+				auto bulletCoords = pBullet->GetCoords();
+				auto targetCoords = pTarget->GetCoords();
+
+				if (this->CellSpread_Cylinder)
+					distSq = Point2D{ bulletCoords.X - targetCoords.X, bulletCoords.Y - targetCoords.Y }.MagnitudeSquared();
+				else
+					distSq = bulletCoords.DistanceFromSquared(targetCoords);
+
 				// Jun 2, 2024 - Starkku: We should only detonate on the target if the bullet, at the moment of detonation is within acceptable distance of the target.
 				// Ares uses 64 leptons / quarter of a cell as a tolerance, so for sake of consistency we're gonna do the same here.
-				if (pBullet->DistanceFrom(pTarget) <= 64.0) // Unsorted::LeptonsPerCell / 4.0
+				if (distSq < ((Unsorted::LeptonsPerCell / 4.0) * (Unsorted::LeptonsPerCell / 4.0))
+					&& (this->AffectsAir && pTarget->IsInAir()
+					|| this->AffectsGround && pTarget->IsOnFloor()
+					|| this->AffectsUnderground && pTarget->InWhichLayer() == Layer::Underground))
+				{
 					this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
+				}
 			}
 		}
 		else if (auto const pTarget = this->DamageAreaTarget)
 		{
-			if (coords.DistanceFromSquared(pTarget->GetCoords()) <= 4096.0) // (Unsorted::LeptonsPerCell / 4.0) * (Unsorted::LeptonsPerCell / 4.0)
+			if (coords.DistanceFromSquared(pTarget->GetCoords()) <= ((Unsorted::LeptonsPerCell / 4.0) * (Unsorted::LeptonsPerCell / 4.0)))
 				this->DetonateOnOneUnit(pHouse, pTarget, coords, damage, pOwner, pBulletExt, bulletWasIntercepted);
 		}
+	}
+
+	if (this->LightChanging)
+	{
+		if (this->SetAmbientLight >= 0)
+		{
+			ScenarioClass::Instance->AmbientOriginal = this->SetAmbientLight;
+
+			if (!LightningStorm::Active)
+			{
+				ScenarioClass::Instance->AmbientCurrent = this->SetAmbientLight;
+				ScenarioClass::Instance->AmbientTarget = ScenarioClass::Instance->AmbientOriginal;
+			}
+		}
+
+		if (this->SetAmbientRed >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * this->SetAmbientRed, 10 * ScenarioClass::Instance->NormalLighting.Tint.Green, 10 * ScenarioClass::Instance->NormalLighting.Tint.Blue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Red = this->SetAmbientRed;
+		}
+
+		if (this->SetAmbientGreen >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * ScenarioClass::Instance->NormalLighting.Tint.Red, 10 * this->SetAmbientGreen, 10 * ScenarioClass::Instance->NormalLighting.Tint.Blue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Green = this->SetAmbientGreen;
+		}
+
+		if (this->SetAmbientBlue >= 0)
+		{
+			ScenarioClass::RecalcLighting(10 * ScenarioClass::Instance->NormalLighting.Tint.Red, 10 * ScenarioClass::Instance->NormalLighting.Tint.Green, 10 * this->SetAmbientBlue, 0);
+			ScenarioClass::Instance->NormalLighting.Tint.Blue = this->SetAmbientBlue;
+		}
+
+		ScenarioClass::Instance->UpdateLighting();
 	}
 }
 
@@ -227,6 +295,9 @@ void WarheadTypeExt::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget,
 	if (this->ReverseEngineer)
 		this->ApplyReverseEngineer(pHouse, pTarget);
 
+	if (this->ForceTrack)
+		this->ApplyForceTrack(pTarget);
+
 	if (this->ReturnWarhead && pOwner)
 		this->ApplyReturnWarhead(pHouse, pTarget, pOwner);
 
@@ -235,6 +306,13 @@ void WarheadTypeExt::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget,
 
 	if (this->Taunt && pOwner)
 		pTarget->Override_Mission(Mission::Attack, pOwner, nullptr);
+
+	// Apply knockup and traction effects
+	if (this->KnockUp)
+		this->ApplyKnockUp(pTarget);
+
+	if (this->Traction)
+		this->ApplyTraction(pTarget, coords);
 
 	// This might change the target's armor type
 	this->ApplyShieldModifiers(pTarget);
@@ -247,6 +325,9 @@ void WarheadTypeExt::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget,
 	if (this->Crit_CurrentChance > 0.0 && (!this->Crit_SuppressWhenIntercepted.Get(RulesExt::Global()->Crit_SuppressWhenIntercepted) || !bulletWasIntercepted))
 		this->ApplyCrit(pHouse, pTarget, pOwner, pBulletExt);
 
+	if (this->Attachment_Transform.size() > 0)
+		this->ApplyAttachmentTransform(pHouse, pTarget);
+
 #ifdef LOCO_TEST_WARHEADS
 	if (this->InflictLocomotor)
 		this->ApplyLocomotorInfliction(pTarget);
@@ -255,6 +336,17 @@ void WarheadTypeExt::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget,
 		this->ApplyLocomotorInflictionReset(pTarget);
 #endif
 
+}
+
+void WarheadTypeExt::ApplyForceTrack(TechnoClass* pTarget)
+{
+	if (const auto pFoot = abstract_cast<FootClass*, true>(pTarget))
+	{
+		const auto pLoco = pFoot->Locomotor;
+
+		if (!pLoco->Is_Moving())
+			pLoco->Force_Track(this->ForceTrack_Index, pFoot->Location + this->ForceTrack_Coord);
+	}
 }
 
 void WarheadTypeExt::ApplyReverseEngineer(HouseClass* pHouse, TechnoClass* pTarget)
@@ -476,16 +568,25 @@ void WarheadTypeExt::ApplyRemoveDisguise(TechnoClass* pTarget)
 
 HouseClass* WarheadTypeExt::ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget)
 {
-	if (const auto pController = pTarget->MindControlledBy)
+	if (this->RemoveMindControl_OnVictim)
 	{
-		CaptureManagerExt::FreeUnit(pController->CaptureManager, pTarget, this->RemoveMindControl_Silent.Get(RulesExt::Global()->RemoveMindControl_Silent));
-		return pTarget->Owner;
+		if (const auto pController = pTarget->MindControlledBy)
+		{
+			CaptureManagerExt::FreeUnit(pController->CaptureManager, pTarget, this->RemoveMindControl_Silent.Get(RulesExt::Global()->RemoveMindControl_Silent));
+			pHouse = pTarget->Owner;
+		}
+	}
+
+	if (this->RemoveMindControl_OnController)
+	{
+		if (const auto pManager = pTarget->CaptureManager)
+			pManager->FreeAll();
 	}
 
 	return pHouse;
 }
 
-void WarheadTypeExt::ExtData::ApplyOwnerChange(HouseClass* pHouse, TechnoClass* pTarget)
+void WarheadTypeExt::ApplyOwnerChange(HouseClass* pHouse, TechnoClass* pTarget)
 {
 	const bool isMindControl = this->ChangeOwner_SetAsMindControl;
 	const auto pType = pTarget->GetTechnoType();
@@ -650,7 +751,7 @@ void WarheadTypeExt::InterceptBullets(TechnoClass* pOwner, BulletClass* pInterce
 	}
 	else
 	{
-		const double cellSpreadSq = cellSpread * cellSpread * 65536; // Unsorted::LeptonsPerCell * Unsorted::LeptonsPerCell
+		const double cellSpreadSq = 65536.0 * cellSpread * cellSpread; // Unsorted::LeptonsPerCell * Unsorted::LeptonsPerCell
 
 		for (const auto& pBullet : BulletClass::Array)
 		{
@@ -666,14 +767,20 @@ void WarheadTypeExt::InterceptBullets(TechnoClass* pOwner, BulletClass* pInterce
 	}
 }
 
+void WarheadTypeExt::ApplyAttachmentTransform(HouseClass* pHouse, TechnoClass* pTarget)
+{
+	const auto pTargetExt = TechnoExt::Fetch(pTarget);
+
+	if (const auto pAttachment = pTargetExt->ParentAttachment)
+		AttachmentTransformGroup::Trasform(pAttachment, this->Attachment_Transform, pHouse);
+
+	for (const auto& pAttachment : pTargetExt->ChildAttachments)
+		AttachmentTransformGroup::Trasform(pAttachment.get(), this->Attachment_Transform, pHouse);
+}
+
 void WarheadTypeExt::ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget)
 {
-	const auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
-
-	if (!pTargetFoot)
-		return;
-
-	TypeConvertGroup::Convert(pTargetFoot, this->Convert_Pairs, pHouse);
+	TypeConvertGroup::Convert(pTarget, this->Convert_Pairs, pHouse);
 }
 
 void WarheadTypeExt::ApplyLocomotorInfliction(TechnoClass* pTarget)
@@ -917,6 +1024,231 @@ void WarheadTypeExt::ApplyPenetratesTransport(TechnoClass* pTarget, TechnoClass*
 
 		if (cleanSound != -1)
 			VocClass::PlayAt(cleanSound, transporterCoords);
+	}
+}
+
+void WarheadTypeExt::ApplyKnockUp(TechnoClass* pTarget)
+{
+	if (!this->KnockUp)
+		return;
+
+	auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
+
+	if (!pTargetFoot)
+		return;
+
+	// same locomotor? no point to change
+	CLSID targetCLSID { };
+	CLSID inflictCLSID = __uuidof(ShiftLocomotionClass);
+	auto pLoco = pTargetFoot->Locomotor;
+	IPersistPtr pLocoPersist = pLoco;
+	if (SUCCEEDED(pLocoPersist->GetClassID(&targetCLSID)) && targetCLSID == inflictCLSID)
+		return;
+
+	// prevent endless piggyback
+	IPiggybackPtr pTargetPiggy = pTargetFoot->Locomotor;
+	if (pTargetPiggy != nullptr && pTargetPiggy->Is_Piggybacking())
+		return;
+
+	bool isAirUnit = ShiftLocomotionClass::IsAirLoco(pLoco);
+
+	// Calculate the reverse direction of PrimaryFacing
+	DirStruct facing = pTargetFoot->PrimaryFacing.Current();
+
+	// Convert facing to a unit vector
+	double angleRad = -facing.GetRadian<65536>();
+	double dx = Math::cos(angleRad);
+	double dy = Math::sin(angleRad);
+
+	// Opposite direction
+	dx = -dx;
+	dy = -dy;
+
+	// Calculate end position based on range
+	int range = this->KnockUp_Range.Get();
+	CoordStruct knockUpOffset;
+	knockUpOffset.X = static_cast<int>(range * dx);
+	knockUpOffset.Y = static_cast<int>(range * dy);
+	knockUpOffset.Z = 0;
+
+	// Check bridge at destination - if there's a bridge, use bridge height
+	CoordStruct destCoords;
+
+	if (isAirUnit)
+	{
+		destCoords = pTargetFoot->GetCoords() + knockUpOffset;
+		destCoords.Z = pTargetFoot->GetHeight() + MapClass::Instance.GetCellAt(destCoords)->GetCoordsWithBridge().Z;
+	}
+	else
+	{
+		destCoords = pTargetFoot->GetCoords() + knockUpOffset;
+		auto destCellCoords = MapClass::Instance.GetCellAt(destCoords)->GetCoords();
+		auto currentCellCoords = pTargetFoot->GetCell()->GetCoords();
+		auto currentCrd = pTargetFoot->GetCoords();
+		destCoords = destCellCoords + (currentCrd - currentCellCoords);
+		destCoords.Z = pTargetFoot->GetHeight() + MapClass::Instance.GetCellAt(destCoords)->GetCoordsWithBridge().Z;
+	}
+
+	destCoords = ShiftLocomotionClass::FindShiftDestination(pTargetFoot, destCoords);
+
+	if (destCoords != CoordStruct::Empty)
+	{
+		// Create shift schedule
+		auto sampleStart = ShiftSchedule::Sample(
+			pTargetFoot->GetCoords(),
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, false);
+
+		auto sampleEnd = ShiftSchedule::Sample(
+			destCoords,
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, true);
+
+		auto params = ParabolaParams(this->KnockUp_Angle.Get(), this->KnockUp_Speed.Get());
+		auto schedule = ParabolaShiftSchedule(sampleStart, sampleEnd, &params);
+
+		// Queue the shift
+		auto pExt = TechnoExt::Fetch(pTargetFoot);
+		pExt->QueuedShift = std::make_unique<ParabolaShiftSchedule>(schedule);
+
+		// Change locomotor
+		LocomotionClass::ChangeLocomotorTo(pTargetFoot, inflictCLSID);
+	}
+}
+
+void WarheadTypeExt::ApplyTraction(TechnoClass* pTarget, const CoordStruct& coords)
+{
+	if (!this->Traction)
+		return;
+
+	auto pTargetFoot = abstract_cast<FootClass*, true>(pTarget);
+
+	if (!pTargetFoot)
+		return;
+
+	if (coords == CoordStruct::Empty)
+		return;
+
+	// same locomotor? no point to change
+	CLSID targetCLSID { };
+	CLSID inflictCLSID = __uuidof(ShiftLocomotionClass);
+	IPersistPtr pLocoPersist = pTargetFoot->Locomotor;
+	if (SUCCEEDED(pLocoPersist->GetClassID(&targetCLSID)) && targetCLSID == inflictCLSID)
+		return;
+
+	// prevent endless piggyback
+	IPiggybackPtr pTargetPiggy = pTargetFoot->Locomotor;
+	if (pTargetPiggy != nullptr && pTargetPiggy->Is_Piggybacking())
+		return;
+
+	int tractionSpeed = this->Traction_Speed.Get();
+	int tractionRange = this->Traction_Range.Get();
+
+	if (tractionSpeed <= 0 || tractionRange <= 0)
+		return;
+
+	CoordStruct startCoords = pTargetFoot->GetCoords();
+	auto startCell = MapClass::Instance.GetCellAt(startCoords);
+	auto offset = startCoords - startCell->GetCoordsWithBridge();
+
+	CoordStruct destCoords = startCoords;
+	auto destMapCrd = startCell->MapCoords;
+	int tractionRangeUnused = tractionRange;
+
+	for (; tractionRangeUnused > 0;)
+	{
+		double bestCos = 0;
+		double bestCost = std::numeric_limits<double>::max();
+		std::vector<size_t> bestDirs;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			auto calcStepResult = [&](CellStruct currentMapCrd) -> std::pair<double, double>
+				{
+					auto dirOffset = CellSpread::GetNeighbourOffset(i);
+					auto nextMapCrd = currentMapCrd + dirOffset;
+					auto nextCell = MapClass::Instance.GetCellAt(nextMapCrd);
+
+					if (pTarget->IsCellOccupied(nextCell, FacingType::None, -1, nullptr, true) != Move::OK)
+						return { 0.0, std::numeric_limits<double>::max() };
+
+					auto dirOffsetCrd = Point2D(dirOffset.X * Unsorted::LeptonsPerCell, dirOffset.Y * Unsorted::LeptonsPerCell);
+					auto dirDelta = dirOffsetCrd.Magnitude();
+					auto tractionVector = coords - CellClass::Cell2Coord(currentMapCrd);
+					auto tractionVector2D = Point2D(tractionVector.X, tractionVector.Y);
+					auto angleCos = Point2D(dirOffsetCrd.X, dirOffsetCrd.Y).AngleCosTo(tractionVector2D);
+
+					if (angleCos <= 0)
+						return { angleCos, std::numeric_limits<double>::max() };
+
+					return { angleCos, dirDelta / angleCos };
+				};
+
+			auto stepResult = calcStepResult(destMapCrd);
+			auto angleCos = stepResult.first;
+			auto cost = stepResult.second;
+
+			if (cost > tractionRangeUnused)
+				continue;
+
+			if (angleCos > bestCos)
+			{
+				bestCos = angleCos;
+				bestCost = cost;
+				bestDirs.clear();
+				bestDirs.push_back(i);
+			}
+			else if (angleCos == bestCos)
+			{
+				if (cost > bestCost)
+				{
+					bestCost = cost;
+					bestDirs.clear();
+					bestDirs.push_back(i);
+				}
+				else if (cost == bestCost)
+				{
+					bestDirs.push_back(i);
+				}
+			}
+		}
+
+		// If no valid direction found, exit the loop
+		if (bestDirs.empty())
+			break;
+
+		// Randomly select one of the best directions if multiple exist
+		size_t selectedDir = bestDirs[ScenarioClass::Instance->Random.RandomRanged(0, bestDirs.size() - 1)];
+		// Move one step in the selected direction
+		auto dirOffset = CellSpread::GetNeighbourOffset(selectedDir);
+		destMapCrd += dirOffset;
+		tractionRangeUnused -= static_cast<int>(bestCost);
+	}
+
+	if (destMapCrd != startCell->MapCoords)
+	{
+		// Convert final map coordinates back to world coordinates
+		destCoords = MapClass::Instance.GetCellAt(destMapCrd)->GetCoordsWithBridge() + offset;
+
+		// Create linear shift schedule for traction
+		auto sampleStart = ShiftSchedule::Sample(
+			startCoords,
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, false);
+
+		auto sampleEnd = ShiftSchedule::Sample(
+			destCoords,
+			pTargetFoot->PrimaryFacing.Current(),
+			0.0f, 0.0f, true);
+
+		auto params = LinearParams { tractionSpeed };
+		auto schedule = LinearShiftSchedule(sampleStart, sampleEnd, &params);
+
+		auto pExt = TechnoExt::Fetch(pTargetFoot);
+		pExt->QueuedShift = std::make_unique<LinearShiftSchedule>(schedule);
+
+		// Change locomotor
+		LocomotionClass::ChangeLocomotorTo(pTargetFoot, inflictCLSID);
 	}
 }
 

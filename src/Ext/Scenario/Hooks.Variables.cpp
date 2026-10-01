@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 DEFINE_HOOK(0x689910, ScenarioClass_SetLocalToByID, 0x5)
 {

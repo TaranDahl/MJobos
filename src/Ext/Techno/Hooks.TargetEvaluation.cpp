@@ -1,5 +1,7 @@
-#include "Body.h"
+﻿#include "Body.h"
+
 #include <Interop/TechnoExt.h>
+#include <Ext/BuildingType/Body.h>
 
 // Cursor & target acquisition stuff not directly tied to other features can go here.
 
@@ -204,17 +206,28 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 	// if (!pThis->Owner->IsControlledByHuman())
 	//	return CanTarget;
 
-	if (!pThis->MegaMissionIsAttackMove())
-		return ContinueCheck;
+	GET(TechnoClass*, pTarget, ESI);
 
-	const auto pExt = TechnoExt::Fetch(pThis);
+	if (pTarget->WhatAmI() == AbstractType::Building)
+	{
+		// Fallback to unmodded behavior if the building is an exempt of aggressive stance.
+		if (BuildingTypeExt::Fetch(static_cast<BuildingClass*>(pTarget)->Type)->AggressiveStance_Exempt)
+			return ContinueCheck;
 
-	return pExt->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive) ? CanTarget : ContinueCheck;
+		if (TechnoExt::Fetch(pThis)->GetAggressiveStance())
+			return CanTarget;
+	}
+
+	if (pThis->MegaMissionIsAttackMove())
+	{
+		if (TechnoExt::Fetch(pThis)->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive))
+			return CanTarget;
+	}
+
+	return ContinueCheck;
 }
 
 #pragma endregion
-
-#pragma region HealingWeapons
 
 #pragma region TechnoClass_EvaluateObject
 
@@ -358,8 +371,37 @@ DEFINE_FUNCTION_JUMP(VTABLE, 0x7EB418, InfantryClass__GetFireError_Wrapper)
 static Action __fastcall UnitClass__WhatAction_Wrapper(UnitClass* pThis, void* _, ObjectClass* pObj, bool ignoreForce)
 {
 	AresScheme::Prefix(pThis, pObj, -1, false);
-	auto const result = pThis->UnitClass::MouseOverObject(pObj, ignoreForce);
+	auto result = pThis->UnitClass::MouseOverObject(pObj, ignoreForce);
 	AresScheme::Suffix();
+
+	auto const pExt = TechnoExt::Fetch(pThis);
+	if (!pExt->ParentAttachment)
+		return result;
+
+	switch (result)
+	{
+	case Action::Repair:
+		result = Action::NoRepair;
+		break;
+
+	case Action::Self_Deploy:
+		if (pThis->Type->DeploysInto)
+			result = Action::NoDeploy;
+		break;
+
+	case Action::Sabotage:
+	case Action::Capture:
+	case Action::Enter:
+		result = Action::NoEnter;
+		break;
+
+	case Action::GuardArea:
+	case Action::AttackMoveNav:
+	case Action::Move:
+		result = Action::NoMove;
+		break;
+	}
+
 	return result;
 }
 DEFINE_FUNCTION_JUMP(VTABLE, 0x7F5CE4, UnitClass__WhatAction_Wrapper)
@@ -369,9 +411,29 @@ static Action __fastcall InfantryClass__WhatAction_Wrapper(InfantryClass* pThis,
 	AresScheme::Prefix(pThis, pObj, -1, pThis->Type->Engineer);
 	auto const result = pThis->InfantryClass::MouseOverObject(pObj, ignoreForce);
 	AresScheme::Suffix();
+
 	return result;
 }
 DEFINE_FUNCTION_JUMP(VTABLE, 0x7EB0CC, InfantryClass__WhatAction_Wrapper)
+
+#pragma region CeaseFireStance
+
+DEFINE_HOOK(0x6F8DFD, TechnoClass_SelectAutoTarget_CeaseFireStance, 0x5)
+{
+	enum { FuncReturn = 0x6F8E38 };
+	GET(TechnoClass*, pThis, ESI);
+	GET_STACK(ThreatType, flags, STACK_OFFSET(0x6C, 0x4));
+	return TechnoExt::Fetch(pThis)->GetCeaseFireStance()
+		&& (((flags & ThreatType::Range) != ThreatType::Normal) || ((flags & ThreatType::Area) != ThreatType::Normal)) // Cease fire don't work for script auto targeting.
+		? FuncReturn : 0;
+}
+
+DEFINE_HOOK(0x708AC5, TechnoClass_CanRetaliateToAttacker_CeaseFireStance, 0x5)
+{
+	enum { FuncReturn = 0x708B17 };
+	GET(TechnoClass*, pThis, ESI);
+	return TechnoExt::Fetch(pThis)->GetCeaseFireStance() ? FuncReturn : 0;
+}
 
 #pragma endregion
 
@@ -509,6 +571,5 @@ DEFINE_HOOK(0x70CF87, TechnoClass_ThreatCoefficient_CanAttackMeThreatBonus, 0x9)
 
 	return 0;
 }
-
 
 #pragma endregion

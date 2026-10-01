@@ -24,7 +24,6 @@ public:
 		return static_cast<WeaponTypeClass*>(this->GetAttachedObject());
 	}
 
-
 	Valueable<double> DiskLaser_Radius;
 	Valueable<Leptons> ProjectileRange;
 	Nullable<bool> ProjectileRange_ApplyModifiers;
@@ -74,6 +73,8 @@ public:
 	ValueableVector<bool> ExtraWarheads_FullDetonation;
 	Nullable<WarheadTypeClass*> AmbientDamage_Warhead;
 	Nullable<bool> AmbientDamage_IgnoreTarget;
+	AEAttachInfoTypeClass AttachEffects;
+	Valueable<bool> AttachEffect_Enable;
 	ValueableVector<AttachEffectTypeClass*> AttachEffect_RequiredTypes;
 	ValueableVector<AttachEffectTypeClass*> AttachEffect_DisallowedTypes;
 	std::vector<std::string> AttachEffect_RequiredGroups;
@@ -88,6 +89,10 @@ public:
 	Nullable<bool> KeepRange_AllowAI;
 	Nullable<bool> KeepRange_AllowPlayer;
 	Nullable<int> KeepRange_EarlyStopFrame;
+	Nullable<bool> AttackIronCurtain;
+	Valueable<bool> ResetGattlingValue;
+	Valueable<bool> AddtionalDamage_GattlingValue;
+	Valueable<double> AddtionalDamage_GattlingValue_Mult;
 	Nullable<bool> KickOutPassengers;
 	Nullable<ColorStruct> Beam_Color;
 	Valueable<int> Beam_Duration;
@@ -112,12 +117,10 @@ public:
 	Nullable<bool> AttackFriendlies;
 	Nullable<bool> AttackCursorOnFriendlies;
 	Nullable<bool> AttackNoThreatBuildings;
-
+	Nullable<bool> CylinderRangefinding;
 	Nullable<bool> Anim_Update;
 
 	bool SkipWeaponPicking;
-
-	Nullable<bool> CylinderRangefinding;
 
 	WeaponTypeExt(WeaponTypeClass* OwnerObject) : AbstractTypeExt(OwnerObject)
 		, DiskLaser_Radius { DiskLaserClass::Radius }
@@ -131,7 +134,7 @@ public:
 		, Bolt_Duration { 17 }
 		, Bolt_FollowFLH {}
 		, IvanBomb_Visibility {}
-		, Strafing { }
+		, Strafing {}
 		, Strafing_Shots {}
 		, Strafing_SimulateBurst {}
 		, Strafing_UseAmmoPerShot {}
@@ -169,6 +172,8 @@ public:
 		, ExtraWarheads_FullDetonation {}
 		, AmbientDamage_Warhead {}
 		, AmbientDamage_IgnoreTarget {}
+		, AttachEffects {}
+		, AttachEffect_Enable { false }
 		, AttachEffect_RequiredTypes {}
 		, AttachEffect_DisallowedTypes {}
 		, AttachEffect_RequiredGroups {}
@@ -183,6 +188,10 @@ public:
 		, KeepRange_AllowAI {}
 		, KeepRange_AllowPlayer {}
 		, KeepRange_EarlyStopFrame {}
+		, AttackIronCurtain {}
+		, ResetGattlingValue { false }
+		, AddtionalDamage_GattlingValue { false }
+		, AddtionalDamage_GattlingValue_Mult { 1.0 }
 		, KickOutPassengers {}
 		, Beam_Color {}
 		, Beam_Duration { 15 }

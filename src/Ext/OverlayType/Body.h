@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <OverlayTypeClass.h>
 
 #include <Ext/ObjectType/Body.h>
@@ -25,11 +25,13 @@ public:
 	Valueable<int> ZAdjust;
 	PhobosFixedString<32u> PaletteFile;
 	DynamicVectorClass<ColorScheme*>* Palette; // Intentionally not serialized - rebuilt from the palette file on load.
+	Valueable<bool> IgnoredByMouse;
 
 	OverlayTypeExt(OverlayTypeClass* OwnerObject) : ObjectTypeExt(OwnerObject)
 		, ZAdjust { 0 }
 		, PaletteFile {}
 		, Palette {}
+		, IgnoredByMouse { false }
 	{ }
 
 	virtual ~OverlayTypeExt() = default;

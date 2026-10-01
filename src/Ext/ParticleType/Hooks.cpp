@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 DEFINE_HOOK(0x62BE30, ParticleClass_Gas_AI_DriftSpeed, 0x0)
 {

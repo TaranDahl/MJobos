@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 OverlayTypeExt::ExtContainer OverlayTypeExt::ExtMap;
 
@@ -11,6 +11,7 @@ void OverlayTypeExt::Serialize(T& Stm)
 	Stm
 		.Process(this->ZAdjust)
 		.Process(this->PaletteFile)
+		.Process(this->IgnoredByMouse)
 		;
 }
 
@@ -18,12 +19,14 @@ void OverlayTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 {
 	auto pThis = this->OwnerObject();
 
-	//const char* pSection = pThis->ID;
-	//
-	//if (!pINI->GetSection(pSection))
-	//	return;
-	//
-	//INI_EX exINI(pINI);
+	const char* pSection = pThis->ID;
+
+	if (!pINI->GetSection(pSection))
+		return;
+
+	INI_EX exINI(pINI);
+
+	this->IgnoredByMouse.Read(exINI, pSection, "IgnoredByMouse");
 
 	auto pArtSection = pThis->ImageFile;
 	INI_EX exArtINI(&CCINIClass::INI_Art);

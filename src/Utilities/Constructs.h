@@ -1,4 +1,4 @@
-#pragma region Ares Copyrights
+﻿#pragma region Ares Copyrights
 /*
  *Copyright (c) 2008+, All Ares Contributors
  *All rights reserved.
@@ -277,6 +277,12 @@ private:
 	}
 
 	container_t values;
+
+public:
+	const container_t& GetValues() const
+	{
+		return this->values;
+	}
 };
 
 // pcx filename storage with optional automatic loading

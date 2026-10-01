@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <HouseClass.h>
 
 #include <Ext/HouseType/Body.h>
@@ -8,6 +8,16 @@
 #include <Utilities/TemplateDef.h>
 
 #include <array>
+
+struct PlacingBuildingStruct
+{
+	BuildingTypeClass* Type;
+	BuildingTypeClass* DrawType;
+	int Times;
+	CDTimerClass Timer;
+	CellStruct TopLeft;
+	size_t PlaceType;
+};
 
 class HouseExt final : public AbstractExt, public Detach::Listener<BuildingClass>
 {
@@ -26,11 +36,14 @@ public:
 		return static_cast<HouseClass*>(this->GetAttachedObject());
 	}
 
+	std::vector<UnitClass*> OwnedDeployingUnits;
+	PlacingBuildingStruct Common;
+	PlacingBuildingStruct Combat;
+	int LastRefineryBuildFrame;
+
 	std::vector<BuildingClass*> PowerPlantEnhancers;
 	std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 	std::vector<TechnoClass*> OwnedCountedHarvesters;
-	bool ForceOnlyTargetHouseEnemy;
-	int ForceOnlyTargetHouseEnemyMode;
 
 	CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 	CounterClass LimboBuildings; // Currently owned buildings in limbo
@@ -72,7 +85,11 @@ public:
 	};
 	std::vector<SWExt> SuperExts;
 
+	CDTimerClass SpyEffect_RadarJamTimer;
+
 	int ForceEnemyIndex;
+	bool ForceOnlyTargetHouseEnemy;
+	int ForceOnlyTargetHouseEnemyMode;
 	int TeamDelay;
 	bool FreeRadar;
 	bool ForceRadar;
@@ -108,13 +125,14 @@ public:
 		, AIFireSaleDelayTimer {}
 		, SuspendedEMPulseSWs {}
 		, SuperExts(SuperWeaponTypeClass::Array.Count)
-		, ForceEnemyIndex(-1)
+		, SpyEffect_RadarJamTimer {}
+		, ForceEnemyIndex { -1 }
 		, ForceOnlyTargetHouseEnemy { false }
 		, ForceOnlyTargetHouseEnemyMode { -1 }
-		, TeamDelay(-1)
-		, FreeRadar(false)
-		, ForceRadar(false)
-		, PlayerAutoRepair(true)
+		, TeamDelay { -1 }
+		, FreeRadar { false }
+		, ForceRadar { false }
+		, PlayerAutoRepair { true }
 		, BeaconsPlacedOrder { 0, 0, 0 }
 	{ }
 
@@ -129,13 +147,13 @@ public:
 	int GetForceEnemyIndex();
 	void SetForceEnemyIndex(int EnemyIndex);
 
+	void UpdateVehicleProduction();
+
 	virtual ~HouseExt() = default;
 
 	virtual void LoadFromINIFile(CCINIClass* pINI) override;
 	//virtual void Initialize() override;
 	virtual void OnDetach(BuildingClass* pTarget, bool removed) override;
-
-	void UpdateVehicleProduction();
 
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 	virtual void SaveToStream(PhobosStreamWriter& Stm) override;
@@ -213,7 +231,15 @@ public:
 
 	static CanBuildResult BuildLimitGroupUpgradeCheck(const HouseClass* pThis, const TechnoTypeClass* pItem, bool buildLimitOnly, bool includeQueued);
 	static bool ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass* pType, bool ignoreQueued);
-
+	static int CountOwnedPresentExt(HouseClass* pHouse, TechnoTypeClass* pTechnoType, bool upgrade = false, bool deploy = false);
+	static int CountOwnedPresentWithJumpjet(HouseClass* pHouse, AircraftTypeClass* pAircraftType);
+	static int CountOwnedPresentWithDeploy(HouseClass* pHouse, UnitTypeClass* pUnitType, bool deploy = false);
+	static int CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade = false, bool deploy = false);
+	static int CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade = true, bool deploy = true);
+	static bool CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType);
+	static void RecheckOwnerBitfieldForCurrentPlayer();
+	static void ReorganizeAllTo(HouseClass* pFromHouse, HouseClass* pToHouse);
+	static void __fastcall DecideTechnosFate(HouseClass* pHouse);
 	static void CalculatePowerSurplus(HouseClass* pThis);
 };
 

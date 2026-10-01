@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include <ScenarioClass.h>
 
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
+#include <Ext/Cell/Body.h>
 #include <Ext/Techno/Body.h>
 
 struct ExtendedVariable
@@ -35,6 +36,18 @@ public:
 
 		bool SWSidebar_Enable;
 		std::vector<int> SWSidebar_Indices;
+
+		int CanBuildNowCount;
+		DWORD OwnerBitfield_BuildingType;
+		DWORD OwnerBitfield_InfantryType;
+		DWORD OwnerBitfield_VehicleType;
+		DWORD OwnerBitfield_NavyType;
+		DWORD OwnerBitfield_AircraftType;
+
+		std::vector<TechnoExt*> BaseNormalTechnos;
+		std::vector<TechnoExt*> OwnedUniqueTechnos;
+
+		std::set<int> Smudges;
 
 		std::vector<std::wstring> RecordMessages;
 
@@ -67,6 +80,15 @@ public:
 			, TransportReloaders {}
 			, SWSidebar_Enable { true }
 			, SWSidebar_Indices {}
+			, CanBuildNowCount { 0 }
+			, OwnerBitfield_BuildingType { 0 }
+			, OwnerBitfield_InfantryType { 0 }
+			, OwnerBitfield_VehicleType { 0 }
+			, OwnerBitfield_NavyType { 0 }
+			, OwnerBitfield_AircraftType { 0 }
+			, BaseNormalTechnos {}
+			, OwnedUniqueTechnos {}
+			, Smudges {}
 			, RecordMessages {}
 			, DefaultLS640BkgdName {}
 			, DefaultLS800BkgdName {}

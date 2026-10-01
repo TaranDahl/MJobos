@@ -14,16 +14,39 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 {
 	GET(UnitClass* const, pThis, ESI);
 
+//	if (TechnoExt::HasAttachmentLoco(pThis))
+//		return 0;
+
 	const auto pType = pThis->Type;
-	CoordStruct& source = pThis->Location;
-	const CoordStruct target = pThis->Target->GetCoords(); // Target checked so it's not null here
+	const auto& source = pThis->Location;
+	const auto target = pThis->Target->GetCoords(); // Target checked so it's not null here
 	const DirStruct tgtDir { Math::atan2(source.Y - target.Y, target.X - source.X) };
 
 	if (pType->Turret && !pType->HasTurret) // 0x736F92
 	{
-		pThis->SecondaryFacing.SetDesired(tgtDir);
+		if (RulesExt::Global()->ExpandTurretRotation)
+		{
+			const auto pExt = TechnoExt::Fetch(pThis);
+			const auto pTypeExt = pExt->TypeExtData;
+
+			if (pTypeExt->Turret_BodyOrientation && !pThis->Destination && !pThis->Locomotor->Is_Moving()
+				&& (!pExt->ParentAttachment || !TechnoExt::HasAttachmentLoco(pThis)))
+			{
+				const auto curDir = pThis->PrimaryFacing.Current();
+				const auto dir = pTypeExt->GetBodyDesiredDir(curDir, tgtDir);
+
+				if (std::abs(static_cast<short>(static_cast<short>(dir.Raw) - static_cast<short>(curDir.Raw))) >= 8192)
+					pThis->PrimaryFacing.SetDesired(dir);
+			}
+
+			pTypeExt->SetTurretLimitedDir(pThis, tgtDir);
+		}
+		else
+		{
+			pThis->SecondaryFacing.SetDesired(tgtDir);
+		}
 	}
-	else // 0x736FB6
+	else if (!TechnoExt::HasAttachmentLoco(pThis) || !TechnoExt::Fetch(pThis)->ParentAttachment) // 0x736FB6
 	{
 		if (const auto jjLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
 		{
@@ -43,7 +66,7 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 		}
 	}
 
-	return 0x736FB1;
+	return 0x737063;
 }
 
 // For compatibility with previous builds
@@ -281,7 +304,7 @@ int JumpjetRushHelpers::JumpjetLocomotionPredictHeight(JumpjetLocomotionClass* p
 			? Unsorted::LeptonsPerCell
 			: Math::min((Unsorted::LeptonsPerCell * 5), pFoot->DistanceFrom(pFoot->Destination)); // Predict the distance of 5 cells ahead
 		const double angle = -pThis->LocomotionFacing.Current().GetRadian<65536>();
-		const auto checkCoord = Point2D { static_cast<int>(checkLength * Math::cos(angle) + 0.5), static_cast<int>(checkLength * Math::sin(angle) + 0.5) };
+		const auto checkCoord = Point2D { static_cast<int>(checkLength * Math::cos(angle)), static_cast<int>(checkLength * Math::sin(angle)) };
 		const int largeStep = Math::max(std::abs(checkCoord.X), std::abs(checkCoord.Y));
 		const int checkSteps = (largeStep > Unsorted::LeptonsPerCell) ? (largeStep / Unsorted::LeptonsPerCell + 1) : 1;
 		const auto stepCoord = Point2D { (checkCoord.X / checkSteps), (checkCoord.Y / checkSteps) };
@@ -320,8 +343,7 @@ int JumpjetRushHelpers::JumpjetLocomotionPredictHeight(JumpjetLocomotionClass* p
 				? CellStruct { static_cast<short>(lastCoord.X >> shift), static_cast<short>(curCoord.Y >> shift) }
 				: CellStruct { static_cast<short>(curCoord.X >> shift), static_cast<short>(lastCoord.Y >> shift) });
 		};
-		auto checkStepHeight = [&maxHeight, &curCoord, &lastCoord, &pCurCell, &stepCoord,
-			&getJumpjetHeight, &getAntiAliasingCell, &getSideHeight]() -> bool
+		auto checkStepHeight = [&maxHeight, &curCoord, &lastCoord, &pCurCell, &stepCoord, &getJumpjetHeight, &getAntiAliasingCell, &getSideHeight]() -> bool
 		{
 			// Check forward
 			lastCoord = curCoord;

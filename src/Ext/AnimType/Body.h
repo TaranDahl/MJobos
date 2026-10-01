@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <AnimTypeClass.h>
 
@@ -78,6 +78,7 @@ public:
 	ValueableVector<AnimTypeClass*> LargeFireAnims;
 	ValueableVector<double> LargeFireChances;
 	ValueableVector<double> LargeFireDistances;
+	Valueable<bool> RenderIfOutOfScreen;
 	Nullable<bool> Crater_DestroyTiberium;
 	Nullable<bool> TheaterPalette;
 	Valueable<int> Tiled_Interval;
@@ -130,6 +131,7 @@ public:
 		, LargeFireAnims {}
 		, LargeFireChances {}
 		, LargeFireDistances {}
+		, RenderIfOutOfScreen { false }
 		, Crater_DestroyTiberium {}
 		, TheaterPalette {}
 		, Tiled_Interval { 0 }

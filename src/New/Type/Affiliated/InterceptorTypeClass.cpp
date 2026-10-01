@@ -1,4 +1,4 @@
-#include "InterceptorTypeClass.h"
+﻿#include "InterceptorTypeClass.h"
 
 void InterceptorTypeClass::LoadFromINI(CCINIClass* pINI, const char* pSection)
 {

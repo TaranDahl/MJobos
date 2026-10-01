@@ -1,4 +1,4 @@
-#include "EnumFunctions.h"
+﻿#include "EnumFunctions.h"
 
 #include <Utilities/GeneralUtils.h>
 

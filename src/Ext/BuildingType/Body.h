@@ -59,6 +59,7 @@ public:
 	Valueable<bool> SpyEffect_Custom;
 	ValueableIdx<SuperWeaponTypeClass> SpyEffect_VictimSuperWeapon;
 	ValueableIdx<SuperWeaponTypeClass> SpyEffect_InfiltratorSuperWeapon;
+	Valueable<int> SpyEffect_RadarJamDuration;
 
 	Nullable<bool> ConsideredVehicle;
 	Valueable<bool> ZShapePointMove_OnBuildup;
@@ -66,10 +67,32 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
+	Valueable<bool> JustHasRallyPoint;
+	Nullable<CoordStruct> JumpjetExitCoord;
+	Nullable<int> RallySpeedType;
+	Nullable<int> RallyMovementZone;
+
+	Nullable<bool> Cameo_ShouldCount;
+	Nullable<bool> AutoBuilding;
+	Nullable<int> AutoBuilding_Gap;
+	Valueable<bool> LimboBuild;
+	Valueable<int> LimboBuildID;
+	Valueable<BuildingTypeClass*> LaserFencePost_Fence;
+	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnLand;
+	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnWater;
+	std::vector<BuildingTypeClass*> PlaceBuilding_OnLand_Unique;
+	std::vector<BuildingTypeClass*> PlaceBuilding_OnWater_Unique;
+	Valueable<SHPStruct*> PlaceBuilding_DirectionShape;
+	CustomPalette PlaceBuilding_DirectionPalette;
+	Valueable<bool> PlaceBuilding_Extra;
+	Valueable<bool> CanBuildUnderUnits;
+
+	Valueable<bool> AggressiveStance_Exempt;
+
 	Valueable<bool> IsAnimDelayedBurst;
 
 	std::vector<std::optional<DirType>> AircraftDockingDirs;
-		Nullable<bool> AircraftDockingDir_DefaultToPoseDir;
+	Nullable<bool> AircraftDockingDir_DefaultToPoseDir;
 
 	ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
 	ValueableVector<TechnoTypeClass*> FactoryPlant_DisallowTypes;
@@ -84,10 +107,14 @@ public:
 	Nullable<bool> NoAlphaImageOnBuildup;
 	ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
 	ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
+	ValueableVector<TechnoTypeClass*> Adjacent_AllowedExtra;
+	ValueableVector<TechnoTypeClass*> Adjacent_DisallowedExtra;
 	Valueable<bool> Adjacent_Disallowed_Prohibit;
 	Valueable<int> Adjacent_Disallowed_ProhibitDistance;
 
 	Nullable<Point2D> BarracksExitCell;
+
+	Valueable<bool> HasSecondaryRallyPoint;
 
 	Valueable<int> Overpower_KeepOnline;
 	Valueable<int> Overpower_ChargeWeapon;
@@ -104,6 +131,14 @@ public:
 	NullableIdx<VocClass> BuildingRepairedSound;
 
 	Valueable<bool> Refinery_UseNormalActiveAnim;
+
+	Nullable<bool> AIBaseNormal;
+
+	Nullable<bool> AISellCapturedBuilding;
+
+	Valueable<int> Bib_Dir;
+	Valueable<int> NumberImpassableRows_Dir;
+	Valueable<int> WeaponsFactory_Dir;
 
 	ValueableVector<bool> HasPowerUpAnim;
 
@@ -143,6 +178,9 @@ public:
 
 	// Ares 0.2
 	Valueable<bool> CloningFacility;
+
+	// Ares 0.7
+	Valueable<bool> IsPassable;
 
 	// Ares 0.A
 	Valueable<BuildingTypeClass*> RubbleIntact;
@@ -192,16 +230,35 @@ public:
 		, SpyEffect_Custom { false }
 		, SpyEffect_VictimSuperWeapon {}
 		, SpyEffect_InfiltratorSuperWeapon {}
+		, SpyEffect_RadarJamDuration { 0 }
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
+		, JustHasRallyPoint { false }
+		, JumpjetExitCoord { }
+		, RallySpeedType { }
+		, RallyMovementZone { }
+		, Cameo_ShouldCount {}
+		, AutoBuilding {}
+		, AutoBuilding_Gap {}
+		, LimboBuild { false }
+		, LimboBuildID { -1 }
+		, LaserFencePost_Fence {}
+		, PlaceBuilding_OnLand {}
+		, PlaceBuilding_OnWater {}
+		, PlaceBuilding_OnLand_Unique {}
+		, PlaceBuilding_OnWater_Unique {}
+		, PlaceBuilding_DirectionShape { nullptr }
+		, PlaceBuilding_DirectionPalette {}
+		, PlaceBuilding_Extra { false }
+		, CanBuildUnderUnits { false }
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
 		, FactoryPlant_DisallowTypes {}
 		, FactoryPlant_MaxCount { -1 }
 		, IsAnimDelayedBurst { true }
+		, AggressiveStance_Exempt { false }
 		, IsDestroyableObstacle { false }
-		, Explodes_DuringBuildup {}
 		, Units_RepairRate {}
 		, Units_RepairStep {}
 		, Units_RepairPercent {}
@@ -210,9 +267,12 @@ public:
 		, NoAlphaImageOnBuildup {}
 		, Adjacent_Allowed {}
 		, Adjacent_Disallowed {}
+		, Adjacent_AllowedExtra {}
+		, Adjacent_DisallowedExtra {}
 		, Adjacent_Disallowed_Prohibit { false }
 		, Adjacent_Disallowed_ProhibitDistance { 0 }
 		, BarracksExitCell {}
+		, HasSecondaryRallyPoint { false }
 		, Overpower_KeepOnline { 2 }
 		, Overpower_ChargeWeapon { 1 }
 		, DisableDamageSound { false }
@@ -225,7 +285,12 @@ public:
 		, BunkerStateUpdateDelay {}
 		, BuildingRepairedSound {}
 		, Refinery_UseNormalActiveAnim { false }
+		, AIBaseNormal {}
 		, HasPowerUpAnim {}
+		, AISellCapturedBuilding {}
+		, Bib_Dir { 2 }
+		, NumberImpassableRows_Dir { 2 }
+		, WeaponsFactory_Dir { 2 }
 		, UndeploysInto_Sellable { false }
 		, BuildingRadioLink_SyncOwner {}
 		, GuardRetryDelay {}
@@ -256,6 +321,9 @@ public:
 		// Ares 0.2
 		, CloningFacility { false }
 
+		// Ares 0.7
+		, IsPassable { false }
+
 		// Ares 0.A
 		, RubbleIntact { nullptr }
 		, RubbleIntactRemove { false }
@@ -272,6 +340,8 @@ public:
 	{
 		return static_cast<BuildingTypeClass*>(this->TechnoTypeExt::OwnerObject());
 	}
+
+	BuildingTypeClass* GetAnotherPlacingType(size_t direction, bool onWater);
 
 	// Ares 0.A functions
 	int GetSuperWeaponCount() const;
@@ -302,6 +372,28 @@ public:
 
 	static ExtContainer ExtMap;
 
+	static std::vector<CellStruct> BaseNormalCells;
+	static std::vector<TechnoClass*> CleanCheckedTechnos;
+	static std::vector<CellClass*> CleanCheckedCells;
+	static std::vector<CellClass*> CleanOptionalCells;
+	static std::vector<TechnoClass*> CleanReCheckedTechnos;
+	struct InfantryCountInCell
+	{
+		CellClass* Position;
+		int Count;
+	};
+	static std::vector<InfantryCountInCell> CleanInfantryCells;
+	struct TechnoWithDestination
+	{
+		TechnoClass* Techno;
+		CellClass* Destination;
+	};
+	static std::vector<TechnoWithDestination> CleanFinalOrder;
+	static std::vector<CellClass*> CleanDeleteCells;
+	static std::vector<TechnoClass*> CleanOptionalTechnos;
+	static std::unordered_map<int, int> PlaceCheckedCells;
+	static bool ContainersInit;
+
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
 	{
 		return AbstractExt::Fetch<BuildingTypeExt>(pThis);
@@ -317,9 +409,20 @@ public:
 	static void PlayBunkerSound(BuildingClass const* pThis, bool buildUp = false);
 	static bool IsPoweredAnimBlocked(BuildingClass* pBuilding, bool powered, bool poweredLight, bool poweredEffect, bool poweredSpecial);
 
+	static CellStruct GetWeaponFactoryDoor(BuildingClass* pThis);
+
 	static std::pair<int, int> GetEnhancedPower(BuildingTypeClass* pBuilding, int output, HouseClass* pHouse, BuildingClass* pPowerPlant = nullptr);
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
-	static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
-	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	static int GetUpgradesAmount(BuildingTypeClass const* const pBuilding, HouseClass const* const pHouse);
+	static void DrawAdjacentLines();
+	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
+	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
+	static bool IsSameBuildingType(BuildingTypeClass* pType1, BuildingTypeClass* pType2);
+	static CellStruct SimulatePlacingAction(BuildingTypeClass* pType, CellStruct rallyCell, HouseClass* pHouse);
+	static CellStruct NearbyPlacingLocation(BuildingTypeClass* pType, CellStruct cell, HouseClass* pHouse, int buildGap = 1, bool checkAdjacent = false, bool checkShroud = false);
+	static bool AutoPlaceBuilding(BuildingClass* pBuilding);
+	static bool BuildLimboBuilding(BuildingClass* pBuilding);
+	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
+	static bool DeleteLimboBuilding(BuildingClass* pBuilding, int ID);
 };
 

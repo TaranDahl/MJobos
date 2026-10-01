@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <BulletTypeClass.h>
 
 #include <Ext/ObjectType/Body.h>
@@ -38,6 +38,57 @@ public:
 
 	TrajectoryTypePointer TrajectoryType;
 
+	Valueable<int> LifeDuration;
+	Valueable<int> NoTargetLifeTime;
+	Valueable<int> CreateCapacity;
+	Valueable<int> RetargetInterval;
+	Valueable<double> RetargetRadius;
+	Valueable<AffectedHouse> RetargetHouses;
+	Valueable<bool> Synchronize;
+	Nullable<bool> PeacefulVanish;
+	Valueable<bool> ApplyRangeModifiers;
+	Valueable<bool> UseDisperseCoord;
+
+	Valueable<bool> PassDetonate;
+	Valueable<bool> PassDetonateLocal;
+	Valueable<WarheadTypeClass*> PassDetonateWarhead;
+	Nullable<int> PassDetonateDamage;
+	Valueable<int> PassDetonateDelay;
+	Valueable<int> PassDetonateInitialDelay;
+	Valueable<int> ProximityImpact;
+	Valueable<WarheadTypeClass*> ProximityWarhead;
+	Nullable<int> ProximityDamage;
+	Valueable<Leptons> ProximityRadius;
+	Valueable<bool> ProximityDirect;
+	Valueable<bool> ProximityMedial;
+	Valueable<bool> ProximityAllies;
+	Valueable<bool> ProximityFlight;
+	Valueable<bool> ProximitySphere;
+	Valueable<bool> ThroughVehicles;
+	Valueable<bool> ThroughBuilding;
+	Valueable<double> DamageEdgeAttenuation;
+	Valueable<double> DamageCountAttenuation;
+
+	ValueableVector<WeaponTypeClass*> DisperseWeapons;
+	ValueableVector<int> DisperseBursts;
+	ValueableVector<int> DisperseCounts;
+	ValueableVector<int> DisperseDelays;
+	Valueable<int> DisperseCycle;
+	Valueable<int> DisperseInitialDelay;
+	Valueable<Leptons> DisperseEffectiveRange;
+	Valueable<bool> DisperseSeparate;
+	Valueable<bool> DisperseRetarget;
+	Valueable<bool> DisperseLocation;
+	Valueable<bool> DisperseTendency;
+	Valueable<bool> DisperseHolistic;
+	Valueable<bool> DisperseMarginal;
+	Valueable<bool> DisperseDoRepeat;
+	Valueable<bool> DisperseSuicide;
+	Nullable<bool> DisperseFromFirer;
+	Valueable<bool> DisperseFaceCheck;
+	Valueable<bool> DisperseForceFire;
+	Valueable<CoordStruct> DisperseCoord;
+
 	Nullable<bool> Shrapnel_AffectsGround;
 	Nullable<bool> Shrapnel_AffectsBuildings;
 	Nullable<bool> Shrapnel_UseWeaponTargeting;
@@ -55,6 +106,15 @@ public:
 	Nullable<bool> Arcing_AllowElevationInaccuracy;
 	Valueable<WeaponTypeClass*> ReturnWeapon;
 	Nullable<bool> ReturnWeapon_ApplyFirepowerMult;
+
+	Valueable<bool> BallisticScatter_IncreaseByRange;
+	Nullable<Leptons> BallisticScatter_MinRange;
+	Nullable<Leptons> BallisticScatter_MaxRange;
+	Nullable<Leptons> BallisticScatter_Min_InMinRange;
+	Nullable<Leptons> BallisticScatter_Min_InMaxRange;
+	Nullable<Leptons> BallisticScatter_Max_InMinRange;
+	Nullable<Leptons> BallisticScatter_Max_InMaxRange;
+	Valueable<double> BallisticScatter_Chance;
 
 	Valueable<bool> SubjectToGround;
 
@@ -87,6 +147,8 @@ public:
 
 	Valueable<bool> AU;
 
+	// Ares 0.1
+	Valueable<bool> SubjectToSolid;
 	Valueable<int> ZAdjust;
 
 	// Ares 0.7
@@ -95,14 +157,62 @@ public:
 
 	BulletTypeExt(BulletTypeClass* OwnerObject) : ObjectTypeExt(OwnerObject)
 		, Armor {}
-		, Interceptable {}
+		, Interceptable { false }
 		, Interceptable_DeleteOnIntercept { false }
 		, Interceptable_WeaponOverride {}
 		, LaserTrail_Types {}
 		, Gravity {}
-		, Vertical_AircraftFix {}
+		, Vertical_AircraftFix { true }
 		, VerticalInitialFacing {}
 		, TrajectoryType { }
+		, LifeDuration { 0 }
+		, NoTargetLifeTime { -1 }
+		, CreateCapacity { -1 }
+		, RetargetInterval { 1 }
+		, RetargetRadius { 0 }
+		, RetargetHouses { AffectedHouse::Enemies }
+		, Synchronize { false }
+		, PeacefulVanish {}
+		, ApplyRangeModifiers { false }
+		, UseDisperseCoord { false }
+		, PassDetonate { false }
+		, PassDetonateLocal { false }
+		, PassDetonateWarhead {}
+		, PassDetonateDamage {}
+		, PassDetonateDelay { 1 }
+		, PassDetonateInitialDelay { 0 }
+		, ProximityImpact { 0 }
+		, ProximityWarhead {}
+		, ProximityDamage {}
+		, ProximityRadius { Leptons(179) }
+		, ProximityDirect { false }
+		, ProximityMedial { false }
+		, ProximityAllies { false }
+		, ProximityFlight { false }
+		, ProximitySphere { true }
+		, ThroughVehicles { true }
+		, ThroughBuilding { true }
+		, DamageEdgeAttenuation { 1.0 }
+		, DamageCountAttenuation { 1.0 }
+		, DisperseWeapons {}
+		, DisperseBursts {}
+		, DisperseCounts {}
+		, DisperseDelays {}
+		, DisperseCycle { 0 }
+		, DisperseInitialDelay { 0 }
+		, DisperseEffectiveRange { Leptons(0) }
+		, DisperseSeparate { false }
+		, DisperseRetarget { false }
+		, DisperseLocation { false }
+		, DisperseTendency { false }
+		, DisperseHolistic { false }
+		, DisperseMarginal { false }
+		, DisperseDoRepeat { false }
+		, DisperseSuicide { true }
+		, DisperseFromFirer {}
+		, DisperseFaceCheck { false }
+		, DisperseForceFire { true }
+		, DisperseCoord { CoordStruct::Empty }
 		, Shrapnel_AffectsGround {}
 		, Shrapnel_AffectsBuildings {}
 		, Shrapnel_UseWeaponTargeting {}
@@ -117,30 +227,39 @@ public:
 		, SubjectToWater {}
 		, SubjectToWater_Detonate { true }
 		, AAOnly { false }
-		, Arcing_AllowElevationInaccuracy {}
+		, Arcing_AllowElevationInaccuracy { true }
 		, ReturnWeapon {}
-		, ReturnWeapon_ApplyFirepowerMult {}
+		, ReturnWeapon_ApplyFirepowerMult { false }
+		, SubjectToSolid { false }
 		, SubjectToGround { false }
+		, BallisticScatter_IncreaseByRange { false }
+		, BallisticScatter_MinRange {}
+		, BallisticScatter_MaxRange {}
+		, BallisticScatter_Min_InMinRange {}
+		, BallisticScatter_Min_InMaxRange {}
+		, BallisticScatter_Max_InMinRange {}
+		, BallisticScatter_Max_InMaxRange {}
+		, BallisticScatter_Chance { 1.0 }
 		, Splits { false }
 		, AirburstSpread { 1.5 }
 		, RetargetAccuracy { 0.0 }
 		, RetargetSelf { true }
 		, RetargetSelf_Probability { 0.5 }
 		, AroundTarget {}
-		, Airburst_UseCluster {}
+		, Airburst_UseCluster { false }
 		, Airburst_RandomClusters { false }
 		, Airburst_TargetAsSource { false }
-		, Airburst_TargetAsSource_SkipHeight {}
+		, Airburst_TargetAsSource_SkipHeight { false }
 		, Splits_TargetingDistance{ Leptons(1280) }
-		, Splits_TargetingDistance_Cylindrical {}
-		, Splits_AllowRepeatTargets {}
+		, Splits_TargetingDistance_Cylindrical { false }
+		, Splits_AllowRepeatTargets { false }
 		, Splits_TargetCellRange { 3 }
-		, Splits_UseWeaponTargeting {}
-		, AirburstWeapon_ApplyFirepowerMult {}
+		, Splits_UseWeaponTargeting { false }
+		, AirburstWeapon_ApplyFirepowerMult { false }
 		, AirburstWeapon_SourceScatterMin { Leptons(0) }
 		, AirburstWeapon_SourceScatterMax { Leptons(0) }
-		, AirburstWeapon_UseFiringEffects {}
-		, AirburstWeapon_HeadToTarget {}
+		, AirburstWeapon_UseFiringEffects { false }
+		, AirburstWeapon_HeadToTarget { false }
 		, AirburstWeapon_RadialFireSegments { 0 }
 		, Parachuted { false }
 		, Parachuted_FallRate { 1 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <SidebarClass.h>
 
@@ -35,6 +35,7 @@ public:
 	static IStream* g_pStm;
 
 	static SHPStruct* TabProducingProgress[4];
+	static SHPStruct* AutoBuildingMark[2];
 
 	static void Allocate(SidebarClass* pThis);
 	static void Remove(SidebarClass* pThis);

@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/WarheadType/Body.h>
 
@@ -68,7 +68,9 @@ DEFINE_HOOK(0x41DAA4, AirstrikeClass_ResetTarget_ResetForOldTarget, 0xA)
 
 	GET(TechnoClass*, pTargetTechno, EDI);
 
-	TechnoExt::Fetch(pTargetTechno)->AirstrikeTargetingMe = nullptr;
+	// Sanity check
+	if (const auto pTargetExt = TechnoExt::Fetch(pTargetTechno))
+		pTargetExt->AirstrikeTargetingMe = nullptr;
 
 	return SkipGameCode;
 }
@@ -80,7 +82,9 @@ DEFINE_HOOK(0x41DAD4, AirstrikeClass_ResetTarget_ResetForNewTarget, 0x6)
 	GET(AirstrikeClass*, pThis, EBP);
 	GET(TechnoClass*, pTargetTechno, ESI);
 
-	TechnoExt::Fetch(pTargetTechno)->AirstrikeTargetingMe = pThis;
+	// Sanity check
+	if (const auto pTargetExt = TechnoExt::Fetch(pTargetTechno))
+		pTargetExt->AirstrikeTargetingMe = pThis;
 
 	return SkipGameCode;
 }

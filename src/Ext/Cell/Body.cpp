@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <memory>
 
@@ -14,6 +14,10 @@ void CellExt::Serialize(T& Stm)
 		.Process(this->RadSites)
 		.Process(this->RadLevels)
 		.Process(this->InfantryCount)
+		.Process(this->IncomingUnit)
+		.Process(this->IncomingUnitAlt)
+		.Process(this->SmudgeGenerate)
+		.Process(this->SmudgeState)
 		;
 }
 

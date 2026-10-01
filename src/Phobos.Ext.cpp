@@ -1,4 +1,4 @@
-#include <Phobos.h>
+﻿#include <Phobos.h>
 
 #include <LoadOptionsClass.h>
 
@@ -327,7 +327,10 @@ using PhobosTypeRegistry = TypeRegistry <
 	AttachEffectTypeClass,
 	AttachEffectClass,
 	NewSWType,
-	SelectBoxTypeClass
+	SelectBoxTypeClass,
+	AttachmentClass,
+	AttachmentTypeClass,
+	SquadManagerClass
 	// other classes
 > ;
 
@@ -400,6 +403,14 @@ DEFINE_HOOK(0x67E685, LoadGame_PostSwizzle_Phobos, 0x5)
 	// with the restored extensions in place, the owners left over are the objects the
 	// game created itself while loading; they get their extensions now
 	PhobosTypeRegistry::AllocatePendingExtensions();
+	return 0;
+}
+
+std::unordered_map<void*, std::weak_ptr<void>> SavegameGlobal::GlobalSharedRegistry;
+
+DEFINE_HOOK(0x67F7C8, LoadGame_Phobos_End, 0x5)
+{
+	SavegameGlobal::ClearSharedRegistry();
 	return 0;
 }
 

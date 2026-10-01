@@ -1,4 +1,4 @@
-#include "SelectCaptured.h"
+﻿#include "SelectCaptured.h"
 
 #include <Utilities/GeneralUtils.h>
 #include <Utilities/Debug.h>
@@ -26,15 +26,12 @@ const wchar_t* SelectCapturedCommandClass::GetUIDescription() const
 
 void SelectCapturedCommandClass::Execute(WWKey eInput) const
 {
-
 	MapClass::Instance.SetTogglePowerMode(0);
 	MapClass::Instance.SetWaypointMode(0, false);
 	MapClass::Instance.SetRepairMode(0);
 	MapClass::Instance.SetSellMode(0);
 
-	auto pFirstObject = MapClass::Instance.NextObject(
-		ObjectClass::CurrentObjects.Count ? ObjectClass::CurrentObjects.GetItem(0) : nullptr);
-
+	auto const pFirstObject = MapClass::Instance.NextObject(ObjectClass::CurrentObjects.Count ? ObjectClass::CurrentObjects.GetItem(0) : nullptr);
 	bool capturedPresent = false;
 	auto pCurrentObject = pFirstObject;
 
@@ -46,8 +43,8 @@ void SelectCapturedCommandClass::Execute(WWKey eInput) const
 			const Point2D coordInScreen = pTactical->CoordsToScreen(pTechno->GetCoords()) - pTactical->TacticalPos;
 			RectangleStruct screenArea = DSurface::Composite->GetRect();
 
-			if (screenArea.Width >= coordInScreen.X && screenArea.Height >= coordInScreen.Y && coordInScreen.X >= 0 && coordInScreen.Y >= 0 && // the unit is in the current screen
-				pTechno->IsMindControlled() && pTechno->IsSelectable() && !pTechno->MindControlledByAUnit) // the unit is mc by non-perma mc, and selectable.
+			if (screenArea.Width >= coordInScreen.X && screenArea.Height >= coordInScreen.Y && coordInScreen.X >= 0 && coordInScreen.Y >= 0 // the unit is in the current screen
+				&& pTechno->IsMindControlled() && pTechno->IsSelectable() && !pTechno->MindControlledByAUnit) // the unit is mc by non-perma mc, and selectable.
 			{
 				if (!capturedPresent)
 				{

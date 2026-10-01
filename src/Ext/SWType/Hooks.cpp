@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 //this hook just for phobos NewSWType
 DEFINE_HOOK(0x6CC390, SuperClass_Launch, 0x6)

@@ -1,7 +1,44 @@
-#include "Body.h"
+﻿#include "Body.h"
+
 #include <Utilities/AresHelper.h>
 #include <Ext/Techno/Body.h>
 #include <Ext/Scenario/Body.h>
+
+enum class AttachCargoMode
+{
+	SingleObject,
+	ObjectChain,
+
+	DefaultBehavior = SingleObject,
+};
+
+namespace TechnoAttachmentTemp
+{
+	AttachCargoMode currentAttachMode = AttachCargoMode::DefaultBehavior;
+}
+
+#define DEFINE_ATTACH_WRAPPER(mode) \
+void __fastcall CargoClass_Attach_##mode(PassengersClass* pThis, void*, FootClass* pThat) \
+{ \
+	TechnoAttachmentTemp::currentAttachMode = AttachCargoMode::mode; \
+	pThis->AddPassenger(pThat); \
+	TechnoAttachmentTemp::currentAttachMode = AttachCargoMode::DefaultBehavior; \
+}
+
+DEFINE_ATTACH_WRAPPER(SingleObject);
+DEFINE_ATTACH_WRAPPER(ObjectChain);
+
+DEFINE_FUNCTION_JUMP(CALL, 0x65DF88, CargoClass_Attach_ObjectChain);  // Create_Group
+DEFINE_FUNCTION_JUMP(CALL, 0x65DCF0, CargoClass_Attach_ObjectChain);  // Do_Reinforcements, paradrop loading
+
+DEFINE_HOOK(0x4733BD, CargoClass_Attach_HandleCurrentAttachMode, 0x6)
+{
+	enum { SkipAttachingChain = 0x4733FA, Continue = 0x0 };
+
+	return TechnoAttachmentTemp::currentAttachMode == AttachCargoMode::SingleObject
+		? SkipAttachingChain
+		: Continue;
+}
 
 // Bugfix: TAction 7,80,107.
 DEFINE_HOOK(0x65DF67, TeamTypeClass_CreateMembers_LoadOntoTransport, 0x6)
@@ -50,7 +87,9 @@ DEFINE_HOOK(0x65DF67, TeamTypeClass_CreateMembers_LoadOntoTransport, 0x6)
 	}
 
 	// Add to transport - this will load the payload object and everything linked to it (rest of the team) in reverse order
+	TechnoAttachmentTemp::currentAttachMode = AttachCargoMode::ObjectChain;
 	pTransport->Passengers.AddPassenger(pPayload);
+	TechnoAttachmentTemp::currentAttachMode = AttachCargoMode::DefaultBehavior;
 
 	// Handle gunner change - this is the 'last' passenger because of reverse order
 	if (pType->Gunner && pGunner)

@@ -1,4 +1,4 @@
-#include <Helpers/Macro.h>
+﻿#include <Helpers/Macro.h>
 #include <CCINIClass.h>
 #include <Straws.h>
 #include <Pipes.h>

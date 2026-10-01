@@ -24,6 +24,7 @@ public:
 	std::optional<int> CurrentLaserWeaponIndex;
 	int PoweredUpToLevel; // Distinct from UpgradeLevel, and set to highest PowersUpToLevel out of applied upgrades regardless of how many are currently applied to this building.
 	SuperClass* CurrentEMPulseSW;
+	AbstractClass* SecondaryArchiveTarget;
 	bool IsFiringNow;
 	int TurretAnimIdleFrame;
 	int TurretAnimFiringFrame;
@@ -42,7 +43,8 @@ public:
 		, AccumulatedIncome { 0 }
 		, CurrentLaserWeaponIndex {}
 		, PoweredUpToLevel { 0 }
-		, CurrentEMPulseSW {}
+		, CurrentEMPulseSW { nullptr }
+		, SecondaryArchiveTarget { nullptr }
 		, IsFiringNow { false }
 		, TurretAnimIdleFrame { 0 }
 		, TurretAnimFiringFrame { -1 }
@@ -73,11 +75,8 @@ public:
 
 	// virtual void LoadFromINIFile(CCINIClass* pINI) override;
 
-	virtual void OnDetach(BuildingClass* pTarget, bool removed) override
-	{
-		if (removed)
-			AnnounceInvalidPointer(this->CurrentAirFactory, pTarget);
-	}
+	virtual void OnDetach(AbstractClass* pTarget, bool removed) override;
+	virtual void OnDetach(BuildingClass* pTarget, bool removed) override;
 
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 	virtual void SaveToStream(PhobosStreamWriter& Stm) override;

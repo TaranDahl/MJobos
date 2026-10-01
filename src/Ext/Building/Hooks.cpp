@@ -1,9 +1,10 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <GameOptionsClass.h>
 #include <Ext/Anim/Body.h>
 #include <Ext/House/Body.h>
 #include <Ext/SWType/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Ext/TechnoType/Body.h>
 #include <Ext/WarheadType/Body.h>
 
@@ -210,26 +211,8 @@ DEFINE_HOOK(0x44D455, BuildingClass_Mission_Missile_EMPulseBulletWeapon, 0x8)
 
 #pragma endregion
 
+// Kick out stuck units when the factory building is not busy
 #pragma region KickOutStuckUnits
-
-DEFINE_HOOK(0x44955D, BuildingClass_WeaponFactoryOutsideBusy_WeaponFactoryCell, 0x6)
-{
-	enum { NotBusy = 0x44969B };
-
-	GET(BuildingClass* const, pThis, ESI);
-
-	const auto pLink = pThis->GetNthLink();
-
-	if (!pLink)
-		return NotBusy;
-
-	const auto pLinkType = pLink->GetTechnoType();
-
-	if (pLinkType->JumpJet && pLinkType->BalloonHover)
-		return NotBusy;
-
-	return 0;
-}
 
 // Attempt to kick the stuck unit out again by setting the destination
 DEFINE_HOOK(0x44E202, BuildingClass_Mission_Unload_CheckStuck, 0x6)
@@ -244,17 +227,20 @@ DEFINE_HOOK(0x44E202, BuildingClass_Mission_Unload_CheckStuck, 0x6)
 	if (const auto pUnit = abstract_cast<UnitClass*>(pThis->GetNthLink()))
 	{
 		// Detecting movement status
-		if (pUnit->Locomotor->Destination() == CoordStruct::Empty)
+		const auto pLocoDest = pUnit->Locomotor->Destination();
+
+		if (pLocoDest == CoordStruct::Empty || pLocoDest == pUnit->Location)
 		{
 			// Evacuate the congestion at the entrance
-			reinterpret_cast<void(__thiscall*)(BuildingClass*)>(0x449540)(pThis);
-			const auto pType = pThis->Type;
-			const auto cell = pThis->GetMapCoords() + pType->FoundationOutside[10];
-			const auto door = cell - CellStruct { 1, 0 };
-			const auto pDest = MapClass::Instance.GetCellAt(door);
+			pThis->WeaponFactoryOutsideBusy();
+			const auto cell = BuildingTypeExt::GetWeaponFactoryDoor(pThis);
+			const auto pDest = MapClass::Instance.GetCellAt(cell);
 
-			// Hover units may stop one cell behind their destination, should forcing them to advance one more cell
-			pUnit->SetDestination((pUnit->Destination != pDest ? pDest : MapClass::Instance.GetCellAt(cell)), true);
+			// Hover units may stop one cell behind their destination
+			if (pUnit->Destination != pDest)
+				pUnit->SetDestination(pDest, true);
+			else
+				pUnit->Locomotor->Move_To(CellClass::Cell2Coord(cell, Unsorted::LevelHeight * pDest->Level));
 		}
 	}
 
@@ -265,6 +251,15 @@ DEFINE_HOOK(0x44E202, BuildingClass_Mission_Unload_CheckStuck, 0x6)
 DEFINE_HOOK(0x44E260, BuildingClass_Mission_Unload_KickOutStuckUnits, 0x7)
 {
 	GET(BuildingClass*, pThis, EBP);
+
+	if (!pThis->IsTether)
+	{
+		if (const auto pLink = pThis->GetNthLink())
+		{
+			pThis->SendCommand(RadioCommand::NotifyUnlink, pLink);
+			pLink->Scatter(pThis->GetCoords(), true, true);
+		}
+	}
 
 	BuildingExt::KickOutStuckUnits(pThis);
 
@@ -499,6 +494,38 @@ DEFINE_HOOK(0x449149, BuildingClass_Captured_FactoryPlant2, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
+{
+	GET(BuildingClass*, pThis, ECX);
+
+	if (!pThis->CanBeRepaired())
+		return 0;
+
+	auto const mission = pThis->CurrentMission;
+
+	if (mission == Mission::Construction || mission == Mission::Selling)
+		return 0;
+
+	auto const pOwner = pThis->Owner;
+
+	if (pOwner->IsControlledByHuman() && RulesExt::Global()->PlayerAutoRepair)
+		pThis->IsBeingRepaired = true;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x448480, BuildingClass_SetOwningHouse_CapturedEVA, 0x5)
+{
+	GET(HouseClass*, pToHouse, EBX);
+
+	if (pToHouse->IsControlledByCurrentPlayer()) // Not necessary to per techno customize this, I guess?
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_WeCaptureABuilding.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+	else
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_OurBuildingIsCaptured.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+
+	return 0x44848F;
+}
 
 #pragma region DestroyableObstacle
 
@@ -787,6 +814,152 @@ DEFINE_HOOK(0x6AA88D, StripClass_RecheckCameo_FindFactoryDehardCode, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x6AB6F5, SelectClass_Action_CheckBuildable, 0x6)
+{
+	enum { ContinueWithVoice = 0x6AB6FB, ContinueWithoutVoice = 0x6AB718, ShouldNotBuild = 0x6AB7D4 };
+
+	GET_STACK(bool, shouldDisableCameo, STACK_OFFSET(0xAC, -0x99));
+
+	if (!shouldDisableCameo)
+		return ContinueWithVoice;
+
+	GET(TechnoTypeClass* const, pType, EDI);
+
+	return TechnoTypeExt::Fetch(pType)->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist) ? ContinueWithoutVoice : ShouldNotBuild;
+}
+
+static bool __fastcall HouseClass_ShouldDisableCameo_Check(HouseClass* pThis, void* _, TechnoTypeClass* pType)
+{
+	if (TechnoTypeExt::Fetch(pType)->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
+		return false;
+
+	return pThis->ShouldDisableCameo(pType);
+}
+DEFINE_FUNCTION_JUMP(CALL, 0x4C9CEA, HouseClass_ShouldDisableCameo_Check);
+
+static BOOL __fastcall TechnoTypeClass_FindFactory_Check(TechnoTypeClass* pThis, void* _, bool allowOccupied, bool requirePower, bool requireCanBuild, HouseClass* pHouse)
+{
+	if (TechnoTypeExt::Fetch(pThis)->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
+		return 1;
+
+	return pThis->FindFactory(allowOccupied, requirePower, requireCanBuild, pHouse) ? 1 : 0;
+}
+DEFINE_FUNCTION_JUMP(CALL6, 0x4FA438, TechnoTypeClass_FindFactory_Check);
+
+DEFINE_HOOK(0x4FA6BB, HouseClass_BeginProduction_Check, 0x9)
+{
+	enum { SkipLog = 0x4FA6D1 };
+
+	GET(TechnoTypeClass* const, pType, EBP);
+
+	if (!TechnoTypeExt::Fetch(pType)->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
+		return 0;
+
+	GET(FactoryClass* const, pFactory, ESI);
+
+	R->EAX(pFactory->QueuedObjects.Count);
+	R->EBX(0);
+
+	return SkipLog;
+}
+
+DEFINE_HOOK(0x4C9D6E, FactoryClass_QueueProduction_CheckBuildable, 0x8)
+{
+	enum { CannotBuild = 0x4C9D64 };
+
+	GET(FactoryClass* const, pThis, ESI);
+	GET(TechnoTypeClass*, pType, EDI);
+	GET_STACK(HouseClass* const, pHouse, STACK_OFFSET(0x14, 0x8));
+
+	if (!pHouse->IsControlledByHuman() || !TechnoTypeExt::Fetch(pType)->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
+		return 0;
+
+	auto& globalCount = ScenarioExt::Global()->CanBuildNowCount;
+	if (!++globalCount)
+	{
+		++globalCount;
+		for (const auto& pTechnoType : TechnoTypeClass::Array)
+		{
+			if (const auto pTechnoTypeExt = TechnoTypeExt::TryFetch(pTechnoType))
+				pTechnoTypeExt->CanBuildNowCount = 0;
+		}
+	}
+
+	auto buildCheck = [pHouse, &globalCount](TechnoTypeClass* pTechnoType) -> bool
+	{
+		const auto pTechnoTypeExt = TechnoTypeExt::Fetch(pTechnoType);
+
+		if (pTechnoTypeExt->CanBuildNowCount != globalCount)
+		{
+			pTechnoTypeExt->CanBuildNowCount = globalCount;
+			auto canBuildNow = [pHouse](TechnoTypeClass* pTechnoType) -> bool
+			{
+				if (pHouse->CanBuild(pTechnoType, false, false) != CanBuildResult::Buildable)
+					return false;
+
+				if (pTechnoType->WhatAmI() != AbstractType::AircraftType || !static_cast<AircraftTypeClass*>(pTechnoType)->AirportBound)
+					return true;
+
+				int ownedAircraft = 0;
+
+				for(const auto& pAircraft : RulesClass::Instance->PadAircraft)
+					ownedAircraft += pHouse->CountOwnedAndPresent(pAircraft);
+
+				return ownedAircraft < pHouse->AirportDocks;
+			};
+			pTechnoTypeExt->CanBuildNowCheck = canBuildNow(pTechnoType);
+		}
+
+		return pTechnoTypeExt->CanBuildNowCheck;
+	};
+
+	if (buildCheck(pType))
+		return 0;
+
+	GET_STACK(bool, isQueueCall, STACK_OFFSET(0x14, 0xC));
+
+	if (!isQueueCall)
+	{
+		if (pHouse->IsControlledByCurrentPlayer())
+			VocClass::PlayGlobal(RulesClass::Instance->ScoldSound, 0x2000, 1.0);
+	}
+	else if (pThis->QueuedObjects.Count > 0)
+	{
+		const int maxIndex = pThis->QueuedObjects.Count - 1;
+		int checkIndex = 0;
+
+		do
+		{
+			const auto pNextType = pThis->QueuedObjects.Items[0];
+
+			for (int i = 0; i < maxIndex; ++i)
+				pThis->QueuedObjects.Items[i] = pThis->QueuedObjects.Items[i + 1];
+
+			pThis->QueuedObjects.Items[maxIndex] = pType;
+			pType = pNextType;
+
+			if (buildCheck(pType))
+			{
+				R->EDI(pType);
+
+				GET_STACK(int, returnAddress, STACK_OFFSET(0x14, 0x0))
+				if (returnAddress == 0x4FA5D6)
+				{
+					R->Stack(STACK_OFFSET(0x48, 0x4), pType->WhatAmI());
+					R->Stack(STACK_OFFSET(0x48, 0x8), pType->GetArrayIndex());
+				}
+
+				return 0;
+			}
+		}
+		while (maxIndex > checkIndex++);
+
+		pThis->QueuedObjects.Count = 0;
+	}
+
+	return CannotBuild;
+}
+
 #pragma endregion
 
 #pragma region BarracksExitCell
@@ -980,6 +1153,13 @@ DEFINE_HOOK(0x4555E4, BuildingClass_IsPowerOnline_Overpower, 0x6)
 	}
 
 	return overPower < keepOnline ? LowPower : (R->Origin() == 0x4555E4 ? Continue1 : Continue2);
+}
+
+DEFINE_HOOK(0x449306, BuildingClass_SetOwningHouse_Sell, 0x6)
+{
+	enum { NoSell = 0x44936E };
+	GET(BuildingClass*, pThis, ESI);
+	return BuildingTypeExt::Fetch(pThis->Type)->AISellCapturedBuilding.Get(RulesExt::Global()->AISellCapturedBuilding) ? 0 : NoSell;
 }
 
 #pragma region OwnerChangeBuildupFix

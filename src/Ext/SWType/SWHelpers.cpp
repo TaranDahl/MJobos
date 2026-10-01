@@ -1,4 +1,4 @@
-#include "Body.h"
+﻿#include "Body.h"
 
 #include <Ext/House/Body.h>
 
@@ -73,8 +73,8 @@ bool SWTypeExt::IsInhibitorEligible(HouseClass* pOwner, const CellStruct& coords
 		const auto center = pTechno->GetCenterCoords();
 
 		// has to be closer than the inhibitor range (which defaults to Sight)
-		const double range = (double)pExt->InhibitorRange.Get(pType->Sight);
-		return coords.DistanceFromSquared(CellClass::Coord2Cell(center)) <= range * range;
+		const int range = pExt->InhibitorRange.Get(pType->Sight);
+		return coords.DistanceFromSquared(CellClass::Coord2Cell(center)) <= static_cast<double>(range) * range;
 	}
 
 	return false;
@@ -112,8 +112,8 @@ bool SWTypeExt::IsDesignatorEligible(HouseClass* pOwner, const CellStruct& coord
 		const auto center = pTechno->GetCenterCoords();
 
 		// has to be closer than the designator range (which defaults to Sight)
-		const double range = (double)pExt->DesignatorRange.Get(pType->Sight);
-		return coords.DistanceFromSquared(CellClass::Coord2Cell(center)) <= range * range;
+		const int range = pExt->DesignatorRange.Get(pType->Sight);
+		return coords.DistanceFromSquared(CellClass::Coord2Cell(center)) <= static_cast<double>(range) * range;
 	}
 
 	return false;

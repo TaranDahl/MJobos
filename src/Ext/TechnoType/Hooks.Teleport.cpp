@@ -1,4 +1,4 @@
-#include <Ext/Anim/Body.h>
+﻿#include <Ext/Anim/Body.h>
 #include <Ext/Foot/Body.h>
 #include <Ext/WeaponType/Body.h>
 
@@ -27,7 +27,7 @@ DEFINE_HOOK(0x7193F6, TeleportLocomotionClass_ILocomotion_Process_WarpoutAnim, 0
 	if (pExt->WarpOutWeapon)
 		WeaponTypeExt::DetonateAt(pExt->WarpOutWeapon, pLinked, pLinked);
 
-	const double distance = Math::sqrt(pLinked->Location.DistanceFromSquared(pLocomotor->LastCoords));
+	const double distance = pLinked->Location.DistanceFrom(pLocomotor->LastCoords);
 	const auto linkedExt = FootExt::Fetch(pLinked);
 	linkedExt->LastWarpDistance = distance;
 

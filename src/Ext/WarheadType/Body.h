@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 #include <WarheadTypeClass.h>
-#include <Ext/Bullet/Body.h>
+#include <Ext/Techno/Body.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 #include <New/Type/ShieldTypeClass.h>
@@ -24,7 +24,6 @@ public:
 		return static_cast<WarheadTypeClass*>(this->GetAttachedObject());
 	}
 
-
 	Valueable<int> Reveal;
 	Valueable<int> CreateGap;
 	Valueable<int> TransactMoney;
@@ -47,6 +46,8 @@ public:
 	Nullable<bool> Conventional_IgnoreUnits;
 	Valueable<bool> RemoveDisguise;
 	Valueable<bool> RemoveMindControl;
+	Valueable<bool> RemoveMindControl_OnVictim;
+	Valueable<bool> RemoveMindControl_OnController;
 	Nullable<bool> RemoveMindControl_Silent;
 	Nullable<bool> RemoveParasite;
 	ValueableVector<TechnoTypeClass*> RemoveParasite_Allow;
@@ -135,6 +136,9 @@ public:
 	NullableVector<ShieldTypeClass*> Shield_Respawn_Types;
 	NullableVector<ShieldTypeClass*> Shield_SelfHealing_Types;
 
+	Valueable<bool> Directional;
+	Valueable<double> Directional_Multiplier;
+
 	Valueable<int> NotHuman_DeathSequence;
 	ValueableIdxVector<SuperWeaponTypeClass> LaunchSW;
 	Valueable<bool> LaunchSW_RealLaunch;
@@ -158,8 +162,20 @@ public:
 	ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_AffectTypes;
 	ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
+	std::vector<AttachmentTransformGroup> Attachment_Transform;
 	std::vector<TypeConvertGroup> Convert_Pairs;
 	AEAttachInfoTypeClass AttachEffects;
+
+	Valueable<bool> InflictLocomotor;
+	Valueable<bool> RemoveInflictedLocomotor;
+
+	Valueable<bool> LightChanging;
+	Valueable<int> SetAmbientLight;
+	Valueable<int> SetAmbientRed;
+	Valueable<int> SetAmbientGreen;
+	Valueable<int> SetAmbientBlue;
+	Valueable<bool> ReduceTiberium;
+
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 	Valueable<bool> InflictLocomotor;
 	Valueable<bool> RemoveInflictedLocomotor;
@@ -181,13 +197,13 @@ public:
 
 	Valueable<bool> Nonprovocative;
 
-	Nullable<bool> MergeBuildingDamage;
-
 	Nullable<int> CombatLightDetailLevel;
 	Nullable<bool> CombatLightDetailLevel_CheckColored;
 	Valueable<double> CombatLightChance;
 	Valueable<bool> CLIsBlack;
 	Nullable<bool> Particle_AlphaImageIsLightFlash;
+
+	Nullable<bool> MergeBuildingDamage;
 
 	Nullable<double> DamageOwnerMultiplier;
 	Nullable<double> DamageAlliesMultiplier;
@@ -209,7 +225,14 @@ public:
 	Valueable<bool> BuildingUndeploy;
 	Valueable<bool> BuildingUndeploy_Leave;
 
+	Valueable<bool> ForceTrack;
+	Valueable<int> ForceTrack_Index;
+	Valueable<CoordStruct> ForceTrack_Coord;
+
 	Nullable<bool> CombatAlert_Suppress;
+
+	Valueable<bool> NoCellSpread;
+	Valueable<Leptons> NoCellSpread_SnapDistance;
 
 	Valueable<WeaponTypeClass*> KillWeapon;
 	Valueable<WeaponTypeClass*> KillWeapon_OnFirer;
@@ -219,6 +242,11 @@ public:
 	Valueable<AffectedTarget> KillWeapon_OnFirer_AffectsTarget;
 
 	Valueable<int> ElectricAssaultLevel;
+
+	Valueable<bool> CanKill;
+
+	Valueable<bool> SuppressWreckage;
+	Valueable<bool> ActivateWreckage;
 
 	Valueable<AffectedTarget> AirstrikeTargets;
 
@@ -234,9 +262,9 @@ public:
 	Valueable<bool> AffectsInvokerOnly_Reverse;
 	Nullable<bool> AffectsInvokerOnly_IgnoreInvokerState;
 
-	Valueable<bool> ReverseEngineer;
+	Nullable<bool> AutoTargetWalls;
 
-	Valueable<bool> CanKill;
+	Valueable<bool> ReverseEngineer;
 
 	Valueable<bool> UnlimboDetonate;
 	Valueable<bool> UnlimboDetonate_ForceLocation;
@@ -263,6 +291,15 @@ public:
 	ValueableIdx<VocClass> PenetratesTransport_CleanSound;
 
 	Valueable<bool> Taunt;
+
+	Valueable<bool> KnockUp;
+	Valueable<Leptons> KnockUp_Range;
+	Valueable<Leptons> KnockUp_Speed;
+	Valueable<double> KnockUp_Angle;
+
+	Valueable<bool> Traction;
+	Valueable<Leptons> Traction_Range;
+	Valueable<Leptons> Traction_Speed;
 
 	Nullable<StackingMode> Psychedelic_StackingMode;
 
@@ -326,11 +363,13 @@ public:
 		, Conventional_IgnoreUnits {}
 		, RemoveDisguise { false }
 		, RemoveMindControl { false }
+		, RemoveMindControl_OnVictim { true }
+		, RemoveMindControl_OnController { false }
 		, RemoveMindControl_Silent {}
 		, RemoveParasite {}
 		, RemoveParasite_Allow {}
 		, RemoveParasite_Disallow {}
-		, DecloakDamagedTargets {}
+		, DecloakDamagedTargets { true }
 		, ShakeIsLocal {}
 		, ApplyModifiersOnNegativeDamage {}
 		, PenetratesIronCurtain { false }
@@ -414,6 +453,9 @@ public:
 		, SpawnsCrate_Types {}
 		, SpawnsCrate_Weights {}
 
+		, Directional { false }
+		, Directional_Multiplier { 1.0 }
+
 		, NotHuman_DeathSequence { -1 }
 		, LaunchSW {}
 		, LaunchSW_RealLaunch { true }
@@ -437,8 +479,20 @@ public:
 		, DetonateOnAllMapObjects_AffectTypes {}
 		, DetonateOnAllMapObjects_IgnoreTypes {}
 
+		, Attachment_Transform {}
 		, Convert_Pairs {}
 		, AttachEffects {}
+
+		, InflictLocomotor { false }
+		, RemoveInflictedLocomotor { false }
+
+		, LightChanging { false }
+		, SetAmbientLight { -1 }
+		, SetAmbientRed { -1 }
+		, SetAmbientGreen { -1 }
+		, SetAmbientBlue { -1 }
+		, ReduceTiberium { false }
+
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 		, InflictLocomotor { false }
 		, RemoveInflictedLocomotor { false }
@@ -460,13 +514,13 @@ public:
 
 		, Nonprovocative { false }
 
-		, MergeBuildingDamage {}
-
 		, CombatLightDetailLevel {}
 		, CombatLightDetailLevel_CheckColored {}
 		, CombatLightChance { 1.0 }
 		, CLIsBlack { false }
 		, Particle_AlphaImageIsLightFlash {}
+
+		, MergeBuildingDamage {}
 
 		, DamageOwnerMultiplier {}
 		, DamageAlliesMultiplier {}
@@ -488,9 +542,19 @@ public:
 		, BuildingUndeploy { false }
 		, BuildingUndeploy_Leave { false }
 
+		, ForceTrack { false }
+		, ForceTrack_Index { 0 }
+		, ForceTrack_Coord { CoordStruct::Empty }
+
 		, CombatAlert_Suppress {}
 
+		, NoCellSpread { false }
+		, NoCellSpread_SnapDistance { Leptons(128) }
+
 		, ElectricAssaultLevel { 1 }
+
+		, SuppressWreckage { false }
+		, ActivateWreckage { false }
 
 		, AirstrikeTargets { AffectedTarget::Building }
 
@@ -545,6 +609,8 @@ public:
 		, KillWeapon_AffectsTarget { AffectedTarget::All }
 		, KillWeapon_OnFirer_AffectsTarget { AffectedTarget::All }
 
+		, AutoTargetWalls {}
+
 		, ReverseEngineer { false }
 
 		, UnlimboDetonate { false }
@@ -558,13 +624,22 @@ public:
 
 		, AnimZAdjust {}
 
+		, ApplyPerTargetEffectsOnDetonate {}
+
 		, ChangeOwner { false }
 		, ChangeOwner_SetAsMindControl { false }
 		, ChangeOwner_MindControlAnim {}
 
-		, ApplyPerTargetEffectsOnDetonate {}
-
 		, Taunt { false }
+
+		, KnockUp { false }
+		, KnockUp_Range { Leptons(0) }
+		, KnockUp_Speed { Leptons(0) }
+		, KnockUp_Angle { 45.0 }
+
+		, Traction { false }
+		, Traction_Range { Leptons(0) }
+		, Traction_Speed { Leptons(0) }
 
 		, Psychedelic_StackingMode {}
 
@@ -575,6 +650,7 @@ public:
 		, Ammo { 0 }
 	{ }
 
+	void ApplyAttachmentTransform(HouseClass* pHouse, TechnoClass* pTarget);
 	void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
 	void ApplyLocomotorInfliction(TechnoClass* pTarget);
 	void ApplyLocomotorInflictionReset(TechnoClass* pTarget);
@@ -611,8 +687,11 @@ private:
 	void ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker);
 	void ApplyBuildingUndeploy(TechnoClass* pTarget);
 	void ApplyReverseEngineer(HouseClass* pHouse, TechnoClass* pTarget);
+	void ApplyForceTrack(TechnoClass* pTarget);
 	void ApplyReturnWarhead(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner);
 	void ApplyPenetratesTransport(TechnoClass* pTarget, TechnoClass* pInvoker, HouseClass* pInvokerHouse, const CoordStruct& coords, int damage, int distance);
+	void ApplyKnockUp(TechnoClass* pTarget);
+	void ApplyTraction(TechnoClass* pTarget, const CoordStruct& coords);
 	double GetCritChance(TechnoClass* pFirer) const;
 	void ApplyAmmoModifier(TechnoClass* pTarget);
 
@@ -635,9 +714,11 @@ public:
 	{
 		return AbstractExt::TryFetch<WarheadTypeExt>(pThis);
 	}
+
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 
+	static int HitDirection;
 	static WarheadTypeClass* LocomotorWarhead;
 
 	static void DetonateAt(WarheadTypeClass* pThis, AbstractClass* pTarget, TechnoClass* pOwner, int damage, HouseClass* pFiringHouse = nullptr);

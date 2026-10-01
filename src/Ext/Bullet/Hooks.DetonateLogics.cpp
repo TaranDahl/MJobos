@@ -10,21 +10,24 @@ DEFINE_HOOK(0x4690D4, BulletClass_Logics_NewChecks, 0x6)
 {
 	enum { SkipShaking = 0x469130, GoToExtras = 0x469AA4 };
 
-	GET(BulletClass*, pBullet, ESI);
+	GET(BulletClass*, pThis, ESI);
 	GET(WarheadTypeClass*, pWarhead, EAX);
 	GET_BASE(CoordStruct const* const, pCoords, 0x8);
 
+	if (BulletExt::Fetch(pThis)->Status & TrajectoryStatus::Vanish)
+		return GoToExtras;
+
 	auto const pExt = WarheadTypeExt::Fetch(pWarhead);
 
-	if (auto const pTarget = abstract_cast<TechnoClass*>(pBullet->Target))
+	if (auto const pTarget = abstract_cast<TechnoClass*>(pThis->Target))
 	{
 		// Check if the WH should affect the techno target or skip it
-		if (BulletTypeExt::Fetch(pBullet->Type)->Shrapnel_ObeyWarheadTriggerConditions.Get(RulesExt::Global()->Shrapnel_ObeyWarheadTriggerConditions))
+		if (BulletTypeExt::Fetch(pThis->Type)->Shrapnel_ObeyWarheadTriggerConditions.Get(RulesExt::Global()->Shrapnel_ObeyWarheadTriggerConditions))
 		{
 			if (!pExt->IsHealthInThreshold(pTarget)
 				|| !pExt->IsVeterancyInThreshold(pTarget)
 				|| (!pExt->AffectsNeutral && pTarget->Owner->IsNeutral())
-				|| !pExt->IsInvokerAllowed(pTarget, pBullet->Owner))
+				|| !pExt->IsInvokerAllowed(pTarget, pThis->Owner))
 				return GoToExtras;
 		}
 	}
@@ -64,15 +67,99 @@ DEFINE_HOOK(0x46954C, BulletClass_Logics_IsLocomotor_Bunker, 0x6)
 	return pTarget->BunkerLinkedItem ? CannotImbue : 0;
 }
 
-DEFINE_HOOK(0x469A75, BulletClass_Logics_DamageHouse, 0x7)
+DEFINE_HOOK(0x469A69, BulletClass_Logics_DamageHouse, 0x6)
 {
+	enum { SkipDamageArea = 0x469A88 };
+
 	GET(BulletClass*, pThis, ESI);
-	GET(HouseClass*, pHouse, ECX);
+	GET(TechnoClass*, pTechno, EAX);
+	GET(int, damage, EDX);
+	GET_BASE(CoordStruct*, coord, 0x8);
 
-	if (!pHouse)
-		R->ECX(BulletExt::Fetch(pThis)->FirerHouse);
+	const auto pExt = BulletExt::Fetch(pThis);
+	const auto pHouse = pTechno ? pTechno->Owner : pExt->FirerHouse;
+	const auto pWH = pThis->WH;
+	const auto pWHExt = WarheadTypeExt::Fetch(pWH);
 
-	return 0;
+	do
+	{
+		if (pWHExt->Directional)
+		{
+			if (const auto pTraj = pExt->Trajectory.get())
+			{
+				const auto flag = pTraj->Flag();
+
+				if ((flag != TrajectoryFlag::Engrave && flag != TrajectoryFlag::Tracing)
+					&& (pTraj->MovingVelocity.X != 0.0 || pTraj->MovingVelocity.Y != 0.0))
+				{
+					WarheadTypeExt::HitDirection = DirStruct((-1) * Math::atan2(pTraj->MovingVelocity.Y, pTraj->MovingVelocity.X)).GetValue<16>();
+					break;
+				}
+			}
+			else if (pThis->Type->Inviso)
+			{
+				const auto delta = Point2D { pThis->SourceCoords.X - pThis->TargetCoords.X, pThis->SourceCoords.Y - pThis->TargetCoords.Y };
+
+				if (delta.X != 0 || delta.Y != 0)
+				{
+					WarheadTypeExt::HitDirection = DirStruct(Math::atan2(static_cast<double>(delta.Y), static_cast<double>(delta.X))).GetValue<16>();
+					break;
+				}
+			}
+			else if (pThis->Velocity.X != 0.0 || pThis->Velocity.Y != 0.0)
+			{
+				WarheadTypeExt::HitDirection = DirStruct((-1) * Math::atan2(pThis->Velocity.Y, pThis->Velocity.X)).GetValue<16>();
+				break;
+			}
+		}
+
+		WarheadTypeExt::HitDirection = -1;
+	}
+	while (false);
+
+	if (pWHExt->NoCellSpread && damage)
+	{
+		DamageAreaResult result = DamageAreaResult::Missed;
+
+		if (const auto pObject = abstract_cast<ObjectClass*>(pThis->Target))
+		{
+			auto dist = coord->DistanceFrom(pObject->GetCoords());
+			const auto isBuilding = pObject->WhatAmI() == AbstractType::Building;
+
+			if (isBuilding)
+			{
+				const auto pBuildingType = static_cast<BuildingClass*>(pObject)->Type;
+				dist -= ((pBuildingType->GetFoundationHeight(false) + pBuildingType->GetFoundationWidth()) << 6);
+			}
+
+			if (dist <= pWHExt->NoCellSpread_SnapDistance.Get())
+			{
+				if (!(pObject->AbstractFlags & AbstractFlags::Techno))
+				{
+					result = DamageAreaResult::Hit;
+					pObject->ReceiveDamage(&damage, 0, pWH, pThis->Owner, false, false, pHouse);
+				}
+				else if (pObject->IsAlive && pObject->Health > 0 && pObject->IsOnMap && !pObject->InLimbo
+					&& (!isBuilding || !static_cast<BuildingClass*>(pObject)->Type->InvisibleInGame)
+					&& !(pObject == pThis->Owner && pObject->GetTechnoType()->DamageSelf && pWH != RulesClass::Instance->CrushWarhead))
+				{
+					result = (pObject->IsIronCurtained() && !static_cast<TechnoClass*>(pObject)->ForceShielded)
+						? DamageAreaResult::Nullified : DamageAreaResult::Hit;
+					pObject->ReceiveDamage(&damage, 0, pWH, pThis->Owner, false, false, pHouse);
+				}
+			}
+		}
+
+		R->EAX(result);
+	}
+	else
+	{
+		R->EAX(MapClass::Instance.DamageArea(*coord, damage, pTechno, pWH, true, pHouse));
+	}
+
+	WarheadTypeExt::HitDirection = -1;
+
+	return SkipDamageArea;
 }
 
 #pragma region DetonateOnAllMapObjects
@@ -514,11 +601,10 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 		if (!pWHExt->UnlimboDetonate_ForceLocation)
 		{
 			const auto pType = pTechno->GetTechnoType();
-			const auto nCell = MapClass::Instance.NearByLocation(CellClass::Coord2Cell(location),
-									pType->SpeedType, -1, pType->MovementZone, false, 1, 1, true,
-									false, false, true, CellStruct::Empty, false, false);
+			const auto cell = MapClass::Instance.NearByLocation(CellClass::Coord2Cell(location), pType->SpeedType,
+				-1, pType->MovementZone, false, 1, 1, true, false, false, true, CellStruct::Empty, false, false);
 
-			const auto pCell = MapClass::Instance.TryGetCellAt(nCell);
+			const auto pCell = MapClass::Instance.TryGetCellAt(cell);
 
 			if (pCell)
 			{

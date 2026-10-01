@@ -1,9 +1,10 @@
-#include <Utilities/AresHelper.h>
+﻿#include <Utilities/AresHelper.h>
 #include <Utilities/AresFunctions.h>
 #include <Utilities/Helpers.Alex.h>
 
 #include <Ext/Aircraft/Body.h>
 #include <Ext/Building/Body.h>
+#include <Ext/House/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/Sidebar/Body.h>
 #include <Ext/EBolt/Body.h>
@@ -63,10 +64,7 @@ static void __fastcall LetGo(TemporalClass* pTemporal)
 
 static bool __stdcall ConvertToType(TechnoClass* pThis, TechnoTypeClass* pToType)
 {
-	if (const auto pFoot = abstract_cast<FootClass*, true>(pThis))
-		return TechnoExt::ConvertToType(pFoot, pToType);
-
-	return false;
+	return TechnoExt::ConvertToType(pThis, pToType);
 }
 
 // Technically this replaces GetTechnoType() call.
@@ -285,6 +283,9 @@ void Apply_Ares3_0_Patches()
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x528C8, &Helpers::Alex::getCellSpreadItems);
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x5273A, &Helpers::Alex::getCellSpreadItems);
 
+	// Redirect Ares's RequirementsMet to our implementation:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x021B40, GET_OFFSET(TechnoTypeExt::RequirementsMetExtraCheck));
+
 	// Redirect Ares's RemoveCameo to our implementation:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x02BDD0, GET_OFFSET(SidebarExt::AresTabCameo_RemoveCameo));
 
@@ -298,6 +299,9 @@ void Apply_Ares3_0_Patches()
 
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x436DA, &LetGo);
+
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x24AC9, &HouseExt::DecideTechnosFate);
 
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x3207C, AresHelper::AresBaseAddress + 0x320DF);
@@ -406,6 +410,9 @@ void Apply_Ares3_0p1_Patches()
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x53578, &Helpers::Alex::getCellSpreadItems);
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x533EA, &Helpers::Alex::getCellSpreadItems);
 
+	// Redirect Ares's RequirementsMet to our implementation:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x0225C0, GET_OFFSET(TechnoTypeExt::RequirementsMetExtraCheck));
+
 	// Redirect Ares's RemoveCameo to our implementation:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x02C910, GET_OFFSET(SidebarExt::AresTabCameo_RemoveCameo));
 
@@ -419,6 +426,9 @@ void Apply_Ares3_0p1_Patches()
 
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x441BA, &LetGo);
+
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x255E9, &HouseExt::DecideTechnosFate);
 
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x32A5C, AresHelper::AresBaseAddress + 0x32ABF);
