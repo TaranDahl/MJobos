@@ -33,6 +33,8 @@ public:
 
 	static void(__stdcall* SpawnSurvivors)(FootClass* pThis, TechnoClass* pKiller, bool Select, bool PreventEscape);
 
+	static int(__thiscall* RequirementsMet)(void* pAresHouseExt, TechnoTypeClass* pType);
+
 	static bool(__thiscall* ReverseEngineer)(void* pAresHouseExt, TechnoTypeClass* pType);
 
 	static bool(__thiscall* IsTargetConstraintsEligible)(void*, HouseClass*, bool);
