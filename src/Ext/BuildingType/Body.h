@@ -66,6 +66,8 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
+	Valueable<bool> AggressiveStance_Exempt;
+
 	Valueable<bool> IsAnimDelayedBurst;
 
 	std::vector<std::optional<DirType>> AircraftDockingDirs;
@@ -200,6 +202,7 @@ public:
 		, FactoryPlant_DisallowTypes {}
 		, FactoryPlant_MaxCount { -1 }
 		, IsAnimDelayedBurst { true }
+		, AggressiveStance_Exempt { false }
 		, IsDestroyableObstacle { false }
 		, Explodes_DuringBuildup {}
 		, Units_RepairRate {}
