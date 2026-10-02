@@ -12,6 +12,39 @@ T* MakeCommand()
 	return command;
 };
 
+class ShapeButtonHelper
+{
+public:
+	static constexpr int MaxButtonCount = 25;
+	static constexpr int InUseButtonCount = 11;
+	static constexpr int UnusedButtonCount = 1;
+	static constexpr int OldButtonCount = InUseButtonCount + UnusedButtonCount;
+	static constexpr int NewButtonCount = std::min(2, (MaxButtonCount - OldButtonCount));
+	//  1. Team01
+	//  2. Team02
+	//  3. Team03
+	//  4. TypeSelect
+	//  5. Deploy
+	//  6. AttackMove
+	//  7. Guard
+	//  8. Beacon
+	//  9. Stop
+	// 10. PlanningMode
+	// 11. Cheer
+	// 12. MoveToDeploy
+	static constexpr const char* NewButtonNames[NewButtonCount] =
+	{
+	/* 13. */ "AggressiveStance",
+	/* 14. */ "CeaseFire"
+	};
+	static constexpr const char* NewButtonTipNames[NewButtonCount] =
+	{
+		"Tip:AggressiveStance",
+		"Tip:CeaseFire"
+	};
+	static int NewButtonIndexes[NewButtonCount];
+};
+
 #define CATEGORY_TEAM StringTable::LoadString(GameStrings::TXT_TEAM)
 #define CATEGORY_INTERFACE StringTable::LoadString(GameStrings::TXT_INTERFACE)
 #define CATEGORY_TAUNT StringTable::LoadString(GameStrings::TXT_TAUNT)
