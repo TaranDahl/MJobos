@@ -164,6 +164,16 @@ public:
 	Valueable<bool> AutoTargetOwnPosition;
 	Valueable<bool> AutoTargetOwnPosition_Self;
 
+	Valueable<bool> AggressiveStance;
+	Nullable<bool> AggressiveStance_Togglable;
+	ValueableIdx<VocClass> VoiceEnterAggressiveStance;
+	ValueableIdx<VocClass> VoiceExitAggressiveStance;
+
+	Valueable<bool> CeaseFireStance;
+	Nullable<bool> CeaseFireStance_Togglable;
+	ValueableIdx<VocClass> VoiceEnterCeaseFireStance;
+	ValueableIdx<VocClass> VoiceExitCeaseFireStance;
+
 	Valueable<bool> NoSecondaryWeaponFallback;
 	Valueable<bool> NoSecondaryWeaponFallback_AllowAA;
 	Nullable<bool> AllowWeaponSelectAgainstWalls;
@@ -550,6 +560,16 @@ public:
 		, OpenTransport_RangeBonus {}
 		, OpenTransport_DamageMultiplier {}
 		, OpenTransport_FireWhileMoving {}
+
+		, AggressiveStance { false }
+		, AggressiveStance_Togglable {}
+		, VoiceEnterAggressiveStance { -1 }
+		, VoiceExitAggressiveStance { -1 }
+
+		, CeaseFireStance { false }
+		, CeaseFireStance_Togglable {}
+		, VoiceEnterCeaseFireStance { -1 }
+		, VoiceExitCeaseFireStance { -1 }
 
 		, AutoTargetOwnPosition { false }
 		, AutoTargetOwnPosition_Self { false }
