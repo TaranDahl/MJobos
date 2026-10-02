@@ -364,6 +364,7 @@ public:
 		Valueable<bool> AINodeWallsOnly;
 		Valueable<bool> AICleanWallNode;
 
+		Valueable<bool> AttackMove_Aggressive;
 		Valueable<bool> AttackMove_UpdateTarget;
 
 		Valueable<int> MindControl_ThreatDelay;
@@ -1020,6 +1021,7 @@ public:
 			, AIForbidConYard { false }
 			, AINodeWallsOnly { false }
 			, AICleanWallNode { false }
+			, AttackMove_Aggressive { false }
 			, AttackMove_UpdateTarget { false }
 			, MindControl_ThreatDelay { 0 }
 			, RecountBurst { false }

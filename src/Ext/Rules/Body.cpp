@@ -441,6 +441,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AINodeWallsOnly.Read(exINI, GameStrings::AI, "AINodeWallsOnly");
 	this->AICleanWallNode.Read(exINI, GameStrings::AI, "AICleanWallNode");
 
+	this->AttackMove_Aggressive.Read(exINI, GameStrings::General, "AttackMove.Aggressive");
 	this->AttackMove_UpdateTarget.Read(exINI, GameStrings::General, "AttackMove.UpdateTarget");
 
 	this->MindControl_ThreatDelay.Read(exINI, GameStrings::General, "MindControl.ThreatDelay");
@@ -1168,6 +1169,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIForbidConYard)
 		.Process(this->AINodeWallsOnly)
 		.Process(this->AICleanWallNode)
+		.Process(this->AttackMove_Aggressive)
 		.Process(this->AttackMove_UpdateTarget)
 		.Process(this->MindControl_ThreatDelay)
 		.Process(this->RecountBurst)

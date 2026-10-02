@@ -194,6 +194,25 @@ DEFINE_HOOK(0x4DF3A0, FootClass_UpdateAttackMove_SelectNewTarget, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
+{
+	enum { ContinueCheck = 0x6F85BA, CanTarget = 0x6F8604 };
+
+	GET(TechnoClass* const, pThis, EDI);
+
+	// Now, it is possible to customize which types of national active attacks on non-threatening buildings, so this part has been commented out.
+	// The new judgment code is in TechnoClass_CanAutoTarget_AttackNoThreatBuildings of Hook.cpp.
+	// if (!pThis->Owner->IsControlledByHuman())
+	//	return CanTarget;
+
+	if (!pThis->MegaMissionIsAttackMove())
+		return ContinueCheck;
+
+	const auto pExt = TechnoExt::Fetch(pThis);
+
+	return pExt->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive) ? CanTarget : ContinueCheck;
+}
+
 #pragma endregion
 
 #pragma region TechnoClass_EvaluateObject
