@@ -75,6 +75,7 @@ bool Phobos::Config::HideShakeEffects = true;
 bool Phobos::Config::ShowFlashOnSelecting = false;
 bool Phobos::Config::UnitPowerDrain = false;
 int Phobos::Config::SuperWeaponSidebar_RequiredSignificance = 0;
+bool Phobos::Config::UnifiedTechnoColor = false;
 bool Phobos::Config::ShowGameTime = false;
 int Phobos::Config::ShowGameTime_BoardOpacity = 40;
 bool Phobos::Config::SelectCapturedCommand = false;
@@ -113,6 +114,7 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::HideShakeEffects = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "HideShakeEffects", false);
 	Phobos::Config::ShowFlashOnSelecting = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowFlashOnSelecting", false);
 	Phobos::Config::SuperWeaponSidebar_RequiredSignificance = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SuperWeaponSidebar.RequiredSignificance", 0);
+	Phobos::Config::UnifiedTechnoColor = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "UnifiedTechnoColor", false);
 	Phobos::Config::ShowGameTime = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowGameTime", false);
 	Phobos::Config::ShowGameTime_BoardOpacity = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "ShowGameTime.BoardOpacity", 40);
 

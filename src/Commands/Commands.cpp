@@ -12,6 +12,7 @@
 #include "SelectCaptured.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
+#include "UnifiedTechnoColor.h"
 #include "ToggleMessageList.h"
 #include "DeselectObject.h"
 #include "DeselectObject5.h"
@@ -29,6 +30,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
+	MakeCommand<UnifiedTechnoColorCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
