@@ -386,6 +386,20 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->UseRetintFix.Read(exINI, GameStrings::AudioVisual, "UseRetintFix");
 
+	this->UnifiedRadarColor.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor");
+	this->UnifiedRadarColor_Land.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor.Land");
+	this->UnifiedRadarColor_Water.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor.Water");
+	this->UnifiedRadarColor_Cliff.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor.Cliff");
+	// Unified techno color
+	this->UnifiedRadarColor_Self.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor.Self");
+	this->UnifiedRadarColor_Ally.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor.Ally");
+	this->UnifiedRadarColor_Enemy.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor.Enemy");
+	this->UnifiedRadarColor_Neutral.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor.Neutral");
+	this->UnifiedTechnoColor_Self.Read(exINI, GameStrings::AudioVisual, "UnifiedTechnoColor.Self");
+	this->UnifiedTechnoColor_Ally.Read(exINI, GameStrings::AudioVisual, "UnifiedTechnoColor.Ally");
+	this->UnifiedTechnoColor_Enemy.Read(exINI, GameStrings::AudioVisual, "UnifiedTechnoColor.Enemy");
+	this->UnifiedTechnoColor_Neutral.Read(exINI, GameStrings::AudioVisual, "UnifiedTechnoColor.Neutral");
+
 	this->ProneSpeed_Crawls.Read(exINI, GameStrings::General, "ProneSpeed.Crawls");
 	this->ProneSpeed_NoCrawls.Read(exINI, GameStrings::General, "ProneSpeed.NoCrawls");
 
@@ -974,6 +988,18 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanTarget_IronCurtained)
 		.Process(this->AutoTarget_IronCurtained)
 		.Process(this->BuildingTypeSelectable)
+		.Process(this->UnifiedRadarColor)
+		.Process(this->UnifiedRadarColor_Land)
+		.Process(this->UnifiedRadarColor_Water)
+		.Process(this->UnifiedRadarColor_Cliff)
+		.Process(this->UnifiedRadarColor_Self)
+		.Process(this->UnifiedRadarColor_Ally)
+		.Process(this->UnifiedRadarColor_Enemy)
+		.Process(this->UnifiedRadarColor_Neutral)
+		.Process(this->UnifiedTechnoColor_Self)
+		.Process(this->UnifiedTechnoColor_Ally)
+		.Process(this->UnifiedTechnoColor_Enemy)
+		.Process(this->UnifiedTechnoColor_Neutral)
 		.Process(this->ProneSpeed_Crawls)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)
