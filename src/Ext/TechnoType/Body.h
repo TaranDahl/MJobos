@@ -411,7 +411,6 @@ public:
 	Nullable<int> PlayerAttackMoveTargetingDelay;
 	Nullable<bool> DistributeTargetingFrame;
 
-	Nullable<bool> AttackMove_Aggressive;
 	Nullable<bool> AttackMove_UpdateTarget;
 
 	Nullable<bool> ApproachTarget_StopWhenInRange;
@@ -980,7 +979,6 @@ public:
 
 		, DigitalDisplay_Health_FakeAtDisguise {}
 
-		, AttackMove_Aggressive {}
 		, AttackMove_UpdateTarget {}
 
 		, ApproachTarget_StopWhenInRange {}

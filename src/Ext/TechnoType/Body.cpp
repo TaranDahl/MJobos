@@ -1417,7 +1417,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->DigitalDisplay_Health_FakeAtDisguise.Read(exINI, pSection, "DigitalDisplay.Health.FakeAtDisguise");
 
-	this->AttackMove_Aggressive.Read(exINI, pSection, "AttackMove.Aggressive");
 	this->AttackMove_UpdateTarget.Read(exINI, pSection, "AttackMove.UpdateTarget");
 
 	if (exINI.ReadString(pSection, "AttackMove.StopWhenTargetAcquired") > 0)
@@ -2205,7 +2204,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->DigitalDisplay_Health_FakeAtDisguise)
 
-		.Process(this->AttackMove_Aggressive)
 		.Process(this->AttackMove_UpdateTarget)
 
 		.Process(this->ApproachTarget_StopWhenInRange)
