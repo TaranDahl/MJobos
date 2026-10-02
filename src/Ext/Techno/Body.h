@@ -56,6 +56,9 @@ public:
 	bool ShouldUpdateGattlingValue;
 	int AttachedEffectInvokerCount;
 
+	bool AggressiveStance;                  // Aggressive stance that will auto target buildings
+	bool CeaseFireStance;
+
 	bool DelayedFireSequencePaused;
 	int DelayedFireWeaponIndex;
 	CDTimerClass DelayedFireTimer;
@@ -115,6 +118,8 @@ public:
 		, LastTargetID { 0xFFFFFFFF }
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
+		, AggressiveStance { false }
+		, CeaseFireStance { false }
 		, AirstrikeTargetingMe { nullptr }
 		, DelayedFireSequencePaused { false }
 		, DelayedFireWeaponIndex { -1 }
@@ -188,6 +193,16 @@ public:
 	int GetSight();
 
 	static bool CanReceiveEvent(TechnoClass* pThis, HouseClass* pHouse);
+
+	void InitAggressiveStance();
+	bool GetAggressiveStance() const;
+	void ToggleAggressiveStance();
+	bool CanToggleAggressiveStance();
+
+	void InitCeaseFireStance();
+	bool GetCeaseFireStance() const;
+	void ToggleCeaseFireStance();
+	bool CanToggleCeaseFireStance();
 
 	virtual ~TechnoExt() override;
 	virtual void OnDetach(AirstrikeClass* pTarget, bool removed) override;
