@@ -652,38 +652,6 @@ For this command to work in multiplayer - you need to use a version of [YRpp spa
 - And Select the SWs in this exclusive sidebar.
 - For localization add `TXT_EX_SW_BUTTON_XX` and `TXT_EX_SW_BUTTON_XX_DESC` into your `.csf` file. (`XX` -> `03`, `10` .etc)
 
-### `[ ]` Toggle Aggressive Stance
-
-- Switches on/off aggressive stance for selected units and structures.
-  - Much like how the deploy command work on G.I.s. If all selected technos that may toggle aggressive stance are already aggressive stance, they will exit it, otherwise they will enter it.
-- Under aggressive stance, units and structures will target unarmed enemy buildings if no enemy units or defensive structures can be targeted.
-  - Aggressive stance does not reset even when the techno changes ownership.
-  - Aggressive stance has no effect if the techno is controlled by the AI.
-  - The passengers of open-topped transports will obey the aggressive stance configuration of the transports.
-  - Aggressive stance doesn't make a unit aggressively attack if `CanPassiveAquire=no`. However they will obey aggressive stance when ordered to attack-move.
-- Techno types can have further customizations about aggressive stance.
-  - A techno type can be made aggressive stance by default by `AggressiveStance=true`.
-  - A techno type can be disallowed to toggle its aggressive stance by `AggressiveStance.Togglable=false`.
-    - `AggressiveStance.Togglable` is default to false for engineers, agents, and technos without a weapon and is not open-topped. It is default to true for anything else.
-  - A building type can be the exempt of aggressive stance by setting `AggressiveStance.Exempt=true`, in which case units under aggressive stance will try to not attack it as if the units were not under aggressive stance. However, they will still attack the building if it was a defensive structure or an occupied civilian structure.
-  - Upon enter aggressive stance, `VoiceEnterAggressiveStance` will be played. If not defined, `VoiceAttack` will be played.
-  - Upon exit aggressive stance, `VoiceExitAggressiveStance` will be played. If not defined, no voice will be played.
-- For localization, add the following keys into your `.csf` file.
-  - `TXT_AGGRESSIVE_STANCE`: The name of the command.
-  - `TXT_AGGRESSIVE_STANCE_DESC`: The description of the command.
-  - `MSG:AGGRESSIVE_STANCE_ON`: The message to be displayed when units enter aggressive stance. May have `%i` inside to display how many units are affected.
-  - `MSG:AGGRESSIVE_STANCE_OFF`: The message to be displayed when units exit aggressive stance. May have `%i` inside to display how many units are affected.
-
-In `rulesmd.ini`:
-```ini
-[SOMETECHNO]                           ; TechnoType
-AggressiveStance=false                 ; boolean
-AggressiveStance.Togglable=            ; boolean
-AggressiveStance.Exempt=false          ; boolean
-VoiceEnterAggressiveStance=            ; sound entry
-VoiceExitAggressiveStance=             ; sound entry
-```
-
 ### `[ ]` Manual Reload
 
 - Manually empty and reload ammo if [CanManualReload=true](New-or-Enhanced-Logics.md#Manually-empty-and-reload-ammo).

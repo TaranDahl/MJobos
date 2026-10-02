@@ -44,21 +44,7 @@ bool SelectedButtonClass::Action(GadgetFlag flags, DWORD* pKey, KeyModifier modi
 
 	if (flags & GadgetFlag::LeftPress)
 	{
-		if (this->ID == 0) // PushButton
-		{
-			const auto pExt = vec[0];
-			const auto pTechno = pExt->OwnerObject();
-
-			if (pTechno->Owner->IsControlledByCurrentPlayer() && pTechno->IsAlive && !pTechno->Berzerk)
-			{
-				if (pExt->CanToggleAggressiveStance())
-				{
-					VocClass::PlayGlobal(RulesClass::Instance->GUIMainButtonSound, 0x2000, 1.0);
-					EventExt::RaiseToggleAggressiveStance(pTechno);
-				}
-			}
-		}
-		else // AmmoButton
+		if (this->ID != 0) // AmmoButton
 		{
 			const auto pExt = vec[0];
 			const auto pTechno = pExt->OwnerObject();
@@ -97,30 +83,7 @@ void SelectedButtonClass::DrawInfo() const
 	DSurface::Composite->DrawSHP(pSideExt->SelectedInfo_Palette.GetOrDefaultConvert(FileSystem::ANIM_PAL),
 		pSHP, 0, &position, &rect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 
-	if (this->ID == 0) // PushButton
-	{
-		int frame = 1;
-
-		if (pExt->CanToggleAggressiveStance() && pTechno->IsAlive && !pTechno->Berzerk)
-			frame = !pExt->GetAggressiveStance() ? 3 : 2;
-
-		DSurface::Composite->DrawSHP(pSideExt->SelectedInfo_Palette.GetOrDefaultConvert(FileSystem::ANIM_PAL),
-			pSHP, frame, &position, &rect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
-
-		if (this->Hovering)
-		{
-			auto location = Point2D { this->X + this->Width + 10, this->Y + 4 };
-			const auto text = GeneralUtils::LoadStringUnlessMissing("TIP:AggressiveStance", L"AggressiveStance");
-			RectangleStruct drawRect = Drawing::GetTextDimensions(text, location, 0, 3, 2);
-			location += Point2D { 4, 1 };
-			drawRect.Width += 8;
-			ColorStruct color { 0, 0, 0 };
-			DSurface::Composite->FillRectTrans(&drawRect, &color, 40);
-			DSurface::Composite->DrawRect(&drawRect, COLOR_WHITE);
-			DSurface::Composite->DrawText(text, &location, COLOR_WHITE);
-		}
-	}
-	else // AmmoButton
+	if (this->ID != 0) // AmmoButton
 	{
 		int frame = 4;
 

@@ -5,9 +5,7 @@
 #include <Ext/Rules/Body.h>
 #include "Ext/Techno/Body.h"
 #include <Ext/Building/Body.h>
-#include <Ext/UnitType/Body.h>
 #include <Ext/WarheadType/Body.h>
-#include <Locomotion/AdvancedDriveLocomotionClass.h>
 
 #include <Helpers/Macro.h>
 #include <ShapeButtonClass.h>
@@ -31,18 +29,6 @@ void EventExt::RespondEvent()
 
 	case EventTypeExt::ManualReload:
 		this->RespondToManualReloadEvent();
-		break;
-
-	case EventTypeExt::ToggleAggressiveStance:
-		this->RespondToToggleAggressiveStance();
-		break;
-
-	case EventTypeExt::ToggleCeaseFireStance:
-		this->RespondToToggleCeaseFireStance();
-		break;
-
-	case EventTypeExt::ToggleReversingStance:
-		this->RespondToToggleReversingStance();
 		break;
 
 	case EventTypeExt::AssignSecondaryRallyPoint:
@@ -89,90 +75,6 @@ void EventExt::RespondToManualReloadEvent()
 	}
 }
 
-void EventExt::RaiseToggleAggressiveStance(TechnoClass* pTechno)
-{
-	EventExt eventExt {};
-	eventExt.Type = EventTypeExt::ToggleAggressiveStance;
-	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
-	eventExt.Frame = Unsorted::CurrentFrame;
-	eventExt.ToggleAggressiveStance.Whom = TargetClass(pTechno);
-	eventExt.AddEvent();
-	Debug::LogGame("Adding event TOGGLE_AGGRESSIVE\n");
-}
-
-void EventExt::RespondToToggleAggressiveStance()
-{
-	if (const auto pTechno = this->ToggleAggressiveStance.Whom.As_Techno())
-	{
-		if (pTechno->IsAlive && !pTechno->Berzerk)
-		{
-			const auto pTechnoExt = TechnoExt::Fetch(pTechno);
-
-			if (pTechnoExt->CanToggleAggressiveStance())
-				pTechnoExt->ToggleAggressiveStance();
-
-			if (pTechnoExt->GetAggressiveStance() && pTechnoExt->GetCeaseFireStance() && pTechnoExt->CanToggleCeaseFireStance())
-				pTechnoExt->ToggleCeaseFireStance();
-		}
-	}
-}
-
-void EventExt::RaiseToggleCeaseFireStance(TechnoClass* pTechno)
-{
-	EventExt eventExt {};
-	eventExt.Type = EventTypeExt::ToggleCeaseFireStance;
-	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
-	eventExt.Frame = Unsorted::CurrentFrame;
-	eventExt.ToggleCeaseFireStance.Whom = TargetClass(pTechno);
-	eventExt.AddEvent();
-	Debug::LogGame("Adding event TOGGLE_CEASEFIRE\n");
-}
-
-void EventExt::RespondToToggleCeaseFireStance()
-{
-	if (const auto pTechno = this->ToggleCeaseFireStance.Whom.As_Techno())
-	{
-		if (pTechno->IsAlive && !pTechno->Berzerk)
-		{
-			const auto pTechnoExt = TechnoExt::Fetch(pTechno);
-
-			if (pTechnoExt->CanToggleCeaseFireStance())
-				pTechnoExt->ToggleCeaseFireStance();
-
-			if (pTechnoExt->GetCeaseFireStance() && pTechnoExt->GetAggressiveStance() && pTechnoExt->CanToggleAggressiveStance())
-				pTechnoExt->ToggleAggressiveStance();
-		}
-	}
-}
-
-void EventExt::RaiseToggleReversingStance(TechnoClass* pTechno)
-{
-	EventExt eventExt {};
-	eventExt.Type = EventTypeExt::ToggleReversingStance;
-	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
-	eventExt.Frame = Unsorted::CurrentFrame;
-	eventExt.ToggleReversingStance.Whom = TargetClass(pTechno);
-	eventExt.AddEvent();
-	Debug::LogGame("Adding event TOGGLE_CEASEFIRE\n");
-}
-
-void EventExt::RespondToToggleReversingStance()
-{
-	if (const auto pUnit = this->ToggleReversingStance.Whom.As_Unit())
-	{
-		if (pUnit->IsAlive && !pUnit->Berzerk && UnitTypeExt::Fetch(pUnit->Type)->AdvancedDrive_Reverse)
-		{
-			if (const auto pLoco = locomotion_cast<AdvancedDriveLocomotionClass*>(pUnit->Locomotor))
-			{
-				if (pLoco->IsForward)
-					pLoco->ShouldReverse = true;
-				else
-					pLoco->ShouldForward = true;
-			}
-		}
-	}
-}
-
 void EventExt::RaiseAssignSecondaryRallyPoint(BuildingClass* pBuilding, AbstractClass* pTarget)
 {
 	EventExt eventExt {};
@@ -214,12 +116,6 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 		return sizeof(EventExt::TogglePlayerAutoRepair);
 	case EventTypeExt::ManualReload:
 		return sizeof(EventExt::ManualReloadEvent);
-	case EventTypeExt::ToggleAggressiveStance:
-		return sizeof(EventExt::ToggleAggressiveStance);
-	case EventTypeExt::ToggleCeaseFireStance:
-		return sizeof(EventExt::ToggleCeaseFireStance);
-	case EventTypeExt::ToggleReversingStance:
-		return sizeof(EventExt::ToggleReversingStance);
 	case EventTypeExt::AssignSecondaryRallyPoint:
 		return sizeof(EventExt::AssignSecondaryRallyPoint);
 	default:

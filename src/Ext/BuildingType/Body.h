@@ -87,8 +87,6 @@ public:
 	Valueable<bool> PlaceBuilding_Extra;
 	Valueable<bool> CanBuildUnderUnits;
 
-	Valueable<bool> AggressiveStance_Exempt;
-
 	Valueable<bool> IsAnimDelayedBurst;
 
 	std::vector<std::optional<DirType>> AircraftDockingDirs;
@@ -257,7 +255,6 @@ public:
 		, FactoryPlant_DisallowTypes {}
 		, FactoryPlant_MaxCount { -1 }
 		, IsAnimDelayedBurst { true }
-		, AggressiveStance_Exempt { false }
 		, IsDestroyableObstacle { false }
 		, Units_RepairRate {}
 		, Units_RepairStep {}

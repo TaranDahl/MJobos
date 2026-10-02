@@ -1131,16 +1131,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->AutoTargetOwnPosition_Self.Read(exINI, pSection, "AutoFire.TargetSelf"); // Temporary solution for the INI tags renaming issue, see #2093
 	this->AutoTargetOwnPosition_Self.Read(exINI, pSection, "AutoTargetOwnPosition.Self");
 
-	this->AggressiveStance.Read(exINI, pSection, "AggressiveStance");
-	this->AggressiveStance_Togglable.Read(exINI, pSection, "AggressiveStance.Togglable");
-	this->VoiceEnterAggressiveStance.Read(exINI, pSection, "VoiceEnterAggressiveStance");
-	this->VoiceExitAggressiveStance.Read(exINI, pSection, "VoiceExitAggressiveStance");
-
-	this->CeaseFireStance.Read(exINI, pSection, "CeaseFireStance");
-	this->CeaseFireStance_Togglable.Read(exINI, pSection, "CeaseFireStance.Togglable");
-	this->VoiceEnterCeaseFireStance.Read(exINI, pSection, "VoiceEnterCeaseFireStance");
-	this->VoiceExitCeaseFireStance.Read(exINI, pSection, "VoiceExitCeaseFireStance");
-
 	this->AttachmentTypes.Read(exINI, pSection, "AttachmentTypes");
 	this->AttachmentTopLayerMinHeight.Read(exINI, pSection, "AttachmentTopLayerMinHeight");
 	this->AttachmentUndergroundLayerMaxHeight.Read(exINI, pSection, "AttachmentUndergroundLayerMaxHeight");
@@ -1968,16 +1958,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->OpenTransport_RangeBonus)
 		.Process(this->OpenTransport_DamageMultiplier)
 		.Process(this->OpenTransport_FireWhileMoving)
-
-		.Process(this->AggressiveStance)
-		.Process(this->AggressiveStance_Togglable)
-		.Process(this->VoiceEnterAggressiveStance)
-		.Process(this->VoiceExitAggressiveStance)
-
-		.Process(this->CeaseFireStance)
-		.Process(this->CeaseFireStance_Togglable)
-		.Process(this->VoiceEnterCeaseFireStance)
-		.Process(this->VoiceExitCeaseFireStance)
 
 		.Process(this->AutoTargetOwnPosition)
 		.Process(this->AutoTargetOwnPosition_Self)

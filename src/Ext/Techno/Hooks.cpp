@@ -300,8 +300,6 @@ void TechnoExt::InitializeState(TechnoTypeClass* pType)
 	this->InitializeAttachEffects();
 	this->InitializeDisplayInfo(pType);
 	this->InitializeLaserTrails();
-	this->InitAggressiveStance();
-	this->InitCeaseFireStance();
 	this->InitializeAttachments();
 
 	if (RulesExt::Global()->CheckExtraBaseNormal && pTypeExt->ExtraBaseNormal)

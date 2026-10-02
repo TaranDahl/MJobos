@@ -16,9 +16,6 @@ enum class EventTypeExt : uint8_t
 	ApproachObject = 0x80,
 	TogglePlayerAutoRepair = 0x81,
 	ManualReload = 0x82,
-	ToggleAggressiveStance = 0x83,
-	ToggleCeaseFireStance = 0x84,
-	ToggleReversingStance = 0x85,
 	AssignSecondaryRallyPoint = 0x86,
 
 	FIRST = ApproachObject,
@@ -52,9 +49,6 @@ public:
 		EventStruct_Obj2 ApproachObject;
 		EventStruct_Obj0 TogglePlayerAutoRepair;
 		EventStruct_Obj1 ManualReloadEvent;
-		EventStruct_Obj1 ToggleAggressiveStance;
-		EventStruct_Obj1 ToggleCeaseFireStance;
-		EventStruct_Obj1 ToggleReversingStance;
 		EventStruct_Obj2 AssignSecondaryRallyPoint;
 	};
 
@@ -67,15 +61,6 @@ public:
 
 	static void RaiseManualReloadEvent(TechnoClass* pTechno);
 	void RespondToManualReloadEvent();
-
-	static void RaiseToggleAggressiveStance(TechnoClass* pTechno);
-	void RespondToToggleAggressiveStance();
-
-	static void RaiseToggleCeaseFireStance(TechnoClass* pTechno);
-	void RespondToToggleCeaseFireStance();
-
-	static void RaiseToggleReversingStance(TechnoClass* pTechno);
-	void RespondToToggleReversingStance();
 
 	static void RaiseAssignSecondaryRallyPoint(BuildingClass* pBuilding, AbstractClass* pTarget);
 	void RespondToAssignSecondaryRallyPoint();

@@ -90,9 +90,6 @@ public:
 	bool ShouldUpdateGattlingValue;
 	int AttachedEffectInvokerCount;
 
-	bool AggressiveStance;                  // Aggressive stance that will auto target buildings
-	bool CeaseFireStance;
-
 	bool IsWreckage;
 
 	bool JumpjetFromAirport;
@@ -210,8 +207,6 @@ public:
 		, LastTargetID { 0xFFFFFFFF }
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
-		, AggressiveStance { false }
-		, CeaseFireStance { false }
 		, IsWreckage { false }
 		, JumpjetFromAirport { false }
 		, BuildingOccupying { }
@@ -313,16 +308,6 @@ public:
 	void AmmoAutoConvertActions();
 	void UpdateLastTargetCrd();
 	int GetSight();
-
-	void InitAggressiveStance();
-	bool GetAggressiveStance() const;
-	void ToggleAggressiveStance();
-	bool CanToggleAggressiveStance();
-
-	void InitCeaseFireStance();
-	bool GetCeaseFireStance() const;
-	void ToggleCeaseFireStance();
-	bool CanToggleCeaseFireStance();
 
 	virtual ~TechnoExt() override;
 	virtual void OnDetach(AirstrikeClass* pTarget, bool removed) override;

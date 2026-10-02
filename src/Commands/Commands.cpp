@@ -19,9 +19,6 @@
 #include "ManualReloadAmmo.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
-#include "AggressiveStance.h"
-#include "CeaseFireStance.h"
-#include "ReversingStance.h"
 #include "UnifiedTechnoColor.h"
 #include "ToggleMessageList.h"
 #include "DeselectObject.h"
@@ -59,9 +56,6 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<AutoBuildingCombatCommandClass>();
 	MakeCommand<UnifiedTechnoColorCommandClass>();
 	MakeCommand<ManualReloadAmmoCommandClass>();
-	MakeCommand<AggressiveStanceClass>();
-	MakeCommand<CeaseFireStanceClass>();
-	MakeCommand<ReversingStanceClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
@@ -189,10 +183,7 @@ DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)
 int ShapeButtonHelper::NewButtonIndexes[ShapeButtonHelper::NewButtonCount] =
 {
 	-1, // DistributionMode
-	-1, // ManualReload
-	-1, // AggressiveStance
-	-1, // CeaseFire
-	-1  // Reversing
+	-1  // ManualReload
 };
 
 DEFINE_HOOK(0x6CFD08, ShapeButtonClass_FindIndex_FindNewButton, 0x5)
@@ -235,15 +226,6 @@ DEFINE_HOOK(0x6D0827, TabClass_Update_UpdateNewButton, 0x6)
 
 	if (ShapeButtonHelper::NewButtonIndexes[1] == index)
 		ManualReloadAmmoCommandClass::ManualReloadExecute();
-
-	if (ShapeButtonHelper::NewButtonIndexes[2] == index)
-		AggressiveStanceClass::AggressiveExecute();
-
-	if (ShapeButtonHelper::NewButtonIndexes[3] == index)
-		CeaseFireStanceClass::CeaseFireExecute();
-
-	if (ShapeButtonHelper::NewButtonIndexes[4] == index)
-		ReversingStanceClass::ReversingExecute();
 
 	return 0;
 }

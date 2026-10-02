@@ -1121,7 +1121,6 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText(COLOR_WHITE, "IsCrushing: %s", (pFoot->IsCrushingSomething ? "Yes" : "No"));
 
 			drawText(COLOR_WHITE, "Scattering: %s", (pExt->ScatteringStopFrame >= Unsorted::CurrentFrame ? "Yes" : "No"));
-			drawText(COLOR_WHITE, "Aggressive: %s", (pExt->AggressiveStance ? "Yes" : "No"));
 
 			if (pFoot->BelongsToATeam())
 			{

@@ -1,7 +1,6 @@
 #include "Body.h"
 
 #include <Interop/TechnoExt.h>
-#include <Ext/BuildingType/Body.h>
 
 // Cursor & target acquisition stuff not directly tied to other features can go here.
 
@@ -206,25 +205,12 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 	// if (!pThis->Owner->IsControlledByHuman())
 	//	return CanTarget;
 
-	GET(TechnoClass*, pTarget, ESI);
+	if (!pThis->MegaMissionIsAttackMove())
+		return ContinueCheck;
 
-	if (pTarget->WhatAmI() == AbstractType::Building)
-	{
-		// Fallback to unmodded behavior if the building is an exempt of aggressive stance.
-		if (BuildingTypeExt::Fetch(static_cast<BuildingClass*>(pTarget)->Type)->AggressiveStance_Exempt)
-			return ContinueCheck;
+	const auto pExt = TechnoExt::Fetch(pThis);
 
-		if (TechnoExt::Fetch(pThis)->GetAggressiveStance())
-			return CanTarget;
-	}
-
-	if (pThis->MegaMissionIsAttackMove())
-	{
-		if (TechnoExt::Fetch(pThis)->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive))
-			return CanTarget;
-	}
-
-	return ContinueCheck;
+	return pExt->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive) ? CanTarget : ContinueCheck;
 }
 
 #pragma endregion
@@ -415,27 +401,6 @@ static Action __fastcall InfantryClass__WhatAction_Wrapper(InfantryClass* pThis,
 	return result;
 }
 DEFINE_FUNCTION_JUMP(VTABLE, 0x7EB0CC, InfantryClass__WhatAction_Wrapper)
-
-#pragma region CeaseFireStance
-
-DEFINE_HOOK(0x6F8DFD, TechnoClass_SelectAutoTarget_CeaseFireStance, 0x5)
-{
-	enum { FuncReturn = 0x6F8E38 };
-	GET(TechnoClass*, pThis, ESI);
-	GET_STACK(ThreatType, flags, STACK_OFFSET(0x6C, 0x4));
-	return TechnoExt::Fetch(pThis)->GetCeaseFireStance()
-		&& (((flags & ThreatType::Range) != ThreatType::Normal) || ((flags & ThreatType::Area) != ThreatType::Normal)) // Cease fire don't work for script auto targeting.
-		? FuncReturn : 0;
-}
-
-DEFINE_HOOK(0x708AC5, TechnoClass_CanRetaliateToAttacker_CeaseFireStance, 0x5)
-{
-	enum { FuncReturn = 0x708B17 };
-	GET(TechnoClass*, pThis, ESI);
-	return TechnoExt::Fetch(pThis)->GetCeaseFireStance() ? FuncReturn : 0;
-}
-
-#pragma endregion
 
 #pragma region ThreatEvaluation
 
