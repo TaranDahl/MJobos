@@ -156,7 +156,6 @@ public:
 		static bool ScrollSidebarStripWhenHoldShift;
 		static bool AutomaticPlacingBuilding;
 		static bool AutomaticPlacingCombatBuilding;
-		static bool UnifiedTechnoColor;
 		static bool ShowGameTime;
 		static int ShowGameTime_BoardOpacity;
 		static bool SelectCapturedCommand;

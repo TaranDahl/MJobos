@@ -98,7 +98,6 @@ bool Phobos::Config::ScrollSidebarStripWhenHoldCtrl = true;
 bool Phobos::Config::ScrollSidebarStripWhenHoldShift = true;
 bool Phobos::Config::AutomaticPlacingBuilding = true;
 bool Phobos::Config::AutomaticPlacingCombatBuilding = true;
-bool Phobos::Config::UnifiedTechnoColor = false;
 bool Phobos::Config::ShowGameTime = false;
 int Phobos::Config::ShowGameTime_BoardOpacity = 40;
 bool Phobos::Config::SelectCapturedCommand = false;
@@ -152,7 +151,6 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::ScrollSidebarStripWhenHoldShift = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ScrollSidebarStripWhenHoldShift", true);
 	Phobos::Config::AutomaticPlacingBuilding = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "AutomaticPlacingBuilding", true);
 	Phobos::Config::AutomaticPlacingCombatBuilding = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "AutomaticPlacingCombatBuilding", true);
-	Phobos::Config::UnifiedTechnoColor = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "UnifiedTechnoColor", false);
 	Phobos::Config::ShowGameTime = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowGameTime", false);
 	Phobos::Config::ShowGameTime_BoardOpacity = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "ShowGameTime.BoardOpacity", 40);
 
