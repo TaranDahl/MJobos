@@ -24,6 +24,7 @@ wchar_t Phobos::wideBuffer[Phobos::readLength];
 
 const char* Phobos::AppIconPath = nullptr;
 
+bool Phobos::ShowCurrentInfo = false;
 bool Phobos::DisplayDamageNumbers = false;
 bool Phobos::IsLoadingSaveGame = false;
 
@@ -393,6 +394,15 @@ void Phobos::ApplyOptimizations()
 	// Disable BuildingClass_AI_Radiation
 	if (Phobos::Optimizations::DisableRadDamageOnBuildings)
 		Patch::Apply_RAW(0x43FB23, { 0x53, 0x55, 0x56, 0x8B, 0xF1 });
+
+	if (!Phobos::Config::DebugToolEnable)
+	{
+		Patch::Apply_RAW(0x6F9C80, { 0x8B, 0x8E, 0x1C, 0x02, 0x00, 0x00 });
+		Patch::Apply_RAW(0x6F91EC, { 0x8B, 0x8E, 0x1C, 0x02, 0x00, 0x00 });
+		Patch::Apply_RAW(0x7043B9, { 0x8B, 0xF8, 0x8B, 0xCF, 0x8B, 0x17 });
+		Patch::Apply_RAW(0x73B0C5, { 0x8B, 0xF0, 0x8B, 0xCE, 0x8B, 0x06 });
+		Patch::Apply_RAW(0x7410D6, { 0x8B, 0x10, 0x8B, 0xC8, 0xFF, 0x52, 0x2C });
+	}
 
 	// Disable BalloonHover path finding fix
 	if (Phobos::Optimizations::DisableBalloonHoverPathingFix)
