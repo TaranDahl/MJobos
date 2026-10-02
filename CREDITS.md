@@ -39,7 +39,6 @@ This page lists all the individual contributions to the project by their author.
   - Recursive transport killer fix
   - Custom locomotors example implementation and piggybacking test warheads
   - Initial jumpjet facing fix
-  - Techno Attachment logic
   - Migration utility
   - GitHub Actions setup
   - Official docs
@@ -151,7 +150,6 @@ This page lists all the individual contributions to the project by their author.
   - Shared ammo logic
   - Customizable FLH when infantry is prone or deployed
   - Initial strength for cloned infantry
-  - Grant new superweapons in superweapons
   - Map Events 604 & 605 for checking if a specific Techno enters in a cell
   - Warhead that can not kill
   - `Pips.HideIfNoStrength` and `SelfHealing.EnabledBy` additions for shields
@@ -271,8 +269,6 @@ This page lists all the individual contributions to the project by their author.
   - Customizable ChronoSphere teleport delays for units
   - Allowed and disallowed types for `FactoryPlant`
   - Forbidding parallel AI queues for specific TechnoTypes
-  - Vehicles keeping target on move command
-  - Reimplemented `Airburst` & `Splits` logic with more customization options
   - Nonprovocative Warheads
   - Customizing effect of level lighting on air units
   - Reimplemented `Airburst` & `Splits` logic with more customization options
@@ -629,7 +625,7 @@ This page lists all the individual contributions to the project by their author.
   - Use 2D distance instead of 3D to check whether in air team members have arrived destination
   - No rearm and reload in EMP or temporal
   - Enhanced Straight trajectory
-  - Enable building production queue
+  - Enable Building Production Queue
   - Fix for sidebar not updating queued unit numbers when on hold
   - New Parabola trajectory
   - Enhanced Bombard trajectory
