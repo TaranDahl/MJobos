@@ -14,14 +14,11 @@ class TacticalButtonsClass
 //	bool CheckMouseOverBackground(const Point2D* pMousePosition);
 
 public:
-//	inline bool MouseIsOverButtons();
+// inline bool MouseIsOverButtons();
 //	inline bool MouseIsOverTactical();
 //	int GetButtonIndex();
 //	void SetMouseButtonIndex(const Point2D* pMousePosition);
 //	void PressDesignatedButton(int triggerIndex);
-
-	// Button index N/A : Show Current Info
-	static void CurrentSelectInfoDraw();
 
 	// TODO New buttons
 

@@ -59,7 +59,6 @@
     <ClCompile Include="src\Commands\SaveVariablesToFile.cpp" />
     <ClCompile Include="src\Commands\SelectCaptured.cpp" />
     <ClCompile Include="src\Commands\SelectedInfo.cpp" />
-    <ClCompile Include="src\Commands\ShowCurrentInfo.cpp" />
     <ClCompile Include="src\Commands\ToggleDesignatorRange.cpp" />
     <ClCompile Include="src\Commands\ToggleDigitalDisplay.cpp" />
     <ClCompile Include="src\Commands\ToggleMessageList.cpp" />
@@ -205,7 +204,6 @@
     <ClCompile Include="src\Ext\Techno\Hooks.Facing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Firing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Misc.cpp" />
-    <ClCompile Include="src\Ext\Techno\Hooks.Others.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Pips.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.ReceiveDamage.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Scatter.cpp" />
@@ -302,7 +300,6 @@
     <ClCompile Include="src\Misc\RetryDialog.cpp" />
     <ClCompile Include="src\Misc\Selection.cpp" />
     <ClCompile Include="src\Misc\SyncLogging.cpp" />
-    <ClCompile Include="src\Misc\TacticalButtons.cpp" />
     <ClCompile Include="src\Misc\TextInput.cpp" />
     <!-- src\UI -->
     <ClCompile Include="src\UI\Mvvm.cpp" />
@@ -413,7 +410,6 @@
     <ClInclude Include="src\Commands\SaveVariablesToFile.h" />
     <ClInclude Include="src\Commands\SelectCaptured.h" />
     <ClInclude Include="src\Commands\SelectedInfo.h" />
-    <ClInclude Include="src\Commands\ShowCurrentInfo.h" />
     <ClInclude Include="src\Commands\ToggleDesignatorRange.h" />
     <ClInclude Include="src\Commands\ToggleDigitalDisplay.h" />
     <ClInclude Include="src\Commands\ToggleMessageList.h" />
@@ -509,8 +505,7 @@
     <ClInclude Include="src\Misc\MessageColumn.h" />
     <ClInclude Include="src\Misc\PhobosToolTip.h" />
     <ClInclude Include="src\Misc\SyncLogging.h" />
-    <ClInclude Include="src\Misc\TacticalButtons.h" />
-    <!-- src\UI -->
+    <!-- src\New -->
     <ClInclude Include="src\UI\Mvvm.h" />
     <ClInclude Include="src\UI\UIComponent.h" />
     <ClInclude Include="src\UI\UIRoot.h" />

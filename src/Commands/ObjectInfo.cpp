@@ -29,7 +29,6 @@ const wchar_t* ObjectInfoCommandClass::GetUIDescription() const
 void ObjectInfoCommandClass::Execute(WWKey eInput) const
 {
 	char buffer[0x800] = { 0 };
-	int count = 0;
 
 	auto append = [&buffer](const char* pFormat, ...)
 	{
@@ -49,99 +48,53 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		buffer[0] = 0;
 	};
 
-	auto getTargetInfo = [&append, &count](TechnoClass* pCurrent, AbstractClass* pTarget, const char* pInfoName)
+	auto getTargetInfo = [](TechnoClass* pCurrent, AbstractClass* pTarget, int& distance, const char*& ID, CellStruct& mapCoords)
 	{
-		if (pTarget)
+		if (auto const pObject = abstract_cast<ObjectClass*>(pTarget))
 		{
-			if (count)
-				append(", ");
-
-			auto mapCoords = CellStruct::Empty;
-			auto ID = "N/A";
-
-			if (auto const pObject = abstract_cast<ObjectClass*>(pTarget))
-			{
-				mapCoords = pObject->GetMapCoords();
-				ID = pObject->GetType()->get_ID();
-			}
-			else if (auto const pCell = abstract_cast<CellClass*>(pTarget))
-			{
-				mapCoords = pCell->MapCoords;
-				ID = "Cell";
-			}
-
-			const auto distance = (pCurrent->DistanceFrom(pTarget) / Unsorted::LeptonsPerCell);
-			append("%s = %s [Distance: %d, Location: (%d, %d)]", pInfoName, ID, distance, mapCoords.X, mapCoords.Y);
-
-			count = (count + 1) % 3;
-
-			if (!count)
-				append("\n");
+			mapCoords = pObject->GetMapCoords();
+			ID = pObject->GetType()->get_ID();
 		}
+		else if (auto const pCell = abstract_cast<CellClass*>(pTarget))
+		{
+			mapCoords = pCell->MapCoords;
+			ID = "Cell";
+		}
+
+		distance = pCurrent->DistanceFrom(pTarget) / Unsorted::LeptonsPerCell;
 	};
 
-	auto printFoots = [&append, &display, &count, &getTargetInfo](FootClass* pFoot)
+	auto printFoots = [&append, &display, &getTargetInfo](FootClass* pFoot)
 	{
-		// Basic Status
-		append("Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame);
-		const auto pType = pFoot->GetTechnoType();
-		append("ID = %s, UniqueID = %d, ", pType->ID, pFoot->UniqueID);
+		append("[Phobos] Dump ObjectInfo runs.\n");
+		auto const pType = pFoot->GetTechnoType();
+		append("ID = %s, ", pType->ID);
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
-		const auto cell = pFoot->GetMapCoords();
-		append("Location = (%d, %d), ", cell.X, cell.Y);
-		append("Tether = (%s, %s), ", (pFoot->IsTether ? "yes" : "no"), (pFoot->IsAlternativeTether ? "yes" : "no"));
-		append("Health = (%d/%d)", pFoot->Health, pType->Strength);
+		append("Location = (%d, %d), ", pFoot->GetMapCoords().X, pFoot->GetMapCoords().Y);
+		append("Mission = %d (%s), Status = %d\n", pFoot->CurrentMission, MissionControlClass::FindName(pFoot->CurrentMission), pFoot->MissionStatus);
 
-		const auto pTechnoExt = TechnoExt::Fetch(pFoot);
-		const auto pShieldData = pTechnoExt->Shield.get();
-
-		if (pTechnoExt->CurrentShieldType && pShieldData)
-			append(", Shield = (%d/%d)", pShieldData->GetHP(), pTechnoExt->CurrentShieldType->Strength);
-
-		if (pType->Ammo > 0)
-			append(", Ammo = (%d/%d)", pFoot->Ammo, pType->Ammo);
-
-		append("\n");
-
-		// Mission Status
-		append("CurrentMission = %d (%s), Status = %d, MissionStartFrame = %d", pFoot->CurrentMission, MissionControlClass::FindName(pFoot->CurrentMission), pFoot->MissionStatus, pFoot->CurrentMissionStartTime);
-
-		if (pFoot->SuspendedMission != Mission::None)
-			append(", SuspendedMission = %d (%s)", pFoot->SuspendedMission, MissionControlClass::FindName(pFoot->SuspendedMission));
-
-		if (pFoot->QueuedMission != Mission::None)
-			append(", QueuedMission = %d (%s)", pFoot->QueuedMission, MissionControlClass::FindName(pFoot->QueuedMission));
-
-		if (pFoot->MegaMission != Mission::None)
-			append(", MegaMission = %d (%s)", pFoot->MegaMission, MissionControlClass::FindName(pFoot->MegaMission));
-
-		if (pFoot->PlanningPathIdx != -1)
-			append(", PlanningPathIdx = %d", pFoot->PlanningPathIdx);
-
-		append("\n");
-
-		// Team Status
 		if (pFoot->BelongsToATeam())
 		{
-			const auto pTeam = pFoot->Team;
-			const auto pTeamType = pTeam->Type;
-			bool found = false;
+			auto const pTeam = pFoot->Team;
 
+			auto const pTeamType = pFoot->Team->Type;
+			bool found = false;
 			for (int i = 0; i < AITriggerTypeClass::Array.Count && !found; i++)
 			{
-				const auto pTriggerType = AITriggerTypeClass::Array.GetItem(i);
-				const auto pTriggerTeam1Type = pTriggerType->Team1;
-				const auto pTriggerTeam2Type = pTriggerType->Team2;
+				auto const pTriggerTeam1Type = AITriggerTypeClass::Array.GetItem(i)->Team1;
+				auto const pTriggerTeam2Type = AITriggerTypeClass::Array.GetItem(i)->Team2;
 
 				if (pTeamType && ((pTriggerTeam1Type && pTriggerTeam1Type == pTeamType) || (pTriggerTeam2Type && pTriggerTeam2Type == pTeamType)))
 				{
 					found = true;
+					auto const pTriggerType = AITriggerTypeClass::Array.GetItem(i);
 					append("Trigger ID = %s, weights [Current, Min, Max]: %f, %f, %f", pTriggerType->ID, pTriggerType->Weight_Current, pTriggerType->Weight_Minimum, pTriggerType->Weight_Maximum);
 				}
 			}
 			display();
 
-			append("Team ID = %s, Script ID = %s, Taskforce ID = %s", pTeam->Type->ID, pTeam->CurrentScript->Type->get_ID(), pTeam->Type->TaskForce->ID);
+			append("Team ID = %s, Script ID = %s, Taskforce ID = %s",
+				pTeam->Type->ID, pTeam->CurrentScript->Type->get_ID(), pTeam->Type->TaskForce->ID);
 			display();
 
 			if (pTeam->CurrentScript->CurrentMission >= 0)
@@ -155,154 +108,63 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		if (FootClass* pCurrent = pFoot->Passengers.GetFirstPassenger())
 		{
 			append("%d Passengers: %s", pFoot->Passengers.NumPassengers, pCurrent->GetTechnoType()->ID);
-
 			for (pCurrent = abstract_cast<FootClass*>(pCurrent->NextObject); pCurrent; pCurrent = abstract_cast<FootClass*>(pCurrent->NextObject))
 				append(", %s", pCurrent->GetTechnoType()->ID);
-
 			append("\n");
 		}
 
-		// Related Status
-		getTargetInfo(pFoot, pFoot->Target, "Target");
-		getTargetInfo(pFoot, pFoot->LastTarget, "LastTarget");
-		getTargetInfo(pFoot, pFoot->GetNthLink(), "NthLink");
-		getTargetInfo(pFoot, pFoot->ArchiveTarget, "ArchiveTarget");
-		getTargetInfo(pFoot, pFoot->Transporter, "Transporter");
-		getTargetInfo(pFoot, pFoot->Destination, "Destination");
-		getTargetInfo(pFoot, pFoot->LastDestination, "LastDestination");
-		getTargetInfo(pFoot, pFoot->QueueUpToEnter, "QueueUpToEnter");
-		getTargetInfo(pFoot, pFoot->unknown_5A0, "Follow");
-		getTargetInfo(pFoot, pFoot->MegaTarget, "MegaTarget");
-		getTargetInfo(pFoot, pFoot->MegaDestination, "MegaDestination");
-		getTargetInfo(pFoot, pFoot->ParasiteEatingMe, "Parasite");
-
-		if (pFoot->unknown_abstract_array_588.Count > 0)
-			getTargetInfo(pFoot, pFoot->unknown_abstract_array_588.GetItem(0), "ArrayTarget");
-
-		if (pFoot->NavQueue.Count > 0)
-			getTargetInfo(pFoot, pFoot->NavQueue.GetItem(0), "NavQueue");
-
-		if (const auto pUnit = abstract_cast<UnitClass*>(pFoot))
-			getTargetInfo(pUnit, pUnit->FollowerCar, "Follower");
-		else if (const auto pAircraft = abstract_cast<AircraftClass*>(pFoot))
-			getTargetInfo(pAircraft, pAircraft->DockNowHeadingTo, "Dock");
-
-		if (count % 3)
-			append("\n");
-
-		// Cell Status
-		if (const auto pCell = MapClass::Instance.TryGetCellAt(cell))
+		if (pFoot->Target)
 		{
-			bool onBridge = pCell->ContainsBridge();
-
-			if (onBridge)
-			{
-				auto flags = pCell->AltOccupationFlags;
-				append("Location Cell (On Bridge): [Occupation Flags: ");
-
-				for (int i = 0; i < 8; ++i, flags >>= 1)
-					append("%d", (flags & 1));
-			}
-			else
-			{
-				auto flags = pCell->OccupationFlags;
-				append("Location Cell (On Ground): [Occupation Flags: ");
-
-				for (int i = 0; i < 8; ++i, flags >>= 1)
-					append("%d", (flags & 1));
-			}
-
-			append("]");
-
-			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
-			{
-				if (pObj == pFoot)
-					append("; [Content Objects: %s(me)", pObj->GetType()->get_ID());
-				else
-					append("; [Content Objects: %s", pObj->GetType()->get_ID());
-
-				for (pObj = pObj->NextObject; pObj; pObj = pObj->NextObject)
-				{
-					if (pObj == pFoot)
-						append(", %s(me)", pObj->GetType()->get_ID());
-					else
-						append(", %s", pObj->GetType()->get_ID());
-				}
-
-				append("]");
-			}
-
-			if (auto pObj = pCell->Jumpjet)
-			{
-				if (pObj == pFoot)
-					append("; [Content Jumpjet: %s(me)]", pObj->GetType()->get_ID());
-				else
-					append("; [Content Jumpjet: %s]", pObj->GetType()->get_ID());
-			}
-
-			append("\n");
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pFoot->Target, distance, ID, mapCoords);
+			append("Target = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
 		}
 
-		// End
+		if (pFoot->Destination)
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pFoot->Destination, distance, ID, mapCoords);
+			append("Destination = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
+		}
+
+		append("Current HP = (%d / %d)", pFoot->Health, pType->Strength);
+
+		auto const pTechnoExt = TechnoExt::Fetch(pFoot);
+		auto const pShieldData = pTechnoExt->Shield.get();
+
+		if (pTechnoExt->CurrentShieldType && pShieldData)
+			append(", Current Shield HP = (%d / %d)", pShieldData->GetHP(), pTechnoExt->CurrentShieldType->Strength);
+
+		if (pType->Ammo > 0)
+			append(", Ammo = (%d / %d)", pFoot->Ammo, pType->Ammo);
+
+		append("\n");
 		display();
 	};
 
-	auto printBuilding = [&append, &display, &count, &getTargetInfo](BuildingClass* pBuilding)
+	auto printBuilding = [&append, &display, &getTargetInfo](BuildingClass* pBuilding)
 	{
-		// Basic Status
-		append("Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame);
-		const auto pType = pBuilding->Type;
-		append("ID = %s, UniqueID = %d, ", pType->ID, pBuilding->UniqueID);
+		append("[Phobos] Dump ObjectInfo runs.\n");
+		auto const pType = pBuilding->Type;
+		append("ID = %s, ", pType->ID);
 		append("Owner = %s (%s), ", pBuilding->Owner->get_ID(), pBuilding->Owner->PlainName);
-		const auto cell = pBuilding->GetMapCoords();
-		append("Location = (%d, %d), ", cell.X, cell.Y);
-		append("Tether = (%s, %s), ", (pBuilding->IsTether ? "yes" : "no"), (pBuilding->IsAlternativeTether ? "yes" : "no"));
-		append("Health = (%d/%d)", pBuilding->Health, pType->Strength);
-
-		const auto pTechnoExt = TechnoExt::Fetch(pBuilding);
-		const auto pShieldData = pTechnoExt->Shield.get();
-
-		if (pTechnoExt->CurrentShieldType && pShieldData)
-			append(", Shield = (%d/%d)", pShieldData->GetHP(), pTechnoExt->CurrentShieldType->Strength);
-
-		if (pType->Ammo > 0)
-			append(", Ammo = (%d/%d)\n", pBuilding->Ammo, pType->Ammo);
-
-		append("\n");
-
-		// Mission Status
-		append("CurrentMission = %d (%s), Status = %d, MissionStartFrame = %d", pBuilding->CurrentMission, MissionControlClass::FindName(pBuilding->CurrentMission), pBuilding->MissionStatus, pBuilding->CurrentMissionStartTime);
-
-		if (pBuilding->SuspendedMission != Mission::None)
-			append(", SuspendedMission = %d (%s)", pBuilding->SuspendedMission, MissionControlClass::FindName(pBuilding->SuspendedMission));
-
-		if (pBuilding->QueuedMission != Mission::None)
-			append(", QueuedMission = %d (%s)", pBuilding->QueuedMission, MissionControlClass::FindName(pBuilding->QueuedMission));
-
-		append("\n");
-
-		// Building Status
-		bool nextLine = false;
+		append("Location = (%d, %d), ", pBuilding->GetMapCoords().X, pBuilding->GetMapCoords().Y);
+		append("Mission = %d (%s), Status = %d\n", pBuilding->CurrentMission, MissionControlClass::FindName(pBuilding->CurrentMission), pBuilding->MissionStatus);
 
 		if (pBuilding->Factory && pBuilding->Factory->Object)
 		{
-			append("Production: %s (%d%%)", pBuilding->Factory->Object->GetTechnoType()->ID, (pBuilding->Factory->GetProgress() * 100 / 54));
-			nextLine = true;
+			append("Production: %s (%d%%)\n", pBuilding->Factory->Object->GetTechnoType()->ID, (pBuilding->Factory->GetProgress() * 100 / 54));
 		}
 
-		if (pType->Refinery || pType->ResourceGatherer)
+		if (pBuilding->Type->Refinery || pBuilding->Type->ResourceGatherer)
 		{
-			if (nextLine)
-				append(", ");
-
-			append("Money: %d", pBuilding->Owner->Available_Money());
-			nextLine = true;
+			append("Money: %d\n", pBuilding->Owner->Available_Money());
 		}
 
-		if (nextLine)
-			append("\n");
-
-		// Occupant Status
 		if (pBuilding->Occupants.Count > 0)
 		{
 			append("Occupants: %s", pBuilding->Occupants.GetItem(0)->Type->ID);
@@ -313,22 +175,9 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			append("\n");
 		}
 
-		// Passenger Status
-		if (pBuilding->Passengers.NumPassengers > 0)
+		if (pBuilding->Type->Upgrades)
 		{
-			FootClass* pCurrent = pBuilding->Passengers.FirstPassenger;
-			append("%d Passengers: %s", pBuilding->Passengers.NumPassengers, pCurrent->GetTechnoType()->ID);
-
-			for (pCurrent = abstract_cast<FootClass*>(pCurrent->NextObject); pCurrent; pCurrent = abstract_cast<FootClass*>(pCurrent->NextObject))
-				append(", %s", pCurrent->GetTechnoType()->ID);
-
-			append("\n");
-		}
-
-		// Upgrade Status
-		if (pType->Upgrades)
-		{
-			append("Upgrades (%d/%d): ", pBuilding->UpgradeLevel, pType->Upgrades);
+			append("Upgrades (%d/%d): ", pBuilding->UpgradeLevel, pBuilding->Type->Upgrades);
 			for (int i = 0; i < 3; i++)
 			{
 				if (i != 0)
@@ -339,65 +188,26 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			append("\n");
 		}
 
-		// Related Status
-		getTargetInfo(pBuilding, pBuilding->Target, "Target");
-		getTargetInfo(pBuilding, pBuilding->LastTarget, "LastTarget");
-		getTargetInfo(pBuilding, pBuilding->GetNthLink(), "NthLink");
-		getTargetInfo(pBuilding, pBuilding->ArchiveTarget, "ArchiveTarget");
-		getTargetInfo(pBuilding, pBuilding->Transporter, "Transporter");
+		if (pBuilding->Type->Ammo > 0)
+			append("Ammo = (%d / %d)\n", pBuilding->Ammo, pBuilding->Type->Ammo);
 
-		if (count % 3)
-			append("\n");
-
-		// Cell Status
-		if (const auto pCell = MapClass::Instance.TryGetCellAt(cell))
+		if (pBuilding->Target)
 		{
-			bool onBridge = pCell->ContainsBridge();
-
-			if (onBridge)
-			{
-				auto flags = pCell->AltOccupationFlags;
-				append("Location Cell (On Bridge): [Occupation Flags: ");
-
-				for (int i = 0; i < 8; ++i, flags >>= 1)
-					append("%d", (flags & 1));
-			}
-			else
-			{
-				auto flags = pCell->OccupationFlags;
-				append("Location Cell (On Ground): [Occupation Flags: ");
-
-				for (int i = 0; i < 8; ++i, flags >>= 1)
-					append("%d", (flags & 1));
-			}
-
-			append("]");
-
-			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
-			{
-				if (pObj == pBuilding)
-					append("; [Content Objects: %s(me)", pObj->GetType()->get_ID());
-				else
-					append("; [Content Objects: %s", pObj->GetType()->get_ID());
-
-				for (pObj = pObj->NextObject; pObj; pObj = pObj->NextObject)
-				{
-					if (pObj == pBuilding)
-						append(", %s(me)", pObj->GetType()->get_ID());
-					else
-						append(", %s", pObj->GetType()->get_ID());
-				}
-
-				append("]");
-			}
-
-			if (auto pObj = pCell->Jumpjet)
-				append("; [Content Jumpjet: %s]", pObj->GetType()->get_ID());
-
-			append("\n");
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pBuilding, pBuilding->Target, distance, ID, mapCoords);
+			append("Target = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
 		}
 
-		// End
+		append("Current HP = (%d / %d)\n", pBuilding->Health, pBuilding->Type->Strength);
+
+		auto const pTechnoExt = TechnoExt::Fetch(pBuilding);
+		auto const pShieldData = pTechnoExt->Shield.get();
+
+		if (pTechnoExt->CurrentShieldType && pShieldData)
+			append("Current Shield HP = (%d / %d)\n", pShieldData->GetHP(), pTechnoExt->CurrentShieldType->Strength);
+
 		display();
 	};
 

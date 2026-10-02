@@ -47,7 +47,6 @@ public:
 
 	static const char* AppIconPath;
 	static const wchar_t* VersionDescription;
-	static bool ShowCurrentInfo;
 	static bool DisplayDamageNumbers;
 	static bool IsLoadingSaveGame;
 	static bool ShouldSave;
@@ -98,7 +97,6 @@ public:
 	class Config
 	{
 	public:
-		static bool DebugToolEnable;
 		static bool ToolTipDescriptions;
 		static bool ToolTipBlur;
 		static bool PrioritySelectionFiltering;
@@ -159,7 +157,6 @@ public:
 		static bool AutomaticPlacingBuilding;
 		static bool AutomaticPlacingCombatBuilding;
 		static bool UnifiedTechnoColor;
-		static int SkipFrameDelay;
 		static bool ShowGameTime;
 		static int ShowGameTime_BoardOpacity;
 		static bool SelectCapturedCommand;
