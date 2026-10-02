@@ -43,6 +43,7 @@
     <ClCompile Include="src\Commands\QuickSave.cpp" />
     <ClCompile Include="src\Commands\SaveVariablesToFile.cpp" />
     <ClCompile Include="src\Commands\SelectCaptured.cpp" />
+    <ClCompile Include="src\Commands\ShowCurrentInfo.cpp" />
     <ClCompile Include="src\Commands\ToggleDesignatorRange.cpp" />
     <ClCompile Include="src\Commands\ToggleDigitalDisplay.cpp" />
     <ClCompile Include="src\Commands\ToggleMessageList.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Firing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Misc.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.Others.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Pips.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.ReceiveDamage.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.TargetEvaluation.cpp" />
@@ -258,6 +260,7 @@
     <ClCompile Include="src\Misc\RetryDialog.cpp" />
     <ClCompile Include="src\Misc\Selection.cpp" />
     <ClCompile Include="src\Misc\SyncLogging.cpp" />
+    <ClCompile Include="src\Misc\TacticalButtons.cpp" />
     <ClCompile Include="src\Misc\TextInput.cpp" />
     <!-- src\New -->
     <!-- src\New\Entity -->
@@ -321,6 +324,7 @@
     <ClInclude Include="src\Commands\QuickSave.h" />
     <ClInclude Include="src\Commands\SaveVariablesToFile.h" />
     <ClInclude Include="src\Commands\SelectCaptured.h" />
+    <ClInclude Include="src\Commands\ShowCurrentInfo.h" />
     <ClInclude Include="src\Commands\ToggleDesignatorRange.h" />
     <ClInclude Include="src\Commands\ToggleDigitalDisplay.h" />
     <ClInclude Include="src\Commands\ToggleMessageList.h" />
@@ -399,6 +403,7 @@
     <ClInclude Include="src\Misc\MessageColumn.h" />
     <ClInclude Include="src\Misc\PhobosToolTip.h" />
     <ClInclude Include="src\Misc\SyncLogging.h" />
+    <ClInclude Include="src\Misc\TacticalButtons.h" />
     <!-- src\New -->
     <!-- src\New\Entity -->
     <ClInclude Include="src\New\Entity\Ares\RadarJammerClass.h" />

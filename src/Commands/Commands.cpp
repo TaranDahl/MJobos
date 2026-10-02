@@ -10,6 +10,7 @@
 #include "ToggleDesignatorRange.h"
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
+#include "ShowCurrentInfo.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "ToggleMessageList.h"
@@ -64,6 +65,9 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		MakeCommand<FrameStepCommandClass<30>>(); // Speed 4
 		MakeCommand<FrameStepCommandClass<60>>(); // Speed 5
 	}
+
+	if (Phobos::Config::DebugToolEnable)
+		MakeCommand<ShowCurrentInfoCommandClass>();
 
 	return 0;
 }

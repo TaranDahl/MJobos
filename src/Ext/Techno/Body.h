@@ -48,6 +48,7 @@ public:
 	bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 	int WHAnimRemainingCreationInterval;
 	WeaponTypeClass* LastWeaponType;
+	int ScatteringStopFrame;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 	int BeControlledThreatFrame;
@@ -108,6 +109,7 @@ public:
 		, CanCloakDuringRearm { false }
 		, WHAnimRemainingCreationInterval { 0 }
 		, LastWeaponType {}
+		, ScatteringStopFrame { 0 }
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
 		, BeControlledThreatFrame { 0 }
