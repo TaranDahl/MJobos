@@ -65,7 +65,7 @@ public:
 		, DistanceTraveled { 0 }
 	{ }
 
-	virtual ~BulletExt() = default;
+	virtual ~BulletExt();
 
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 	virtual void SaveToStream(PhobosStreamWriter& Stm) override;

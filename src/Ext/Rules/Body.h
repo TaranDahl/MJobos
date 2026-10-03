@@ -340,6 +340,9 @@ public:
 
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
 
+
+		Valueable<bool> VHPScan_Enhanced;
+
 		NullableIdx<AnimTypeClass> Parasite_GrappleAnim;
 		Nullable<bool> Parasite_AllowWaterExit;
 
@@ -347,6 +350,9 @@ public:
 		int TintColorIronCurtain;
 		int TintColorForceShield;
 		int TintColorBerserk;
+
+
+		Valueable<bool> Decloak_OnCloakingWithLowHealth;
 
 		Valueable<bool> InfantryAutoDeploy;
 
@@ -846,6 +852,10 @@ public:
 			, TintColorBerserk { 0 }
 
 			, AttackMove_IgnoreWeaponCheck { false }
+
+
+			, Decloak_OnCloakingWithLowHealth { true }
+			, VHPScan_Enhanced { false }
 
 			, Parasite_GrappleAnim {}
 			, Parasite_AllowWaterExit {}
