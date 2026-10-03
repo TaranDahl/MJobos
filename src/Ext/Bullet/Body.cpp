@@ -5,6 +5,7 @@
 #include <Ext/WeaponType/Body.h>
 #include <Ext/Cell/Body.h>
 #include <Ext/EBolt/Body.h>
+#include <Ext/Techno/Body.h>
 #include <New/Entity/LaserTrailClass.h>
 
 namespace LaserRT
@@ -13,6 +14,15 @@ namespace LaserRT
 }
 
 BulletExt::ExtContainer BulletExt::ExtMap;
+
+BulletExt::~BulletExt()
+{
+	if (RulesExt::Global()->VHPScan_Enhanced)
+	{
+		if (const auto pTarget = abstract_cast<TechnoClass*>(this->OwnerObject()->Target))
+			TechnoExt::Fetch(pTarget)->BulletsTargetingMeCount--;
+	}
+	}
 
 void BulletExt::InterceptBullet(TechnoClass* pSource, BulletClass* pInterceptor)
 {

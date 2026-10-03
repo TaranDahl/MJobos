@@ -81,6 +81,9 @@ public:
 	CoordStruct LastTargetCrd;
 	CDTimerClass LastTargetCrdClearTimer;
 
+
+	int BulletsTargetingMeCount;
+
 	bool ShouldBeDead;
 
 	int DropCrate; // Drop crate on death, modified by map action
@@ -128,6 +131,7 @@ public:
 		, TintIntensityAllies { 0 }
 		, TintIntensityEnemies { 0 }
 		, SpecialTracked { false }
+		, BulletsTargetingMeCount { 0 }
 		, FallingDownTracked { false }
 		, OnParachuted { false }
 		, HoverShutdown { false }
