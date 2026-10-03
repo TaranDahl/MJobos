@@ -326,6 +326,8 @@ public:
 		Valueable<bool> BuildingWaypoints;
 		Valueable<bool> BuildingTypeSelectable;
 
+		Valueable<bool> ExtraTargeting;
+
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
 
@@ -829,6 +831,9 @@ public:
 			, AutoTarget_IronCurtained { true }
 			, BuildingWaypoints { false }
 			, BuildingTypeSelectable { false }
+
+			, ExtraTargeting { false }
+
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 
