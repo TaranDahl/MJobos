@@ -1154,6 +1154,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Ammo_AutoConvertMaximumAmount.Read(exINI, pSection, "Ammo.AutoConvertMaximumAmount");
 	this->Ammo_AutoConvertType.Read(exINI, pSection, "Ammo.AutoConvertType");
 
+	this->ExtraTargeting_Excluded.Read(exINI, pSection, "ExtraTargeting.Excluded");
+
 	if (this->Ammo_AutoConvertMinimumAmount > this->Ammo_AutoConvertMaximumAmount)
 		Debug::Log("[Developer warning][%s] Ammo.AutoConvertMinimumAmount is greater than Ammo.AutoConvertMaximumAmount, resulting in no conversion.\n", pSection);
 
@@ -1797,6 +1799,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->VoiceEliteWeaponAttacks)
 
 		.Process(this->TeamMember_ConsideredAs)
+
+		.Process(this->ExtraTargeting_Excluded)
 
 		.Process(this->AttackFriendlies)
 
