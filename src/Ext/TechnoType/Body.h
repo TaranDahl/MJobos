@@ -288,6 +288,8 @@ public:
 	Nullable<bool> NoReload_UnderEMP;
 	Nullable<bool> NoReload_Temporal;
 
+	Valueable<bool> Engineer_CanAutoFire;
+
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -712,6 +714,8 @@ public:
 		, NoRearm_Temporal {}
 		, NoReload_UnderEMP {}
 		, NoReload_Temporal {}
+
+		, Engineer_CanAutoFire { false }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}

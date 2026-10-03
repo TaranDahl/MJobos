@@ -1056,6 +1056,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
 	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
 
+	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
+
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
 
@@ -1703,6 +1705,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->VeteranEmptyReload)
 		.Process(this->VeteranRange)
 		.Process(this->VeteranCritChance)
+
+		.Process(this->Engineer_CanAutoFire)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
