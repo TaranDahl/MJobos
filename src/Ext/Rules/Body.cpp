@@ -501,6 +501,10 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ParadropEndDelay.Read(exINI, GameStrings::General, "ParadropEndDelay");
 
 	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
+	this->PlayerDestroyWalls.Read(exINI, GameStrings::General, "PlayerDestroyWalls");
+	this->AutoTargetWalls.Read(exINI, GameStrings::General, "AutoTargetWalls");
+	this->EndAutoTargetingIfFindWalls.Read(exINI, GameStrings::General, "EndAutoTargetingIfFindWalls");
+	this->DestroyOwnerlessWalls.Read(exINI, GameStrings::General, "DestroyOwnerlessWalls");
 
 	this->PenetratesTransport_Level.Read(exINI, GameStrings::CombatDamage, "PenetratesTransport.Level");
 
@@ -1052,6 +1056,10 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->LeptonMindControlOffset)
 		.Process(this->MindControlRingOffset)
 		.Process(this->CylinderRangefinding)
+		.Process(this->PlayerDestroyWalls)
+		.Process(this->AutoTargetWalls)
+		.Process(this->EndAutoTargetingIfFindWalls)
+		.Process(this->DestroyOwnerlessWalls)
 		.Process(this->PenetratesTransport_Level)
 		.Process(this->UnitsUnsellable)
 		.Process(this->DriverKilled_KeptPassengers)
