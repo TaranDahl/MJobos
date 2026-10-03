@@ -239,6 +239,10 @@ public:
 		ValueableVector<AnimTypeClass*> Promote_VeteranAnimation;
 		ValueableVector<AnimTypeClass*> Promote_EliteAnimation;
 
+		Valueable<bool> PlayerDestroyWalls;
+		Valueable<int> AutoTargetWalls;
+		Valueable<bool> EndAutoTargetingIfFindWalls;
+		Valueable<bool> DestroyOwnerlessWalls;
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<bool> JumpjetClimbIgnoreBuilding;
@@ -758,6 +762,10 @@ public:
 			, DropPodTrailer { }
 			, DropPodDefaultTrailer { }
 			, PodImage { }
+			, PlayerDestroyWalls { false }
+			, AutoTargetWalls { 1 }
+			, EndAutoTargetingIfFindWalls { true }
+			, DestroyOwnerlessWalls { false }
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
 			, JumpjetClimbIgnoreBuilding { false }
