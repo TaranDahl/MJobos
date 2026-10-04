@@ -1351,19 +1351,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 
-	this->PlayerGuardModePursuit.Read(exINI, pSection, "PlayerGuardModePursuit");
-	this->PlayerGuardModeStray.Read(exINI, pSection, "PlayerGuardModeStray");
-	this->PlayerGuardModeGuardRangeMultiplier.Read(exINI, pSection, "PlayerGuardModeGuardRangeMultiplier");
-	this->PlayerGuardModeGuardRangeAddend.Read(exINI, pSection, "PlayerGuardModeGuardRangeAddend");
-	this->PlayerGuardStationaryStray.Read(exINI, pSection, "PlayerGuardStationaryStray");
-	this->AIGuardModePursuit.Read(exINI, pSection, "AIGuardModePursuit");
-	this->AIGuardModeStray.Read(exINI, pSection, "AIGuardModeStray");
-	this->AIGuardModeGuardRangeMultiplier.Read(exINI, pSection, "AIGuardModeGuardRangeMultiplier");
-	this->AIGuardModeGuardRangeAddend.Read(exINI, pSection, "AIGuardModeGuardRangeAddend");
-	this->AIGuardStationaryStray.Read(exINI, pSection, "AIGuardStationaryStray");
-
-	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
-
 	this->DigStartROT.Read(exINI, pSection, "DigStartROT");
 	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
 	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
@@ -1516,8 +1503,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	if (this->Ammo_AutoConvertMinimumAmount > this->Ammo_AutoConvertMaximumAmount)
 		Debug::Log("[Developer warning][%s] Ammo.AutoConvertMinimumAmount is greater than Ammo.AutoConvertMaximumAmount, resulting in no conversion.\n", pSection);
-
-	this->ExtraTargeting_Excluded.Read(exINI, pSection, "ExtraTargeting.Excluded");
 
 	this->AIDefendBase_Ignore.Read(exINI, pSection, "AIDefendBase.Ignore");
 
@@ -2152,19 +2137,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->FiringByPassMovingCheck)
 
-		.Process(this->PlayerGuardModePursuit)
-		.Process(this->PlayerGuardModeStray)
-		.Process(this->PlayerGuardModeGuardRangeMultiplier)
-		.Process(this->PlayerGuardModeGuardRangeAddend)
-		.Process(this->PlayerGuardStationaryStray)
-		.Process(this->AIGuardModePursuit)
-		.Process(this->AIGuardModeStray)
-		.Process(this->AIGuardModeGuardRangeMultiplier)
-		.Process(this->AIGuardModeGuardRangeAddend)
-		.Process(this->AIGuardStationaryStray)
-
-		.Process(this->Engineer_CanAutoFire)
-
 		.Process(this->DigStartROT)
 		.Process(this->DigInSpeed)
 		.Process(this->DigOutSpeed)
@@ -2320,8 +2292,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->VoiceEliteWeaponAttacks)
 
 		.Process(this->TeamMember_ConsideredAs)
-
-		.Process(this->ExtraTargeting_Excluded)
 
 		.Process(this->AIDefendBase_Ignore)
 

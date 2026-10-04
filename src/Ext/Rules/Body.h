@@ -290,26 +290,12 @@ public:
 		Valueable<bool> PlayerReturnFire_Smarter;
 		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
 		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
-		Valueable<bool> PlayerGuardModePursuit;
-		Valueable<double> PlayerGuardModeGuardRangeMultiplier;
-		Valueable<Leptons> PlayerGuardModeGuardRangeAddend;
-		Valueable<Leptons> PlayerGuardModeGuardRangeMax;
-		Valueable<Leptons> PlayerGuardStationaryStray;
-		Valueable<bool> AIGuardModePursuit;
-		Valueable<double> AIGuardModeGuardRangeMultiplier;
-		Valueable<Leptons> AIGuardModeGuardRangeAddend;
-		Valueable<Leptons> AIGuardModeGuardRangeMax;
-		Valueable<Leptons> AIGuardStationaryStray;
 		Valueable<bool> UseGlobalDeathWeaponDamage;
 		Valueable<bool> NonVehExplodeOnDestroy;
 		Valueable<bool> FireDeathWeaponOnCrushed;
 		Valueable<bool> CrushBuildingOnAnyCell;
 		Valueable<bool> RallyPointIgnoreReachability;
 		Valueable<bool> RallyPointAreaGuard;
-		Valueable<bool> PlayerDestroyWalls;
-		Valueable<int> AutoTargetWalls;
-		Valueable<bool> EndAutoTargetingIfFindWalls;
-		Valueable<bool> DestroyOwnerlessWalls;
 		Valueable<bool> AIAngerOnAlly;
 		Valueable<bool> FollowTargetSelf;
 
@@ -411,8 +397,6 @@ public:
 		Valueable<bool> BuildingWaypoints;
 		Valueable<bool> BuildingTypeSelectable;
 
-		Valueable<bool> ExtraTargeting;
-
 		Valueable<bool> AllyShareControl;
 
 		Valueable<bool> InTransportInfantryAmmoFix;
@@ -442,8 +426,6 @@ public:
 		Valueable<int> TunnelPathingDistTooFar;
 
 		Valueable<AffectedHouse> ReorganizeToWhenDefeated;
-
-		Valueable<bool> VHPScan_Enhanced;
 
 		Valueable<bool> AnimCraterDestroyTiberium;
 
@@ -940,26 +922,12 @@ public:
 			, PlayerReturnFire_Smarter { false }
 			, EVA_WeCaptureABuilding {}
 			, EVA_OurBuildingIsCaptured {}
-			, PlayerGuardModePursuit { true }
-			, PlayerGuardModeGuardRangeMultiplier { 2.0 }
-			, PlayerGuardModeGuardRangeAddend { Leptons(0) }
-			, PlayerGuardModeGuardRangeMax { Leptons(4096) }
-			, PlayerGuardStationaryStray { Leptons(-256) }
-			, AIGuardModePursuit { true }
-			, AIGuardModeGuardRangeMultiplier { 2.0 }
-			, AIGuardModeGuardRangeAddend { Leptons(0) }
-			, AIGuardModeGuardRangeMax { Leptons(4096) }
-			, AIGuardStationaryStray { Leptons(-256) }
 			, UseGlobalDeathWeaponDamage { false }
 			, NonVehExplodeOnDestroy { false }
 			, FireDeathWeaponOnCrushed { false }
 			, CrushBuildingOnAnyCell { false }
 			, RallyPointIgnoreReachability { false }
 			, RallyPointAreaGuard { false }
-			, PlayerDestroyWalls { false }
-			, AutoTargetWalls { 1 }
-			, EndAutoTargetingIfFindWalls { true }
-			, DestroyOwnerlessWalls { false }
 			, AIAngerOnAlly { true }
 			, FollowTargetSelf { false }
 
@@ -1046,7 +1014,6 @@ public:
 			, BuildingWaypoints { false }
 			, BuildingTypeSelectable { false }
 
-			, ExtraTargeting { false }
 			, AllyShareControl { false }
 			, InTransportInfantryAmmoFix { false }
 			, UpdateInLimbo_Occupier { false }
@@ -1071,8 +1038,6 @@ public:
 			, TunnelPathingDistTooFar { 15 }
 
 			, ReorganizeToWhenDefeated { AffectedHouse::None }
-
-			, VHPScan_Enhanced { false }
 
 			, AnimCraterDestroyTiberium { true }
 

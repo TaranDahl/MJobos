@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <Ext/TechnoType/Body.h>
 #include <Ext/Bullet/Body.h>
@@ -74,7 +74,6 @@ public:
 	std::shared_ptr<PhobosMap<BulletTypeClass*, BulletGroupData>> TrajectoryGroup;
 	int ScatteringStopFrame;
 	int MyTargetingFrame;
-	CellClass* AutoTargetedWallCell;
 	bool HasCachedClickMission;
 	Mission CachedMission;
 	AbstractClass* CachedCell;
@@ -130,8 +129,6 @@ public:
 	bool HoverShutdown;
 	CoordStruct LastTargetCrd;
 	CDTimerClass LastTargetCrdClearTimer;
-
-	int BulletsTargetingMeCount;
 
 	bool JumpjetStraightAscend; // Is set to true jumpjet units will ascend straight and do not adjust rotation or position during it.
 
@@ -193,7 +190,6 @@ public:
 		, TrajectoryGroup {}
 		, ScatteringStopFrame { 0 }
 		, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
-		, AutoTargetedWallCell{ nullptr }
 		, HasCachedClickMission { false }
 		, CachedMission { Mission::None }
 		, CachedCell { nullptr }
@@ -231,7 +227,6 @@ public:
 		, TintIntensityAllies { 0 }
 		, TintIntensityEnemies { 0 }
 		, SpecialTracked { false }
-		, BulletsTargetingMeCount { 0 }
 		, FallingDownTracked { false }
 		, JumpjetStraightAscend { false }
 		, OnParachuted { false }

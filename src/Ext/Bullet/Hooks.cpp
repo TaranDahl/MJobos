@@ -15,25 +15,6 @@ DEFINE_HOOK(0x466556, BulletClass_Init, 0x6)
 	if (auto const pExt = BulletExt::TryFetch(pThis))
 		pExt->InitializeState();
 
-	if (RulesExt::Global()->VHPScan_Enhanced)
-	{
-		if (const auto pTarget = abstract_cast<TechnoClass*>(pThis->Target))
-			TechnoExt::Fetch(pTarget)->BulletsTargetingMeCount++;
-	}
-
-	return 0;
-}
-
-DEFINE_HOOK(0x468430, BulletClass_ClearTarget_Start, 0x6)
-{
-	GET(BulletClass*, pThis, ECX);
-
-	if (RulesExt::Global()->VHPScan_Enhanced)
-	{
-		if (const auto pTarget = abstract_cast<TechnoClass*>(pThis->Target))
-			TechnoExt::Fetch(pTarget)->BulletsTargetingMeCount--;
-	}
-
 	return 0;
 }
 

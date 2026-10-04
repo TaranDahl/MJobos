@@ -353,19 +353,6 @@ public:
 
 	Valueable<bool> FiringByPassMovingCheck;
 
-	Nullable<bool> PlayerGuardModePursuit;
-	Nullable<Leptons> PlayerGuardModeStray;
-	Nullable<double> PlayerGuardModeGuardRangeMultiplier;
-	Nullable<Leptons> PlayerGuardModeGuardRangeAddend;
-	Nullable<Leptons> PlayerGuardStationaryStray;
-	Nullable<bool> AIGuardModePursuit;
-	Nullable<Leptons> AIGuardModeStray;
-	Nullable<double> AIGuardModeGuardRangeMultiplier;
-	Nullable<Leptons> AIGuardModeGuardRangeAddend;
-	Nullable<Leptons> AIGuardStationaryStray;
-
-	Valueable<bool> Engineer_CanAutoFire;
-
 	Valueable<int> DigStartROT;
 	Valueable<int> DigInSpeed;
 	Valueable<int> DigOutSpeed;
@@ -534,8 +521,6 @@ public:
 	ValueableVector<int> VoiceEliteWeaponAttacks;
 
 	ValueableVector<TechnoTypeClass*> TeamMember_ConsideredAs;
-
-	Valueable<bool> ExtraTargeting_Excluded;
 
 	Valueable<bool> AIDefendBase_Ignore;
 
@@ -920,19 +905,6 @@ public:
 
 		, FiringByPassMovingCheck { false }
 
-		, PlayerGuardModePursuit {}
-		, PlayerGuardModeStray {}
-		, PlayerGuardModeGuardRangeMultiplier {}
-		, PlayerGuardModeGuardRangeAddend {}
-		, PlayerGuardStationaryStray {}
-		, AIGuardModePursuit {}
-		, AIGuardModeStray {}
-		, AIGuardModeGuardRangeMultiplier {}
-		, AIGuardModeGuardRangeAddend {}
-		, AIGuardStationaryStray {}
-
-		, Engineer_CanAutoFire { false }
-
 		, DigStartROT { -1 }
 		, DigInSpeed { -1 }
 		, DigOutSpeed { -1 }
@@ -1091,8 +1063,6 @@ public:
 		, VoiceEliteWeaponAttacks {}
 
 		, TeamMember_ConsideredAs {}
-
-		, ExtraTargeting_Excluded { false }
 
 		, AIDefendBase_Ignore { false }
 

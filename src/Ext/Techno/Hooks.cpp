@@ -563,40 +563,8 @@ DEFINE_HOOK(0x6FDC87, TechnoClass_AdjustDamage_ArmorMultiplier, 0x6)
 {
 	GET(TechnoClass* const, pThis, ESI);
 	GET(TechnoClass* const, pTarget, EDI);
-	GET(int, damage, EAX);
+	GET(const int, damage, EAX);
 	GET_STACK(WeaponTypeClass* const, pWeapon, STACK_OFFSET(0x18, 0x8));
-
-	if (RulesExt::Global()->VHPScan_Enhanced)
-	{
-		const auto pWHExt = WarheadTypeExt::Fetch(pWeapon->Warhead);
-
-		if (pWHExt->IsHealthInThreshold(pTarget)
-			&& pWHExt->CanTargetHouse(pThis->Owner, pTarget)
-			&& !TechnoExt::Fetch(pTarget)->Shield)
-		{
-			double multiplier = 1.0;
-
-			if (!pThis->Owner->IsAlliedWith(pTarget->Owner))
-				multiplier = pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier);
-			else if (pThis->Owner != pTarget->Owner)
-				multiplier = pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier);
-			else
-				multiplier = pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier);
-
-			if (pWHExt->DamageSourceHealthMultiplier)
-				multiplier += pWHExt->DamageSourceHealthMultiplier * pThis->GetHealthPercentage();
-
-			if (pWHExt->DamageTargetHealthMultiplier)
-				multiplier += pWHExt->DamageTargetHealthMultiplier * pTarget->GetHealthPercentage();
-
-			if (multiplier != 1.0)
-				damage = static_cast<int>(damage * multiplier);
-		}
-		else
-		{
-			damage = 0;
-		}
-	}
 
 	R->EAX(static_cast<int>(damage / TechnoExt::CalculateArmorMultipliers(pTarget, pWeapon->Warhead, pThis->Owner)));
 

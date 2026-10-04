@@ -18,12 +18,6 @@ BulletExt::ExtContainer BulletExt::ExtMap;
 
 BulletExt::~BulletExt()
 {
-	if (RulesExt::Global()->VHPScan_Enhanced)
-	{
-		if (const auto pTarget = abstract_cast<TechnoClass*>(this->OwnerObject()->Target))
-			TechnoExt::Fetch(pTarget)->BulletsTargetingMeCount--;
-	}
-
 	if (this->GroupIndex != -1)
 	{
 		if (const auto pMap = this->TrajectoryGroup)
