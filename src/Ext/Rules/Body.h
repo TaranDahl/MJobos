@@ -140,6 +140,8 @@ public:
 
 		Valueable<bool> BuildingProductionQueue;
 
+		Valueable<bool> ExtendedScatterAction;
+
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -674,6 +676,8 @@ public:
 			, ForceAAWeapon_InRange_ApplyRangeModifiers { false }
 
 			, BuildingProductionQueue { false }
+
+			, ExtendedScatterAction { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

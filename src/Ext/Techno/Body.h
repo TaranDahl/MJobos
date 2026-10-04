@@ -49,6 +49,7 @@ public:
 	bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 	int WHAnimRemainingCreationInterval;
 	WeaponTypeClass* LastWeaponType;
+	int ScatteringStopFrame;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 	int BeControlledThreatFrame;
@@ -116,6 +117,7 @@ public:
 		, CanCloakDuringRearm { false }
 		, WHAnimRemainingCreationInterval { 0 }
 		, LastWeaponType {}
+		, ScatteringStopFrame { 0 }
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
 		, BeControlledThreatFrame { 0 }
@@ -243,6 +245,15 @@ public:
 	static CoordStruct GetFLHAbsoluteCoords(TechnoClass* pThis, const CoordStruct& flh, bool isOnTurret = false, int turIdx = -1);
 
 	static CoordStruct GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound);
+
+	template <bool checkParent = false>
+	static void EnhancedScatterContent(CellClass* pCell, TechnoClass* pThis, const CoordStruct& coords, bool alt);
+	static TechnoClass* FindOccupyTechno(CellClass* pCell, TechnoClass* pExclude);
+	static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass* pThis, const CoordStruct& coords, bool alt);
+	static void __fastcall CallEnhancedScatterContent(CellClass* pCell, FootClass* pFoot, bool alt);
+	static void ScatterPathCellContent(FootClass* pThis, CellClass* pCell);
+	static CellStruct GetScatterCell(FootClass* pThis, int face);
+	static int GetTechnoCloseEnoughRange(TechnoClass* pThis);
 
 	static bool AttachTo(TechnoClass* pThis, TechnoClass* pParent);
 	static bool DetachFromParent(TechnoClass* pThis);

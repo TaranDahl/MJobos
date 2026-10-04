@@ -291,6 +291,9 @@ static inline void DoEnterNow(UnitClass* pTransport, FootClass* pPassenger, Foot
 	if (const auto pTag = pTransport->AttachedTag)
 		pTag->RaiseEvent(TriggerEvent::EnteredBy, pPassenger, CellStruct::Empty);
 
+	if (RulesExt::Global()->ExtendedScatterAction)
+		pPassenger->NavQueue.Clear();
+
 	// Vanilla did not handle SpawnManager and SlaveManager, so I don't care about these here either
 	pPassenger->SetArchiveTarget(nullptr);
 	pPassenger->MissionAccumulateTime = 0;
