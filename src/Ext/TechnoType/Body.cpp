@@ -1376,6 +1376,11 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 			this->AlternateFLHs.emplace_back(alternateFLH);
 	}
 
+	this->DefaultVisualCharacter.Read(exArtINI, pArtSection, "DefaultVisualCharacter");
+	this->DefaultVisualCharacterToSelf.Read(exArtINI, pArtSection, "DefaultVisualCharacterToSelf");
+	this->DefaultVisualCharacterToAlly.Read(exArtINI, pArtSection, "DefaultVisualCharacterToAlly");
+	this->DefaultVisualCharacterToEnemy.Read(exArtINI, pArtSection, "DefaultVisualCharacterToEnemy");
+
 	// Parasitic types
 	this->AttachEffects.LoadFromINI(pINI, pSection);
 
@@ -1748,6 +1753,11 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->Spawner_RecycleAnim)
 		.Process(this->Spawner_RecycleCoord)
 		.Process(this->Spawner_RecycleOnTurret)
+
+		.Process(this->DefaultVisualCharacter)
+		.Process(this->DefaultVisualCharacterToSelf)
+		.Process(this->DefaultVisualCharacterToAlly)
+		.Process(this->DefaultVisualCharacterToEnemy)
 
 		.Process(this->SuppressKillWeapons)
 		.Process(this->SuppressKillWeapons_Types)
