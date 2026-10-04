@@ -439,10 +439,6 @@ public:
 		int TintColorForceShield;
 		int TintColorBerserk;
 
-		Valueable<bool> Decloak_OnBlockingMovement;
-		Valueable<bool> Decloak_OnCloakingWithLowHealth;
-		Valueable<bool> Decloak_OnCrushing;
-
 		Valueable<bool> InvisoBlockageFix;
 
 		Valueable<int> SmudgeUpdateTime;
@@ -1049,10 +1045,6 @@ public:
 			, TintColorBerserk { 0 }
 
 			, AttackMove_IgnoreWeaponCheck { false }
-
-			, Decloak_OnBlockingMovement { true }
-			, Decloak_OnCloakingWithLowHealth { true }
-			, Decloak_OnCrushing { true }
 
 			, InvisoBlockageFix { false }
 

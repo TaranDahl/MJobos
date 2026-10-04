@@ -922,9 +922,6 @@ bool AdvancedDriveLocomotionClass::PassableCheck(bool* pStop, bool force, bool c
 		}
 		else if (moveResult == Move::Cloak)
 		{
-			if (RulesExt::Global()->Decloak_OnBlockingMovement)
-				pNextCell->RevealCellObjects();
-
 			if (force)
 			{
 				pLinked->PathDirections[0] = -1;
@@ -1213,9 +1210,6 @@ bool AdvancedDriveLocomotionClass::PassableCheck(bool* pStop, bool force, bool c
 			}
 			else if (nextMoveResult == Move::Cloak)
 			{
-				if (RulesExt::Global()->Decloak_OnBlockingMovement)
-					pNextCell->RevealCellObjects();
-
 				if (force)
 				{
 					pLinked->PathDirections[0] = -1;
@@ -1878,9 +1872,6 @@ inline int AdvancedDriveLocomotionClass::UpdateSpeedAccum(int& speedAccum)
 
 					case Move::Cloak:
 					{
-						if (RulesExt::Global()->Decloak_OnBlockingMovement)
-							pCell->RevealCellObjects();
-
 						break;
 					}
 

@@ -498,10 +498,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->AttackMove_IgnoreWeaponCheck.Read(exINI, GameStrings::General, "AttackMove.IgnoreWeaponCheck");
 
-	this->Decloak_OnBlockingMovement.Read(exINI, GameStrings::General, "Decloak.OnBlockingMovement");
-	this->Decloak_OnCloakingWithLowHealth.Read(exINI, GameStrings::General, "Decloak.OnCloakingWithLowHealth");
-	this->Decloak_OnCrushing.Read(exINI, GameStrings::General, "Decloak.OnCrushing");
-
 	this->InvisoBlockageFix.Read(exINI, GameStrings::General, "InvisoBlockageFix");
 
 	this->SmudgeUpdateTime.Read(exINI, GameStrings::AudioVisual, "SmudgeUpdateTime");
@@ -1185,9 +1181,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->TintColorForceShield)
 		.Process(this->TintColorBerserk)
 		.Process(this->AttackMove_IgnoreWeaponCheck)
-		.Process(this->Decloak_OnBlockingMovement)
-		.Process(this->Decloak_OnCloakingWithLowHealth)
-		.Process(this->Decloak_OnCrushing)
 		.Process(this->InvisoBlockageFix)
 		.Process(this->SmudgeUpdateTime)
 		.Process(this->AIAdjacentMax)
