@@ -144,6 +144,9 @@ public:
 	// Ares 0.2
 	Valueable<bool> CloningFacility;
 
+	// Ares 0.7
+	Valueable<bool> IsPassable;
+
 	// Ares 0.A
 	Valueable<BuildingTypeClass*> RubbleIntact;
 	Valueable<bool> RubbleIntactRemove;
@@ -255,6 +258,9 @@ public:
 
 		// Ares 0.2
 		, CloningFacility { false }
+
+		// Ares 0.7
+		, IsPassable { false }
 
 		// Ares 0.A
 		, RubbleIntact { nullptr }

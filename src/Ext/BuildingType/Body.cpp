@@ -377,6 +377,9 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	// Ares 0.2
 	this->CloningFacility.Read(exINI, pSection, "CloningFacility");
 
+	// Ares 0.7
+	this->IsPassable.Read(exINI, pSection, "IsPassable");
+
 	// Ares 0.A
 	this->RubbleIntact.Read(exINI, pSection, "Rubble.Intact");
 	this->RubbleIntactRemove.Read(exINI, pSection, "Rubble.Intact.Remove");
@@ -499,6 +502,9 @@ void BuildingTypeExt::Serialize(T& Stm)
 
 		// Ares 0.2
 		.Process(this->CloningFacility)
+
+		// Ares 0.7
+		.Process(this->IsPassable)
 
 		// Ares 0.A
 		.Process(this->RubbleIntact)

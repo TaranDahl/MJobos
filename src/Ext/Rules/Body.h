@@ -352,6 +352,8 @@ public:
 
 		Valueable<int> AdjacentWallDamage;
 
+		Valueable<bool> ExtendedStray;
+
 		Valueable<int> WarheadAnimZAdjust;
 
 		Valueable<bool> IvanBombAttachToCenter;
@@ -851,6 +853,8 @@ public:
 			, Parasite_AllowWaterExit {}
 			, InfantryAutoDeploy { false }
 			, AdjacentWallDamage { 200 }
+
+			, ExtendedStray { false }
 
 			, WarheadAnimZAdjust { -15 }
 
