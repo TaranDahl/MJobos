@@ -9,6 +9,9 @@
 #include <Utilities/AresFunctions.h>
 #include <New/Type/Affiliated/TypeConvertGroup.h>
 
+#include <TargetClass.h>
+#include <EventClass.h>
+
 
 // TechnoClass_AI_0x6F9E50
 // It's not recommended to do anything more here it could have a better place for performance consideration
@@ -21,6 +24,7 @@ void TechnoExt::OnEarlyUpdate()
 	this->ApplyMindControlRangeLimit();
 	this->UpdateRecountBurst();
 	this->UpdateRearmInEMPState();
+	this->UpdateCachedClick();
 	this->UpdateLastTargetCrd();
 
 	if (this->CheckDeathConditions())
@@ -1248,6 +1252,37 @@ void TechnoExt::UpdateTintValues()
 	{
 		auto const pShieldType = this->Shield->GetType();
 		calculateTint(Drawing::RGB_To_Int(pShieldType->Tint_Color), static_cast<int>(pShieldType->Tint_Intensity * 1000), pShieldType->Tint_VisibleToHouses);
+	}
+}
+
+void TechnoExt::UpdateCachedClick()
+{
+	if (EventClass::OutList.Count >= 128)
+		return;
+
+	if (this->HasCachedClickMission)
+	{
+		// process
+		TargetClass target1 = TargetClass(this->CachedCell);
+		TargetClass target2 = TargetClass(this->CachedTarget);
+		TargetClass target3 = TargetClass(this->OwnerObject());
+		TargetClass target4;
+		target4.m_ID = target3.m_ID;
+		target4.m_RTTI = 0;
+		EventClass::OutList.Add(EventClass(HouseClass::CurrentPlayer->ArrayIndex, target3, this->CachedMission, target2, target1, target4));
+		// clear
+		this->HasCachedClickMission = false;
+		this->CachedMission = Mission::None;
+		this->CachedCell = nullptr;
+		this->CachedTarget = nullptr;
+	}
+	else if (this->HasCachedClickEvent)
+	{
+		// process
+		this->OwnerObject()->ClickedEvent(this->CachedEventType);
+		// clear
+		this->HasCachedClickEvent = false;
+		this->CachedEventType = EventType::LAST_EVENT;
 	}
 }
 
