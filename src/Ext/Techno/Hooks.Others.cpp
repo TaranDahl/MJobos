@@ -112,12 +112,3 @@ DEFINE_HOOK(0x6F9F7B, TechnoClass_Update_EstimateHealth, 0x7)
 }
 
 #pragma endregion
-
-#pragma region Decloak
-
-DEFINE_HOOK(0x6FBC74, TechnoClass_UpdateCloak_LowHealth, 0x6)
-{
-	return RulesExt::Global()->Decloak_OnCloakingWithLowHealth ? 0 : R->Origin() + 0xC;
-}
-
-#pragma endregion

@@ -352,8 +352,6 @@ public:
 		int TintColorBerserk;
 
 
-		Valueable<bool> Decloak_OnCloakingWithLowHealth;
-
 		Valueable<bool> InfantryAutoDeploy;
 
 		Valueable<int> AdjacentWallDamage;
@@ -854,7 +852,6 @@ public:
 			, AttackMove_IgnoreWeaponCheck { false }
 
 
-			, Decloak_OnCloakingWithLowHealth { true }
 			, VHPScan_Enhanced { false }
 
 			, Parasite_GrappleAnim {}
