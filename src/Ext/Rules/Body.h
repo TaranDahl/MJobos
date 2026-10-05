@@ -140,6 +140,7 @@ public:
 
 		Valueable<bool> BuildingProductionQueue;
 
+		Valueable<int> CleanUpAirBarrier;
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -672,6 +673,7 @@ public:
 
 			, BuildingProductionQueue { false }
 
+			, CleanUpAirBarrier { 0 }
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
 			, ForbidParallelAIQueues_Building { false }
