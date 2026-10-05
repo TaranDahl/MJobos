@@ -157,7 +157,7 @@ DEFINE_HOOK(0x709918, TechnoClass_TargetAndEstimateDamage_CheckTarget, 0x6)
 
 DEFINE_HOOK(0x709957, TechnoClass_TargetAndEstimateDamage_SetTarget, 0x6)
 {
-	enum { SkipSetTarget = 0x709966, SkipSetTargetAndEstimateHealth = 0x7099B8 };
+	enum { SkipSetTarget = 0x709966 };
 
 	GET(TechnoClass*, pThis, ESI);
 	GET(AbstractClass*, pTarget, EDI);
