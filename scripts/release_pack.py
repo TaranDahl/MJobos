@@ -4,7 +4,7 @@
 
 发布包结构（对齐 Phobos-v0.5.0.0-Recya1.zip）:
     Phobos.dll / Phobos.pdb      <- Release 构建产物
-    整合包说明/ 目录内容平铺      <- 底部选择栏模板/ + 抛体案例参考.ini + 两个说明 md
+    整合包说明/ 目录内容平铺      <- 抛体案例参考.ini + 两个说明 md
 
 子命令（按发布日顺序）:
     check      查看状态: 版本号、占位小节、upstream 合并行、构建产物、git 状态
