@@ -6,6 +6,7 @@
 #include <New/Type/ShieldTypeClass.h>
 #include <New/Type/AttachEffectTypeClass.h>
 #include <New/Type/Affiliated/TypeConvertGroup.h>
+#include <New/Entity/AttachmentClass.h>
 
 class WarheadTypeExt final : public AbstractTypeExt
 {
@@ -158,6 +159,7 @@ public:
 	ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_AffectTypes;
 	ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
+	std::vector<AttachmentTransformGroup> Attachment_Transform;
 	std::vector<TypeConvertGroup> Convert_Pairs;
 	AEAttachInfoTypeClass AttachEffects;
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
@@ -437,6 +439,7 @@ public:
 		, DetonateOnAllMapObjects_AffectTypes {}
 		, DetonateOnAllMapObjects_IgnoreTypes {}
 
+		, Attachment_Transform {}
 		, Convert_Pairs {}
 		, AttachEffects {}
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
@@ -575,6 +578,7 @@ public:
 		, Ammo { 0 }
 	{ }
 
+	void ApplyAttachmentTransform(HouseClass* pHouse, TechnoClass* pTarget);
 	void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
 	void ApplyLocomotorInfliction(TechnoClass* pTarget);
 	void ApplyLocomotorInflictionReset(TechnoClass* pTarget);

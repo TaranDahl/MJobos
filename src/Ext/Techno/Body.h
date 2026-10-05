@@ -8,6 +8,7 @@
 #include <New/Entity/ShieldClass.h>
 #include <New/Entity/LaserTrailClass.h>
 #include <New/Entity/AttachEffectClass.h>
+#include <New/Entity/AttachmentClass.h>
 
 class AirstrikeClass;
 class BulletClass;
@@ -63,6 +64,13 @@ public:
 
 	AirstrikeClass* AirstrikeTargetingMe;
 
+	AttachmentClass* ParentAttachment;
+	std::vector<std::unique_ptr<AttachmentClass>> ChildAttachments;
+	CellClass* ThisOccupationCell;
+	CellClass* LastOccupationCell;
+	// Ares
+	std::optional<bool> AltOccupation; // if the unit marks cell occupation flags, this is set to whether it uses the "high" occupation members
+
 	bool IsSelected;
 
 	// cache tint values
@@ -115,6 +123,11 @@ public:
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
 		, AirstrikeTargetingMe { nullptr }
+		, ParentAttachment { nullptr }
+		, ChildAttachments {}
+		, ThisOccupationCell { nullptr }
+		, LastOccupationCell { nullptr }
+		, AltOccupation {}
 		, DelayedFireSequencePaused { false }
 		, DelayedFireWeaponIndex { -1 }
 		, DelayedFireTimer {}
@@ -174,6 +187,7 @@ public:
 	void UpdateRearmInTemporal();
 	void InitializeLaserTrails();
 	void InitializeAttachEffects();
+	void InitializeAttachments();
 	void UpdateSelfOwnedAttachEffects();
 	bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> const& attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts, bool requireAnims = false) const;
 	int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr, bool requireAnims = false) const;
@@ -230,8 +244,27 @@ public:
 
 	static CoordStruct GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound);
 
+	static bool AttachTo(TechnoClass* pThis, TechnoClass* pParent);
+	static bool DetachFromParent(TechnoClass* pThis);
+
+	static void DestroyAttachments(TechnoClass* pThis, TechnoClass* pSource);
+	static void HandleDestructionAsChild(TechnoClass* pThis);
+	static void UnlimboAttachments(TechnoClass* pThis);
+	static void LimboAttachments(TechnoClass* pThis);
+	static void TransferAttachments(TechnoClass* pThis, TechnoClass* pThat);
+	static bool ShouldInheritTarget(TechnoClass* pThis);
+	static TechnoClass* GetTrainParent(TechnoClass* pThis);
+	static bool IsAttached(TechnoClass* pThis);
+	static bool HasAttachmentLoco(FootClass* pThis); // FIXME shouldn't be here
+	static bool DoesntOccupyCellAsChild(TechnoClass* pThis);
+	static bool IsChildOf(TechnoClass* pThis, TechnoClass* pParent, bool deep = true);
+	static bool AreRelatives(TechnoClass* pThis, TechnoClass* pThat);
+	static TechnoClass* GetTopLevelParent(TechnoClass* pThis);
+
 	static void ChangeOwnerMissionFix(FootClass* pThis, TechnoTypeClass* pType);
 	static void KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, const std::vector<AnimTypeClass*>& pVanishAnimation, bool isInLimbo = false);
+	static void Kill(TechnoClass* pThis, ObjectClass* pAttacker, HouseClass* pAttackingHouse);
+	static void Kill(TechnoClass* pThis, TechnoClass* pAttacker);
 	static void ObjectKilledBy(TechnoClass* pThis, TechnoClass* pKiller);
 	static void UpdateSharedAmmo(TechnoClass* pThis);
 	static bool HasAdditionalAbility(TechnoClass* pThis, AdditionalAbility ability);

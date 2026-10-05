@@ -46,6 +46,8 @@ public:
 	std::vector<RadSiteClass*> RadSites {};
 	std::vector<RadLevel> RadLevels { };
 	int InfantryCount{ 0 };
+	UnitClass* IncomingUnit { nullptr };
+	UnitClass* IncomingUnitAlt { nullptr };
 
 	CellExt(CellClass* OwnerObject) : AbstractExt(OwnerObject)
 	{ }

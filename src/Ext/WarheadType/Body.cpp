@@ -399,6 +399,9 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->AirstrikeTargets.Read(exINI, pSection, "AirstrikeTargets");
 
+	// AttachmentTransform.Types
+	AttachmentTransformGroup::Parse(this->Attachment_Transform, exINI, pSection, AffectedHouse::All);
+
 	this->AffectsBelowPercent.Read(exINI, pSection, "AffectsBelowPercent");
 	this->AffectsAbovePercent.Read(exINI, pSection, "AffectsAbovePercent");
 	this->AffectsVeterancy.Read(exINI, pSection, "AffectsVeterancy");
@@ -501,6 +504,7 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->Shield_AttachTypes.size() > 0
 		|| this->Shield_RemoveTypes.size() > 0
 		|| this->Shield_RemoveAll
+		|| this->Attachment_Transform.size() > 0
 		|| this->Convert_Pairs.size() > 0
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 		|| this->InflictLocomotor
@@ -691,6 +695,8 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->DetonateOnAllMapObjects_AffectsHouse)
 		.Process(this->DetonateOnAllMapObjects_AffectTypes)
 		.Process(this->DetonateOnAllMapObjects_IgnoreTypes)
+
+		.Process(this->Attachment_Transform)
 
 		.Process(this->Convert_Pairs)
 		.Process(this->AttachEffects)

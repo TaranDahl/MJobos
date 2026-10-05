@@ -28,6 +28,9 @@ void SWTypeExt::FireSuperWeaponExt(SuperClass* pSW, const CellStruct& cell)
 	if (pTypeExt->SW_Next.size() > 0)
 		pTypeExt->ApplySWNext(pSW, cell);
 
+	if (pTypeExt->Attachment_Transform.size() > 0)
+		pTypeExt->ApplyAttachmentTransform(pHouse);
+
 	if (pTypeExt->Convert_Pairs.size() > 0)
 		pTypeExt->ApplyTypeConversion(pSW);
 
@@ -345,6 +348,12 @@ void SWTypeExt::ApplySWNext(SuperClass* pSW, const CellStruct& cell)
 		for (const auto swType : this->SW_Next)
 			LaunchTheSW(swType);
 	}
+}
+
+void SWTypeExt::ApplyAttachmentTransform(HouseClass* pHouse)
+{
+	for (const auto& pAttachment : AttachmentClass::Array)
+		AttachmentTransformGroup::Trasform(pAttachment, this->Attachment_Transform, pHouse);
 }
 
 void SWTypeExt::ApplyTypeConversion(SuperClass* pSW)
