@@ -162,7 +162,6 @@ public:
 	ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_AffectTypes;
 	ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
-	std::vector<AttachmentTransformGroup> Attachment_Transform;
 	std::vector<TypeConvertGroup> Convert_Pairs;
 	AEAttachInfoTypeClass AttachEffects;
 
@@ -477,7 +476,6 @@ public:
 		, DetonateOnAllMapObjects_AffectTypes {}
 		, DetonateOnAllMapObjects_IgnoreTypes {}
 
-		, Attachment_Transform {}
 		, Convert_Pairs {}
 		, AttachEffects {}
 
@@ -646,7 +644,6 @@ public:
 		, Ammo { 0 }
 	{ }
 
-	void ApplyAttachmentTransform(HouseClass* pHouse, TechnoClass* pTarget);
 	void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
 	void ApplyLocomotorInfliction(TechnoClass* pTarget);
 	void ApplyLocomotorInflictionReset(TechnoClass* pTarget);

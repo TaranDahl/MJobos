@@ -34,8 +34,7 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 			{
 				const auto targetDir = pThis->GetTargetDirection(pThis->Target);
 
-				if (pTypeExt->Turret_BodyOrientation && !pThis->Destination && !pThis->Locomotor->Is_Moving()
-					&& (!pExt->ParentAttachment || !TechnoExt::HasAttachmentLoco(pThis)))
+				if (pTypeExt->Turret_BodyOrientation && !pThis->Destination && !pThis->Locomotor->Is_Moving())
 				{
 					const auto curDir = pThis->PrimaryFacing.Current();
 					const auto tgtDir = pTypeExt->GetBodyDesiredDir(curDir, targetDir);

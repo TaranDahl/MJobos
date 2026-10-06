@@ -104,20 +104,12 @@ DEFINE_HOOK(0x6B72FE, SpawnerManagerClass_AI_MissileCheck, 0x9)
 
 	GET(SpawnManagerClass*, pThis, ESI);
 
-	const auto pFoot = abstract_cast<FootClass*, true>(TechnoExt::GetTopLevelParent(pThis->Owner));
+	const auto pLoco = ((FootClass*)pThis->Owner)->Locomotor; // Ares has already handled the building case.
+	const auto pLocoInterface = pLoco.GetInterfacePtr();
 
-	if (!pFoot)
-		return SpawnMissile;
-
-	const auto pLoco = pFoot->Locomotor;
-
-	if (pLoco->Is_Moving_Now())
-		return NoSpawn;
-
-	if (locomotion_cast<JumpjetLocomotionClass*>(pLoco)) // Jumpjet should only check Is_Moving_Now.
-		return SpawnMissile;
-
-	return pLoco->Is_Moving() ? NoSpawn : SpawnMissile;
+	return (pLocoInterface->Is_Moving_Now()
+		|| (!locomotion_cast<JumpjetLocomotionClass*>(pLoco) && pLocoInterface->Is_Moving())) // Jumpjet should only check Is_Moving_Now.
+		? NoSpawn : SpawnMissile;
 }
 
 DEFINE_HOOK_AGAIN(0x6B73A8, SpawnManagerClass_AI_SpawnTimer, 0x5)

@@ -325,8 +325,6 @@ void WarheadTypeExt::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget,
 	if (this->Crit_CurrentChance > 0.0 && (!this->Crit_SuppressWhenIntercepted.Get(RulesExt::Global()->Crit_SuppressWhenIntercepted) || !bulletWasIntercepted))
 		this->ApplyCrit(pHouse, pTarget, pOwner, pBulletExt);
 
-	if (this->Attachment_Transform.size() > 0)
-		this->ApplyAttachmentTransform(pHouse, pTarget);
 
 #ifdef LOCO_TEST_WARHEADS
 	if (this->InflictLocomotor)
@@ -767,16 +765,6 @@ void WarheadTypeExt::InterceptBullets(TechnoClass* pOwner, BulletClass* pInterce
 	}
 }
 
-void WarheadTypeExt::ApplyAttachmentTransform(HouseClass* pHouse, TechnoClass* pTarget)
-{
-	const auto pTargetExt = TechnoExt::Fetch(pTarget);
-
-	if (const auto pAttachment = pTargetExt->ParentAttachment)
-		AttachmentTransformGroup::Trasform(pAttachment, this->Attachment_Transform, pHouse);
-
-	for (const auto& pAttachment : pTargetExt->ChildAttachments)
-		AttachmentTransformGroup::Trasform(pAttachment.get(), this->Attachment_Transform, pHouse);
-}
 
 void WarheadTypeExt::ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget)
 {

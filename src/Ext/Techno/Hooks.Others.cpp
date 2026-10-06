@@ -923,14 +923,6 @@ DEFINE_HOOK(0x6DA4FB, TacticalClass_GetObjectOnCrd_IgnoredByMouse2, 0x6)
 	{
 		if (ShouldIgnoreByMouse(pOccupier))
 			continue;
-
-		// find first non-transparent to mouse techno and return it
-		if (const auto pExt = TechnoExt::TryFetch(abstract_cast<TechnoClass*, true>(pOccupier)))
-		{
-			if (pExt->ParentAttachment && pExt->ParentAttachment->GetType()->TransparentToMouse)
-				continue;
-		}
-
 		pFoundObject = pOccupier;
 		break;
 	}

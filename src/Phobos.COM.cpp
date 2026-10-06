@@ -4,7 +4,6 @@
 
 #include <Locomotion/TestLocomotionClass.h>
 #include <Locomotion/AdvancedDriveLocomotionClass.h>
-#include <Locomotion/AttachmentLocomotionClass.h>
 
 #include <Locomotion/ShiftLocomotionClass.h>
 
@@ -18,7 +17,6 @@ DEFINE_HOOK(0x6BD68D, WinMain_PhobosRegistrations, 0x6)
 	RegisterFactoryForClass<TestLocomotionClass>();
 #endif
 	RegisterFactoryForClass<AdvancedDriveLocomotionClass>();
-	RegisterFactoryForClass<AttachmentLocomotionClass>();
 	RegisterFactoryForClass<ShiftLocomotionClass>();
 
 	Debug::Log("COM registration done!\n");

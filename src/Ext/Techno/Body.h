@@ -9,7 +9,6 @@
 #include <New/Entity/ShieldClass.h>
 #include <New/Entity/LaserTrailClass.h>
 #include <New/Entity/AttachEffectClass.h>
-#include <New/Entity/AttachmentClass.h>
 #include <New/Entity/SquadManagerClass.h>
 #include <New/Entity/ShiftSchedule.h>
 
@@ -72,7 +71,6 @@ public:
 	WeaponTypeClass* LastWeaponType;
 	CoordStruct LastWeaponFLH;
 	std::shared_ptr<PhobosMap<BulletTypeClass*, BulletGroupData>> TrajectoryGroup;
-	int ScatteringStopFrame;
 	int MyTargetingFrame;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
@@ -92,13 +90,6 @@ public:
 	AirstrikeClass* AirstrikeTargetingMe;
 
 	SquadManagerClass* SquadManager;
-
-	AttachmentClass* ParentAttachment;
-	std::vector<std::unique_ptr<AttachmentClass>> ChildAttachments;
-	CellClass* ThisOccupationCell;
-	CellClass* LastOccupationCell;
-	// Ares
-	std::optional<bool> AltOccupation; // if the unit marks cell occupation flags, this is set to whether it uses the "high" occupation members
 
 	bool IsSelected;
 	bool ResetLocomotor;
@@ -182,7 +173,6 @@ public:
 		, LastWeaponType {}
 		, LastWeaponFLH {}
 		, TrajectoryGroup {}
-		, ScatteringStopFrame { 0 }
 		, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
@@ -196,11 +186,6 @@ public:
 		, BuildingOccupying { }
 		, AirstrikeTargetingMe { nullptr }
 		, SquadManager { nullptr }
-		, ParentAttachment { nullptr }
-		, ChildAttachments {}
-		, ThisOccupationCell { nullptr }
-		, LastOccupationCell { nullptr }
-		, AltOccupation {}
 		, DelayedFireSequencePaused { false }
 		, DelayedFireWeaponIndex { -1 }
 		, DelayedFireTimer {}
@@ -269,7 +254,6 @@ public:
 	void UpdateRearmInTemporal();
 	void InitializeLaserTrails();
 	void InitializeAttachEffects();
-	void InitializeAttachments();
 	void UpdateSelfOwnedAttachEffects();
 	bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> const& attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts, bool requireAnims = false) const;
 	int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr, bool requireAnims = false) const;
@@ -350,36 +334,8 @@ public:
 
 	static CoordStruct GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FLHFound);
 
-	template <bool checkParent = false>
-	static void EnhancedScatterContent(CellClass* pCell, TechnoClass* pThis, const CoordStruct& coords, bool alt);
-	static TechnoClass* FindOccupyTechno(CellClass* pCell, TechnoClass* pExclude);
-	static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass* pThis, const CoordStruct& coords, bool alt);
-	static void __fastcall CallEnhancedScatterContent(CellClass* pCell, FootClass* pFoot, bool alt);
-	static void ScatterPathCellContent(FootClass* pThis, CellClass* pCell);
-	static CellStruct GetScatterCell(FootClass* pThis, int face);
-	static int GetTechnoCloseEnoughRange(TechnoClass* pThis);
-
-	static bool AttachTo(TechnoClass* pThis, TechnoClass* pParent);
-	static bool DetachFromParent(TechnoClass* pThis);
-
-	static void DestroyAttachments(TechnoClass* pThis, TechnoClass* pSource);
-	static void HandleDestructionAsChild(TechnoClass* pThis);
-	static void UnlimboAttachments(TechnoClass* pThis);
-	static void LimboAttachments(TechnoClass* pThis);
-	static void TransferAttachments(TechnoClass* pThis, TechnoClass* pThat);
-	static bool ShouldInheritTarget(TechnoClass* pThis);
-	static TechnoClass* GetTrainParent(TechnoClass* pThis);
-	static bool IsAttached(TechnoClass* pThis);
-	static bool HasAttachmentLoco(FootClass* pThis); // FIXME shouldn't be here
-	static bool DoesntOccupyCellAsChild(TechnoClass* pThis);
-	static bool IsChildOf(TechnoClass* pThis, TechnoClass* pParent, bool deep = true);
-	static bool AreRelatives(TechnoClass* pThis, TechnoClass* pThat);
-	static TechnoClass* GetTopLevelParent(TechnoClass* pThis);
-
 	static void ChangeOwnerMissionFix(FootClass* pThis, TechnoTypeClass* pType);
 	static void KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, const std::vector<AnimTypeClass*>& pVanishAnimation, bool isInLimbo = false);
-	static void Kill(TechnoClass* pThis, ObjectClass* pAttacker, HouseClass* pAttackingHouse);
-	static void Kill(TechnoClass* pThis, TechnoClass* pAttacker);
 	static void ObjectKilledBy(TechnoClass* pThis, TechnoClass* pKiller);
 	static void UpdateSharedAmmo(TechnoClass* pThis);
 	static bool HasAdditionalAbility(TechnoClass* pThis, AdditionalAbility ability);

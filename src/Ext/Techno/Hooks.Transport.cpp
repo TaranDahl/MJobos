@@ -262,7 +262,6 @@ static inline bool CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 		return false;
 
 	// Added to fit with techno attachment
-	if (TechnoExt::IsAttached(pPassenger))
 		return false;
 
 	const bool bySize = pTransportTypeExt->Passengers_BySize;
@@ -300,8 +299,6 @@ static inline void DoEnterNow(UnitClass* pTransport, FootClass* pPassenger, Foot
 	if (const auto pTag = pTransport->AttachedTag)
 		pTag->RaiseEvent(TriggerEvent::EnteredBy, pPassenger, CellStruct::Empty);
 
-	if (RulesExt::Global()->ExtendedScatterAction)
-		pPassenger->NavQueue.Clear();
 
 	// Vanilla did not handle SpawnManager and SlaveManager, so I don't care about these here either
 	pPassenger->SetArchiveTarget(nullptr);

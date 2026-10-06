@@ -29,8 +29,7 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 			const auto pExt = TechnoExt::Fetch(pThis);
 			const auto pTypeExt = pExt->TypeExtData;
 
-			if (pTypeExt->Turret_BodyOrientation && !pThis->Destination && !pThis->Locomotor->Is_Moving()
-				&& (!pExt->ParentAttachment || !TechnoExt::HasAttachmentLoco(pThis)))
+			if (pTypeExt->Turret_BodyOrientation && !pThis->Destination && !pThis->Locomotor->Is_Moving())
 			{
 				const auto curDir = pThis->PrimaryFacing.Current();
 				const auto dir = pTypeExt->GetBodyDesiredDir(curDir, tgtDir);
@@ -46,7 +45,7 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 			pThis->SecondaryFacing.SetDesired(tgtDir);
 		}
 	}
-	else if (!TechnoExt::HasAttachmentLoco(pThis) || !TechnoExt::Fetch(pThis)->ParentAttachment) // 0x736FB6
+	else // 0x736FB6
 	{
 		if (const auto jjLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
 		{

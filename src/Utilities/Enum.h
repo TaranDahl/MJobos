@@ -263,12 +263,6 @@ enum class DamageDisplayType
 	Intercept = 2
 };
 
-enum class AttachmentYSortPosition : unsigned char
-{
-	Default = 0,
-	UnderParent = 1,
-	OverParent = 2
-};
 
 enum class StackingMode
 {

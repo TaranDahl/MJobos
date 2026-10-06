@@ -443,9 +443,6 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 				if (pLocoDest != CoordStruct::Empty && pLocoDest != pUnit->Location)
 					continue;
 
-				if (TechnoExt::IsAttached(pUnit))
-					continue;
-
 				const auto height = pUnit->GetHeight();
 
 				if (height < 0 || height > Unsorted::CellHeight)

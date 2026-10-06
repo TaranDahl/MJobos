@@ -9,22 +9,6 @@ DEFINE_HOOK(0x740A93, UnitClass_Mission_Move_DisallowMoving, 0x6)
 
 	GET(UnitClass*, pThis, ESI);
 
-	if (TechnoExt::HasAttachmentLoco(pThis))
-	{
-		auto const pExt = TechnoExt::Fetch(pThis);
-		if (pExt->ParentAttachment)
-		{
-			auto const& pParent = pExt->ParentAttachment->Parent;
-			if (pThis->PlanningToken && pThis->PlanningToken->PlanningNodes.Count
-				&& pParent->PlanningToken && pParent->PlanningToken->PlanningNodes.Count
-				&& pThis->PlanningToken->PlanningNodes[0] == pParent->PlanningToken->PlanningNodes[0])
-			{
-				return ReturnTrue;
-			}
-		}
-		pThis->EnterIdleMode(false, true);
-		return ReturnTrue;
-	}
 
 	// skips this->IsHarvesting = 0, may backfire somewhere - Kerbiter
 	return UnitExt::CannotMove(pThis)
@@ -36,14 +20,14 @@ DEFINE_HOOK(0x741AA7, UnitClass_Assign_Destination_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, EBP);
 
-	return UnitExt::CannotMove(pThis) || TechnoExt::HasAttachmentLoco(pThis) ? 0x743173 : 0;
+	return UnitExt::CannotMove(pThis) ? 0x743173 : 0;
 }
 
 DEFINE_HOOK(0x743B4B, UnitClass_Scatter_DisallowMoving, 0x6)
 {
 	GET(UnitClass*, pThis, EBP);
 
-	return UnitExt::CannotMove(pThis) || TechnoExt::HasAttachmentLoco(pThis) ? 0x74408E : 0;
+	return UnitExt::CannotMove(pThis) ? 0x74408E : 0;
 }
 
 DEFINE_HOOK(0x74038F, UnitClass_What_Action_ObjectClass_DisallowMoving_1, 0x6)

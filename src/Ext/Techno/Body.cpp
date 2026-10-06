@@ -20,46 +20,12 @@ TechnoExt::~TechnoExt()
 	// Besides BuildingClass, calling pThis->WhatAmI() here will only result in AbstractType::None
 	auto const whatAmI = pType->WhatAmI();
 
-	if (whatAmI == AbstractType::UnitType)
-	{
-		auto invalidateCellPointer = [pThis, pType](CellClass* pCell, bool last)
-			{
-				auto const pCellExt = CellExt::Fetch(pCell);
-
-				if (pCellExt->IncomingUnitAlt == pThis)
-				{
-					pCellExt->IncomingUnitAlt = nullptr;
-					pCell->AltOccupationFlags &= ~0x20;
-				}
-
-				if (pCellExt->IncomingUnit == pThis)
-				{
-					pCellExt->IncomingUnit = nullptr;
-					pCell->OccupationFlags &= ~0x20;
-				}
-			};
-
-		if (auto const pCell = this->LastOccupationCell)
-			invalidateCellPointer(pCell, true);
-
-		if (auto const pCell = this->ThisOccupationCell)
-			invalidateCellPointer(pCell, false);
-	}
-
 	if (const auto pSquad = this->SquadManager)
 	{
 		pSquad->RemoveMember(pThis);
 
 		if (pSquad->Members.empty())
 			SquadManagerClass::Remove(pSquad);
-	}
-
-	if (!this->ChildAttachments.empty())
-	{
-		for (auto const& pAttachment : this->ChildAttachments)
-			pAttachment->UnInit();
-
-		this->ChildAttachments.clear();
 	}
 
 	if (pTypeExt->AutoDeath_Behavior.isset())
@@ -725,165 +691,6 @@ int TechnoExt::GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEf
 	return foundCount;
 }
 
-// Attaches this techno in a first available attachment "slot".
-// Returns true if the attachment is successful.
-bool TechnoExt::AttachTo(TechnoClass* pThis, TechnoClass* pParent)
-{
-	auto const pParentExt = TechnoExt::Fetch(pParent);
-
-	for (auto const& pAttachment : pParentExt->ChildAttachments)
-	{
-		if (pAttachment->AttachChild(pThis))
-			return true;
-	}
-
-	return false;
-}
-
-bool TechnoExt::DetachFromParent(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::Fetch(pThis);
-
-	return pExt->ParentAttachment->DetachChild();
-}
-
-void TechnoExt::InitializeAttachments()
-{
-	const auto& types = this->TypeExtData->AttachmentTypes;
-	const auto pThis = this->OwnerObject();
-
-	for (const auto& type : types)
-	{
-		this->ChildAttachments.emplace_back(std::make_unique<AttachmentClass>(type, pThis, nullptr));
-		this->ChildAttachments.back()->Initialize();
-	}
-}
-
-void TechnoExt::DestroyAttachments(TechnoClass* pThis, TechnoClass* pSource)
-{
-	auto const pExt = TechnoExt::TryFetch(pThis);
-
-	if (!pExt)
-		return;
-
-	for (auto const& pAttachment : pExt->ChildAttachments)
-		pAttachment->Destroy(pSource);
-
-	// TODO I am not sure, without clearing the attachments it sometimes crashes under
-	// weird circumstances, like if the techno exists but the parent attachment isn't,
-	// in particular in can enter cell hook, this may be a bandaid fix for something
-	// way worse like improper occupation clearance or whatever - Kerbiter
-	pExt->ChildAttachments.clear();
-}
-
-void TechnoExt::HandleDestructionAsChild(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::Fetch(pThis);
-
-	if (pExt->ParentAttachment)
-		pExt->ParentAttachment->ChildDestroyed();
-}
-
-void TechnoExt::UnlimboAttachments(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::Fetch(pThis);
-
-	for (auto const& pAttachment : pExt->ChildAttachments)
-		pAttachment->Unlimbo();
-}
-
-void TechnoExt::LimboAttachments(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::Fetch(pThis);
-
-	for (auto const& pAttachment : pExt->ChildAttachments)
-		pAttachment->Limbo();
-}
-
-void TechnoExt::TransferAttachments(TechnoClass* pThis, TechnoClass* pThat)
-{
-	auto const pExt = TechnoExt::Fetch(pThis);
-	auto const pThatExt = TechnoExt::Fetch(pThat);
-
-	for (auto& pAttachment : pExt->ChildAttachments)
-	{
-		pAttachment->Parent = pThat;
-		pThatExt->ChildAttachments.push_back(std::move(pAttachment));
-	}
-
-	pExt->ChildAttachments.clear();
-}
-
-bool TechnoExt::ShouldInheritTarget(TechnoClass* pThis)
-{
-	if (auto const pExt = TechnoExt::TryFetch(pThis))
-	{
-		if (auto const pAttachment = pExt->ParentAttachment)
-		{
-			auto const pType = pAttachment->GetType();
-
-			return pType->InheritTarget && pType->InheritTarget_Force;
-		}
-	}
-
-	return false;
-}
-
-TechnoClass* TechnoExt::GetTrainParent(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::TryFetch(pThis);
-
-	return pExt && pExt->ParentAttachment
-		&& pExt->ParentAttachment->GetType()->InheritExperience
-		? TechnoExt::GetTrainParent(pExt->ParentAttachment->Parent)
-		: pThis;
-}
-
-bool TechnoExt::IsAttached(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::TryFetch(pThis);
-
-	return pExt && pExt->ParentAttachment;
-}
-
-bool TechnoExt::HasAttachmentLoco(FootClass* pThis)
-{
-	return locomotion_cast<AttachmentLocomotionClass*>(pThis->Locomotor) != nullptr;
-}
-
-bool TechnoExt::DoesntOccupyCellAsChild(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::TryFetch(pThis);
-
-	return pExt && pExt->ParentAttachment
-		&& !pExt->ParentAttachment->GetType()->OccupiesCell;
-}
-
-bool TechnoExt::IsChildOf(TechnoClass* pThis, TechnoClass* pParent, bool deep)
-{
-	auto const pExt = TechnoExt::TryFetch(pThis);
-
-	return pExt && pParent  // sanity check, sometimes crashes because ext is null - Kerbiter
-		&& pExt->ParentAttachment
-		&& (pExt->ParentAttachment->Parent == pParent
-			|| (deep && TechnoExt::IsChildOf(pExt->ParentAttachment->Parent, pParent)));
-}
-
-bool TechnoExt::AreRelatives(TechnoClass* pThis, TechnoClass* pThat)
-{
-	return TechnoExt::GetTopLevelParent(pThis) == TechnoExt::GetTopLevelParent(pThat);
-}
-
-// Returns this if no parent.
-TechnoClass* TechnoExt::GetTopLevelParent(TechnoClass* pThis)
-{
-	auto const pExt = TechnoExt::TryFetch(pThis);
-
-	return pExt  // sanity check, sometimes crashes because ext is null - Kerbiter
-		&& pExt->ParentAttachment
-		? TechnoExt::GetTopLevelParent(pExt->ParentAttachment->Parent)
-		: pThis;
-}
 
 // Check adjacent cells from the center
 // The current MapClass::Instance.PlacePowerupCrate(...) doesn't like slopes and maybe other cases
@@ -1489,7 +1296,6 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->LastWeaponType)
 		.Process(this->LastWeaponFLH)
 		.Process(this->TrajectoryGroup)
-		.Process(this->ScatteringStopFrame)
 		.Process(this->MyTargetingFrame)
 		.Process(this->FiringObstacleCell)
 		.Process(this->IsDetachingForCloak)
@@ -1502,11 +1308,6 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->JumpjetFromAirport)
 		.Process(this->BuildingOccupying)
 		.Process(this->SquadManager)
-		.Process(this->ParentAttachment)
-		.Process(this->ChildAttachments)
-		.Process(this->ThisOccupationCell)
-		.Process(this->LastOccupationCell)
-		.Process(this->AltOccupation)
 		.Process(this->AirstrikeTargetingMe)
 		.Process(this->DelayedFireSequencePaused)
 		.Process(this->DelayedFireTimer)

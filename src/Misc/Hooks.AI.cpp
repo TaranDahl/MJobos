@@ -1,4 +1,3 @@
-#include <New/Entity/AttachmentClass.h>
 
 #include <Ext/Scenario/Body.h>
 #include <Ext/TerrainType/Body.h>
@@ -39,8 +38,6 @@ static bool __forceinline ShouldRemoveSmudgeCell(const int index, const int time
 
 DEFINE_HOOK(0x55B6B3, LogicClass_AI_After, 0x5)
 {
-	for (auto const& attachment : AttachmentClass::Array)
-		attachment->AI();
 
 	const int time = RulesExt::Global()->SmudgeUpdateTime;
 

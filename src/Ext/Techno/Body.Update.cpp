@@ -635,9 +635,8 @@ void TechnoExt::ApplyIdleAction()
 void TechnoExt::ManualIdleAction()
 {
 	const auto pThis = this->OwnerObject();
-	const auto pParent = this->ParentAttachment;
 
-	if (pThis->IsSelected || pParent && pParent->GetType()->InheritTarget && pParent->Parent && pParent->Parent->IsSelected)
+	if (pThis->IsSelected)
 	{
 		this->CheckIdleAction();
 		this->UnitIdleIsSelected = true;
@@ -946,30 +945,21 @@ void TechnoExt::KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, cons
 	}
 
 	default: //must be AutoDeathBehavior::Kill
-		TechnoExt::Kill(pThis, nullptr, nullptr);
-	}
-}
-
-void TechnoExt::Kill(TechnoClass* pThis, ObjectClass* pAttacker, HouseClass* pAttackingHouse)
-{
-	if (AresFunctions::SpawnSurvivors)
-	{
-		switch (pThis->WhatAmI())
+		if (AresFunctions::SpawnSurvivors)
 		{
-		case AbstractType::Unit:
-		case AbstractType::Aircraft:
-			AresFunctions::SpawnSurvivors(abstract_cast<FootClass*>(pThis), abstract_cast<TechnoClass*>(pAttacker), false, false);
-		default: break;
+			switch (pThis->WhatAmI())
+			{
+			case AbstractType::Unit:
+			case AbstractType::Aircraft:
+				AresFunctions::SpawnSurvivors(static_cast<FootClass*>(pThis), nullptr, false, false);
+			default:;
+			}
 		}
+		pThis->ReceiveDamage(&pThis->Health, 0, RulesClass::Instance->C4Warhead, nullptr, true, false, nullptr);
+		return;
 	}
-
-	pThis->ReceiveDamage(&pThis->Health, 0, RulesClass::Instance->C4Warhead, pAttacker, true, false, pAttackingHouse);
 }
 
-void TechnoExt::Kill(TechnoClass* pThis, TechnoClass* pAttacker)
-{
-	TechnoExt::Kill(pThis, pAttacker, pAttacker ? pAttacker->Owner : nullptr);
-}
 
 void TechnoExt::UpdateSharedAmmo(TechnoClass* pThis)
 {

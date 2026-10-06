@@ -777,8 +777,7 @@ void TechnoTypeExt::SetTurretLimitedDir(FootClass* pThis, DirStruct desiredDir)
 	auto desiredDifference = static_cast<short>(desiredRaw - bodyRaw);
 	// Beyond the rotation range of the turret, the body rotates first
 	if ((desiredDifference < -restrictRaw || desiredDifference > restrictRaw)
-		&& !pThis->Destination && !pThis->Locomotor->Is_Moving()
-		&& (!TechnoExt::Fetch(pThis)->ParentAttachment || !TechnoExt::HasAttachmentLoco(pThis)))
+		&& !pThis->Destination && !pThis->Locomotor->Is_Moving())
 	{
 		pBody->SetDesired(this->Turret_BodyOrientation ? this->GetBodyDesiredDir(currentDir, desiredDir) : desiredDir);
 		// Once rotation begins, data needs to be updated to avoid delays
@@ -1131,9 +1130,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->AutoTargetOwnPosition_Self.Read(exINI, pSection, "AutoFire.TargetSelf"); // Temporary solution for the INI tags renaming issue, see #2093
 	this->AutoTargetOwnPosition_Self.Read(exINI, pSection, "AutoTargetOwnPosition.Self");
 
-	this->AttachmentTypes.Read(exINI, pSection, "AttachmentTypes");
-	this->AttachmentTopLayerMinHeight.Read(exINI, pSection, "AttachmentTopLayerMinHeight");
-	this->AttachmentUndergroundLayerMaxHeight.Read(exINI, pSection, "AttachmentUndergroundLayerMaxHeight");
 
 	this->NoSecondaryWeaponFallback.Read(exINI, pSection, "NoSecondaryWeaponFallback");
 	this->NoSecondaryWeaponFallback_AllowAA.Read(exINI, pSection, "NoSecondaryWeaponFallback.AllowAA");
@@ -2244,9 +2240,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->Overload_ParticleSys)
 		.Process(this->Overload_ParticleSysCount)
 
-		.Process(this->AttachmentTypes)
-		.Process(this->AttachmentTopLayerMinHeight)
-		.Process(this->AttachmentUndergroundLayerMaxHeight)
 
 		.Process(this->Squad_Members)
 		.Process(this->Squad_IsInitAsTeam)

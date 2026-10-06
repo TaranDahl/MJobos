@@ -183,7 +183,6 @@ public:
 		PhobosPCXFile SelectedAircraftMissingPCX;
 		PhobosPCXFile SelectedBuildingMissingPCX;
 		Valueable<bool> SelectedIngameTimer;
-		Valueable<bool> ExtendedScatterAction;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -416,8 +415,6 @@ public:
 		Valueable<bool> EnableWreckageSpawn;
 		Valueable<double> WreckageInitialHealthPercent;
 
-		Valueable<int> AttachmentTopLayerMinHeight;
-		Valueable<int> AttachmentUndergroundLayerMaxHeight;
 
 		Valueable<bool> HarvesterScanAfterUnload;
 
@@ -821,7 +818,6 @@ public:
 			, SelectedAircraftMissingPCX {}
 			, SelectedBuildingMissingPCX {}
 			, SelectedIngameTimer { false }
-			, ExtendedScatterAction { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
@@ -1021,8 +1017,6 @@ public:
 			, EnableWreckageSpawn { false }
 			, WreckageInitialHealthPercent { 0.1 }
 
-			, AttachmentTopLayerMinHeight { 500 }
-			, AttachmentUndergroundLayerMaxHeight { -256 }
 
 			, HarvesterScanAfterUnload { false }
 

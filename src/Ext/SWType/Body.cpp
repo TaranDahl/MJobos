@@ -76,7 +76,6 @@ void SWTypeExt::Serialize(T& Stm)
 		.Process(this->SW_Next_RollChances)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->ShowTimer_Percentage)
-		.Process(this->Attachment_Transform)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
 		.Process(this->TabIndex)
@@ -280,8 +279,6 @@ void SWTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Detonate_Warhead_Full.Read(exINI, pSection, "Detonate.Warhead.Full");
 	this->Detonate_AtFirer.Read(exINI, pSection, "Detonate.AtFirer");
 
-	// AttachmentTransform.Types
-	AttachmentTransformGroup::Parse(this->Attachment_Transform, exINI, pSection, AffectedHouse::Owner);
 
 	// Convert.From & Convert.To
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::Owner);
