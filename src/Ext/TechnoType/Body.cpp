@@ -791,6 +791,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Spawner_ExtraLimitRange.Read(exINI, pSection, "Spawner.ExtraLimitRange");
 	this->Spawner_DelayFrames.Read(exINI, pSection, "Spawner.DelayFrames");
 	this->Spawner_AttackImmediately.Read(exINI, pSection, "Spawner.AttackImmediately");
+	this->Spawner_ReturnOnRepairDone.Read(exINI, pSection, "Spawner.ReturnOnRepairDone");
 	this->Spawner_UseTurretFacing.Read(exINI, pSection, "Spawner.UseTurretFacing");
 
 	this->Harvester_Counted.Read(exINI, pSection, "Harvester.Counted");
@@ -1055,6 +1056,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
 	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
 	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
+
+	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
 
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
@@ -1477,6 +1480,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->EliteSpawnerRange)
 		.Process(this->Spawner_DelayFrames)
 		.Process(this->Spawner_AttackImmediately)
+		.Process(this->Spawner_ReturnOnRepairDone)
 		.Process(this->Spawner_UseTurretFacing)
 		.Process(this->Harvester_Counted)
 		.Process(this->Promote_IncludeSpawns)
@@ -1703,6 +1707,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->VeteranEmptyReload)
 		.Process(this->VeteranRange)
 		.Process(this->VeteranCritChance)
+
+		.Process(this->MissileSpawnUseOtherFLHs)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

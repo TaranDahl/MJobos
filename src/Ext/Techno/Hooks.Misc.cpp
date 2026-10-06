@@ -343,6 +343,53 @@ DEFINE_HOOK(0x418CF3, AircraftClass_Mission_Attack_ReturnToSpawnOwner, 0x5)
 
 #pragma endregion
 
+#pragma region CheckRepairDone
+
+static inline bool ShouldResetSpawnManagerTarget(SpawnManagerClass* pThis)
+{
+	if (!pThis->Target)
+		return true;
+
+	if (TechnoTypeExt::Fetch(pThis->Owner->GetTechnoType())->Spawner_ReturnOnRepairDone)
+	{
+		auto pTarget = abstract_cast<TechnoClass*>(pThis->Target);
+
+		if (pTarget && pTarget->GetHealthPercentage() >= RulesClass::Instance->ConditionGreen)
+			return true;
+	}
+
+	return false;
+}
+
+DEFINE_HOOK(0x6B7702, SpawnManagerClass_AI_CheckRepairDone1, 0x5)
+{
+	enum { KeepTarget = 0x6B770D, ResetTarget = 0x6B7663 };
+
+	GET(SpawnManagerClass*, pThis, ESI);
+
+	R->EAX(pThis->Target);
+	return ShouldResetSpawnManagerTarget(pThis) ? ResetTarget : KeepTarget;
+}
+
+DEFINE_HOOK(0x6B7752, SpawnManagerClass_AI_CheckRepairDone2, 0x5)
+{
+	enum { KeepTarget = 0x6B7759, ResetTarget = 0x6B7793 };
+
+	GET(SpawnManagerClass*, pThis, ESI);
+
+	R->EAX(pThis->Target);
+	return ShouldResetSpawnManagerTarget(pThis) ? ResetTarget : KeepTarget;
+}
+
+DEFINE_HOOK(0x6B79BF, SpawnManagerClass_AI_CheckRepairDone3, 0x5)
+{
+	enum { ResetTarget = 0x6B79C4, KeepTarget = 0x6B79D3 };
+	GET(SpawnManagerClass*, pThis, ESI);
+	return ShouldResetSpawnManagerTarget(pThis) ? ResetTarget : KeepTarget;
+}
+
+#pragma endregion
+
 #pragma region WakeAnims
 
 DEFINE_HOOK_AGAIN(0x69FEDC, Locomotion_Process_Wake, 0x6)  // Ship
