@@ -1617,9 +1617,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->ZShapePointMove_OnBuildup.Read(exArtINI, pArtSection, "ZShapePointMove.OnBuildup");
 	this->Refinery_UseNormalActiveAnim.Read(exArtINI, pArtSection, "Refinery.UseNormalActiveAnim");
 
-	// Ares 0.7
-	this->IsPassable.Read(exINI, pSection, "IsPassable");
-
 	// Ares 0.2
 	this->CloningFacility.Read(exINI, pSection, "CloningFacility");
 
@@ -1772,9 +1769,6 @@ void BuildingTypeExt::Serialize(T& Stm)
 
 		// Ares 0.2
 		.Process(this->CloningFacility)
-
-		// Ares 0.7
-		.Process(this->IsPassable)
 
 		// Ares 0.A
 		.Process(this->RubbleIntact)

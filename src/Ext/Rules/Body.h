@@ -183,7 +183,6 @@ public:
 		PhobosPCXFile SelectedAircraftMissingPCX;
 		PhobosPCXFile SelectedBuildingMissingPCX;
 		Valueable<bool> SelectedIngameTimer;
-		Valueable<int> CleanUpAirBarrier;
 		Valueable<bool> ExtendedScatterAction;
 
 		Valueable<bool> AllowParallelAIQueues;
@@ -458,8 +457,6 @@ public:
 		Valueable<bool> IgnoreCenterMinorRadarEvent;
 
 		Valueable<bool> KeepAnimOnLimbo;
-
-		Valueable<bool> ExtendedStray;
 
 		Valueable<int> WarheadAnimZAdjust;
 
@@ -824,7 +821,6 @@ public:
 			, SelectedAircraftMissingPCX {}
 			, SelectedBuildingMissingPCX {}
 			, SelectedIngameTimer { false }
-			, CleanUpAirBarrier { 0 }
 			, ExtendedScatterAction { false }
 
 			, AllowParallelAIQueues { true }
@@ -1063,8 +1059,6 @@ public:
 			, IgnoreCenterMinorRadarEvent { false }
 
 			, KeepAnimOnLimbo { false }
-
-			, ExtendedStray { false }
 
 			, WarheadAnimZAdjust { -15 }
 

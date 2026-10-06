@@ -75,7 +75,6 @@ public:
 
 	// virtual void LoadFromINIFile(CCINIClass* pINI) override;
 
-	virtual void OnDetach(AbstractClass* pTarget, bool removed) override;
 	virtual void OnDetach(BuildingClass* pTarget, bool removed) override;
 
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;

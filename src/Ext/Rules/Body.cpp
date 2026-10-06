@@ -257,7 +257,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->SelectedBuildingMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedBuildingMissingPCX");
 	this->SelectedIngameTimer.Read(exINI, GameStrings::AudioVisual, "SelectedIngameTimer");
 
-	this->CleanUpAirBarrier.Read(exINI, GameStrings::General, "CleanUpAirBarrier");
 	this->ExtendedScatterAction.Read(exINI, GameStrings::General, "ExtendedScatterAction");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
@@ -530,8 +529,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->IgnoreCenterMinorRadarEvent.Read(exINI, GameStrings::General, "IgnoreCenterMinorRadarEvent");
 
 	this->KeepAnimOnLimbo.Read(exINI, GameStrings::General, "KeepAnimOnLimbo");
-
-	this->ExtendedStray.Read(exINI, GameStrings::General, "ExtendedStray");
 
 	this->WarheadAnimZAdjust.Read(exINI, GameStrings::AudioVisual, "WarheadAnimZAdjust");
 
@@ -979,7 +976,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->SelectedAircraftMissingPCX)
 		.Process(this->SelectedBuildingMissingPCX)
 		.Process(this->SelectedIngameTimer)
-		.Process(this->CleanUpAirBarrier)
 		.Process(this->ExtendedScatterAction)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
@@ -1192,7 +1188,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AISellCapturedBuilding)
 		.Process(this->IgnoreCenterMinorRadarEvent)
 		.Process(this->KeepAnimOnLimbo)
-		.Process(this->ExtendedStray)
 		.Process(this->WarheadAnimZAdjust)
 		.Process(this->IvanBombAttachToCenter)
 		.Process(this->IvanBomb_Visibility)

@@ -676,12 +676,6 @@ void BuildingExt::Serialize(T& Stm)
 		;
 }
 
-void BuildingExt::OnDetach(AbstractClass* pTarget, bool removed)
-{
-	AnnounceInvalidPointer(this->SecondaryArchiveTarget, pTarget);
-	TechnoExt::OnDetach(pTarget, removed);
-}
-
 void BuildingExt::OnDetach(BuildingClass* pTarget, bool removed)
 {
 	if (removed)

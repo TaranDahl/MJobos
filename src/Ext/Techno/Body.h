@@ -16,7 +16,7 @@
 class AirstrikeClass;
 struct ShiftSchedule;
 
-class TechnoExt : public RadioExt, public Detach::Listener<AirstrikeClass>, public Detach::Listener<AbstractClass>, public Detach::Listener<TechnoClass>, public Detach::Listener<HouseClass>
+class TechnoExt : public RadioExt, public Detach::Listener<AirstrikeClass>, public Detach::Listener<TechnoClass>, public Detach::Listener<HouseClass>
 {
 public:
 	using base_type = TechnoClass;
@@ -74,12 +74,6 @@ public:
 	std::shared_ptr<PhobosMap<BulletTypeClass*, BulletGroupData>> TrajectoryGroup;
 	int ScatteringStopFrame;
 	int MyTargetingFrame;
-	bool HasCachedClickMission;
-	Mission CachedMission;
-	AbstractClass* CachedCell;
-	AbstractClass* CachedTarget;
-	bool HasCachedClickEvent;
-	EventType CachedEventType;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 	int BeControlledThreatFrame;
@@ -190,12 +184,6 @@ public:
 		, TrajectoryGroup {}
 		, ScatteringStopFrame { 0 }
 		, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
-		, HasCachedClickMission { false }
-		, CachedMission { Mission::None }
-		, CachedCell { nullptr }
-		, CachedTarget { nullptr }
-		, HasCachedClickEvent { false }
-		, CachedEventType { EventType::LAST_EVENT }
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
 		, BeControlledThreatFrame { 0 }
@@ -293,7 +281,6 @@ public:
 	void UpdateIdleDir();
 	void SetTurretDir(DirStruct desiredDir, bool limited = false);
 	void StopRotateWithNewROT(int ROT = -1);
-	void UpdateCachedClick();
 	void ApplyMindControlRangeLimit();
 	int ApplyForceWeaponInRange(AbstractClass* pTarget);
 	void ResetDelayedFireTimer();
@@ -306,7 +293,6 @@ public:
 
 	virtual ~TechnoExt() override;
 	virtual void OnDetach(AirstrikeClass* pTarget, bool removed) override;
-	virtual void OnDetach(AbstractClass* pTarget, bool removed) override;
 	virtual void OnDetach(TechnoClass* pTarget, bool removed) override;
 	virtual void OnDetach(HouseClass* pTarget, bool removed) override;
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
