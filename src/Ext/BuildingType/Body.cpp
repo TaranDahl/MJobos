@@ -221,6 +221,11 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->IsDestroyableObstacle.Read(exINI, pSection, "IsDestroyableObstacle");
 	this->Explodes_DuringBuildup.Read(exINI, pSection, "Explodes.DuringBuildup");
 
+	this->JustHasRallyPoint.Read(exINI, pSection, "JustHasRallyPoint");
+	this->JumpjetExitCoord.Read(exINI, pSection, "JumpjetExitCoord");
+	this->RallySpeedType.Read(exINI, pSection, "RallySpeedType");
+	this->RallyMovementZone.Read(exINI,pSection,"RallyMovementZone");
+
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
 	this->FactoryPlant_MaxCount.Read(exINI, pSection, "FactoryPlant.MaxCount");
@@ -238,6 +243,8 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Adjacent_Disallowed_ProhibitDistance.Read(exINI, pSection, "Adjacent.Disallowed.ProhibitDistance");
 
 	this->BarracksExitCell.Read(exINI, pSection, "BarracksExitCell");
+
+	this->HasSecondaryRallyPoint.Read(exINI, pSection, "HasSecondaryRallyPoint");
 
 	this->Overpower_KeepOnline.Read(exINI, pSection, "Overpower.KeepOnline");
 	this->Overpower_ChargeWeapon.Read(exINI, pSection, "Overpower.ChargeWeapon");
@@ -439,6 +446,10 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
+		.Process(this->JustHasRallyPoint)
+		.Process(this->JumpjetExitCoord)
+		.Process(this->RallySpeedType)
+		.Process(this->RallyMovementZone)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->AircraftDockingDir_DefaultToPoseDir)
 		.Process(this->FactoryPlant_AllowTypes)
@@ -458,6 +469,7 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->Adjacent_Disallowed_Prohibit)
 		.Process(this->Adjacent_Disallowed_ProhibitDistance)
 		.Process(this->BarracksExitCell)
+		.Process(this->HasSecondaryRallyPoint)
 		.Process(this->Overpower_KeepOnline)
 		.Process(this->Overpower_ChargeWeapon)
 		.Process(this->DisableDamageSound)

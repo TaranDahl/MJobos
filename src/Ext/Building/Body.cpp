@@ -599,6 +599,7 @@ void BuildingExt::Serialize(T& Stm)
 		.Process(this->CurrentLaserWeaponIndex)
 		.Process(this->PoweredUpToLevel)
 		.Process(this->CurrentEMPulseSW)
+		.Process(this->SecondaryArchiveTarget)
 		//.Process(this->IsFiringNow) It is set and reset within a same function.
 		.Process(this->TurretAnimIdleFrame)
 		.Process(this->TurretAnimFiringFrame)

@@ -66,6 +66,11 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
+	Valueable<bool> JustHasRallyPoint;
+	Nullable<CoordStruct> JumpjetExitCoord;
+	Nullable<int> RallySpeedType;
+	Nullable<int> RallyMovementZone;
+
 	Valueable<bool> IsAnimDelayedBurst;
 
 	std::vector<std::optional<DirType>> AircraftDockingDirs;
@@ -88,6 +93,8 @@ public:
 	Valueable<int> Adjacent_Disallowed_ProhibitDistance;
 
 	Nullable<Point2D> BarracksExitCell;
+
+	Valueable<bool> HasSecondaryRallyPoint;
 
 	Valueable<int> Overpower_KeepOnline;
 	Valueable<int> Overpower_ChargeWeapon;
@@ -195,6 +202,10 @@ public:
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
+		, JustHasRallyPoint { false }
+		, JumpjetExitCoord { }
+		, RallySpeedType { }
+		, RallyMovementZone { }
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
 		, FactoryPlant_DisallowTypes {}
@@ -213,6 +224,7 @@ public:
 		, Adjacent_Disallowed_Prohibit { false }
 		, Adjacent_Disallowed_ProhibitDistance { 0 }
 		, BarracksExitCell {}
+		, HasSecondaryRallyPoint { false }
 		, Overpower_KeepOnline { 2 }
 		, Overpower_ChargeWeapon { 1 }
 		, DisableDamageSound { false }
