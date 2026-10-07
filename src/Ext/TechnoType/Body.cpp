@@ -872,6 +872,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->WarpOutWeapon.Read<true>(exINI, pSection, "WarpOutWeapon");
 	this->WarpInWeapon_UseDistanceAsDamage.Read(exINI, pSection, "WarpInWeapon.UseDistanceAsDamage");
 
+	this->DefaultDisguise.Read(exINI, pSection, "DefaultDisguise");
+
 	this->DestroyAnim_Random.Read(exINI, pSection, "DestroyAnim.Random");
 
 	this->UseDisguiseMovementSpeed.Read(exINI, pSection, "UseDisguiseMovementSpeed");
@@ -1544,6 +1546,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->WarpInMinRangeWeapon)
 		.Process(this->WarpOutWeapon)
 		.Process(this->WarpInWeapon_UseDistanceAsDamage)
+
+		.Process(this->DefaultDisguise)
 
 		.Process(this->LaserTrailData)
 		.Process(this->DestroyAnim_Random)
