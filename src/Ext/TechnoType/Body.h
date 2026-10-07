@@ -288,6 +288,11 @@ public:
 	Nullable<bool> NoReload_UnderEMP;
 	Nullable<bool> NoReload_Temporal;
 
+	Valueable<int> DigStartROT;
+	Valueable<int> DigInSpeed;
+	Valueable<int> DigOutSpeed;
+	Valueable<int> DigEndROT;
+
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -712,6 +717,11 @@ public:
 		, NoRearm_Temporal {}
 		, NoReload_UnderEMP {}
 		, NoReload_Temporal {}
+
+		, DigStartROT { -1 }
+		, DigInSpeed { -1 }
+		, DigOutSpeed { -1 }
+		, DigEndROT { -1 }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}

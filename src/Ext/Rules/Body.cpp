@@ -393,6 +393,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->HarvesterScanAfterUnload.Read(exINI, GameStrings::General, "HarvesterScanAfterUnload");
 
+	this->TunnelSimpleDistTooFar.Read(exINI, GameStrings::General, "TunnelSimpleDistTooFar");
+	this->TunnelPathingDistTooFar.Read(exINI, GameStrings::General, "TunnelPathingDistTooFar");
+
 	this->AnimCraterDestroyTiberium.Read(exINI, GameStrings::General, "AnimCraterDestroyTiberium");
 
 	this->BerzerkTargeting.Read(exINI, GameStrings::CombatDamage, "BerzerkTargeting");
@@ -978,6 +981,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)
 		.Process(this->HarvesterScanAfterUnload)
+		.Process(this->TunnelSimpleDistTooFar)
+		.Process(this->TunnelPathingDistTooFar)
 		.Process(this->AnimCraterDestroyTiberium)
 		.Process(this->BerzerkTargeting)
 		.Process(this->AllowBerzerkOnAllies)
