@@ -288,6 +288,13 @@ public:
 	Nullable<bool> NoReload_UnderEMP;
 	Nullable<bool> NoReload_Temporal;
 
+	Valueable<int> FlightClimb;
+	Valueable<int> FlightCrash;
+
+	Valueable<UnitTypeClass*> ThisIsAJumpjet;
+
+	Valueable<int> JumpjetSpeedType;
+
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -712,6 +719,13 @@ public:
 		, NoRearm_Temporal {}
 		, NoReload_UnderEMP {}
 		, NoReload_Temporal {}
+
+		, FlightClimb { -1 }
+		, FlightCrash { -1 }
+
+		, ThisIsAJumpjet { nullptr }
+
+		, JumpjetSpeedType { 3 }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}

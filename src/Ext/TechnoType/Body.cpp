@@ -1056,6 +1056,16 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
 	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
 
+	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
+	this->FlightCrash.Read(exINI, pSection, "FlightCrash");
+
+	if (pThis->WhatAmI() == AbstractType::AircraftType)
+		this->ThisIsAJumpjet.Read(exINI, pSection, "ThisIsAJumpjet");
+	else
+		this->ThisIsAJumpjet = nullptr;
+
+	this->JumpjetSpeedType.Read(exINI, pSection, "JumpjetSpeedType");
+
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
 
@@ -1697,6 +1707,14 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->NoRearm_Temporal)
 		.Process(this->NoReload_UnderEMP)
 		.Process(this->NoReload_Temporal)
+
+		.Process(this->FlightClimb)
+		.Process(this->FlightCrash)
+
+		.Process(this->ThisIsAJumpjet)
+
+		.Process(this->JumpjetSpeedType)
+
 		.Process(this->AdditionalVeteranAbilities)
 		.Process(this->AdditionalEliteAbilities)
 		.Process(this->VeteranReload)

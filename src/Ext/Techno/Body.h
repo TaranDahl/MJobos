@@ -61,6 +61,8 @@ public:
 	CDTimerClass DelayedFireTimer;
 	AnimClass* CurrentDelayedFireAnim;
 
+	bool JumpjetFromAirport;
+
 	AirstrikeClass* AirstrikeTargetingMe;
 
 	bool IsSelected;
@@ -114,6 +116,7 @@ public:
 		, LastTargetID { 0xFFFFFFFF }
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
+		, JumpjetFromAirport { false }
 		, AirstrikeTargetingMe { nullptr }
 		, DelayedFireSequencePaused { false }
 		, DelayedFireWeaponIndex { -1 }
