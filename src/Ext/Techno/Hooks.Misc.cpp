@@ -525,20 +525,15 @@ DEFINE_HOOK(0x728FF2, TunnelLocomotionClass_Process_SubterraneanHeight3, 0x6)
 	enum { SkipGameCode = 0x72900C };
 
 	GET(TechnoClass*, pLinkedTo, ECX);
-	GET(int, heightOffset, EAX);
+	GET(const int, heightOffset, EAX);
 	REF_STACK(int, height, 0x14);
 
 	auto const pTypeExt = static_cast<UnitExt*>(TechnoExt::Fetch(pLinkedTo))->GetTypeExtData();
-	const int digInSpeed = pTypeExt->DigInSpeed;
-
-	if (digInSpeed > 0)
-		heightOffset = (int)(digInSpeed * TechnoExt::GetCurrentSpeedMultiplier((FootClass*)pLinkedTo));
-
+	const int subtHeight = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
 	height -= heightOffset;
-	const int subHeight = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
 
-	if (height < subHeight)
-		height = subHeight;
+	if (height < subtHeight)
+		height = subtHeight;
 
 	return SkipGameCode;
 }
@@ -554,52 +549,6 @@ DEFINE_HOOK(0x7295E2, TunnelLocomotionClass_ProcessStateDigging_SubterraneanHeig
 	height = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
 
 	return SkipGameCode;
-}
-
-DEFINE_HOOK(0x7292BF, TunnelLocomotionClass_ProcessPreDigIn_DigStartROT, 0x6)
-{
-	GET(TunnelLocomotionClass* const, pThis, ESI);
-	GET(int, time, EAX);
-
-	auto const pTypeExt = TechnoExt::Fetch(pThis->LinkedTo)->TypeExtData;
-	const int rot = pTypeExt->DigStartROT;
-
-	if (rot > 0)
-		time = (int)(64 / (double)rot);
-
-	R->EAX(time);
-	return 0;
-}
-
-DEFINE_HOOK(0x729A65, TunnelLocomotionClass_ProcessPreDigOut_DigEndROT, 0x6)
-{
-	GET(TunnelLocomotionClass* const, pThis, ESI);
-	GET(int, time, EAX);
-
-	auto const pTypeExt = TechnoExt::Fetch(pThis->LinkedTo)->TypeExtData;
-	const int rot = pTypeExt->DigEndROT;
-
-	if (rot > 0)
-		time = (int)(64 / (double)rot);
-
-	R->EAX(time);
-	return 0;
-}
-
-DEFINE_HOOK(0x729969, TunnelLocomotionClass_ProcessPreDigOut_DigOutSpeed, 0x6)
-{
-	GET(TunnelLocomotionClass* const, pThis, ESI);
-	GET(int, speed, EAX);
-
-	auto const pTechno = pThis->LinkedTo;
-	auto const pTypeExt = TechnoExt::Fetch(pTechno)->TypeExtData;
-	const int digOutSpeed = pTypeExt->DigOutSpeed;
-
-	if (digOutSpeed > 0)
-		speed = (int)(digOutSpeed * TechnoExt::GetCurrentSpeedMultiplier(pTechno));
-
-	R->EAX(speed);
-	return 0;
 }
 
 #pragma endregion

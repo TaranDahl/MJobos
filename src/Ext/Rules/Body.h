@@ -416,8 +416,6 @@ public:
 
 		Valueable<bool> HarvesterScanAfterUnload;
 
-		Valueable<int> TunnelSimpleDistTooFar;
-		Valueable<int> TunnelPathingDistTooFar;
 
 		Valueable<AffectedHouse> ReorganizeToWhenDefeated;
 
@@ -1016,8 +1014,6 @@ public:
 
 			, HarvesterScanAfterUnload { false }
 
-			, TunnelSimpleDistTooFar { 12 }
-			, TunnelPathingDistTooFar { 15 }
 
 			, ReorganizeToWhenDefeated { AffectedHouse::None }
 

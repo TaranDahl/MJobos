@@ -87,30 +87,6 @@ static CanBuildResult CheckBuildLimit(HouseClass const* const pHouse, BuildingTy
 	return Remaining > 0 ? CanBuildResult::Buildable : CanBuildResult::TemporarilyUnbuildable;
 }
 */
-CanBuildResult CheckExBuildLimit(HouseClass* pHouse, TechnoTypeClass* pItem, bool includeInProduction, CanBuildResult defaultResult)
-{
-	if (!pItem || pItem->BuildLimit < 0 || !TechnoTypeExt::Fetch(pItem)->ThisIsAJumpjet)
-		return defaultResult;
-
-	if (pItem->WhatAmI() == AbstractType::UnitType)
-		return CanBuildResult::Unbuildable;
-
-	const auto pJumpjetType = TechnoTypeExt::Fetch(pItem)->ThisIsAJumpjet;
-
-	if (!pJumpjetType)
-		return defaultResult;
-
-	int count = pHouse->CountOwnedNow(pJumpjetType);
-
-	if (includeInProduction)
-	{
-		if (const auto pFactory = pHouse->Primary_ForAircraft)
-			count += pFactory->CountTotal(pItem);
-	}
-
-	return pItem->BuildLimit <= count ? CanBuildResult::TemporarilyUnbuildable : defaultResult;
-}
-
 DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x3)
 {
 	GET(HouseClass* const, pThis, ECX);
@@ -129,7 +105,6 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x3)
 	}
 
 	if (canBuild == CanBuildResult::Buildable)
-		canBuild = CheckExBuildLimit(pThis, pItem, includeInProduction, canBuild);
 
 	if (!buildLimitOnly && includeInProduction && pThis == HouseClass::CurrentPlayer) // Eliminate any non-producible calls
 		canBuild = TechnoTypeExt::CheckAlwaysExistCameo(pItem, canBuild);

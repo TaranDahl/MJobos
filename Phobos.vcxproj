@@ -214,7 +214,6 @@
     <ClCompile Include="src\Ext\TechnoType\Hooks.cpp" />
     <ClCompile Include="src\Ext\TechnoType\Hooks.MatrixOp.cpp" />
     <ClCompile Include="src\Ext\TechnoType\Hooks.MultiWeapon.cpp" />
-    <ClCompile Include="src\Ext\TechnoType\Hooks.Production.cpp" />
     <ClCompile Include="src\Ext\TechnoType\Hooks.Teleport.cpp" />
     <!-- src\Ext\TerrainType -->
     <ClCompile Include="src\Ext\TerrainType\Body.cpp" />

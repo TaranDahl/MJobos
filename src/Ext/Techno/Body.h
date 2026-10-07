@@ -83,7 +83,6 @@ public:
 
 	bool IsWreckage;
 
-	bool JumpjetFromAirport;
 
 	BuildingClass* BuildingOccupying;
 
@@ -182,7 +181,6 @@ public:
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
 		, IsWreckage { false }
-		, JumpjetFromAirport { false }
 		, BuildingOccupying { }
 		, AirstrikeTargetingMe { nullptr }
 		, SquadManager { nullptr }

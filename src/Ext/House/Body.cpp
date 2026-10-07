@@ -390,8 +390,6 @@ int HouseExt::CountOwnedPresentWithJumpjet(HouseClass* pHouse, AircraftTypeClass
 {
 	auto count = pHouse->CountOwnedAndPresent(pAircraftType);
 
-	if (const auto pJumpjetType = TechnoTypeExt::Fetch(pAircraftType)->ThisIsAJumpjet)
-		count += pHouse->CountOwnedAndPresent(pJumpjetType);
 
 	return count;
 }
@@ -400,8 +398,6 @@ int HouseExt::CountOwnedPresentWithDeploy(HouseClass* pHouse, UnitTypeClass* pUn
 {
 	auto count = pHouse->CountOwnedAndPresent(pUnitType);
 
-	if (const auto pAircraftType = TechnoTypeExt::Fetch(pUnitType)->ThisIsAJumpjet)
-		count += pHouse->CountOwnedAndPresent(pAircraftType);
 
 	if (deploy && pUnitType->DeploysInto)
 		count += pHouse->CountOwnedAndPresent(pUnitType->DeploysInto);
@@ -969,8 +965,6 @@ static int CountOwnedIncludeNone(const HouseClass* pThis, const TechnoTypeClass*
 {
 	int count = pThis->CountOwnedNow(pItem);
 
-	if (const auto pEx = TechnoTypeExt::Fetch(pItem)->ThisIsAJumpjet)
-		count += pThis->CountOwnedNow(pEx);
 
 	return count;
 }
@@ -980,13 +974,9 @@ static int CountOwnedIncludeDeploy(const HouseClass* pThis, const TechnoTypeClas
 	int count = pThis->CountOwnedNow(pItem);
 
 	if (const auto pEx = pItem->DeploysInto)
-		count += pThis->CountOwnedNow(pEx);
 
 	if (const auto pEx = pItem->UndeploysInto)
-		count += pThis->CountOwnedNow(pEx);
 
-	if (const auto pEx = TechnoTypeExt::Fetch(pItem)->ThisIsAJumpjet)
-		count += pThis->CountOwnedNow(pEx);
 
 	return count;
 }

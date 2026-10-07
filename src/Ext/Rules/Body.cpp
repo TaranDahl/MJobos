@@ -476,8 +476,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->HarvesterScanAfterUnload.Read(exINI, GameStrings::General, "HarvesterScanAfterUnload");
 
-	this->TunnelSimpleDistTooFar.Read(exINI, GameStrings::General, "TunnelSimpleDistTooFar");
-	this->TunnelPathingDistTooFar.Read(exINI, GameStrings::General, "TunnelPathingDistTooFar");
 
 	this->BalloonHoverPathingFix.Read(exINI, GameStrings::General, "BalloonHoverPathingFix");
 
@@ -1154,8 +1152,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->EnableWreckageSpawn)
 		.Process(this->WreckageInitialHealthPercent)
 		.Process(this->HarvesterScanAfterUnload)
-		.Process(this->TunnelSimpleDistTooFar)
-		.Process(this->TunnelPathingDistTooFar)
 		.Process(this->BalloonHoverPathingFix)
 		.Process(this->ReorganizeToWhenDefeated)
 		.Process(this->AnimCraterDestroyTiberium)

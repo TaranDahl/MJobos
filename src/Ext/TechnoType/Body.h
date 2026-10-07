@@ -351,13 +351,7 @@ public:
 
 	Valueable<bool> FiringByPassMovingCheck;
 
-	Valueable<int> DigStartROT;
-	Valueable<int> DigInSpeed;
-	Valueable<int> DigOutSpeed;
-	Valueable<int> DigEndROT;
 
-	Valueable<int> FlightClimb;
-	Valueable<int> FlightCrash;
 
 	Nullable<bool> ExplodeOnDestroy;
 	Nullable<bool> FireDeathWeaponOnCrushed;
@@ -366,10 +360,8 @@ public:
 
 	Valueable<bool> HarvesterQuickUnloader;
 
-	Valueable<UnitTypeClass*> ThisIsAJumpjet;
 
 
-	Valueable<int> JumpjetSpeedType;
 
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
@@ -892,13 +884,7 @@ public:
 
 		, FiringByPassMovingCheck { false }
 
-		, DigStartROT { -1 }
-		, DigInSpeed { -1 }
-		, DigOutSpeed { -1 }
-		, DigEndROT { -1 }
 
-		, FlightClimb { -1 }
-		, FlightCrash { -1 }
 
 		, ExplodeOnDestroy {}
 		, FireDeathWeaponOnCrushed {}
@@ -907,10 +893,8 @@ public:
 
 		, HarvesterQuickUnloader { false }
 
-		, ThisIsAJumpjet { nullptr }
 
 
-		, JumpjetSpeedType { 3 }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}

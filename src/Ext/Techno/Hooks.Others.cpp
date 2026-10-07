@@ -198,23 +198,6 @@ DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
 
 #pragma endregion
 
-#pragma region JumpjetSpeedType
-
-DEFINE_HOOK(0x54B36A, JumpjetLocomotionClass_MoveTo_JumpjetSpeedType, 0x5)
-{
-	GET(ILocomotion* const, iloco, ESI);
-	REF_STACK(SpeedType, speedType, STACK_OFFSET(0x5C, -0x54));
-
-	__assume(iloco != nullptr);
-	const auto pLoco = static_cast<JumpjetLocomotionClass*>(iloco);
-	const auto pTypeExt = TechnoExt::Fetch(pLoco->LinkedTo)->TypeExtData;
-	speedType = static_cast<SpeedType>(pTypeExt->JumpjetSpeedType.Get());
-
-	return 0;
-}
-
-#pragma endregion
-
 #pragma region UpdateReload
 
 DEFINE_HOOK(0x51BDCF, InfantryClass_Update_Reload, 0x7)
@@ -436,24 +419,6 @@ DEFINE_HOOK(0x70FC85, TechnoClass_Activate_End, 0x5)
 	if (!pThis->Deactivated && TechnoExt::Fetch(pThis)->IsWreckage)
 		pThis->Deactivate();
 
-	return 0;
-}
-
-#pragma region
-
-#pragma region TunnelDist
-
-DEFINE_HOOK(0x74608F, UnitClass_AStarAttempt_SimpleTooFar, 0x5)
-{
-	enum { GoUnderground = 0x7460F4, GoSurface = 0x746094 };
-	GET(const int, simpleDist, EAX);
-	return simpleDist >= RulesExt::Global()->TunnelSimpleDistTooFar ? GoUnderground : GoSurface;
-}
-
-DEFINE_HOOK(0x7460EC, UnitClass_AStarAttempt_PathingTooFar, 0x5)
-{
-	GET(const int, pathingDist, EAX);
-	R->DL(pathingDist > RulesExt::Global()->TunnelPathingDistTooFar);
 	return 0;
 }
 

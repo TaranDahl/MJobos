@@ -1346,13 +1346,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 
-	this->DigStartROT.Read(exINI, pSection, "DigStartROT");
-	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
-	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
-	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
 
-	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
-	this->FlightCrash.Read(exINI, pSection, "FlightCrash");
 
 	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
@@ -1361,13 +1355,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
 
-	if (pThis->WhatAmI() == AbstractType::AircraftType)
-		this->ThisIsAJumpjet.Read(exINI, pSection, "ThisIsAJumpjet");
-	else
-		this->ThisIsAJumpjet = nullptr;
 
 
-	this->JumpjetSpeedType.Read(exINI, pSection, "JumpjetSpeedType");
 
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
@@ -2124,13 +2113,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->FiringByPassMovingCheck)
 
-		.Process(this->DigStartROT)
-		.Process(this->DigInSpeed)
-		.Process(this->DigOutSpeed)
-		.Process(this->DigEndROT)
 
-		.Process(this->FlightClimb)
-		.Process(this->FlightCrash)
 
 		.Process(this->ExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
@@ -2139,10 +2122,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->HarvesterQuickUnloader)
 
-		.Process(this->ThisIsAJumpjet)
 
 
-		.Process(this->JumpjetSpeedType)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

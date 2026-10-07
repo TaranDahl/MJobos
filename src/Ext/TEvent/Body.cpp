@@ -224,14 +224,7 @@ bool TEventExt::HouseOwnsTechnoTypeTEvent(TEventClass* pThis)
 		return false;
 	}
 
-	int count = pHouse->CountOwnedNow(pType);
-
-	if (count)
-		return true;
-
-	if (const auto pJumpjetType = TechnoTypeExt::Fetch(pType)->ThisIsAJumpjet)
-		return pHouse->CountOwnedNow(pJumpjetType) > 0;
-
+	return pHouse->CountOwnedNow(pType) > 0;
 	return false;
 }
 
