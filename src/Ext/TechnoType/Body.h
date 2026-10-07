@@ -64,7 +64,6 @@ public:
 	int EliteSpawnerRange;
 	Nullable<int> Spawner_DelayFrames;
 	Nullable<bool> Spawner_AttackImmediately;
-	Valueable<bool> Spawner_ReturnOnRepairDone;
 	Nullable<bool> Spawner_UseTurretFacing;
 	Nullable<bool> Harvester_Counted;
 	Nullable<bool> Promote_IncludeSpawns;
@@ -363,15 +362,12 @@ public:
 	Nullable<bool> ExplodeOnDestroy;
 	Nullable<bool> FireDeathWeaponOnCrushed;
 
-	Nullable<CoordStruct> ExitCoord;
 
-	Valueable<bool> MissileSpawnUseOtherFLHs;
 
 	Valueable<bool> HarvesterQuickUnloader;
 
 	Valueable<UnitTypeClass*> ThisIsAJumpjet;
 
-	Valueable<bool> IgnoreRallyPoint;
 
 	Valueable<int> JumpjetSpeedType;
 
@@ -615,7 +611,6 @@ public:
 		, EliteSpawnerRange { 0 }
 		, Spawner_DelayFrames {}
 		, Spawner_AttackImmediately {}
-		, Spawner_ReturnOnRepairDone { false }
 		, Spawner_UseTurretFacing {}
 		, Harvester_Counted {}
 		, Promote_IncludeSpawns {}
@@ -908,15 +903,12 @@ public:
 		, ExplodeOnDestroy {}
 		, FireDeathWeaponOnCrushed {}
 
-		, ExitCoord {}
 
-		, MissileSpawnUseOtherFLHs { false }
 
 		, HarvesterQuickUnloader { false }
 
 		, ThisIsAJumpjet { nullptr }
 
-		, IgnoreRallyPoint { false }
 
 		, JumpjetSpeedType { 3 }
 

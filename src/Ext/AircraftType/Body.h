@@ -33,8 +33,6 @@ public:
 	Valueable<bool> Missile_Cruise;
 	Valueable<AnimTypeClass*> Missile_TakeOffAnim;
 	Valueable<int> Missile_TakeOffSeparation;
-	Valueable<bool> Missile_Tracing;
-	Valueable<bool> Missile_UseDeathWeaponWhenIntercepted;
 
 	explicit AircraftTypeExt(AircraftTypeClass* const OwnerObject) : TechnoTypeExt(OwnerObject)
 		, VoicePickup {}
@@ -59,8 +57,6 @@ public:
 		, Missile_Cruise { false }
 		, Missile_TakeOffAnim { nullptr }
 		, Missile_TakeOffSeparation { 24 }
-		, Missile_Tracing { false }
-		, Missile_UseDeathWeaponWhenIntercepted { false }
 	{ }
 
 	AircraftTypeClass* OwnerObject() const

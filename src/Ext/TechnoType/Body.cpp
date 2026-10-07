@@ -1012,7 +1012,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Spawner_ExtraLimitRange.Read(exINI, pSection, "Spawner.ExtraLimitRange");
 	this->Spawner_DelayFrames.Read(exINI, pSection, "Spawner.DelayFrames");
 	this->Spawner_AttackImmediately.Read(exINI, pSection, "Spawner.AttackImmediately");
-	this->Spawner_ReturnOnRepairDone.Read(exINI, pSection, "Spawner.ReturnOnRepairDone");
 	this->Spawner_UseTurretFacing.Read(exINI, pSection, "Spawner.UseTurretFacing");
 
 	this->Harvester_Counted.Read(exINI, pSection, "Harvester.Counted");
@@ -1358,9 +1357,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 
-	this->ExitCoord.Read(exINI, pSection, "ExitCoord");
 
-	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
 
 	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
 
@@ -1369,7 +1366,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	else
 		this->ThisIsAJumpjet = nullptr;
 
-	this->IgnoreRallyPoint.Read(exINI, pSection, "IgnoreRallyPoint");
 
 	this->JumpjetSpeedType.Read(exINI, pSection, "JumpjetSpeedType");
 
@@ -1839,7 +1835,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->EliteSpawnerRange)
 		.Process(this->Spawner_DelayFrames)
 		.Process(this->Spawner_AttackImmediately)
-		.Process(this->Spawner_ReturnOnRepairDone)
 		.Process(this->Spawner_UseTurretFacing)
 		.Process(this->Harvester_Counted)
 		.Process(this->Promote_IncludeSpawns)
@@ -2140,15 +2135,12 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->ExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
 
-		.Process(this->ExitCoord)
 
-		.Process(this->MissileSpawnUseOtherFLHs)
 
 		.Process(this->HarvesterQuickUnloader)
 
 		.Process(this->ThisIsAJumpjet)
 
-		.Process(this->IgnoreRallyPoint)
 
 		.Process(this->JumpjetSpeedType)
 

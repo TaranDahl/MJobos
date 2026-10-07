@@ -1208,8 +1208,7 @@ bool BuildingTypeExt::AutoPlaceBuilding(BuildingClass* pBuilding)
 
 		for (auto pConYard : pHouse->ConYards)
 		{
-			auto pArchiveTarget = isDefense && BuildingTypeExt::Fetch(pConYard->Type)->HasSecondaryRallyPoint
-				? BuildingExt::Fetch(pConYard)->SecondaryArchiveTarget : pConYard->ArchiveTarget;
+			auto pArchiveTarget = pConYard->ArchiveTarget;
 
 			if (!pArchiveTarget)
 				pArchiveTarget = pConYard;
@@ -1415,10 +1414,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->IsDestroyableObstacle.Read(exINI, pSection, "IsDestroyableObstacle");
 	this->Explodes_DuringBuildup.Read(exINI, pSection, "Explodes.DuringBuildup");
 
-	this->JustHasRallyPoint.Read(exINI, pSection, "JustHasRallyPoint");
-	this->JumpjetExitCoord.Read(exINI, pSection, "JumpjetExitCoord");
-	this->RallySpeedType.Read(exINI, pSection, "RallySpeedType");
-	this->RallyMovementZone.Read(exINI,pSection,"RallyMovementZone");
 
 	this->Cameo_ShouldCount.Read(exINI, pSection, "Cameo.ShouldCount");
 	this->AutoBuilding.Read(exINI, pSection, "AutoBuilding");
@@ -1467,7 +1462,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->BarracksExitCell.Read(exINI, pSection, "BarracksExitCell");
 
-	this->HasSecondaryRallyPoint.Read(exINI, pSection, "HasSecondaryRallyPoint");
 
 	this->Overpower_KeepOnline.Read(exINI, pSection, "Overpower.KeepOnline");
 	this->Overpower_ChargeWeapon.Read(exINI, pSection, "Overpower.ChargeWeapon");
@@ -1680,10 +1674,6 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
-		.Process(this->JustHasRallyPoint)
-		.Process(this->JumpjetExitCoord)
-		.Process(this->RallySpeedType)
-		.Process(this->RallyMovementZone)
 		.Process(this->Cameo_ShouldCount)
 		.Process(this->AutoBuilding)
 		.Process(this->AutoBuilding_Gap)
@@ -1719,7 +1709,6 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->Adjacent_Disallowed_Prohibit)
 		.Process(this->Adjacent_Disallowed_ProhibitDistance)
 		.Process(this->BarracksExitCell)
-		.Process(this->HasSecondaryRallyPoint)
 		.Process(this->Overpower_KeepOnline)
 		.Process(this->Overpower_ChargeWeapon)
 		.Process(this->DisableDamageSound)

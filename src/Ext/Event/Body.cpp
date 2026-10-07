@@ -89,11 +89,6 @@ void EventExt::RaiseAssignSecondaryRallyPoint(BuildingClass* pBuilding, Abstract
 
 void EventExt::RespondToAssignSecondaryRallyPoint()
 {
-	if (const auto pBuilding = this->AssignSecondaryRallyPoint.Whom.As_Building())
-	{
-		if (pBuilding->IsAlive && BuildingTypeExt::Fetch(pBuilding->Type)->HasSecondaryRallyPoint)
-			BuildingExt::Fetch(pBuilding)->SecondaryArchiveTarget = this->AssignSecondaryRallyPoint.Target.As_Abstract();
-	}
 }
 
 void EventExt::RaiseTogglePlayerAutoRepair()

@@ -292,8 +292,6 @@ public:
 		Valueable<bool> NonVehExplodeOnDestroy;
 		Valueable<bool> FireDeathWeaponOnCrushed;
 		Valueable<bool> CrushBuildingOnAnyCell;
-		Valueable<bool> RallyPointIgnoreReachability;
-		Valueable<bool> RallyPointAreaGuard;
 		Valueable<bool> AIAngerOnAlly;
 		Valueable<bool> FollowTargetSelf;
 
@@ -914,8 +912,6 @@ public:
 			, NonVehExplodeOnDestroy { false }
 			, FireDeathWeaponOnCrushed { false }
 			, CrushBuildingOnAnyCell { false }
-			, RallyPointIgnoreReachability { false }
-			, RallyPointAreaGuard { false }
 			, AIAngerOnAlly { true }
 			, FollowTargetSelf { false }
 

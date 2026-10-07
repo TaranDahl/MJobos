@@ -42,7 +42,6 @@
     <ClCompile Include="src\Blowfish\blowfish.cpp" />
     <ClCompile Include="src\Blowfish\Hooks.Blowfish.cpp" />
     <!-- src\Commands -->
-    <ClCompile Include="src\Commands\AssignRallyPoint.cpp" />
     <ClCompile Include="src\Commands\AutoBuilding.cpp" />
     <ClCompile Include="src\Commands\Commands.cpp" />
     <ClCompile Include="src\Commands\DamageDisplay.cpp" />
@@ -87,7 +86,6 @@
     <ClCompile Include="src\Ext\Building\Hooks.Grinding.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.Production.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.Refinery.cpp" />
-    <ClCompile Include="src\Ext\Building\Hooks.SecondaryArchive.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.Selling.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.Unload.cpp" />
     <!-- src\Ext\BuildingType -->
@@ -385,7 +383,6 @@
     <!-- src\Blowfish\ -->
     <ClInclude Include="src\Blowfish\blowfish.h" />
     <!-- src\Commands\ -->
-    <ClInclude Include="src\Commands\AssignRallyPoint.h" />
     <ClInclude Include="src\Commands\AutoBuilding.h" />
     <ClInclude Include="src\Commands\Commands.h" />
     <ClInclude Include="src\Commands\DamageDisplay.h" />

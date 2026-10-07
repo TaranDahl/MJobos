@@ -42,8 +42,6 @@ void AircraftTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Missile_Cruise.Read(exINI, pSection, "Missile.Cruise");
 	this->Missile_TakeOffSeparation.Read(exINI, pSection, "Missile.TakeOffSeparation");
 	this->Missile_TakeOffAnim.Read(exINI, pSection, "Missile.TakeOffAnim");
-	this->Missile_Tracing.Read(exINI, pSection, "Missile.Tracing");
-	this->Missile_UseDeathWeaponWhenIntercepted.Read(exINI, pSection, "Missile.UseDeathWeaponWhenIntercepted");
 }
 
 template <typename T>
@@ -72,8 +70,6 @@ void AircraftTypeExt::Serialize(T& Stm)
 		.Process(this->Missile_Cruise)
 		.Process(this->Missile_TakeOffAnim)
 		.Process(this->Missile_TakeOffSeparation)
-		.Process(this->Missile_Tracing)
-		.Process(this->Missile_UseDeathWeaponWhenIntercepted)
 		;
 }
 

@@ -10,7 +10,6 @@
 #include "ToggleDesignatorRange.h"
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
-#include "AssignRallyPoint.h"
 #include "SelectedInfo.h"
 #include "HerosInfo.h"
 #include "AutoBuilding.h"
@@ -48,8 +47,6 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SelectedExpandCommandClass>();
 	// MakeCommand<Mutation::OpenMutationUICommandClass>();
 	MakeCommand<HerosInfoCommandClass>();
-	MakeCommand<AssignRallyPointCommandClass>();
-	MakeCommand<AssignSecondaryRallyPointCommandClass>();
 	MakeCommand<AutoBuildingCommandClass>();
 	MakeCommand<AutoBuildingCombatCommandClass>();
 	MakeCommand<ManualReloadAmmoCommandClass>();

@@ -366,8 +366,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
 	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
-	this->RallyPointIgnoreReachability.Read(exINI, GameStrings::General, "RallyPointIgnoreReachability");
-	this->RallyPointAreaGuard.Read(exINI, GameStrings::General, "RallyPointAreaGuard");
 	this->AIAngerOnAlly.Read(exINI, GameStrings::General, "AIAngerOnAlly");
 	this->FollowTargetSelf.Read(exINI, GameStrings::General, "FollowTargetSelf");
 
@@ -1063,8 +1061,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->NonVehExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
 		.Process(this->CrushBuildingOnAnyCell)
-		.Process(this->RallyPointIgnoreReachability)
-		.Process(this->RallyPointAreaGuard)
 		.Process(this->AIAngerOnAlly)
 		.Process(this->FollowTargetSelf)
 		.Process(this->JumpjetClimbPredictHeight)
