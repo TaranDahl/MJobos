@@ -14,14 +14,36 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 {
 	GET(UnitClass* const, pThis, ESI);
 
+//	if (TechnoExt::HasAttachmentLoco(pThis))
+//		return 0;
+
 	const auto pType = pThis->Type;
-	CoordStruct& source = pThis->Location;
-	const CoordStruct target = pThis->Target->GetCoords(); // Target checked so it's not null here
+	const auto& source = pThis->Location;
+	const auto target = pThis->Target->GetCoords(); // Target checked so it's not null here
 	const DirStruct tgtDir { Math::atan2(source.Y - target.Y, target.X - source.X) };
 
 	if (pType->Turret && !pType->HasTurret) // 0x736F92
 	{
-		pThis->SecondaryFacing.SetDesired(tgtDir);
+		if (RulesExt::Global()->ExpandTurretRotation)
+		{
+			const auto pExt = TechnoExt::Fetch(pThis);
+			const auto pTypeExt = pExt->TypeExtData;
+
+			if (pTypeExt->Turret_BodyOrientation && !pThis->Destination && !pThis->Locomotor->Is_Moving())
+			{
+				const auto curDir = pThis->PrimaryFacing.Current();
+				const auto dir = pTypeExt->GetBodyDesiredDir(curDir, tgtDir);
+
+				if (std::abs(static_cast<short>(static_cast<short>(dir.Raw) - static_cast<short>(curDir.Raw))) >= 8192)
+					pThis->PrimaryFacing.SetDesired(dir);
+			}
+
+			pTypeExt->SetTurretLimitedDir(pThis, tgtDir);
+		}
+		else
+		{
+			pThis->SecondaryFacing.SetDesired(tgtDir);
+		}
 	}
 	else // 0x736FB6
 	{
@@ -43,7 +65,7 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 		}
 	}
 
-	return 0x736FB1;
+	return 0x737063;
 }
 
 // For compatibility with previous builds

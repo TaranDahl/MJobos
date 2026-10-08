@@ -47,6 +47,9 @@ public:
 	bool LastRearmWasFullDelay;
 	bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 	int WHAnimRemainingCreationInterval;
+	bool UnitIdleIsSelected;
+	CDTimerClass UnitIdleActionTimer;
+	CDTimerClass UnitIdleActionGapTimer;
 	WeaponTypeClass* LastWeaponType;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
@@ -107,6 +110,9 @@ public:
 		, LastRearmWasFullDelay { false }
 		, CanCloakDuringRearm { false }
 		, WHAnimRemainingCreationInterval { 0 }
+		, UnitIdleIsSelected { false }
+		, UnitIdleActionTimer {}
+		, UnitIdleActionGapTimer {}
 		, LastWeaponType {}
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
@@ -178,6 +184,13 @@ public:
 	bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> const& attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts, bool requireAnims = false) const;
 	int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr, bool requireAnims = false) const;
 	void InitializeDisplayInfo(TechnoTypeClass* pType);
+	void StopIdleAction();
+	void ApplyIdleAction();
+	void ManualIdleAction();
+	void CheckIdleAction();
+	void UpdateIdleDir();
+	void SetTurretDir(DirStruct desiredDir, bool limited = false);
+	void StopRotateWithNewROT(int ROT = -1);
 	void ApplyMindControlRangeLimit();
 	int ApplyForceWeaponInRange(AbstractClass* pTarget);
 	void ResetDelayedFireTimer();

@@ -2,6 +2,7 @@
 
 #include <Ext/WeaponType/Body.h>
 
+DEFINE_JUMP(LJMP, 0x741376, 0x7413B0)
 DEFINE_JUMP(LJMP, 0x741406, 0x741427)
 
 DEFINE_HOOK(0x736F61, UnitClass_UpdateFiring_FireUp, 0x6)
