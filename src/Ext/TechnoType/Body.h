@@ -147,7 +147,6 @@ public:
 
 	Nullable<bool> DestroyAnim_Random;
 
-	Valueable<TechnoTypeClass*> DefaultDisguise;
 	Nullable<bool> UseDisguiseMovementSpeed;
 
 	Nullable<int> OpenTopped_RangeBonus;
@@ -645,7 +644,6 @@ public:
 		, AlternateFLH_ApplyVehicle {}
 		, DestroyAnim_Random {}
 
-		, DefaultDisguise { nullptr }
 		, UseDisguiseMovementSpeed {}
 
 		, OpenTopped_RangeBonus {}

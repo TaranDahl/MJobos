@@ -332,14 +332,14 @@ DEFINE_HOOK(0x6F421C, TechnoClass_Init_DefaultDisguise, 0x6)
 {
 	GET(TechnoClass*, pThis, ESI);
 
-	auto const pTypeExt = TechnoTypeExt::Fetch(pThis->GetTechnoType());
-	const auto absType = pThis->WhatAmI();
 	// mirage is not here yet
-	if ((absType == AbstractType::Infantry || absType == AbstractType::Unit) && pTypeExt->DefaultDisguise)
+	if (auto const pInf = abstract_cast<InfantryClass*, true>(pThis))
 	{
-		if (pTypeExt->DefaultDisguise)
+		auto const pExt = InfantryTypeExt::Fetch(pInf->Type);
+
+		if (pExt->DefaultDisguise)
 		{
-			pThis->Disguise = pTypeExt->DefaultDisguise;
+			pThis->Disguise = pExt->DefaultDisguise;
 			pThis->DisguisedAsHouse = pThis->Owner;
 			pThis->Disguised = true;
 			return 0x6F4277;
@@ -350,6 +350,7 @@ DEFINE_HOOK(0x6F421C, TechnoClass_Init_DefaultDisguise, 0x6)
 
 	return 0;
 }
+
 
 DEFINE_HOOK_AGAIN(0x7355C0, TechnoClass_Init_InitialStrength, 0x6) // UnitClass_Init
 DEFINE_HOOK_AGAIN(0x517D69, TechnoClass_Init_InitialStrength, 0x6) // InfantryClass_Init
@@ -949,103 +950,6 @@ DEFINE_HOOK(0x70D703, TechnoClass_FireDeathWeapon_UseGlobalDeathWeaponDamage, 0x
 
 	return 0;
 }
-
-#pragma region UnitDisguise
-
-DEFINE_HOOK(0x7466D8, UnitClass_DisguiseAs_DisguiseUnit, 0xA)
-{
-	enum { ret = 0x746712 };
-
-	GET(UnitClass*, pThis, EDI);
-	GET(UnitClass*, pTarget, ESI);
-
-	pThis->TechnoClass::DisguiseAs(pTarget);
-
-	if (pTarget->IsDisguised())
-	{
-		pThis->Disguise = pTarget->GetDisguise(true);
-		pThis->DisguisedAsHouse = pTarget->GetDisguiseHouse(true);
-	}
-	else
-	{
-		pThis->Disguise = pTarget->Type;
-		pThis->DisguisedAsHouse = pTarget->GetOwningHouse();
-	}
-
-	// Use the same FireAngle
-	if (pThis->Disguise && pThis->Disguise->WhatAmI() == AbstractType::UnitType)
-		pThis->BarrelFacing.SetCurrent(pTarget->BarrelFacing.Current());
-
-	return ret;
-}
-
-namespace RotatingContext
-{
-	UnitClass* pThis = nullptr;
-	UnitTypeClass* pType = nullptr;
-}
-
-DEFINE_HOOK(0x736990, UnitClass_UpdateRotating_Start, 0x6)
-{
-	GET(UnitClass*, pThis, ECX);
-
-	RotatingContext::pThis = pThis;
-	RotatingContext::pType = pThis->Type;
-
-	if (pThis->IsDisguised())
-	{
-		auto pDisguisedType = pThis->GetDisguise(true);
-
-		if (pDisguisedType->WhatAmI() == AbstractType::UnitType)
-			pThis->Type = (UnitTypeClass*)pDisguisedType;
-	}
-
-	return 0;
-}
-
-DEFINE_HOOK(0x736C0E, UnitClass_UpdateRotating_End, 0x5)
-{
-	RotatingContext::pThis->Type = RotatingContext::pType;
-	return 0;
-}
-/*
-// SHP still needs more improvment.
-namespace DrawAsSHPContext
-{
-	UnitClass* pThis;
-	UnitTypeClass* OriginalType;
-}
-
-DEFINE_HOOK(0x73C5F0, UnitClass_DrawAsSHP_Start, 0x6)
-{
-	GET(UnitClass*, pThis, ECX);
-
-	DrawAsSHPContext::pThis = pThis;
-	DrawAsSHPContext::OriginalType = pThis->Type;
-
-	if (!pThis->IsClearlyVisibleTo(HouseClass::CurrentPlayer))
-	{
-		if (auto pDisguiseUnitType = abstract_cast<UnitTypeClass*>(pThis->GetDisguise(true)))
-			pThis->Type = pDisguiseUnitType;
-	}
-
-	return 0;
-}
-
-DEFINE_HOOK_AGAIN(0x73CE68, UnitClass_DrawAsSHP_End, 0x6);
-DEFINE_HOOK_AGAIN(0x73CEB7, UnitClass_DrawAsSHP_End, 0x6);
-DEFINE_HOOK(0x73CE04, UnitClass_DrawAsSHP_End, 0x6)
-{
-	DrawAsSHPContext::pThis->Type = DrawAsSHPContext::OriginalType;
-	return 0;
-}
-
-DEFINE_HOOK(0x73C61C, UnitClass_DrawAsSHP_Disguise, 0x5)
-{
-	return 0x73C62B;
-}
-*/
-#pragma endregion
 
 DEFINE_HOOK(0x521D94, InfantryClass_CurrentSpeed_ProneSpeed, 0x6)
 {
