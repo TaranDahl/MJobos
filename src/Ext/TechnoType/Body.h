@@ -272,6 +272,16 @@ public:
 	ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 	Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
+	Nullable<bool> Turret_IdleRotate;
+	Nullable<bool> Turret_PointToMouse;
+	Nullable<int> TurretROT;
+	Valueable<DirStruct> Turret_Restriction;
+	Valueable<DirStruct> Turret_ExtraAngle;
+	Nullable<bool> Turret_BodyFoundation;
+	Valueable<bool> Turret_BodyOrientation;
+	Valueable<DirStruct> Turret_BodyOrientationAngle;
+	Valueable<bool> Turret_BodyOrientationSymmetric;
+
 	Nullable<bool> AmphibiousEnter;
 	Nullable<bool> AmphibiousUnload;
 	Nullable<bool> NoQueueUpToEnter;
@@ -697,6 +707,16 @@ public:
 		, BuildLimitGroup_ExtraLimit_MaxCount {}
 		, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
+		, Turret_IdleRotate {}
+		, Turret_PointToMouse {}
+		, TurretROT {}
+		, Turret_Restriction { DirStruct(32768) }
+		, Turret_ExtraAngle { DirStruct(0) }
+		, Turret_BodyFoundation {}
+		, Turret_BodyOrientation { false }
+		, Turret_BodyOrientationAngle { DirStruct(0) }
+		, Turret_BodyOrientationSymmetric { true }
+
 		, AmphibiousEnter {}
 		, AmphibiousUnload {}
 		, NoQueueUpToEnter {}
@@ -883,6 +903,11 @@ public:
 
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 	virtual void SaveToStream(PhobosStreamWriter& Stm) override;
+
+	DirStruct GetTurretDesiredDir(DirStruct defaultDir);
+	void SetTurretLimitedDir(FootClass* pThis, DirStruct desiredDir);
+	short GetTurretLimitedRaw(short currentDirectionRaw);
+	DirStruct GetBodyDesiredDir(DirStruct currentDir, DirStruct defaultDir);
 
 	void ApplyTurretOffset(Matrix3D* mtx, double factor = 1.0);
 	void CalculateSpawnerRange();

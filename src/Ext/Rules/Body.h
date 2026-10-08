@@ -94,6 +94,15 @@ public:
 		Valueable<double> HeightShadowScaling_MinScale;
 		double AirShadowBaseScale_log;
 
+		Valueable<bool> ExpandTurretRotation;
+		Valueable<bool> Turret_IdleRotate;
+		Valueable<bool> Turret_PointToMouse;
+		Valueable<bool> Turret_BodyFoundation;
+		Valueable<int> Turret_IdleRestartMin;
+		Valueable<int> Turret_IdleRestartMax;
+		Valueable<int> Turret_IdleIntervalMin;
+		Valueable<int> Turret_IdleIntervalMax;
+
 		Valueable<bool> ExtendedAircraftMissions;
 		Valueable<int> ExtendedAircraftMissions_UnlandDamage;
 		Valueable<EdgeType> AircraftSpawnFromEdge;
@@ -625,6 +634,15 @@ public:
 			, HeightShadowScaling { false }
 			, HeightShadowScaling_MinScale { 0.0 }
 			, AirShadowBaseScale_log { 0.693376137 }
+
+			, ExpandTurretRotation { false }
+			, Turret_IdleRotate { false }
+			, Turret_PointToMouse { false }
+			, Turret_BodyFoundation { false }
+			, Turret_IdleRestartMin { 150 }
+			, Turret_IdleRestartMax { 300 }
+			, Turret_IdleIntervalMin { 150 }
+			, Turret_IdleIntervalMax { 450 }
 
 			, ExtendedAircraftMissions { false }
 			, ExtendedAircraftMissions_UnlandDamage { -1 }

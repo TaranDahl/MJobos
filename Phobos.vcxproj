@@ -170,6 +170,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.Airstrike.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Cloak.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.Facing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Firing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Misc.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Pips.cpp" />
