@@ -2,6 +2,7 @@
 #include <EventClass.h>
 #include <TargetClass.h>
 #include <HouseClass.h>
+#include <TechnoClass.h>
 
 #include <cstddef>
 #include <stdint.h>
@@ -14,9 +15,10 @@ enum class EventTypeExt : uint8_t
 
 	ApproachObject = 0x40,
 	TogglePlayerAutoRepair = 0x41,
+	ToggleReversingStance = 0x85,
 
 	FIRST = ApproachObject,
-	LAST = TogglePlayerAutoRepair
+	LAST = ToggleReversingStance
 };
 
 #pragma pack(push, 1)
@@ -38,6 +40,10 @@ public:
 		} ApproachObject;
 		struct TogglePlayerAutoRepair
 		{ } TogglePlayerAutoRepair;
+		struct ToggleReversingStance
+		{
+			TargetClass Whom;
+		} ToggleReversingStance;
 	};
 
 	bool AddEvent();
@@ -46,6 +52,9 @@ public:
 	void RespondApproachObject();
 	static void RaiseTogglePlayerAutoRepair();
 	void RespondToTogglePlayerAutoRepair();
+
+	static void RaiseToggleReversingStance(TechnoClass* pTechno);
+	void RespondToToggleReversingStance();
 
 	static size_t GetDataSize(EventTypeExt type);
 	static bool IsValidType(EventTypeExt type);
