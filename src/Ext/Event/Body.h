@@ -11,9 +11,10 @@ enum class EventTypeExt : uint8_t
 	// Vanilla game used Events from 0x00 to 0x2F
 	// CnCNet reserved Events from 0x30 to 0x3F
 	// Ares used Events 0x60 and 0x61
+	// Phobos uses Events from 0x80 onward
 
-	ApproachObject = 0x40,
-	TogglePlayerAutoRepair = 0x41,
+	ApproachObject = 0x80,
+	TogglePlayerAutoRepair = 0x81,
 
 	FIRST = ApproachObject,
 	LAST = TogglePlayerAutoRepair
