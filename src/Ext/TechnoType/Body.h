@@ -463,6 +463,15 @@ public:
 	Nullable<bool> Unsellable;
 	Nullable<bool> KeepAlive;
 
+	ValueableVector<TechnoTypeClass*> WreckageType;
+	Nullable<double> WreckageInitialHealthPercent;
+	Valueable<bool> WreckageDeactive;
+	Valueable<bool> WreckageMarkUp;
+	Valueable<OwnerHouseKind> WreckageOwner;
+	Valueable<bool> WreckageLeaveOnWater;
+	Valueable<bool> WreckageLeaveInAir;
+	Valueable<bool> WreckageSwapLocomotor;
+
 	TechnoTypeExt(TechnoTypeClass* OwnerObject) : ObjectTypeExt(OwnerObject)
 		, HealthBar_Hide { false }
 		, HealthBar_HidePips { false }
@@ -876,6 +885,15 @@ public:
 		// Ares 3.0
 		, Unsellable {}
 		, KeepAlive {}
+
+		, WreckageType { }
+		, WreckageInitialHealthPercent { }
+		, WreckageDeactive { true }
+		, WreckageMarkUp { true }
+		, WreckageOwner { OwnerHouseKind::Default }
+		, WreckageLeaveOnWater { false }
+		, WreckageLeaveInAir { false }
+		, WreckageSwapLocomotor { false }
 	{ }
 
 	virtual ~TechnoTypeExt() = default;

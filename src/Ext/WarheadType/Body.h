@@ -272,6 +272,9 @@ public:
 
 	Valueable<int> Ammo;
 
+	Valueable<bool> SuppressWreckage;
+	Valueable<bool> ActivateWreckage;
+
 	// Ares tags
 	// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
 	Valueable<bool> AffectsEnemies;
@@ -573,6 +576,9 @@ public:
 		, PreventOccupantEscape { false }
 
 		, Ammo { 0 }
+
+		, SuppressWreckage { false }
+		, ActivateWreckage { false }
 	{ }
 
 	void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
