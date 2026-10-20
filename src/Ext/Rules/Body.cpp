@@ -166,14 +166,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 		this->HeightShadowScaling = false;
 	this->HeightShadowScaling_MinScale.Read(exINI, GameStrings::AudioVisual, "HeightShadowScaling.MinScale");
 
-	this->ExpandTurretRotation.Read(exINI, GameStrings::General, "ExpandTurretRotation");
-	this->Turret_IdleRotate.Read(exINI, GameStrings::AudioVisual, "Turret.IdleRotate");
-	this->Turret_PointToMouse.Read(exINI, GameStrings::AudioVisual, "Turret.PointToMouse");
-	this->Turret_BodyFoundation.Read(exINI, GameStrings::AudioVisual, "Turret.BodyFoundation");
-	this->Turret_IdleRestartMin.Read(exINI, GameStrings::AudioVisual, "Turret.IdleRestartMin");
-	this->Turret_IdleRestartMax.Read(exINI, GameStrings::AudioVisual, "Turret.IdleRestartMax");
-	this->Turret_IdleIntervalMin.Read(exINI, GameStrings::AudioVisual, "Turret.IdleIntervalMin");
-	this->Turret_IdleIntervalMax.Read(exINI, GameStrings::AudioVisual, "Turret.IdleIntervalMax");
 	this->FactoryProgressDisplay.Read(exINI, GameStrings::AudioVisual, "FactoryProgressDisplay");
 	this->MainSWProgressDisplay.Read(exINI, GameStrings::AudioVisual, "MainSWProgressDisplay");
 	this->InvulnerableDisplay.Read(exINI, GameStrings::AudioVisual, "InvulnerableDisplay");
@@ -883,14 +875,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AirShadowBaseScale_log)
 		.Process(this->HeightShadowScaling)
 		.Process(this->HeightShadowScaling_MinScale)
-		.Process(this->ExpandTurretRotation)
-		.Process(this->Turret_IdleRotate)
-		.Process(this->Turret_PointToMouse)
-		.Process(this->Turret_BodyFoundation)
-		.Process(this->Turret_IdleRestartMin)
-		.Process(this->Turret_IdleRestartMax)
-		.Process(this->Turret_IdleIntervalMin)
-		.Process(this->Turret_IdleIntervalMax)
 		.Process(this->FactoryProgressDisplay)
 		.Process(this->MainSWProgressDisplay)
 		.Process(this->InvulnerableDisplay)

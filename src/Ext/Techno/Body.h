@@ -64,9 +64,6 @@ public:
 	bool LastRearmWasFullDelay;
 	bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 	int WHAnimRemainingCreationInterval;
-	bool UnitIdleIsSelected;
-	CDTimerClass UnitIdleActionTimer;
-	CDTimerClass UnitIdleActionGapTimer;
 	CDTimerClass UnitAutoDeployTimer;
 	WeaponTypeClass* LastWeaponType;
 	CoordStruct LastWeaponFLH;
@@ -165,9 +162,6 @@ public:
 		, LastRearmWasFullDelay { false }
 		, CanCloakDuringRearm { false }
 		, WHAnimRemainingCreationInterval { 0 }
-		, UnitIdleIsSelected { false }
-		, UnitIdleActionTimer {}
-		, UnitIdleActionGapTimer {}
 		, UnitAutoDeployTimer {}
 		, LastWeaponType {}
 		, LastWeaponFLH {}
@@ -256,13 +250,6 @@ public:
 	bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> const& attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts, bool requireAnims = false) const;
 	int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr, bool requireAnims = false) const;
 	void InitializeDisplayInfo(TechnoTypeClass* pType);
-	void StopIdleAction();
-	void ApplyIdleAction();
-	void ManualIdleAction();
-	void CheckIdleAction();
-	void UpdateIdleDir();
-	void SetTurretDir(DirStruct desiredDir, bool limited = false);
-	void StopRotateWithNewROT(int ROT = -1);
 	void ApplyMindControlRangeLimit();
 	int ApplyForceWeaponInRange(AbstractClass* pTarget);
 	void ResetDelayedFireTimer();
