@@ -262,7 +262,6 @@
     <ClCompile Include="src\Interop\UIExt\UIExtApi.cpp" />
     <!-- src\Locomotion -->
     <ClCompile Include="src\Locomotion\AdvancedDriveLocomotionClass.cpp" />
-    <ClCompile Include="src\Locomotion\AStar\AStarClass.cpp" />
     <ClCompile Include="src\Locomotion\ShiftLocomotionClass.cpp" />
     <ClCompile Include="src\Locomotion\TestLocomotionClass.cpp" />
     <!-- src\Misc -->
