@@ -122,7 +122,18 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 
 bool EventExt::IsValidType(EventTypeExt type)
 {
-	return (type >= EventTypeExt::FIRST && type <= EventTypeExt::LAST);
+	// Transitional fused state: base events were renumbered back while the
+	// remaining Phobos events still use sparse IDs until their topics land.
+	switch (type)
+	{
+	case EventTypeExt::ApproachObject:
+	case EventTypeExt::TogglePlayerAutoRepair:
+	case EventTypeExt::ManualReload:
+	case EventTypeExt::AssignSecondaryRallyPoint:
+		return true;
+	default:
+		return false;
+	}
 }
 
 void EventExt::RespondApproachObject()

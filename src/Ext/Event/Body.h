@@ -13,8 +13,8 @@ enum class EventTypeExt : uint8_t
 	// CnCNet reserved Events from 0x30 to 0x3F
 	// Ares used Events 0x60 and 0x61
 
-	ApproachObject = 0x80,
-	TogglePlayerAutoRepair = 0x81,
+	ApproachObject = 0x40,
+	TogglePlayerAutoRepair = 0x41,
 	ManualReload = 0x82,
 	AssignSecondaryRallyPoint = 0x86,
 
