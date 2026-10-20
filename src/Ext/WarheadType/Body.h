@@ -244,9 +244,6 @@ public:
 
 	Valueable<bool> CanKill;
 
-	Valueable<bool> SuppressWreckage;
-	Valueable<bool> ActivateWreckage;
-
 	Valueable<AffectedTarget> AirstrikeTargets;
 
 	Valueable<double> AffectsBelowPercent;
@@ -548,9 +545,6 @@ public:
 		, NoCellSpread_SnapDistance { Leptons(128) }
 
 		, ElectricAssaultLevel { 1 }
-
-		, SuppressWreckage { false }
-		, ActivateWreckage { false }
 
 		, AirstrikeTargets { AffectedTarget::Building }
 

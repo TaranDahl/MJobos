@@ -78,9 +78,6 @@ public:
 	bool ShouldUpdateGattlingValue;
 	int AttachedEffectInvokerCount;
 
-	bool IsWreckage;
-
-
 	BuildingClass* BuildingOccupying;
 
 	AirstrikeClass* AirstrikeTargetingMe;
@@ -174,7 +171,6 @@ public:
 		, LastTargetID { 0xFFFFFFFF }
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
-		, IsWreckage { false }
 		, BuildingOccupying { }
 		, AirstrikeTargetingMe { nullptr }
 		, SquadManager { nullptr }

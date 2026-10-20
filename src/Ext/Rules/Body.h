@@ -402,10 +402,6 @@ public:
 
 		Valueable<double> DamagedSpeed;
 
-		Valueable<bool> EnableWreckageSpawn;
-		Valueable<double> WreckageInitialHealthPercent;
-
-
 		Valueable<bool> HarvesterScanAfterUnload;
 
 
@@ -991,10 +987,6 @@ public:
 			, ProneSpeed_NoCrawls { 1.5 }
 
 			, DamagedSpeed { 0.75 }
-
-			, EnableWreckageSpawn { false }
-			, WreckageInitialHealthPercent { 0.1 }
-
 
 			, HarvesterScanAfterUnload { false }
 

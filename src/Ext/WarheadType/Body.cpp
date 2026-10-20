@@ -416,9 +416,6 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ElectricAssaultLevel.Read(exINI, pSection, "ElectricAssaultLevel");
 
-	this->SuppressWreckage.Read(exINI, pSection, "SuppressWreckage");
-	this->ActivateWreckage.Read(exINI, pSection, "ActivateWreckage");
-
 	this->AirstrikeTargets.Read(exINI, pSection, "AirstrikeTargets");
 
 
@@ -828,9 +825,6 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->KillWeapon_OnFirer_AffectsTarget)
 
 		.Process(this->ElectricAssaultLevel)
-
-		.Process(this->SuppressWreckage)
-		.Process(this->ActivateWreckage)
 
 		.Process(this->AirstrikeTargets)
 

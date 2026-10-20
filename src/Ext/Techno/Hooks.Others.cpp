@@ -410,20 +410,6 @@ DEFINE_HOOK(0x50B716, HouseClass_IsCurrentPlayer_SharedControl, 0x6)
 
 #pragma endregion
 
-#pragma region Activate
-
-DEFINE_HOOK(0x70FC85, TechnoClass_Activate_End, 0x5)
-{
-	GET(TechnoClass*, pThis, ECX);
-
-	if (!pThis->Deactivated && TechnoExt::Fetch(pThis)->IsWreckage)
-		pThis->Deactivate();
-
-	return 0;
-}
-
-#pragma region
-
 #pragma region AIAdjacentMax
 
 DEFINE_HOOK_AGAIN(0x42EB6A, BaseClass_GetBaseNodeIndex_AIAdjacentMax, 0x8);

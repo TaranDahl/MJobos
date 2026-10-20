@@ -462,10 +462,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->DamagedSpeed.Read(exINI, GameStrings::General, "DamagedSpeed");
 
-	this->EnableWreckageSpawn.Read(exINI, GameStrings::General, "EnableWreckageSpawn");
-	this->WreckageInitialHealthPercent.Read(exINI, GameStrings::General, "WreckageInitialHealthPercent");
-
-
 	this->HarvesterScanAfterUnload.Read(exINI, GameStrings::General, "HarvesterScanAfterUnload");
 
 
@@ -1133,8 +1129,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->ProneSpeed_Crawls)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)
-		.Process(this->EnableWreckageSpawn)
-		.Process(this->WreckageInitialHealthPercent)
 		.Process(this->HarvesterScanAfterUnload)
 		.Process(this->BalloonHoverPathingFix)
 		.Process(this->ReorganizeToWhenDefeated)

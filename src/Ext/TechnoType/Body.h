@@ -419,15 +419,6 @@ public:
 	ValueableVector<AnimTypeClass*> Promote_VeteranAnimation;
 	ValueableVector<AnimTypeClass*> Promote_EliteAnimation;
 
-	ValueableVector<TechnoTypeClass*> WreckageType;
-	Nullable<double> WreckageInitialHealthPercent;
-	Valueable<bool> WreckageDeactive;
-	Valueable<bool> WreckageMarkUp;
-	Valueable<OwnerHouseKind> WreckageOwner;
-	Valueable<bool> WreckageLeaveOnWater;
-	Valueable<bool> WreckageLeaveInAir;
-	Valueable<bool> WreckageSwapLocomotor;
-
 	Nullable<AffectedHouse> RadarInvisibleToHouse;
 
 
@@ -950,15 +941,6 @@ public:
 
 		, Promote_VeteranAnimation { }
 		, Promote_EliteAnimation { }
-
-		, WreckageType { }
-		, WreckageInitialHealthPercent { }
-		, WreckageDeactive { true }
-		, WreckageMarkUp { true }
-		, WreckageOwner { OwnerHouseKind::Default }
-		, WreckageLeaveOnWater { false }
-		, WreckageLeaveInAir { false }
-		, WreckageSwapLocomotor { false }
 
 		, RadarInvisibleToHouse {}
 
