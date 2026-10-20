@@ -3,6 +3,8 @@
 
 #include <Ext/House/Body.h>
 #include <Ext/Rules/Body.h>
+#include <Ext/UnitType/Body.h>
+#include <Locomotion/AdvancedDriveLocomotionClass.h>
 
 #include <Helpers/Macro.h>
 #include <ShapeButtonClass.h>
@@ -22,6 +24,9 @@ void EventExt::RespondEvent()
 	case EventTypeExt::TogglePlayerAutoRepair:
 		this->RespondToTogglePlayerAutoRepair();
 		break;
+	case EventTypeExt::ToggleReversingStance:
+		this->RespondToToggleReversingStance();
+		break;
 	default:
 		break;
 	}
@@ -37,6 +42,34 @@ void EventExt::RaiseTogglePlayerAutoRepair()
 	Debug::LogGame("Adding event TOGGLE_PLAYER_AUTOREPAIR\n");
 }
 
+void EventExt::RaiseToggleReversingStance(TechnoClass* pTechno)
+{
+	EventExt eventExt {};
+	eventExt.Type = EventTypeExt::ToggleReversingStance;
+	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
+	eventExt.Frame = Unsorted::CurrentFrame;
+	eventExt.ToggleReversingStance.Whom = TargetClass(pTechno);
+	eventExt.AddEvent();
+	Debug::LogGame("Adding event TOGGLE_REVERSING\n");
+}
+
+void EventExt::RespondToToggleReversingStance()
+{
+	if (const auto pUnit = this->ToggleReversingStance.Whom.As_Unit())
+	{
+		if (pUnit->IsAlive && !pUnit->Berzerk && UnitTypeExt::Fetch(pUnit->Type)->AdvancedDrive_Reverse)
+		{
+			if (const auto pLoco = locomotion_cast<AdvancedDriveLocomotionClass*>(pUnit->Locomotor))
+			{
+				if (pLoco->IsForward)
+					pLoco->ShouldReverse = true;
+				else
+					pLoco->ShouldForward = true;
+			}
+		}
+	}
+}
+
 size_t EventExt::GetDataSize(EventTypeExt type)
 {
 	switch (type)
@@ -45,6 +78,8 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 		return sizeof(EventExt::ApproachObject);
 	case EventTypeExt::TogglePlayerAutoRepair:
 		return sizeof(EventExt::TogglePlayerAutoRepair);
+	case EventTypeExt::ToggleReversingStance:
+		return sizeof(EventExt::ToggleReversingStance);
 	default:
 		break;
 	}
@@ -54,7 +89,15 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 
 bool EventExt::IsValidType(EventTypeExt type)
 {
-	return (type >= EventTypeExt::FIRST && type <= EventTypeExt::LAST);
+	switch (type)
+	{
+	case EventTypeExt::ApproachObject:
+	case EventTypeExt::TogglePlayerAutoRepair:
+	case EventTypeExt::ToggleReversingStance:
+		return true;
+	default:
+		return false;
+	}
 }
 
 void EventExt::RespondApproachObject()

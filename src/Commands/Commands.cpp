@@ -15,6 +15,7 @@
 #include "ToggleMessageList.h"
 #include "DeselectObject.h"
 #include "DeselectObject5.h"
+#include "ReversingStance.h"
 
 #include <CCINIClass.h>
 #include <ShapeButtonClass.h>
@@ -31,6 +32,12 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
+	MakeCommand<ReversingStanceClass>();
+	ShapeButtonHelper::RegisterButton(
+		ShapeButtonId::Reversing,
+		"Reversing",
+		"Tip:Reversing",
+		&ReversingStanceClass::ReversingExecute);
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
