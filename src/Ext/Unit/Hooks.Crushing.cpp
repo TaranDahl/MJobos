@@ -15,10 +15,7 @@ DEFINE_HOOK(0x73B05B, UnitClass_PerCellProcess_TiltWhenCrushes, 0x6)
 	if (!pTypeExt->TiltsWhenCrushes_Overlays.Get(pType->TiltsWhenCrushes))
 		return SkipGameCode;
 
-	if (AdvancedDriveLocomotionClass::IsReversing(pThis))
-		pThis->RockingForwardsPerFrame -= static_cast<float>(pTypeExt->CrushOverlayExtraForwardTilt);
-	else
-		pThis->RockingForwardsPerFrame += static_cast<float>(pTypeExt->CrushOverlayExtraForwardTilt);
+	pThis->RockingForwardsPerFrame += static_cast<float>(pTypeExt->CrushOverlayExtraForwardTilt);
 
 	return SkipGameCode;
 }
@@ -35,10 +32,7 @@ DEFINE_HOOK(0x741941, UnitClass_OverrunSquare_TiltWhenCrushes, 0x6)
 	if (!pTypeExt->TiltsWhenCrushes_Vehicles.Get(pType->TiltsWhenCrushes))
 		return SkipGameCode;
 
-	if (AdvancedDriveLocomotionClass::IsReversing(pThis))
-		pThis->RockingForwardsPerFrame = static_cast<float>(-pTypeExt->CrushForwardTiltPerFrame.Get(-0.05));
-	else
-		pThis->RockingForwardsPerFrame = static_cast<float>(pTypeExt->CrushForwardTiltPerFrame.Get(-0.05));
+	pThis->RockingForwardsPerFrame = static_cast<float>(pTypeExt->CrushForwardTiltPerFrame.Get(-0.050000001));
 
 	return SkipGameCode;
 }

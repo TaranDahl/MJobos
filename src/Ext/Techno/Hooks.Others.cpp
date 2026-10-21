@@ -29,18 +29,6 @@ DEFINE_JUMP(LJMP, 0x44C75E, 0x44C793);
 
 #pragma endregion
 
-#pragma region HardLoco
-/*
-DEFINE_HOOK_AGAIN(0x742A8C, UnitClass_SetDestination_PiggyBack, 0x8)
-DEFINE_HOOK(0x742691, UnitClass_SetDestination_PiggyBack, 0x8)
-{
-	REF_STACK(const _GUID*, ID, STACK_OFFSET(0x9C, -0x9C));
-	ID = &__uuidof(AdvancedDriveLocomotionClass);//&LocomotionClass::CLSIDs::Jumpjet;
-	return 0;
-}
-*/
-#pragma endregion
-
 #pragma region NewFactories
 
 // Disappear
