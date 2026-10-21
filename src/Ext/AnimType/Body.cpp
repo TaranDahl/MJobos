@@ -123,6 +123,7 @@ void AnimTypeExt::LoadFromINIFile(CCINIClass* pINI)
 	this->LargeFireAnims.Read(exINI, pID, "LargeFireAnims");
 	this->LargeFireChances.Read(exINI, pID, "LargeFireChances");
 	this->LargeFireDistances.Read(exINI, pID, "LargeFireDistances");
+	this->RenderIfOutOfScreen.Read(exINI, pID, "RenderIfOutOfScreen");
 	this->Crater_DestroyTiberium.Read(exINI, pID, "Crater.DestroyTiberium");
 	this->TheaterPalette.Read(exINI, pID, "TheaterPalette");
 	this->Tiled_Interval.Read(exINI, pID, "Tiled.Interval");
@@ -195,6 +196,7 @@ void AnimTypeExt::Serialize(T& Stm)
 		.Process(this->LargeFireAnims)
 		.Process(this->LargeFireChances)
 		.Process(this->LargeFireDistances)
+		.Process(this->RenderIfOutOfScreen)
 		.Process(this->Crater_DestroyTiberium)
 		.Process(this->TheaterPalette)
 		.Process(this->Tiled_Interval)
