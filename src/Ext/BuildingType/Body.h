@@ -106,6 +106,7 @@ public:
 	Valueable<bool> Refinery_UseNormalActiveAnim;
 
 	ValueableVector<bool> HasPowerUpAnim;
+	Nullable<bool> AISellCapturedBuilding;
 
 	Valueable<bool> UndeploysInto_Sellable;
 
@@ -226,6 +227,7 @@ public:
 		, BuildingRepairedSound {}
 		, Refinery_UseNormalActiveAnim { false }
 		, HasPowerUpAnim {}
+		, AISellCapturedBuilding {}
 		, UndeploysInto_Sellable { false }
 		, BuildingRadioLink_SyncOwner {}
 		, GuardRetryDelay {}
