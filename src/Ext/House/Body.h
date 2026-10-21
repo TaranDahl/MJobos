@@ -29,6 +29,7 @@ public:
 	std::vector<BuildingClass*> PowerPlantEnhancers;
 	std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 	std::vector<TechnoClass*> OwnedCountedHarvesters;
+	int LastRefineryBuildFrame;
 	bool ForceOnlyTargetHouseEnemy;
 	int ForceOnlyTargetHouseEnemyMode;
 
@@ -85,6 +86,7 @@ public:
 		, PowerPlantEnhancers {}
 		, OwnedLimboDeliveredBuildings {}
 		, OwnedCountedHarvesters {}
+		, LastRefineryBuildFrame { -1 }
 		, LimboAircraft {}
 		, LimboBuildings {}
 		, LimboInfantry {}
