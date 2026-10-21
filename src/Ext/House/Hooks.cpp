@@ -646,6 +646,10 @@ DEFINE_HOOK(0x508E17, HouseClass_UpdateRadar_FreeRadar, 0x8)
 		enableRadar = true;
 		return ForceRadar;
 	}
+	else if (pExt->SpyEffect_RadarJamTimer.IsTicking())
+	{
+		return ForceRadar;
+	}
 
 	return Continue;
 }
@@ -703,6 +707,22 @@ DEFINE_HOOK(0x50BF60, HouseClass_CalculateCostMultipliers, 0x5)
 	}
 
 	return SkipGameCode;
+}
+
+// This address is stacked with Ares HouseClass_Update_TogglePower; both hooks must return 0.
+DEFINE_HOOK(0x4F8440, HouseClass_Update_SpyEffectRadarJam, 0x5)
+{
+	GET(HouseClass*, pThis, ECX);
+
+	auto& radarJamTimer = HouseExt::Fetch(pThis)->SpyEffect_RadarJamTimer;
+
+	if (radarJamTimer.Completed())
+	{
+		radarJamTimer.Stop();
+		pThis->RecheckRadar = true;
+	}
+
+	return 0;
 }
 
 #pragma region PlayerAutoRepair

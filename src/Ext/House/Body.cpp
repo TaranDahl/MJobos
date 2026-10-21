@@ -711,6 +711,7 @@ void HouseExt::Serialize(T& Stm)
 		.Process(this->TeamDelay)
 		.Process(this->FreeRadar)
 		.Process(this->ForceRadar)
+		.Process(this->SpyEffect_RadarJamTimer)
 		.Process(this->PlayerAutoRepair)
 		//.Process(this->BeaconsPlacedOrder) beacon is not saved, so this follows it.
 		;
