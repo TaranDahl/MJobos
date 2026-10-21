@@ -10,6 +10,7 @@
 #include "ToggleDesignatorRange.h"
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
+#include "ManualReloadAmmo.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "ToggleMessageList.h"
@@ -31,6 +32,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
+	MakeCommand<ManualReloadAmmoCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
@@ -52,6 +54,12 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		SWSidebarClass::Commands[8] = MakeCommand<FireTacticalSWCommandClass<8>>();
 		SWSidebarClass::Commands[9] = MakeCommand<FireTacticalSWCommandClass<9>>();
 	}
+
+	ShapeButtonHelper::RegisterButton(
+		ShapeButtonId::ManualReload,
+		"ManualReload",
+		"Tip:ManualReload",
+		&ManualReloadAmmoCommandClass::ManualReloadExecute);
 
 	if (Phobos::Config::DevelopmentCommands)
 	{
