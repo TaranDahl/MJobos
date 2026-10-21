@@ -286,15 +286,6 @@ public:
 
 	Valueable<bool> Taunt;
 
-	Valueable<bool> KnockUp;
-	Valueable<Leptons> KnockUp_Range;
-	Valueable<Leptons> KnockUp_Speed;
-	Valueable<double> KnockUp_Angle;
-
-	Valueable<bool> Traction;
-	Valueable<Leptons> Traction_Range;
-	Valueable<Leptons> Traction_Speed;
-
 	Nullable<StackingMode> Psychedelic_StackingMode;
 
 	Valueable<bool> PreventCrewEscape;
@@ -620,15 +611,6 @@ public:
 
 		, Taunt { false }
 
-		, KnockUp { false }
-		, KnockUp_Range { Leptons(0) }
-		, KnockUp_Speed { Leptons(0) }
-		, KnockUp_Angle { 45.0 }
-
-		, Traction { false }
-		, Traction_Range { Leptons(0) }
-		, Traction_Speed { Leptons(0) }
-
 		, Psychedelic_StackingMode {}
 
 		, PreventCrewEscape { false }
@@ -677,8 +659,6 @@ private:
 	void ApplyForceTrack(TechnoClass* pTarget);
 	void ApplyReturnWarhead(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner);
 	void ApplyPenetratesTransport(TechnoClass* pTarget, TechnoClass* pInvoker, HouseClass* pInvokerHouse, const CoordStruct& coords, int damage, int distance);
-	void ApplyKnockUp(TechnoClass* pTarget);
-	void ApplyTraction(TechnoClass* pTarget, const CoordStruct& coords);
 	double GetCritChance(TechnoClass* pFirer) const;
 	void ApplyAmmoModifier(TechnoClass* pTarget);
 

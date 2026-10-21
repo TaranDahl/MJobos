@@ -10,12 +10,10 @@
 #include <New/Entity/LaserTrailClass.h>
 #include <New/Entity/AttachEffectClass.h>
 #include <New/Entity/SquadManagerClass.h>
-#include <New/Entity/ShiftSchedule.h>
 
 class AirstrikeClass;
-struct ShiftSchedule;
 
-class TechnoExt : public RadioExt, public Detach::Listener<AirstrikeClass>, public Detach::Listener<TechnoClass>, public Detach::Listener<HouseClass>
+class TechnoExt : public RadioExt, public Detach::Listener<AirstrikeClass>
 {
 public:
 	using base_type = TechnoClass;
@@ -112,10 +110,6 @@ public:
 
 	bool ShouldBeDead;
 
-	std::unique_ptr<ShiftSchedule> QueuedShift;
-	TechnoClass* ShiftApplier;
-	HouseClass* ShiftApplierHouse;
-
 	bool HasDeployConverted;
 	bool HasUndeployConverted;
 	std::vector<RecoilData> ExtraTurretRecoil;
@@ -192,9 +186,6 @@ public:
 		, JumpjetStraightAscend { false }
 		, OnParachuted { false }
 		, HoverShutdown { false }
-		, QueuedShift {}
-		, ShiftApplier { nullptr }
-		, ShiftApplierHouse { nullptr }
 		, LastTargetCrd { CoordStruct::Empty }
 		, LastTargetCrdClearTimer {}
 		, HasDeployConverted { false }
@@ -258,8 +249,6 @@ public:
 
 	virtual ~TechnoExt() override;
 	virtual void OnDetach(AirstrikeClass* pTarget, bool removed) override;
-	virtual void OnDetach(TechnoClass* pTarget, bool removed) override;
-	virtual void OnDetach(HouseClass* pTarget, bool removed) override;
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 	virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 

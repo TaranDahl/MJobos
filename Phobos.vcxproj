@@ -261,7 +261,6 @@
     <ClCompile Include="src\Interop\Version.cpp" />
     <ClCompile Include="src\Interop\UIExt\UIExtApi.cpp" />
     <!-- src\Locomotion -->
-    <ClCompile Include="src\Locomotion\ShiftLocomotionClass.cpp" />
     <ClCompile Include="src\Locomotion\TestLocomotionClass.cpp" />
     <!-- src\Misc -->
     <ClCompile Include="src\Misc\BlittersFix.cpp" />
@@ -320,7 +319,6 @@
     <ClCompile Include="src\New\Entity\BannerClass.cpp" />
     <ClCompile Include="src\New\Entity\LaserTrailClass.cpp" />
     <ClCompile Include="src\New\Entity\ShieldClass.cpp" />
-    <ClCompile Include="src\New\Entity\ShiftSchedule.cpp" />
     <ClCompile Include="src\New\Entity\SquadManagerClass.cpp" />
     <!-- src\New\Type -->
     <ClCompile Include="src\New\Type\AttachEffectTypeClass.cpp" />
@@ -479,7 +477,6 @@
     <ClInclude Include="src\Interop\UIExt\UIExtApi.h" />
     <!-- src\Locomotion -->
     <ClInclude Include="src\Locomotion\AStar\AStarClass.h" />
-    <ClInclude Include="src\Locomotion\ShiftLocomotionClass.h" />
     <ClInclude Include="src\Locomotion\TestLocomotionClass.h" />
     <!-- src\Misc -->
     <ClInclude Include="src\Misc\BlittersFix.h" />
@@ -519,7 +516,6 @@
     <ClInclude Include="src\New\Entity\BannerClass.h" />
     <ClInclude Include="src\New\Entity\LaserTrailClass.h" />
     <ClInclude Include="src\New\Entity\ShieldClass.h" />
-    <ClInclude Include="src\New\Entity\ShiftSchedule.h" />
     <ClInclude Include="src\New\Entity\SquadManagerClass.h" />
     <!-- src\New\Type -->
     <ClInclude Include="src\New\Type\AttachEffectTypeClass.h" />

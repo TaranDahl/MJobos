@@ -1322,9 +1322,6 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->FallingDownTracked)
 		.Process(this->OnParachuted)
 		.Process(this->HoverShutdown)
-		/*.Process(this->QueuedShift)*/ // Always set and reset in one function
-		.Process(this->ShiftApplier)
-		.Process(this->ShiftApplierHouse)
 		.Process(this->LastTargetCrd)
 		.Process(this->LastTargetCrdClearTimer)
 		.Process(this->ShouldBeDead)
@@ -1336,16 +1333,6 @@ void TechnoExt::OnDetach(AirstrikeClass* pTarget, bool removed)
 {
 	if (removed)
 		AnnounceInvalidPointer(this->AirstrikeTargetingMe, pTarget);
-}
-
-void TechnoExt::OnDetach(TechnoClass* pTarget, bool removed)
-{
-	AnnounceInvalidPointer(this->ShiftApplier, pTarget);
-}
-
-void TechnoExt::OnDetach(HouseClass* pTarget, bool removed)
-{
-	AnnounceInvalidPointer(this->ShiftApplierHouse, pTarget);
 }
 
 void TechnoExt::LoadFromStream(PhobosStreamReader& Stm)
