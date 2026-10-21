@@ -1,5 +1,6 @@
 #include <Ext/Building/Body.h>
 #include <Ext/House/Body.h>
+#include <Ext/TechnoType/Body.h>
 
 bool BuildingTypeExt::CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner)
 {
@@ -96,17 +97,21 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x3)
 	GET_STACK(TechnoTypeClass const* const, pItem, 0x4);
 	GET_STACK(bool const, buildLimitOnly, 0x8);
 	GET_STACK(bool const, includeInProduction, 0xC);
-	GET(CanBuildResult const, resultOfAres, EAX);
-
-	if (resultOfAres != CanBuildResult::Buildable)
-		return 0;
+	GET(CanBuildResult, canBuild, EAX);
 
 	if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
 	{
-		if (BuildingTypeExt::Fetch(pBuilding)->PowersUp_Buildings.size() > 0)
-			R->EAX(HouseExt::BuildLimitGroupUpgradeCheck(pThis, pItem, buildLimitOnly, includeInProduction));
+		if (canBuild == CanBuildResult::Buildable
+			&& BuildingTypeExt::Fetch(pBuilding)->PowersUp_Buildings.size() > 0)
+		{
+			canBuild = HouseExt::BuildLimitGroupUpgradeCheck(pThis, pItem, buildLimitOnly, includeInProduction);
+		}
 	}
 
+	if (!buildLimitOnly && includeInProduction && pThis == HouseClass::CurrentPlayer)
+		canBuild = TechnoTypeExt::CheckAlwaysExistCameo(const_cast<TechnoTypeClass*>(pItem), canBuild);
+
+	R->EAX(canBuild);
 	return 0;
 }
 

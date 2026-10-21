@@ -122,6 +122,10 @@ public:
 	void AddToLimboTracking(TechnoTypeClass* pTechnoType);
 	void RemoveFromLimboTracking(TechnoTypeClass* pTechnoType);
 	int CountOwnedPresentAndLimboed(TechnoTypeClass* pTechnoType) const;
+	static int CountOwnedPresentExt(HouseClass* pHouse, TechnoTypeClass* pTechnoType, bool upgrade = false, bool deploy = false);
+	static int CountOwnedPresentWithJumpjet(HouseClass* pHouse, AircraftTypeClass* pAircraftType);
+	static int CountOwnedPresentWithDeploy(HouseClass* pHouse, UnitTypeClass* pUnitType, bool deploy = false);
+	static int CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade = false, bool deploy = false);
 	void UpdateNonMFBFactoryCounts(AbstractType rtti, bool remove, bool isNaval);
 	int GetFactoryCountWithoutNonMFB(AbstractType rtti, bool isNaval) const;
 	float GetRestrictedFactoryPlantMult(TechnoTypeClass* pTechnoType) const;
@@ -213,6 +217,8 @@ public:
 
 	static CanBuildResult BuildLimitGroupUpgradeCheck(const HouseClass* pThis, const TechnoTypeClass* pItem, bool buildLimitOnly, bool includeQueued);
 	static bool ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass* pType, bool ignoreQueued);
+	static bool CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType);
+	static void RecheckOwnerBitfieldForCurrentPlayer();
 
 	static void CalculatePowerSurplus(HouseClass* pThis);
 };
