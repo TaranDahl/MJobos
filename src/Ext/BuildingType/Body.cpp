@@ -1,7 +1,12 @@
 #include "Body.h"
 
+#include <EventClass.h>
+
+#include <Ext/Building/Body.h>
 #include <Ext/House/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Ext/SWType/Body.h>
+#include <Ext/Techno/Body.h>
 
 BuildingTypeExt::ExtContainer BuildingTypeExt::ExtMap;
 
@@ -161,6 +166,115 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass*
 		checkUpgrade(pTPowersUp);
 
 	return isUpgrade ? result : -1;
+}
+
+bool BuildingTypeExt::BuildLimboBuilding(BuildingClass* pBuilding)
+{
+	const auto pBuildingType = pBuilding->Type;
+
+	if (BuildingTypeExt::Fetch(pBuildingType)->LimboBuild)
+	{
+		EventClass::OutList.Add(EventClass(
+			pBuilding->Owner->ArrayIndex,
+			EventType::Place,
+			AbstractType::Building,
+			pBuildingType->GetArrayIndex(),
+			pBuildingType->Naval,
+			CellStruct { 1, 1 }
+		));
+
+		return true;
+	}
+
+	return false;
+}
+
+void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID)
+{
+	if (pBuilding || (pBuilding = static_cast<BuildingClass*>(pType->CreateObject(pOwner)), pBuilding))
+	{
+		pBuilding->InLimbo = false;
+		pBuilding->IsAlive = true;
+		pBuilding->IsOnMap = true;
+
+		if (SessionClass::IsCampaign())
+			pBuilding->DiscoveredBy(HouseClass::CurrentPlayer);
+
+		pBuilding->DiscoveredBy(pOwner);
+
+		pOwner->RegisterGain(pBuilding, false);
+		pOwner->RecheckTechTree = true;
+		pOwner->RecheckPower = true;
+		pOwner->Buildings.AddItem(pBuilding);
+
+		if (pType->ConstructionYard)
+			pOwner->ConYards.AddItem(pBuilding);
+
+		if (pType->SecretLab)
+			pOwner->SecretLabs.AddItem(pBuilding);
+
+		const auto pBuildingExt = BuildingExt::Fetch(pBuilding);
+		const auto pOwnerExt = HouseExt::Fetch(pOwner);
+		const auto pTypeExt = pBuildingExt->GetTypeExtData();
+
+		if (!pTypeExt->PowerPlantEnhancer_Buildings.empty()
+			&& (pTypeExt->PowerPlantEnhancer_Amount != 0 || pTypeExt->PowerPlantEnhancer_Factor != 1.0f))
+		{
+			pOwnerExt->PowerPlantEnhancers.push_back(pBuilding);
+		}
+
+		if (pType->FactoryPlant)
+		{
+			if (!pTypeExt->FactoryPlant_AllowTypes.empty() || !pTypeExt->FactoryPlant_DisallowTypes.empty())
+			{
+				pOwnerExt->RestrictedFactoryPlants.push_back(pBuilding);
+			}
+			else
+			{
+				pOwner->FactoryPlants.AddItem(pBuilding);
+				pOwner->CalculateCostMultipliers();
+			}
+		}
+
+		pBuildingExt->LimboID = ID;
+		pOwnerExt->OwnedLimboDeliveredBuildings.push_back(pBuilding);
+
+		if (!pBuilding->Type->Insignificant && !pBuilding->Type->DontScore)
+			pOwnerExt->AddToLimboTracking(pBuilding->Type);
+
+		const auto pTechnoExt = TechnoExt::Fetch(pBuilding);
+		const auto pTechnoTypeExt = pTechnoExt->TypeExtData;
+
+		if (pTechnoTypeExt->AutoDeath_Behavior.isset())
+		{
+			ScenarioExt::Global()->AutoDeathObjects.push_back(pTechnoExt);
+
+			if (pTechnoTypeExt->AutoDeath_AfterDelay > 0)
+				pTechnoExt->AutoDeathTimer.Start(pTechnoTypeExt->AutoDeath_AfterDelay);
+		}
+	}
+}
+
+bool BuildingTypeExt::DeleteLimboBuilding(BuildingClass* pBuilding, int ID)
+{
+	const auto pBuildingExt = BuildingExt::Fetch(pBuilding);
+
+	if (pBuildingExt->LimboID != ID)
+		return false;
+
+	if (pBuildingExt->GetTypeExtData()->LimboBuildID == ID)
+	{
+		const auto pHouse = pBuilding->Owner;
+		const auto index = pBuilding->Type->ArrayIndex;
+
+		for (auto& pBaseNode : pHouse->Base.BaseNodes)
+		{
+			if (pBaseNode.BuildingTypeIndex == index)
+				pBaseNode.Placed = false;
+		}
+	}
+
+	return true;
 }
 
 void BuildingTypeExt::Initialize()
@@ -343,6 +457,8 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		this->SpyEffect_VictimSuperWeapon.Read(exINI, pSection, "SpyEffect.VictimSuperWeapon");
 		this->SpyEffect_InfiltratorSuperWeapon.Read(exINI, pSection, "SpyEffect.InfiltratorSuperWeapon");
 	}
+	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
+	this->LimboBuildID.Read(exINI, pSection, "LimboBuildID");
 
 	if (pThis->MaxNumberOccupants > 10)
 	{
@@ -436,6 +552,8 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->SpyEffect_Custom)
 		.Process(this->SpyEffect_VictimSuperWeapon)
 		.Process(this->SpyEffect_InfiltratorSuperWeapon)
+		.Process(this->LimboBuild)
+		.Process(this->LimboBuildID)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
