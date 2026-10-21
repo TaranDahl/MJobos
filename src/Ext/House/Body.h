@@ -213,6 +213,8 @@ public:
 
 	static CanBuildResult BuildLimitGroupUpgradeCheck(const HouseClass* pThis, const TechnoTypeClass* pItem, bool buildLimitOnly, bool includeQueued);
 	static bool ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass* pType, bool ignoreQueued);
+	static void ReorganizeAllTo(HouseClass* pFromHouse, HouseClass* pToHouse);
+	static void __fastcall DecideTechnosFate(HouseClass* pHouse);
 
 	static void CalculatePowerSurplus(HouseClass* pThis);
 };

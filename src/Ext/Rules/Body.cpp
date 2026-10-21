@@ -392,6 +392,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DamagedSpeed.Read(exINI, GameStrings::General, "DamagedSpeed");
 
 	this->HarvesterScanAfterUnload.Read(exINI, GameStrings::General, "HarvesterScanAfterUnload");
+	this->ReorganizeToWhenDefeated.Read(exINI, GameStrings::General, "ReorganizeToWhenDefeated");
 
 	this->AnimCraterDestroyTiberium.Read(exINI, GameStrings::General, "AnimCraterDestroyTiberium");
 
@@ -978,6 +979,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)
 		.Process(this->HarvesterScanAfterUnload)
+		.Process(this->ReorganizeToWhenDefeated)
 		.Process(this->AnimCraterDestroyTiberium)
 		.Process(this->BerzerkTargeting)
 		.Process(this->AllowBerzerkOnAllies)

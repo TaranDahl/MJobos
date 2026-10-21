@@ -855,4 +855,12 @@ DEFINE_HOOK(0x4AC9B2, MouseClass_ToggleBeaconMode_AllUsed, 0x6)
 	return RET;
 }
 
+DEFINE_HOOK_AGAIN(0x4F87FA, HouseClass_Update_DestroyAll, 0x5);
+DEFINE_HOOK(0x4F8F7B, HouseClass_Update_DestroyAll, 0x5)
+{
+	GET(HouseClass*, pThis, ECX);
+	HouseExt::DecideTechnosFate(pThis);
+	return R->Origin() + 0x5;
+}
+
 #pragma endregion

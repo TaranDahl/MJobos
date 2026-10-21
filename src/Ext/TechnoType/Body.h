@@ -283,6 +283,8 @@ public:
 	Valueable<int> RateDown_Cover_Value;
 	Valueable<int> RateDown_Cover_AmmoBelow;
 
+	Valueable<bool> ReorganizeToWhenDefeated_Excluded;
+
 	Nullable<bool> NoRearm_UnderEMP;
 	Nullable<bool> NoRearm_Temporal;
 	Nullable<bool> NoReload_UnderEMP;
@@ -707,6 +709,8 @@ public:
 		, RateDown_Reset { false }
 		, RateDown_Cover_Value { 0 }
 		, RateDown_Cover_AmmoBelow { -2 }
+
+		, ReorganizeToWhenDefeated_Excluded { false }
 
 		, NoRearm_UnderEMP {}
 		, NoRearm_Temporal {}

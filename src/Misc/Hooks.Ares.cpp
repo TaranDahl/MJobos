@@ -6,6 +6,7 @@
 #include <Ext/Building/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/Sidebar/Body.h>
+#include <Ext/House/Body.h>
 #include <Ext/EBolt/Body.h>
 #include <Ext/SWType/Body.h>
 #include <Ext/CaptureManager/Body.h>
@@ -299,6 +300,9 @@ void Apply_Ares3_0_Patches()
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x436DA, &LetGo);
 
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x24AC9, &HouseExt::DecideTechnosFate);
+
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x3207C, AresHelper::AresBaseAddress + 0x320DF);
 
@@ -419,6 +423,9 @@ void Apply_Ares3_0p1_Patches()
 
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x441BA, &LetGo);
+
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x255E9, &HouseExt::DecideTechnosFate);
 
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x32A5C, AresHelper::AresBaseAddress + 0x32ABF);

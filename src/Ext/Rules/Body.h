@@ -332,6 +332,7 @@ public:
 		Valueable<double> DamagedSpeed;
 
 		Valueable<bool> HarvesterScanAfterUnload;
+		Valueable<AffectedHouse> ReorganizeToWhenDefeated;
 
 		Valueable<bool> AnimCraterDestroyTiberium;
 
@@ -835,6 +836,7 @@ public:
 			, DamagedSpeed { 0.75 }
 
 			, HarvesterScanAfterUnload { false }
+			, ReorganizeToWhenDefeated { AffectedHouse::None }
 
 			, AnimCraterDestroyTiberium { true }
 

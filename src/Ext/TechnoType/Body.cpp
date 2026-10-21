@@ -1051,6 +1051,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->RateDown_Cover_Value.Read(exINI, pSection, "RateDown.Cover.Value");
 	this->RateDown_Cover_AmmoBelow.Read(exINI, pSection, "RateDown.Cover.AmmoBelow");
 
+	this->ReorganizeToWhenDefeated_Excluded.Read(exINI, pSection, "ReorganizeToWhenDefeated.Excluded");
+
 	this->NoRearm_UnderEMP.Read(exINI, pSection, "NoRearm.UnderEMP");
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
 	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
@@ -1692,6 +1694,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->RateDown_Reset)
 		.Process(this->RateDown_Cover_Value)
 		.Process(this->RateDown_Cover_AmmoBelow)
+
+		.Process(this->ReorganizeToWhenDefeated_Excluded)
 
 		.Process(this->NoRearm_UnderEMP)
 		.Process(this->NoRearm_Temporal)
