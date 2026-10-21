@@ -705,6 +705,41 @@ DEFINE_HOOK(0x50BF60, HouseClass_CalculateCostMultipliers, 0x5)
 	return SkipGameCode;
 }
 
+namespace SpyEffectRadarJamContext
+{
+	HouseClass* pThis = nullptr;
+}
+
+// This address is stacked with Ares HouseClass_Update_TogglePower; both hooks must return 0.
+DEFINE_HOOK(0x4F8440, HouseClass_Update_SpyEffectRadarJam, 0x5)
+{
+	GET(HouseClass*, pThis, ECX);
+
+	auto& radarJamTimer = HouseExt::Fetch(pThis)->SpyEffect_RadarJamTimer;
+
+	if (radarJamTimer.Completed())
+	{
+		radarJamTimer.Stop();
+		pThis->RecheckRadar = true;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x508DF0, HouseClass_UpdateRadar_SetContext, 0x7)
+{
+	GET(HouseClass*, pThis, ECX);
+	SpyEffectRadarJamContext::pThis = pThis;
+	return 0;
+}
+
+DEFINE_HOOK(0x508F2A, HouseClass_UpdateRadar_CheckSpyEffectRadarJam, 0x5)
+{
+	enum { RadarUnavailable = 0x508F2F };
+	const auto pExt = HouseExt::Fetch(SpyEffectRadarJamContext::pThis);
+	return pExt->SpyEffect_RadarJamTimer.IsTicking() ? RadarUnavailable : 0;
+}
+
 #pragma region PlayerAutoRepair
 
 DEFINE_HOOK(0x6A5395, SidebarClass_InitIO_InitRepairButton, 0x6)
