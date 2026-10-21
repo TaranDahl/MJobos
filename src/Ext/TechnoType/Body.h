@@ -283,6 +283,12 @@ public:
 	Valueable<int> RateDown_Cover_Value;
 	Valueable<int> RateDown_Cover_AmmoBelow;
 
+	Valueable<bool> CanManualReload;
+	Valueable<bool> CanManualReload_WhenFull;
+	Valueable<bool> CanManualReload_ResetROF;
+	Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
+	Valueable<int> CanManualReload_DetonateConsume;
+
 	Nullable<bool> NoRearm_UnderEMP;
 	Nullable<bool> NoRearm_Temporal;
 	Nullable<bool> NoReload_UnderEMP;
@@ -707,6 +713,12 @@ public:
 		, RateDown_Reset { false }
 		, RateDown_Cover_Value { 0 }
 		, RateDown_Cover_AmmoBelow { -2 }
+
+		, CanManualReload { false }
+		, CanManualReload_WhenFull { false }
+		, CanManualReload_ResetROF { true }
+		, CanManualReload_DetonateWarhead {}
+		, CanManualReload_DetonateConsume { 0 }
 
 		, NoRearm_UnderEMP {}
 		, NoRearm_Temporal {}

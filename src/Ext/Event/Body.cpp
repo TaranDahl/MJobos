@@ -3,6 +3,9 @@
 
 #include <Ext/House/Body.h>
 #include <Ext/Rules/Body.h>
+#include <Ext/Techno/Body.h>
+#include <Ext/TechnoType/Body.h>
+#include <Ext/WarheadType/Body.h>
 
 #include <Helpers/Macro.h>
 #include <ShapeButtonClass.h>
@@ -22,6 +25,9 @@ void EventExt::RespondEvent()
 	case EventTypeExt::TogglePlayerAutoRepair:
 		this->RespondToTogglePlayerAutoRepair();
 		break;
+	case EventTypeExt::ManualReload:
+		this->RespondToManualReloadEvent();
+		break;
 	default:
 		break;
 	}
@@ -37,6 +43,42 @@ void EventExt::RaiseTogglePlayerAutoRepair()
 	Debug::LogGame("Adding event TOGGLE_PLAYER_AUTOREPAIR\n");
 }
 
+void EventExt::RaiseManualReloadEvent(TechnoClass* pTechno)
+{
+	EventExt eventExt {};
+	eventExt.Type = EventTypeExt::ManualReload;
+	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
+	eventExt.Frame = Unsorted::CurrentFrame;
+	eventExt.ManualReloadEvent.Whom = TargetClass(pTechno);
+	eventExt.AddEvent();
+	Debug::LogGame("Adding event MANUAL_RELOAD\n");
+}
+
+void EventExt::RespondToManualReloadEvent()
+{
+	const auto pTechno = this->ManualReloadEvent.Whom.As_Techno();
+
+	if (TechnoExt::IsActive(pTechno) && pTechno->Ammo > 0 && !pTechno->Berzerk)
+	{
+		const auto pType = pTechno->GetTechnoType();
+		const auto pTypeExt = TechnoTypeExt::Fetch(pType);
+
+		if (pTypeExt->CanManualReload && (pTechno->Ammo != pType->Ammo || pTypeExt->CanManualReload_WhenFull))
+		{
+			if (pTypeExt->CanManualReload_DetonateWarhead && pTypeExt->CanManualReload_DetonateConsume <= pTechno->Ammo)
+				WarheadTypeExt::DetonateAt(pTypeExt->CanManualReload_DetonateWarhead.Get(), pTechno->GetCoords(), pTechno, pTechno->Ammo, pTechno->Owner, pTechno->Target);
+
+			if (pTypeExt->CanManualReload_ResetROF)
+				pTechno->RearmTimer.Stop();
+
+			pTechno->Ammo = 0;
+
+			if (pTechno->WhatAmI() != AbstractType::Aircraft)
+				pTechno->StartReloading();
+		}
+	}
+}
+
 size_t EventExt::GetDataSize(EventTypeExt type)
 {
 	switch (type)
@@ -45,6 +87,8 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 		return sizeof(EventExt::ApproachObject);
 	case EventTypeExt::TogglePlayerAutoRepair:
 		return sizeof(EventExt::TogglePlayerAutoRepair);
+	case EventTypeExt::ManualReload:
+		return sizeof(EventExt::ManualReloadEvent);
 	default:
 		break;
 	}
@@ -54,7 +98,15 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 
 bool EventExt::IsValidType(EventTypeExt type)
 {
-	return (type >= EventTypeExt::FIRST && type <= EventTypeExt::LAST);
+	switch (type)
+	{
+	case EventTypeExt::ApproachObject:
+	case EventTypeExt::TogglePlayerAutoRepair:
+	case EventTypeExt::ManualReload:
+		return true;
+	default:
+		return false;
+	}
 }
 
 void EventExt::RespondApproachObject()

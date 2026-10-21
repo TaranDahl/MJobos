@@ -1051,6 +1051,12 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->RateDown_Cover_Value.Read(exINI, pSection, "RateDown.Cover.Value");
 	this->RateDown_Cover_AmmoBelow.Read(exINI, pSection, "RateDown.Cover.AmmoBelow");
 
+	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
+	this->CanManualReload_WhenFull.Read(exINI, pSection, "CanManualReload.WhenFull");
+	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
+	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
+	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
+
 	this->NoRearm_UnderEMP.Read(exINI, pSection, "NoRearm.UnderEMP");
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
 	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
@@ -1692,6 +1698,12 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->RateDown_Reset)
 		.Process(this->RateDown_Cover_Value)
 		.Process(this->RateDown_Cover_AmmoBelow)
+
+		.Process(this->CanManualReload)
+		.Process(this->CanManualReload_WhenFull)
+		.Process(this->CanManualReload_ResetROF)
+		.Process(this->CanManualReload_DetonateWarhead)
+		.Process(this->CanManualReload_DetonateConsume)
 
 		.Process(this->NoRearm_UnderEMP)
 		.Process(this->NoRearm_Temporal)
