@@ -12,6 +12,55 @@ T* MakeCommand()
 	return command;
 };
 
+enum class ShapeButtonId : int
+{
+	DistributionMode = 0,
+	ManualReload = 1,
+	AggressiveStance = 2,
+	CeaseFire = 3,
+	Reversing = 4
+};
+
+class ShapeButtonHelper
+{
+public:
+	using Action = void (*)();
+
+	static constexpr int MaxButtonCount = 25;
+	static constexpr int InUseButtonCount = 11;
+	static constexpr int UnusedButtonCount = 1;
+	static constexpr int OldButtonCount = InUseButtonCount + UnusedButtonCount;
+	static constexpr int MaxNewButtonCount = MaxButtonCount - OldButtonCount;
+
+	static bool RegisterButton(ShapeButtonId id, const char* name, const char* tooltip, Action action);
+	static bool RegisterButton(ShapeButtonId id, const char* name, const char* tooltip, Action action, int toggleType, bool useFlash);
+	static int GetButtonIndex(ShapeButtonId id);
+	static bool IsButtonOn(ShapeButtonId id);
+	static int GetRegisteredButtonCount();
+
+private:
+	struct ButtonEntry
+	{
+		ShapeButtonId Id;
+		const char* Name;
+		const char* Tooltip;
+		Action Action;
+		int ToggleType;
+		bool UseFlash;
+		bool ConfigureButtonIO;
+	};
+
+	static ButtonEntry Buttons[MaxNewButtonCount];
+	static int ButtonIndexes[MaxNewButtonCount];
+	static int RegisteredButtonCount;
+
+	static int FindSlot(ShapeButtonId id);
+	static int FindSlotByButtonIndex(int buttonIndex);
+	static bool RegisterButtonInternal(ShapeButtonId id, const char* name, const char* tooltip, Action action, int toggleType, bool useFlash, bool configureButtonIO);
+
+	friend struct ShapeButtonHookAccess;
+};
+
 #define CATEGORY_TEAM StringTable::LoadString(GameStrings::TXT_TEAM)
 #define CATEGORY_INTERFACE StringTable::LoadString(GameStrings::TXT_INTERFACE)
 #define CATEGORY_TAUNT StringTable::LoadString(GameStrings::TXT_TAUNT)
