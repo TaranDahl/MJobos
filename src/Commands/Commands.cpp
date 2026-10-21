@@ -10,6 +10,7 @@
 #include "ToggleDesignatorRange.h"
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
+#include "DistributionMode.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "ToggleMessageList.h"
@@ -53,6 +54,28 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		SWSidebarClass::Commands[9] = MakeCommand<FireTacticalSWCommandClass<9>>();
 	}
 
+	if (Phobos::Config::AllowSwitchNoMoveCommand)
+		MakeCommand<SwitchNoMoveCommandClass>();
+
+	if (Phobos::Config::AllowDistributionCommand)
+	{
+		if (Phobos::Config::AllowDistributionCommand_SpreadMode)
+			MakeCommand<DistributionModeSpreadCommandClass>();
+
+		if (Phobos::Config::AllowDistributionCommand_FilterMode)
+			MakeCommand<DistributionModeFilterCommandClass>();
+
+		MakeCommand<DistributionModeHoldDownCommandClass>();
+
+		ShapeButtonHelper::RegisterButton(
+			ShapeButtonId::DistributionMode,
+			"DistributionMode",
+			"Tip:DistributionMode",
+			&DistributionModeHoldDownCommandClass::ToggleExecute,
+			1,
+			true);
+	}
+
 	if (Phobos::Config::DevelopmentCommands)
 	{
 		MakeCommand<DamageDisplayCommandClass>();
@@ -72,12 +95,18 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 
 static void MouseWheelDownCommand()
 {
+	if (DistributionModeHoldDownCommandClass::Enabled && Phobos::Config::AllowDistributionCommand_SpreadModeScroll)
+		DistributionModeHoldDownCommandClass::DistributionSpreadModeReduce();
+
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollDown();
 }
 
 static void MouseWheelUpCommand()
 {
+	if (DistributionModeHoldDownCommandClass::Enabled && Phobos::Config::AllowDistributionCommand_SpreadModeScroll)
+		DistributionModeHoldDownCommandClass::DistributionSpreadModeExpand();
+
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollUp();
 }
@@ -96,7 +125,8 @@ DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
 
 static inline bool CheckSkipScrollSidebar()
 {
-	return MessageColumnClass::Instance.IsHovering();
+	return DistributionModeHoldDownCommandClass::Enabled
+		|| MessageColumnClass::Instance.IsHovering();
 }
 
 DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)

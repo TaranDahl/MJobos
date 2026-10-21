@@ -139,6 +139,9 @@ public:
 		Valueable<bool> ForceAAWeapon_InRange_ApplyRangeModifiers;
 
 		Valueable<bool> BuildingProductionQueue;
+		ValueableIdx<VocClass> StartDistributionModeSound;
+		ValueableIdx<VocClass> EndDistributionModeSound;
+		ValueableIdx<VocClass> AddDistributionModeCommandSound;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -671,6 +674,9 @@ public:
 			, ForceAAWeapon_InRange_ApplyRangeModifiers { false }
 
 			, BuildingProductionQueue { false }
+			, StartDistributionModeSound { -1 }
+			, EndDistributionModeSound { -1 }
+			, AddDistributionModeCommandSound { -1 }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
