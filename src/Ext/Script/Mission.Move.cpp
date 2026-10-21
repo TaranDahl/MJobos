@@ -237,7 +237,7 @@ void ScriptExt::Mission_Move(TeamClass* pTeam, int calcThreatMode, bool pickAlli
 	}
 }
 
-TechnoClass* ScriptExt::FindBestObject(TechnoClass* pTechno, int method, int calcThreatMode, bool pickAllies, int attackAITargetType, int idxAITargetTypeItem)
+TechnoClass* ScriptExt::FindBestObject(TechnoClass* pTechno, int method, int calcThreatMode, bool pickAllies, int attackAITargetType, int idxAITargetTypeItem, bool needAttackableByLeader)
 {
 	TechnoClass* pBestObject = nullptr;
 	double bestVal = -1;
@@ -327,6 +327,9 @@ TechnoClass* ScriptExt::FindBestObject(TechnoClass* pTechno, int method, int cal
 		if (!ScriptExt::IsUnitAvailable(pTarget, true))
 			continue;
 
+		if (needAttackableByLeader && pTechno->GetFireErrorWithoutRange(pTarget, pTechno->SelectWeapon(pTarget)) == FireError::ILLEGAL)
+			continue;
+
 		double value = 0;
 		bool isGoodTarget = false;
 
@@ -393,6 +396,36 @@ TechnoClass* ScriptExt::FindBestObject(TechnoClass* pTechno, int method, int cal
 				if (value > bestVal || bestVal < 0)
 					isGoodTarget = true;
 			}
+
+			break;
+		}
+		case 4:
+		{
+			auto getFinalBuildingType = [pTargetType, pTargetBuildingType]() -> BuildingTypeClass*
+			{
+				if (pTargetBuildingType)
+					return pTargetBuildingType;
+
+				if (const auto pTargetUnitType = abstract_cast<UnitTypeClass*, true>(pTargetType))
+					return pTargetUnitType->DeploysInto;
+
+				return nullptr;
+			};
+			const auto pFinalBuildingType = getFinalBuildingType();
+
+			if (pFinalBuildingType && pFinalBuildingType->ConstructionYard)
+				value = 1024 * 256 * 4;
+			else if (pFinalBuildingType && pFinalBuildingType->Factory == AbstractType::Unit)
+				value = 1024 * 256 * 3;
+			else if (pFinalBuildingType && pFinalBuildingType->Factory != AbstractType::None)
+				value = 1024 * 256 * 2;
+			else if (TechnoTypeExt::Fetch(pTargetType)->KeepAlive.Get(pTargetBuildingType && !pTargetBuildingType->Insignificant && !pTargetBuildingType->DontScore))
+				value = 1024 * 256;
+
+			value -= pTechno->DistanceFrom(pTarget);
+
+			if (value > bestVal || bestVal < 0)
+				isGoodTarget = true;
 
 			break;
 		}

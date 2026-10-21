@@ -124,6 +124,63 @@ DEFINE_HOOK(0x6F01B0, TMission_ChronoShiftToTarget_SuperWeapons, 0x6)
 	return SkipGameCode;
 }
 
+DEFINE_HOOK(0x6ECCF3, TeamClass_UpdateScriptAction16_UsePhobosTargeting, 0x7)
+{
+	enum { UseWaypoint = 0, UsePhobosTargetResult = 0x6ECCFF, FuncRet = 0x6ECE4B };
+
+	GET(int, scriptArg, ECX);
+	GET(TeamClass* const, pThis, EDI);
+
+	if (scriptArg >= 0)
+		return UseWaypoint;
+
+	auto const pTeamData = TeamExt::Fetch(pThis);
+	auto pLeaderUnit = pTeamData->TeamLeader;
+
+	if (!ScriptExt::IsUnitAvailable(pLeaderUnit, true))
+	{
+		pLeaderUnit = ScriptExt::FindTheTeamLeader(pThis);
+		pTeamData->TeamLeader = pLeaderUnit;
+	}
+
+	CellClass* pCell = nullptr;
+	scriptArg = -scriptArg;
+	int targetType = -1;
+	int targetMask = -1;
+	const int targetArg = scriptArg % 256;
+	scriptArg /= 256;
+	const int calcThreatMode = scriptArg % 8;
+	scriptArg /= 8;
+	const bool pickAllies = scriptArg % 2;
+	scriptArg /= 2;
+	const bool useAITargetType = scriptArg % 2;
+	scriptArg /= 2;
+	const bool needAttackableByLeader = scriptArg % 2;
+
+	if (useAITargetType)
+		targetType = targetArg;
+	else
+		targetMask = targetArg;
+
+	const auto pSelectedTarget = ScriptExt::FindBestObject(pLeaderUnit, targetMask, calcThreatMode, pickAllies, targetType, -1, needAttackableByLeader);
+	pCell = pSelectedTarget ? pSelectedTarget->GetCell() : nullptr;
+
+	if (!pCell)
+	{
+		for (auto pUnit = pThis->FirstUnit; pUnit; pUnit = pUnit->NextTeamMember)
+		{
+			if (pUnit && pUnit->IsAlive && pUnit->Health > 0 && !pUnit->InLimbo)
+				pUnit->SetTarget(nullptr);
+		}
+
+		pThis->StepCompleted = true;
+		return FuncRet;
+	}
+
+	R->EAX(pCell);
+	return UsePhobosTargetResult;
+}
+
 DEFINE_HOOK_AGAIN(0x6F0304, TMission_ChronoShiftToTarget_SWIndex, 0x6)
 DEFINE_HOOK(0x6F02AD, TMission_ChronoShiftToTarget_SWIndex, 0x6)
 {
