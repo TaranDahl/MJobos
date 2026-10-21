@@ -1220,13 +1220,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 
-
-
-	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
-
-
-
-
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
 
@@ -1966,13 +1959,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->ExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
-
-
-
-		.Process(this->HarvesterQuickUnloader)
-
-
-
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

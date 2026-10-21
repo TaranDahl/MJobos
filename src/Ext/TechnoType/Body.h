@@ -347,11 +347,6 @@ public:
 
 
 
-	Valueable<bool> HarvesterQuickUnloader;
-
-
-
-
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -857,11 +852,6 @@ public:
 
 		, ExplodeOnDestroy {}
 		, FireDeathWeaponOnCrushed {}
-
-
-
-		, HarvesterQuickUnloader { false }
-
 
 
 

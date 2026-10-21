@@ -39,7 +39,6 @@ public:
 	std::vector<UnitClass*> OwnedDeployingUnits;
 	PlacingBuildingStruct Common;
 	PlacingBuildingStruct Combat;
-	int LastRefineryBuildFrame;
 
 	std::vector<BuildingClass*> PowerPlantEnhancers;
 	std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
