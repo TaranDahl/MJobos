@@ -36,6 +36,8 @@ public:
 		bool SWSidebar_Enable;
 		std::vector<int> SWSidebar_Indices;
 
+		std::set<int> Smudges;
+
 		std::vector<std::wstring> RecordMessages;
 
 		PhobosFixedString<64u> DefaultLS640BkgdName;
@@ -67,6 +69,7 @@ public:
 			, TransportReloaders {}
 			, SWSidebar_Enable { true }
 			, SWSidebar_Indices {}
+			, Smudges {}
 			, RecordMessages {}
 			, DefaultLS640BkgdName {}
 			, DefaultLS800BkgdName {}

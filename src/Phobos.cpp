@@ -461,5 +461,11 @@ void Phobos::ApplyOptimizations()
 		Phobos::Optimizations::DisableSyncLogging = true;
 	}
 
+	if (RulesExt::Global()->SmudgeUpdateTime <= 0)
+	{
+		Patch::Apply_RAW(0x6B56AC, { 0x52, 0x8B, 0x56, 0x34, 0x50 });
+		Patch::Apply_RAW(0x6B60DE, { 0x8B, 0x96, 0x94, 0x02, 0x00, 0x00 });
+	}
+
 	Phobos::Optimizations::Applied = true;
 }

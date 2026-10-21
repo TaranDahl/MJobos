@@ -210,6 +210,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ForceAAWeapon_InRange_ApplyRangeModifiers.Read(exINI, GameStrings::General, "ForceAAWeapon.InRange.ApplyRangeModifiers");
 
 	this->BuildingProductionQueue.Read(exINI, GameStrings::General, "BuildingProductionQueue");
+	this->SmudgeUpdateTime.Read(exINI, GameStrings::AudioVisual, "SmudgeUpdateTime");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -823,6 +824,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->FallingDownDamage)
 		.Process(this->FallingDownDamage_AllowEMP)
 		.Process(this->BuildingProductionQueue)
+		.Process(this->SmudgeUpdateTime)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

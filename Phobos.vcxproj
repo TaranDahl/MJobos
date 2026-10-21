@@ -239,6 +239,7 @@
     <ClCompile Include="src\Misc\ExceptionHandler.Dialog.cpp" />
     <ClCompile Include="src\Misc\ExceptionHandler.Report.cpp" />
     <ClCompile Include="src\Misc\FlyingStrings.cpp" />
+    <ClCompile Include="src\Misc\Hooks.AI.cpp" />
     <ClCompile Include="src\Misc\Hooks.AlphaImage.cpp" />
     <ClCompile Include="src\Misc\Hooks.Ares.cpp" />
     <ClCompile Include="src\Misc\Hooks.BugFixes.cpp" />
