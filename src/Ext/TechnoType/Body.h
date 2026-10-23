@@ -285,13 +285,8 @@ public:
 	Valueable<bool> ExtraBaseNormal;
 	Valueable<bool> ExtraBaseForAllyBuilding;
 
-	Nullable<bool> Cameo_AlwaysExist;
-	ValueableVector<TechnoTypeClass*> Cameo_OverrideTechnos;
-	DWORD Cameo_RequiredHouses;
-	bool IsMetTheEssentialConditions; // Not read from ini
 	bool IsGreyCameoForCurrentPlayer; // Not read from ini
-	bool CanBuildNowCheck; // Not read from ini
-	int CanBuildNowCount; // Not read from ini
+
 	Valueable<CSFText> UIDescription_Unbuildable;
 
 	CustomPalette CameoPal;
@@ -324,11 +319,6 @@ public:
 
 	Valueable<bool> UniqueTechno;
 
-	Valueable<bool> CanManualReload;
-	Valueable<bool> CanManualReload_WhenFull;
-	Valueable<bool> CanManualReload_ResetROF;
-	Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
-	Valueable<int> CanManualReload_DetonateConsume;
 
 	Nullable<bool> NoRearm_UnderEMP;
 	Nullable<bool> NoRearm_Temporal;
@@ -481,7 +471,6 @@ public:
 
 	Valueable<bool> NoAutoFire_AI;
 
-	Valueable<bool> ReorganizeToWhenDefeated_Excluded;
 
 	Vector2D<bool> AttackFriendlies;
 
@@ -793,13 +782,8 @@ public:
 		, ExtraBaseNormal { false }
 		, ExtraBaseForAllyBuilding { false }
 
-		, Cameo_AlwaysExist {}
-		, Cameo_OverrideTechnos {}
-		, Cameo_RequiredHouses { 0xFFFFFFFF }
-		, IsMetTheEssentialConditions { false }
 		, IsGreyCameoForCurrentPlayer { false }
-		, CanBuildNowCheck { false }
-		, CanBuildNowCount { 0 }
+
 		, UIDescription_Unbuildable {}
 
 		, CameoPal {}
@@ -832,11 +816,6 @@ public:
 
 		, UniqueTechno { false }
 
-		, CanManualReload { false }
-		, CanManualReload_WhenFull { false }
-		, CanManualReload_ResetROF { true }
-		, CanManualReload_DetonateWarhead {}
-		, CanManualReload_DetonateConsume { 0 }
 
 		, NoRearm_UnderEMP {}
 		, NoRearm_Temporal {}
@@ -979,7 +958,6 @@ public:
 
 		, NoAutoFire_AI { false }
 
-		, ReorganizeToWhenDefeated_Excluded { false }
 		, AttackFriendlies { false,false }
 
 		, DrainMoneyFrameDelay {}
@@ -1104,9 +1082,6 @@ public:
 	CoordStruct location, HouseClass* pOwner, TechnoClass* pInvoker, HouseClass* pInvokerHouse);
 
 	static WeaponTypeClass* GetWeaponType(TechnoTypeClass* pThis, int weaponIndex, bool isElite);
-
-	static int __fastcall RequirementsMetExtraCheck(void* pAresHouseExt, void* _, TechnoTypeClass* pType);
-	static CanBuildResult CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild);
 
 	// Ares 0.A
 	static const char* GetSelectionGroupID(ObjectTypeClass* pType);

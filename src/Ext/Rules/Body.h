@@ -125,7 +125,6 @@ public:
 		Nullable<bool> NoQueueUpToUnload_Buildings;
 
 		Valueable<bool> CheckExtraBaseNormal;
-		Valueable<bool> Cameo_AlwaysExist;
 		Valueable<SHPStruct*> Cameo_OverlayShapes;
 		ValueableVector<int> Cameo_OverlayFrames;
 		CustomPalette Cameo_OverlayPalette;
@@ -323,9 +322,6 @@ public:
 		Valueable<bool> CombatAlert_UseAttackVoice;
 		Valueable<bool> CombatAlert_UseEVA;
 
-		ValueableIdx<VocClass> StartDistributionModeSound;
-		ValueableIdx<VocClass> EndDistributionModeSound;
-		ValueableIdx<VocClass> AddDistributionModeCommandSound;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -389,9 +385,6 @@ public:
 
 		Valueable<bool> InTransportInfantryAmmoFix;
 
-		Valueable<bool> UpdateInLimbo_Occupier;
-		Valueable<bool> UpdateInLimbo_NormalPassenger;
-		Valueable<bool> UpdateInLimbo_LimboLaunch;
 
 		Valueable<bool> InvisoLatencyFix;
 
@@ -405,7 +398,6 @@ public:
 		Valueable<bool> HarvesterScanAfterUnload;
 
 
-		Valueable<AffectedHouse> ReorganizeToWhenDefeated;
 
 		Valueable<bool> AnimCraterDestroyTiberium;
 
@@ -421,7 +413,6 @@ public:
 
 		Valueable<bool> InvisoBlockageFix;
 
-		Valueable<int> SmudgeUpdateTime;
 
 		Valueable<int> AIAdjacentMax;
 		Nullable<int> AIAdjacentMax_Campaign;
@@ -432,10 +423,6 @@ public:
 		Valueable<bool> InfantryAutoDeploy;
 
 		Valueable<int> AdjacentWallDamage;
-
-		Valueable<bool> AISellCapturedBuilding;
-
-		Valueable<bool> IgnoreCenterMinorRadarEvent;
 
 		Valueable<bool> KeepAnimOnLimbo;
 
@@ -744,7 +731,6 @@ public:
 			, NoQueueUpToUnload_Buildings {}
 
 			, CheckExtraBaseNormal { false }
-			, Cameo_AlwaysExist { false }
 			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
 			, Cameo_OverlayFrames {}
 			, Cameo_OverlayPalette {}
@@ -928,9 +914,6 @@ public:
 			, CombatAlert_UseFeedbackVoice { true }
 			, CombatAlert_UseAttackVoice { true }
 			, CombatAlert_UseEVA { true }
-			, StartDistributionModeSound { -1 }
-			, EndDistributionModeSound { -1 }
-			, AddDistributionModeCommandSound { -1 }
 			, UseFixedVoxelLighting { false }
 			, AIAutoDeployMCV { true }
 			, AISetBaseCenter { true }
@@ -978,9 +961,6 @@ public:
 
 			, AllyShareControl { false }
 			, InTransportInfantryAmmoFix { false }
-			, UpdateInLimbo_Occupier { false }
-			, UpdateInLimbo_NormalPassenger { false }
-			, UpdateInLimbo_LimboLaunch { false }
 			, InvisoLatencyFix { false }
 			, WalkFrameFirst { true }
 			, ProneSpeed_Crawls { 0.67 }
@@ -991,7 +971,6 @@ public:
 			, HarvesterScanAfterUnload { false }
 
 
-			, ReorganizeToWhenDefeated { AffectedHouse::None }
 
 			, AnimCraterDestroyTiberium { true }
 
@@ -1006,7 +985,6 @@ public:
 
 			, InvisoBlockageFix { false }
 
-			, SmudgeUpdateTime { 0 }
 
 			, AIAdjacentMax { -1 }
 			, AIAdjacentMax_Campaign {}
@@ -1015,10 +993,6 @@ public:
 			, Parasite_AllowWaterExit {}
 			, InfantryAutoDeploy { false }
 			, AdjacentWallDamage { 200 }
-
-			, AISellCapturedBuilding { true }
-
-			, IgnoreCenterMinorRadarEvent { false }
 
 			, KeepAnimOnLimbo { false }
 

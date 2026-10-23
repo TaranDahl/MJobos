@@ -241,7 +241,7 @@ BuildingTypeClass* BuildingTypeExt::GetAnotherPlacingType(size_t direction, bool
 {
 	const auto pType = this->OwnerObject();
 
-	if (pType->PlaceAnywhere || this->LimboBuild)
+	if (pType->PlaceAnywhere)
 		return nullptr;
 
 	const auto& types = onWater ? this->PlaceBuilding_OnWater : this->PlaceBuilding_OnLand;
@@ -254,13 +254,78 @@ BuildingTypeClass* BuildingTypeExt::GetAnotherPlacingType(size_t direction, bool
 	const auto pAnotherType = types[static_cast<int>(direction * size / 32u)];
 
 	if (pAnotherType->BuildCat != pType->BuildCat
-		|| pAnotherType->PlaceAnywhere
-		|| BuildingTypeExt::Fetch(pAnotherType)->LimboBuild)
+		|| pAnotherType->PlaceAnywhere)
 	{
 		return nullptr;
 	}
 
 	return pAnotherType;
+}
+
+void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID)
+{
+	if (pBuilding || (pBuilding = static_cast<BuildingClass*>(pType->CreateObject(pOwner)), pBuilding))
+	{
+		pBuilding->InLimbo = false;
+		pBuilding->IsAlive = true;
+		pBuilding->IsOnMap = true;
+
+		if (SessionClass::IsCampaign())
+			pBuilding->DiscoveredBy(HouseClass::CurrentPlayer);
+
+		pBuilding->DiscoveredBy(pOwner);
+
+		pOwner->RegisterGain(pBuilding, false);
+		pOwner->RecheckTechTree = true;
+		pOwner->RecheckPower = true;
+		pOwner->Buildings.AddItem(pBuilding);
+
+		if (pType->ConstructionYard)
+			pOwner->ConYards.AddItem(pBuilding);
+
+		if (pType->SecretLab)
+			pOwner->SecretLabs.AddItem(pBuilding);
+
+		const auto pBuildingExt = BuildingExt::Fetch(pBuilding);
+		const auto pOwnerExt = HouseExt::Fetch(pOwner);
+		const auto pTypeExt = pBuildingExt->GetTypeExtData();
+
+		if (!pTypeExt->PowerPlantEnhancer_Buildings.empty()
+			&& (pTypeExt->PowerPlantEnhancer_Amount != 0 || pTypeExt->PowerPlantEnhancer_Factor != 1.0f))
+		{
+			pOwnerExt->PowerPlantEnhancers.push_back(pBuilding);
+		}
+
+		if (pType->FactoryPlant)
+		{
+			if (!pTypeExt->FactoryPlant_AllowTypes.empty() || !pTypeExt->FactoryPlant_DisallowTypes.empty())
+			{
+				pOwnerExt->RestrictedFactoryPlants.push_back(pBuilding);
+			}
+			else
+			{
+				pOwner->FactoryPlants.AddItem(pBuilding);
+				pOwner->CalculateCostMultipliers();
+			}
+		}
+
+		pBuildingExt->LimboID = ID;
+		pOwnerExt->OwnedLimboDeliveredBuildings.push_back(pBuilding);
+
+		if (!pBuilding->Type->Insignificant && !pBuilding->Type->DontScore)
+			pOwnerExt->AddToLimboTracking(pBuilding->Type);
+
+		const auto pTechnoExt = TechnoExt::Fetch(pBuilding);
+		const auto pTechnoTypeExt = pTechnoExt->TypeExtData;
+
+		if (pTechnoTypeExt->AutoDeath_Behavior.isset())
+		{
+			ScenarioExt::Global()->AutoDeathObjects.push_back(pTechnoExt);
+
+			if (pTechnoTypeExt->AutoDeath_AfterDelay > 0)
+				pTechnoExt->AutoDeathTimer.Start(pTechnoTypeExt->AutoDeath_AfterDelay);
+		}
+	}
 }
 
 // Check whether can call the occupiers leave
@@ -1237,125 +1302,6 @@ bool BuildingTypeExt::AutoPlaceBuilding(BuildingClass* pBuilding)
 	return false;
 }
 
-bool BuildingTypeExt::BuildLimboBuilding(BuildingClass* pBuilding)
-{
-	const auto pBuildingType = pBuilding->Type;
-
-	if (BuildingTypeExt::Fetch(pBuildingType)->LimboBuild)
-	{
-		EventClass::OutList.Add(EventClass(
-			pBuilding->Owner->ArrayIndex,
-			EventType::Place,
-			AbstractType::Building,
-			pBuildingType->GetArrayIndex(),
-			pBuildingType->Naval,
-			CellStruct { 1, 1 }
-		));
-
-		return true;
-	}
-
-	return false;
-}
-
-void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID)
-{
-	if (pBuilding || (pBuilding = static_cast<BuildingClass*>(pType->CreateObject(pOwner)), pBuilding))
-	{
-		// All of these are mandatory
-		pBuilding->InLimbo = false;
-		pBuilding->IsAlive = true;
-		pBuilding->IsOnMap = true;
-
-		// Jun 3, 2023 - Starkku: For reasons beyond my comprehension, the discovery logic is checked for certain logics like power drain/output in campaign only.
-		// Normally on unlimbo the buildings are revealed to current player if unshrouded or if game is a campaign and to non-player houses always.
-		// Because of the unique nature of LimboDelivered buildings, this has been adjusted to always reveal to the current player in singleplayer
-		// and to the owner of the building regardless, removing the shroud check from the equation since they don't physically exist
-		if (SessionClass::IsCampaign())
-			pBuilding->DiscoveredBy(HouseClass::CurrentPlayer);
-
-		pBuilding->DiscoveredBy(pOwner);
-
-		pOwner->RegisterGain(pBuilding, false);
-		pOwner->RecheckTechTree = true;
-		pOwner->RecheckPower = true;
-		pOwner->Buildings.AddItem(pBuilding);
-
-		// Different types of building logics
-		if (pType->ConstructionYard)
-			pOwner->ConYards.AddItem(pBuilding); // why would you do that????
-
-		if (pType->SecretLab)
-			pOwner->SecretLabs.AddItem(pBuilding);
-
-		auto const pBuildingExt = BuildingExt::Fetch(pBuilding);
-		auto const pOwnerExt = HouseExt::Fetch(pOwner);
-
-		if (!pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Buildings.empty()
-			&& (pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Amount != 0 || pBuildingExt->GetTypeExtData()->PowerPlantEnhancer_Factor != 1.0f))
-			pOwnerExt->PowerPlantEnhancers.push_back(pBuilding);
-
-		if (pType->FactoryPlant)
-		{
-			if (pBuildingExt->GetTypeExtData()->FactoryPlant_AllowTypes.size() > 0 || pBuildingExt->GetTypeExtData()->FactoryPlant_DisallowTypes.size() > 0)
-			{
-				pOwnerExt->RestrictedFactoryPlants.push_back(pBuilding);
-			}
-			else
-			{
-				pOwner->FactoryPlants.AddItem(pBuilding);
-				pOwner->CalculateCostMultipliers();
-			}
-		}
-
-		// BuildingClass::Place is already called in DiscoveredBy
-		// it added OrePurifier and xxxGainSelfHeal to House counter already
-
-		// LimboKill ID
-		pBuildingExt->LimboID = ID;
-
-		// Add building to list of owned limbo buildings
-		pOwnerExt->OwnedLimboDeliveredBuildings.push_back(pBuilding);
-		auto const pBldType = pBuilding->Type;
-
-		if (!pBldType->Insignificant && !pBldType->DontScore)
-			pOwnerExt->AddToLimboTracking(pBldType);
-
-		auto const pTechnoExt = TechnoExt::Fetch(pBuilding);
-		auto const pTechnoTypeExt = pTechnoExt->TypeExtData;
-
-		if (pTechnoTypeExt->AutoDeath_Behavior.isset())
-		{
-			ScenarioExt::Global()->AutoDeathObjects.push_back(pTechnoExt);
-
-			if (pTechnoTypeExt->AutoDeath_AfterDelay > 0)
-				pTechnoExt->AutoDeathTimer.Start(pTechnoTypeExt->AutoDeath_AfterDelay);
-		}
-	}
-}
-
-bool BuildingTypeExt::DeleteLimboBuilding(BuildingClass* pBuilding, int ID)
-{
-	const auto pBuildingExt = BuildingExt::Fetch(pBuilding);
-
-	if (pBuildingExt->LimboID != ID)
-		return false;
-
-	if (pBuildingExt->GetTypeExtData()->LimboBuildID == ID)
-	{
-		const auto pHouse = pBuilding->Owner;
-		const auto index = pBuilding->Type->ArrayIndex;
-
-		for (auto& pBaseNode : pHouse->Base.BaseNodes)
-		{
-			if (pBaseNode.BuildingTypeIndex == index)
-				pBaseNode.Placed = false;
-		}
-	}
-
-	return true;
-}
-
 void BuildingTypeExt::Initialize()
 {
 	TechnoTypeExt::Initialize();
@@ -1418,7 +1364,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Cameo_ShouldCount.Read(exINI, pSection, "Cameo.ShouldCount");
 	this->AutoBuilding.Read(exINI, pSection, "AutoBuilding");
 	this->AutoBuilding_Gap.Read(exINI, pSection, "AutoBuilding.Gap");
-	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
 	this->LimboBuildID.Read(exINI, pSection, "LimboBuildID");
 	this->LaserFencePost_Fence.Read(exINI, pSection, "LaserFencePost.Fence");
 	this->PlaceBuilding_OnLand.Read(exINI, pSection, "PlaceBuilding.OnLand");
@@ -1481,8 +1426,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->UndeploysInto_Sellable.Read(exINI, pSection, "UndeploysInto.Sellable");
 	this->BuildingRadioLink_SyncOwner.Read(exINI, pSection, "BuildingRadioLink.SyncOwner");
 	this->GuardRetryDelay.Read(exINI, pSection, "GuardRetryDelay");
-
-	this->AISellCapturedBuilding.Read(exINI, pSection, "AISellCapturedBuilding");
 
 	this->TurretAnim_IdleFrames.Read(exINI, pSection, "TurretAnim.IdleFrames");
 	this->TurretAnim_LowPowerIdleFrames.Read(exINI, pSection, "TurretAnim.LowPowerIdleFrames");
@@ -1575,8 +1518,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		this->SpyEffect_VictimSuperWeapon.Read(exINI, pSection, "SpyEffect.VictimSuperWeapon");
 		this->SpyEffect_InfiltratorSuperWeapon.Read(exINI, pSection, "SpyEffect.InfiltratorSuperWeapon");
 	}
-	this->SpyEffect_RadarJamDuration.Read(exINI, pSection, "SpyEffect.RadarJamDuration");
-
 	if (pThis->MaxNumberOccupants > 10)
 	{
 		char tempBuffer[32];
@@ -1670,14 +1611,12 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->SpyEffect_Custom)
 		.Process(this->SpyEffect_VictimSuperWeapon)
 		.Process(this->SpyEffect_InfiltratorSuperWeapon)
-		.Process(this->SpyEffect_RadarJamDuration)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
 		.Process(this->Cameo_ShouldCount)
 		.Process(this->AutoBuilding)
 		.Process(this->AutoBuilding_Gap)
-		.Process(this->LimboBuild)
 		.Process(this->LimboBuildID)
 		.Process(this->LaserFencePost_Fence)
 		.Process(this->PlaceBuilding_OnLand)
@@ -1723,7 +1662,6 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->Refinery_UseNormalActiveAnim)
 		.Process(this->AIBaseNormal)
 		.Process(this->HasPowerUpAnim)
-		.Process(this->AISellCapturedBuilding)
 		.Process(this->Bib_Dir)
 		.Process(this->NumberImpassableRows_Dir)
 		.Process(this->WeaponsFactory_Dir)

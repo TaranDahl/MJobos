@@ -15,7 +15,6 @@ enum class EventTypeExt : uint8_t
 
 	ApproachObject = 0x40,
 	TogglePlayerAutoRepair = 0x41,
-	ManualReload = 0x82,
 	AssignSecondaryRallyPoint = 0x86,
 
 	FIRST = ApproachObject,
@@ -48,7 +47,6 @@ public:
 		char DataBuffer[104];
 		EventStruct_Obj2 ApproachObject;
 		EventStruct_Obj0 TogglePlayerAutoRepair;
-		EventStruct_Obj1 ManualReloadEvent;
 		EventStruct_Obj2 AssignSecondaryRallyPoint;
 	};
 
@@ -58,9 +56,6 @@ public:
 	void RespondApproachObject();
 	static void RaiseTogglePlayerAutoRepair();
 	void RespondToTogglePlayerAutoRepair();
-
-	static void RaiseManualReloadEvent(TechnoClass* pTechno);
-	void RespondToManualReloadEvent();
 
 	static void RaiseAssignSecondaryRallyPoint(BuildingClass* pBuilding, AbstractClass* pTarget);
 	void RespondToAssignSecondaryRallyPoint();

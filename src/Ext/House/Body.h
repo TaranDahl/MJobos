@@ -84,7 +84,6 @@ public:
 	};
 	std::vector<SWExt> SuperExts;
 
-	CDTimerClass SpyEffect_RadarJamTimer;
 
 	int ForceEnemyIndex;
 	bool ForceOnlyTargetHouseEnemy;
@@ -124,7 +123,6 @@ public:
 		, AIFireSaleDelayTimer {}
 		, SuspendedEMPulseSWs {}
 		, SuperExts(SuperWeaponTypeClass::Array.Count)
-		, SpyEffect_RadarJamTimer {}
 		, ForceEnemyIndex { -1 }
 		, ForceOnlyTargetHouseEnemy { false }
 		, ForceOnlyTargetHouseEnemyMode { -1 }
@@ -230,15 +228,8 @@ public:
 
 	static CanBuildResult BuildLimitGroupUpgradeCheck(const HouseClass* pThis, const TechnoTypeClass* pItem, bool buildLimitOnly, bool includeQueued);
 	static bool ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass* pType, bool ignoreQueued);
-	static int CountOwnedPresentExt(HouseClass* pHouse, TechnoTypeClass* pTechnoType, bool upgrade = false, bool deploy = false);
-	static int CountOwnedPresentWithJumpjet(HouseClass* pHouse, AircraftTypeClass* pAircraftType);
-	static int CountOwnedPresentWithDeploy(HouseClass* pHouse, UnitTypeClass* pUnitType, bool deploy = false);
 	static int CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade = false, bool deploy = false);
 	static int CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade = true, bool deploy = true);
-	static bool CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType);
-	static void RecheckOwnerBitfieldForCurrentPlayer();
-	static void ReorganizeAllTo(HouseClass* pFromHouse, HouseClass* pToHouse);
-	static void __fastcall DecideTechnosFate(HouseClass* pHouse);
 	static void CalculatePowerSurplus(HouseClass* pThis);
 };
 

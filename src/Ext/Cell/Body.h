@@ -47,8 +47,6 @@ public:
 	std::vector<RadSiteClass*> RadSites {};
 	std::vector<RadLevel> RadLevels {};
 	int InfantryCount { 0 };
-	int SmudgeGenerate { 0 };
-	BlitterFlags SmudgeState { BlitterFlags::None };
 
 	CellExt(CellClass* OwnerObject) : AbstractExt(OwnerObject)
 	{ }

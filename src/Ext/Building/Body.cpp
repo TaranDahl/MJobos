@@ -1,5 +1,4 @@
 #include "Body.h"
-#include "Ext/House/Body.h"
 
 #include <BitFont.h>
 #include <Misc/FlyingStrings.h>
@@ -353,17 +352,6 @@ bool BuildingExt::HandleInfiltrate(HouseClass* pInfiltratorHouse, int moneybefor
 		if (idx2 >= 0)
 			launchTheSWHere(pInfiltratorHouse->Supers.Items[idx2], pInfiltratorHouse);
 
-		const int jamTime = pTypeExt->SpyEffect_RadarJamDuration;
-		if (jamTime > 0)
-		{
-			pVictimHouse->RecheckRadar = true;
-			auto pVictimExt = HouseExt::Fetch(pVictimHouse);
-			if (pVictimExt->SpyEffect_RadarJamTimer.TimeLeft < jamTime)
-			{
-				pVictimExt->SpyEffect_RadarJamTimer.Stop();
-				pVictimExt->SpyEffect_RadarJamTimer.Start(jamTime);
-			}
-		}
 	}
 
 	return true;

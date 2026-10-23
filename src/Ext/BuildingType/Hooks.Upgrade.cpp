@@ -104,11 +104,6 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x3)
 		}
 	}
 
-	if (canBuild == CanBuildResult::Buildable)
-
-	if (!buildLimitOnly && includeInProduction && pThis == HouseClass::CurrentPlayer) // Eliminate any non-producible calls
-		canBuild = TechnoTypeExt::CheckAlwaysExistCameo(pItem, canBuild);
-
 	R->EAX(canBuild);
 	return 0;
 }

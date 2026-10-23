@@ -78,9 +78,6 @@ bool UniqueTechnoButtonClass::Draw(bool forced)
 		pSelect = pTechno;
 	else if (auto pTrans = pTechno->Transporter)
 		for (; pTrans; pSelect = pTrans, pTrans = pTrans->Transporter);
-	else if (const auto pOccupy = pExt->BuildingOccupying)
-		pSelect = pOccupy;
-
 	if (pSelect)
 	{
 		const auto pSelectExt = TechnoExt::Fetch(pSelect);

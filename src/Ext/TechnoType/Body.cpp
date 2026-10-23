@@ -1,4 +1,3 @@
-#include <EventClass.h>
 #include <FlyLocomotionClass.h>
 #include <JumpjetLocomotionClass.h>
 
@@ -10,10 +9,8 @@
 #include <Ext/Foot/Body.h>
 #include <Ext/UnitType/Body.h>
 #include <Ext/WeaponType/Body.h>
-#include <Ext/House/Body.h>
 #include <New/Type/InsigniaTypeClass.h>
 
-#include <Utilities/AresFunctions.h>
 #include <Utilities/AresHelper.h>
 
 namespace
@@ -731,106 +728,6 @@ TechnoClass* TechnoTypeExt::CreateUnit(CreateUnitTypeClass* pCreateUnit, DirType
 	return nullptr;
 }
 
-int __fastcall TechnoTypeExt::RequirementsMetExtraCheck(void* pAresHouseExt, void* _, TechnoTypeClass* pType)
-{
-	// Only with Ares will call this function, so skip sanity check.
-	const auto result = AresFunctions::RequirementsMet(pAresHouseExt, pType);
-
-	if (*reinterpret_cast<HouseClass**>(pAresHouseExt) == HouseClass::CurrentPlayer)
-	{
-		const auto pTypeExt = TechnoTypeExt::Fetch(pType);
-
-		if (pTypeExt->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
-			pTypeExt->IsMetTheEssentialConditions = (result > 2);
-	}
-
-	return result;
-}
-
-CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild)
-{
-	const auto pTypeExt = TechnoTypeExt::Fetch(pType);
-	auto ForceRedrawSidebar = [pType]()
-	{
-		const auto tabIndex = SidebarClass::GetObjectTabIdx(pType->WhatAmI(), pType->GetArrayIndex(), 0);
-		auto& sidebar = SidebarClass::Instance;
-
-		if (tabIndex != sidebar.ActiveTabIndex)
-			return;
-
-		sidebar.SidebarNeedsRedraw = true;
-		sidebar.SidebarBackgroundNeedsRedraw = true; // Necessary
-		sidebar.Tabs[tabIndex].NeedsRedraw = true;
-		sidebar.RedrawSidebar(0);
-	};
-
-	if (canBuild == CanBuildResult::Unbuildable)
-	{
-		const auto pCurrent = HouseClass::CurrentPlayer;
-		auto CheckOverrideTechnos = [pCurrent, pTypeExt]()
-		{
-			const auto& pAuxTypes = pTypeExt->Cameo_OverrideTechnos;
-
-			if (pAuxTypes.size())
-			{
-				for (const auto& pAuxType : pAuxTypes)
-				{
-					if (HouseExt::CountOwnedPresentExt(pCurrent, pAuxType, true, true))
-						return true;
-				}
-			}
-
-			return false;
-		};
-
-		if (pTypeExt->IsMetTheEssentialConditions && (CheckOverrideTechnos() || HouseExt::CheckOwnerBitfieldForCurrentPlayer(pType)))
-		{
-			if (!pTypeExt->IsGreyCameoForCurrentPlayer)
-			{
-				pTypeExt->IsGreyCameoForCurrentPlayer = true;
-				ForceRedrawSidebar();
-				auto buildCat = BuildCat::DontCare;
-
-				if (const auto pBldType = abstract_cast<BuildingTypeClass*>(pType))
-				{
-					buildCat = pBldType->BuildCat;
-					auto& display = DisplayClass::Instance;
-					const auto pCurType = abstract_cast<BuildingTypeClass*>(display.CurrentBuildingType);
-
-					if (!RulesExt::Global()->ExtendedBuildingPlacing || !pCurType || BuildingTypeExt::IsSameBuildingType(pBldType, pCurType))
-					{
-						display.SetActiveFoundation(nullptr);
-						display.CurrentBuilding = nullptr;
-						display.CurrentBuildingType = nullptr;
-						display.CurrentBuildingOwnerArrayIndex = -1;
-					}
-				}
-
-				if (pCurrent->GetPrimaryFactory(pType->WhatAmI(), pType->Naval, buildCat))
-				{
-					EventClass::OutList.Add(EventClass(
-						pCurrent->ArrayIndex,
-						EventType::AbandonAll,
-						static_cast<int>(pType->WhatAmI()),
-						pType->GetArrayIndex(),
-						pType->Naval
-					));
-				}
-			}
-
-			canBuild = CanBuildResult::TemporarilyUnbuildable;
-		}
-	}
-	else if (pTypeExt->IsGreyCameoForCurrentPlayer)
-	{
-		pTypeExt->IsGreyCameoForCurrentPlayer = false;
-		VoxClass::Play(&Make_Global<const char>(0x83FA64)); // 0x83FA64 -> EVA_NewConstructionOptions
-		ForceRedrawSidebar();
-	}
-
-	return canBuild;
-}
-
 // used for more WeaponX added by Ares.
 WeaponTypeClass* TechnoTypeExt::GetWeaponType(TechnoTypeClass* pThis, int weaponIndex, bool isElite)
 {
@@ -1168,9 +1065,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->ExtraBaseNormal.Read(exINI, pSection, "ExtraBaseNormal");
 	this->ExtraBaseForAllyBuilding.Read(exINI, pSection, "ExtraBaseForAllyBuilding");
 
-	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
-	this->Cameo_OverrideTechnos.Read(exINI, pSection, "Cameo.OverrideTechnos");
-	this->Cameo_RequiredHouses = pINI->ReadHouseTypesList(pSection, "Cameo.RequiredHouses", this->Cameo_RequiredHouses);
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 
 	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
@@ -1199,11 +1093,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
 
-	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
-	this->CanManualReload_WhenFull.Read(exINI, pSection, "CanManualReload.WhenFull");
-	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
-	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
-	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
 
 	this->NoRearm_UnderEMP.Read(exINI, pSection, "NoRearm.UnderEMP");
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
@@ -1342,7 +1231,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->NoAutoFire_AI.Read(exINI, pSection, "NoAutoFire.AI");
 
-	this->ReorganizeToWhenDefeated_Excluded.Read(exINI, pSection, "ReorganizeToWhenDefeated.Excluded");
 
 	this->TeamMember_ConsideredAs.Read(exINI, pSection, "TeamMember.ConsideredAs");
 
@@ -1894,13 +1782,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->ExtraBaseNormal)
 		.Process(this->ExtraBaseForAllyBuilding)
 
-		.Process(this->Cameo_AlwaysExist)
-		.Process(this->Cameo_OverrideTechnos)
-		.Process(this->Cameo_RequiredHouses)
-		.Process(this->IsMetTheEssentialConditions)
 		.Process(this->IsGreyCameoForCurrentPlayer)
-		.Process(this->CanBuildNowCheck)
-		.Process(this->CanBuildNowCount)
+
 		.Process(this->UIDescription_Unbuildable)
 
 		.Process(this->CameoPal)
@@ -1933,11 +1816,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->UniqueTechno)
 
-		.Process(this->CanManualReload)
-		.Process(this->CanManualReload_WhenFull)
-		.Process(this->CanManualReload_ResetROF)
-		.Process(this->CanManualReload_DetonateWarhead)
-		.Process(this->CanManualReload_DetonateConsume)
 
 		.Process(this->NoRearm_UnderEMP)
 		.Process(this->NoRearm_Temporal)
@@ -2081,7 +1959,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->NoAutoFire_AI)
 
-		.Process(this->ReorganizeToWhenDefeated_Excluded)
 		.Process(this->AttackFriendlies)
 
 		.Process(this->DrainMoneyFrameDelay)

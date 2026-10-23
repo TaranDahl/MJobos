@@ -27,51 +27,11 @@ void EventExt::RespondEvent()
 		this->RespondToTogglePlayerAutoRepair();
 		break;
 
-	case EventTypeExt::ManualReload:
-		this->RespondToManualReloadEvent();
-		break;
-
 	case EventTypeExt::AssignSecondaryRallyPoint:
 		this->RespondToAssignSecondaryRallyPoint();
 		break;
 	default:
 		break;
-	}
-}
-
-void EventExt::RaiseManualReloadEvent(TechnoClass* pTechno)
-{
-	EventExt eventExt {};
-	eventExt.Type = EventTypeExt::ManualReload;
-	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
-	eventExt.Frame = Unsorted::CurrentFrame;
-	eventExt.ManualReloadEvent.Whom = TargetClass(pTechno);
-	eventExt.AddEvent();
-	Debug::LogGame("Adding event MANUAL_RELOAD\n");
-}
-
-void EventExt::RespondToManualReloadEvent()
-{
-	const auto pTechno = this->ManualReloadEvent.Whom.As_Techno();
-
-	if (TechnoExt::IsActive(pTechno) && pTechno->Ammo > 0 && !pTechno->Berzerk)
-	{
-		const auto pType = pTechno->GetTechnoType();
-		const auto pTypeExt = TechnoTypeExt::Fetch(pType);
-
-		if (pTypeExt->CanManualReload && (pTechno->Ammo != pType->Ammo || pTypeExt->CanManualReload_WhenFull))
-		{
-			if (pTypeExt->CanManualReload_DetonateWarhead && pTypeExt->CanManualReload_DetonateConsume <= pTechno->Ammo)
-				WarheadTypeExt::DetonateAt(pTypeExt->CanManualReload_DetonateWarhead.Get(), pTechno->GetCoords(), pTechno, pTechno->Ammo, pTechno->Owner, pTechno->Target);
-
-			if (pTypeExt->CanManualReload_ResetROF)
-				pTechno->RearmTimer.Stop();
-
-			pTechno->Ammo = 0;
-
-			if (pTechno->WhatAmI() != AbstractType::Aircraft)
-				pTechno->StartReloading();
-		}
 	}
 }
 
@@ -109,8 +69,6 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 		return sizeof(EventExt::ApproachObject);
 	case EventTypeExt::TogglePlayerAutoRepair:
 		return sizeof(EventExt::TogglePlayerAutoRepair);
-	case EventTypeExt::ManualReload:
-		return sizeof(EventExt::ManualReloadEvent);
 	case EventTypeExt::AssignSecondaryRallyPoint:
 		return sizeof(EventExt::AssignSecondaryRallyPoint);
 	default:
@@ -128,7 +86,6 @@ bool EventExt::IsValidType(EventTypeExt type)
 	{
 	case EventTypeExt::ApproachObject:
 	case EventTypeExt::TogglePlayerAutoRepair:
-	case EventTypeExt::ManualReload:
 	case EventTypeExt::AssignSecondaryRallyPoint:
 		return true;
 	default:

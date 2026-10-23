@@ -42,26 +42,6 @@ bool SelectedButtonClass::Action(GadgetFlag flags, DWORD* pKey, KeyModifier modi
 	if (vec.empty())
 		return false;
 
-	if (flags & GadgetFlag::LeftPress)
-	{
-		if (this->ID != 0) // AmmoButton
-		{
-			const auto pExt = vec[0];
-			const auto pTechno = pExt->OwnerObject();
-
-			if (pTechno->Owner->IsControlledByCurrentPlayer() && pTechno->Ammo > 0 && pTechno->IsAlive && !pTechno->Berzerk)
-			{
-				const auto pTypeExt = pExt->TypeExtData;
-
-				if (pTechno->Ammo != pTypeExt->OwnerObject()->Ammo && pTypeExt->CanManualReload)
-				{
-					VocClass::PlayGlobal(RulesClass::Instance->GUIMainButtonSound, 0x2000, 1.0);
-					EventExt::RaiseManualReloadEvent(pTechno);
-				}
-			}
-		}
-	}
-
 	this->GadgetClass::Action(flags, pKey, KeyModifier::None);
 	return true;
 }
@@ -87,24 +67,12 @@ void SelectedButtonClass::DrawInfo() const
 	{
 		int frame = 4;
 
-		if (pTypeExt->CanManualReload && pTechno->IsAlive && !pTechno->Berzerk && pTechno->Ammo != pTechno->GetTechnoType()->Ammo)
+		if (pTechno->IsAlive && !pTechno->Berzerk && pTechno->Ammo != pTechno->GetTechnoType()->Ammo)
 			frame = pTechno->Ammo ? 6 : 5;
 
 		DSurface::Composite->DrawSHP(pSideExt->SelectedInfo_Palette.GetOrDefaultConvert(FileSystem::ANIM_PAL),
 			pSHP, frame, &position, &rect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 
-		if (this->Hovering)
-		{
-			auto location = Point2D { this->X + this->Width + 10, this->Y + 4 };
-			const auto text = GeneralUtils::LoadStringUnlessMissing("TIP:ManualReloadAmmo", L"ManualReloadAmmo");
-			RectangleStruct drawRect = Drawing::GetTextDimensions(text, location, 0, 3, 2);
-			location += Point2D { 4, 1 };
-			drawRect.Width += 8;
-			ColorStruct color { 0, 0, 0 };
-			DSurface::Composite->FillRectTrans(&drawRect, &color, 40);
-			DSurface::Composite->DrawRect(&drawRect, COLOR_WHITE);
-			DSurface::Composite->DrawText(text, &location, COLOR_WHITE);
-		}
 	}
 }
 

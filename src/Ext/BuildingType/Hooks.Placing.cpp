@@ -950,17 +950,6 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 	const auto pBufferType = pBuildingType;
 	const auto pTypeExt = BuildingTypeExt::Fetch(pBuildingType);
 
-	if (pTypeExt->LimboBuild)
-	{
-		BuildingTypeExt::CreateLimboBuilding(pBuilding, pBuildingType, pHouse, pTypeExt->LimboBuildID);
-
-		if (pDisplay->CurrentBuilding == pBuilding && HouseClass::CurrentPlayer == pHouse)
-			ClearCurrentBuildingData(pDisplay);
-
-		PlayConstructionYardAnim<true>(pFactory);
-		return BuildSucceeded;
-	}
-
 	const bool upgrade = pBuildingType->PowersUpBuilding[0];
 	const bool expand = RulesExt::Global()->ExtendedBuildingPlacing && !pBuildingType->PlaceAnywhere && !upgrade;
 	const size_t placeType = PlaceTypeTemp::PlaceType;
@@ -1436,24 +1425,6 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 	}
 
 	const auto pHouse = pFactory->Owner;
-	const auto pTypeExt = BuildingTypeExt::Fetch(pBuildingType);
-
-	if (pTypeExt->LimboBuild)
-	{
-		BuildingTypeExt::CreateLimboBuilding(pBuilding, pBuildingType, pHouse, pTypeExt->LimboBuildID);
-
-		if (pBaseNode)
-		{
-			pBaseNode->Placed = true;
-			pBaseNode->Attempts = 0;
-
-			if (pHouse->ProducingBuildingTypeIndex == pBuildingType->ArrayIndex)
-				pHouse->ProducingBuildingTypeIndex = -1;
-		}
-
-		PlayConstructionYardAnim<true>(pFactory);
-		return BuildSucceeded;
-	}
 
 	if (!RulesExt::Global()->ExtendedBuildingPlacing)
 		return 0;
@@ -1954,10 +1925,6 @@ DEFINE_HOOK(0x6A8E34, StripClass_Update_AutoBuildBuildings, 0x7)
 	enum { SkipGameCode = 0x6A8F49 };
 
 	GET(BuildingClass* const, pBuilding, ESI);
-
-	if (BuildingTypeExt::BuildLimboBuilding(pBuilding))
-		return SkipGameCode;
-
 	BuildingTypeExt::AutoPlaceBuilding(pBuilding);
 
 	return 0;
@@ -1976,17 +1943,12 @@ DEFINE_HOOK(0x42EB8E, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x6)
 	GET(BaseClass* const, pBase, ESI);
 	GET(BaseNodeClass* const, pBaseNode, EAX);
 
-	if (pBaseNode->Placed)
+	if (RulesExt::Global()->AIForbidConYard && pBaseNode->Placed)
 	{
 		const auto index = pBaseNode->BuildingTypeIndex;
 
-		if (index >= 0 && index < BuildingTypeClass::Array.Count)
-		{
-			const auto pType = BuildingTypeClass::Array.Items[index];
-
-			if ((pType->ConstructionYard && RulesExt::Global()->AIForbidConYard) || BuildingTypeExt::Fetch(pType)->LimboBuild)
-				return Invalid;
-		}
+		if (index >= 0 && index < BuildingTypeClass::Array.Count && BuildingTypeClass::Array.Items[index]->ConstructionYard)
+			return Invalid;
 	}
 
 	return pBase->Owner->IsValidBaseNode(pBaseNode) ? Valid : Invalid;

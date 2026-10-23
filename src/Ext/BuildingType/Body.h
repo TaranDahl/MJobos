@@ -59,7 +59,6 @@ public:
 	Valueable<bool> SpyEffect_Custom;
 	ValueableIdx<SuperWeaponTypeClass> SpyEffect_VictimSuperWeapon;
 	ValueableIdx<SuperWeaponTypeClass> SpyEffect_InfiltratorSuperWeapon;
-	Valueable<int> SpyEffect_RadarJamDuration;
 
 	Nullable<bool> ConsideredVehicle;
 	Valueable<bool> ZShapePointMove_OnBuildup;
@@ -71,7 +70,6 @@ public:
 	Nullable<bool> Cameo_ShouldCount;
 	Nullable<bool> AutoBuilding;
 	Nullable<int> AutoBuilding_Gap;
-	Valueable<bool> LimboBuild;
 	Valueable<int> LimboBuildID;
 	Valueable<BuildingTypeClass*> LaserFencePost_Fence;
 	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnLand;
@@ -127,7 +125,6 @@ public:
 
 	Nullable<bool> AIBaseNormal;
 
-	Nullable<bool> AISellCapturedBuilding;
 
 	Valueable<int> Bib_Dir;
 	Valueable<int> NumberImpassableRows_Dir;
@@ -220,14 +217,12 @@ public:
 		, SpyEffect_Custom { false }
 		, SpyEffect_VictimSuperWeapon {}
 		, SpyEffect_InfiltratorSuperWeapon {}
-		, SpyEffect_RadarJamDuration { 0 }
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
 		, Cameo_ShouldCount {}
 		, AutoBuilding {}
 		, AutoBuilding_Gap {}
-		, LimboBuild { false }
 		, LimboBuildID { -1 }
 		, LaserFencePost_Fence {}
 		, PlaceBuilding_OnLand {}
@@ -271,7 +266,6 @@ public:
 		, Refinery_UseNormalActiveAnim { false }
 		, AIBaseNormal {}
 		, HasPowerUpAnim {}
-		, AISellCapturedBuilding {}
 		, Bib_Dir { 2 }
 		, NumberImpassableRows_Dir { 2 }
 		, WeaponsFactory_Dir { 2 }
@@ -402,8 +396,6 @@ public:
 	static CellStruct SimulatePlacingAction(BuildingTypeClass* pType, CellStruct rallyCell, HouseClass* pHouse);
 	static CellStruct NearbyPlacingLocation(BuildingTypeClass* pType, CellStruct cell, HouseClass* pHouse, int buildGap = 1, bool checkAdjacent = false, bool checkShroud = false);
 	static bool AutoPlaceBuilding(BuildingClass* pBuilding);
-	static bool BuildLimboBuilding(BuildingClass* pBuilding);
 	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
-	static bool DeleteLimboBuilding(BuildingClass* pBuilding, int ID);
 };
 
