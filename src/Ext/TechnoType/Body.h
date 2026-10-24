@@ -274,6 +274,7 @@ public:
 	Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
 	CustomPalette CameoPal;
+	PhobosPCXFile CameoPCX;
 
 	Valueable<DisplayInfoType> SelectedInfo_UpperType;
 	Valueable<int> SelectedInfo_UpperIndex;
@@ -717,6 +718,7 @@ public:
 		, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
 		, CameoPal {}
+		, CameoPCX {}
 
 		, SelectedInfo_UpperType { DisplayInfoType::Shield }
 		, SelectedInfo_UpperIndex { 0 }

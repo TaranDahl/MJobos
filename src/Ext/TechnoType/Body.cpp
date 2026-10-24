@@ -1453,6 +1453,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		Debug::Log("[Developer warning] [%s] has Palette=%s set but no palette file was loaded (missing file or wrong filename). Missing palettes cause issues with lighting recalculations.\n", pArtSection, pThis->PaletteFile);
 
 	this->CameoPal.LoadFromINI(&CCINIClass::INI_Art, pArtSection, "CameoPalette");
+	this->CameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "CameoPCX");
 
 	DropCrate.Read(exINI, pSection, "DropCrate");
 
@@ -1701,6 +1702,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
 		.Process(this->CameoPal)
+		.Process(this->CameoPCX)
 
 		.Process(this->SelectedInfo_UpperType)
 		.Process(this->SelectedInfo_UpperIndex)
