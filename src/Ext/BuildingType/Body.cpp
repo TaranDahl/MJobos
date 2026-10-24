@@ -924,16 +924,6 @@ CellStruct BuildingTypeExt::NearbyPlacingLocation(BuildingTypeClass* pType, Cell
 				if (!canBeBaseNormal())
 					continue;
 
-				const auto& pExtraAllowed = pTypeExt->Adjacent_AllowedExtra;
-
-				if (pExtraAllowed.size() > 0 && !pExtraAllowed.Contains(pTechnoTypeExt->OwnerObject()))
-					continue;
-
-				const auto& pExtraDisallowed = pTypeExt->Adjacent_DisallowedExtra;
-
-				if (pExtraDisallowed.size() > 0 && pExtraDisallowed.Contains(pTechnoTypeExt->OwnerObject()))
-					continue;
-
 				BuildingTypeExt::PlaceCheckedCells[MapClass::GetCellIndex(pTechno->GetMapCoords())] |= 0x4;
 			}
 		}
@@ -1400,8 +1390,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoAlphaImageOnBuildup.Read(exINI, pSection, "NoAlphaImageOnBuildup");
 	this->Adjacent_Allowed.Read(exINI, pSection, "Adjacent.Allowed");
 	this->Adjacent_Disallowed.Read(exINI, pSection, "Adjacent.Disallowed");
-	this->Adjacent_AllowedExtra.Read(exINI, pSection, "Adjacent.AllowedExtra");
-	this->Adjacent_DisallowedExtra.Read(exINI, pSection, "Adjacent.DisallowedExtra");
 	this->Adjacent_Disallowed_Prohibit.Read(exINI, pSection, "Adjacent.Disallowed.Prohibit");
 	this->Adjacent_Disallowed_ProhibitDistance.Read(exINI, pSection, "Adjacent.Disallowed.ProhibitDistance");
 
@@ -1643,8 +1631,6 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->NoAlphaImageOnBuildup)
 		.Process(this->Adjacent_Allowed)
 		.Process(this->Adjacent_Disallowed)
-		.Process(this->Adjacent_AllowedExtra)
-		.Process(this->Adjacent_DisallowedExtra)
 		.Process(this->Adjacent_Disallowed_Prohibit)
 		.Process(this->Adjacent_Disallowed_ProhibitDistance)
 		.Process(this->BarracksExitCell)

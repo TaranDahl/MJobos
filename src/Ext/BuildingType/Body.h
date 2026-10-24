@@ -99,8 +99,6 @@ public:
 	Nullable<bool> NoAlphaImageOnBuildup;
 	ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
 	ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
-	ValueableVector<TechnoTypeClass*> Adjacent_AllowedExtra;
-	ValueableVector<TechnoTypeClass*> Adjacent_DisallowedExtra;
 	Valueable<bool> Adjacent_Disallowed_Prohibit;
 	Valueable<int> Adjacent_Disallowed_ProhibitDistance;
 
@@ -247,8 +245,6 @@ public:
 		, NoAlphaImageOnBuildup {}
 		, Adjacent_Allowed {}
 		, Adjacent_Disallowed {}
-		, Adjacent_AllowedExtra {}
-		, Adjacent_DisallowedExtra {}
 		, Adjacent_Disallowed_Prohibit { false }
 		, Adjacent_Disallowed_ProhibitDistance { 0 }
 		, BarracksExitCell {}
