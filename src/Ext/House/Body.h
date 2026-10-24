@@ -9,16 +9,6 @@
 
 #include <array>
 
-struct PlacingBuildingStruct
-{
-	BuildingTypeClass* Type;
-	BuildingTypeClass* DrawType;
-	int Times;
-	CDTimerClass Timer;
-	CellStruct TopLeft;
-	size_t PlaceType;
-};
-
 class HouseExt final : public AbstractExt, public Detach::Listener<BuildingClass>
 {
 public:
@@ -35,10 +25,6 @@ public:
 	{
 		return static_cast<HouseClass*>(this->GetAttachedObject());
 	}
-
-	std::vector<UnitClass*> OwnedDeployingUnits;
-	PlacingBuildingStruct Common;
-	PlacingBuildingStruct Combat;
 
 	std::vector<BuildingClass*> PowerPlantEnhancers;
 	std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;

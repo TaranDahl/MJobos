@@ -61,7 +61,6 @@ public:
 	bool LastRearmWasFullDelay;
 	bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 	int WHAnimRemainingCreationInterval;
-	CDTimerClass UnitAutoDeployTimer;
 	WeaponTypeClass* LastWeaponType;
 	CoordStruct LastWeaponFLH;
 	std::shared_ptr<PhobosMap<BulletTypeClass*, BulletGroupData>> TrajectoryGroup;
@@ -149,7 +148,6 @@ public:
 		, LastRearmWasFullDelay { false }
 		, CanCloakDuringRearm { false }
 		, WHAnimRemainingCreationInterval { 0 }
-		, UnitAutoDeployTimer {}
 		, LastWeaponType {}
 		, LastWeaponFLH {}
 		, TrajectoryGroup {}

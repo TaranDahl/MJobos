@@ -3,12 +3,9 @@
 
 #include <EventClass.h>
 
-#include <Ext/BuildingType/Body.h>
-
 std::unique_ptr<SidebarExt::ExtData> SidebarExt::Data = nullptr;
 
 SHPStruct* SidebarExt::TabProducingProgress[4];
-SHPStruct* SidebarExt::AutoBuildingMark[2];
 
 void SidebarExt::Allocate(SidebarClass* pThis)
 {
@@ -53,20 +50,12 @@ bool __stdcall SidebarExt::AresTabCameo_RemoveCameo(BuildType* pItem)
 	if (pItem->ItemType == AbstractType::BuildingType || pItem->ItemType == AbstractType::Building)
 	{
 		__assume(pTechnoType != nullptr);
-		// It is not necessary to remove buildings on the mouse in all cases here
-		const auto pBldType = static_cast<BuildingTypeClass*>(pTechnoType);
-		buildCat = pBldType->BuildCat;
-		const auto pDisplay = &DisplayClass::Instance;
-		const auto pCurType = abstract_cast<BuildingTypeClass*>(pDisplay->CurrentBuildingType);
-
-		if (!RulesExt::Global()->ExtendedBuildingPlacing || !pCurType
-			|| BuildingTypeExt::IsSameBuildingType(pBldType, pCurType))
-		{
-			pDisplay->SetActiveFoundation(nullptr);
-			pDisplay->CurrentBuilding = nullptr;
-			pDisplay->CurrentBuildingType = nullptr;
-			pDisplay->CurrentBuildingOwnerArrayIndex = -1;
-		}
+		buildCat = static_cast<BuildingTypeClass*>(pTechnoType)->BuildCat;
+		auto& pDisplay = DisplayClass::Instance;
+		pDisplay.SetActiveFoundation(nullptr);
+		pDisplay.CurrentBuilding = nullptr;
+		pDisplay.CurrentBuildingType = nullptr;
+		pDisplay.CurrentBuildingOwnerArrayIndex = -1;
 	}
 
 	// AbandonAll contains Abandon, if the factory cannot be found, it will also cannot be found when respont to this event.

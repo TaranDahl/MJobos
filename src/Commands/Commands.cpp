@@ -12,7 +12,6 @@
 #include "SelectCaptured.h"
 #include "SelectedInfo.h"
 #include "HerosInfo.h"
-#include "AutoBuilding.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "ToggleMessageList.h"
@@ -44,8 +43,6 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SelectedExpandCommandClass>();
 	// MakeCommand<Mutation::OpenMutationUICommandClass>();
 	MakeCommand<HerosInfoCommandClass>();
-	MakeCommand<AutoBuildingCommandClass>();
-	MakeCommand<AutoBuildingCombatCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();

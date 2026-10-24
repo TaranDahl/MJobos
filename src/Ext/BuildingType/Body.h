@@ -68,8 +68,6 @@ public:
 
 
 	Nullable<bool> Cameo_ShouldCount;
-	Nullable<bool> AutoBuilding;
-	Nullable<int> AutoBuilding_Gap;
 	Valueable<int> LimboBuildID;
 	Valueable<BuildingTypeClass*> LaserFencePost_Fence;
 	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnLand;
@@ -219,8 +217,6 @@ public:
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
 		, Cameo_ShouldCount {}
-		, AutoBuilding {}
-		, AutoBuilding_Gap {}
 		, LimboBuildID { -1 }
 		, LaserFencePost_Fence {}
 		, PlaceBuilding_OnLand {}
@@ -344,25 +340,6 @@ public:
 	static ExtContainer ExtMap;
 
 	static std::vector<CellStruct> BaseNormalCells;
-	static std::vector<TechnoClass*> CleanCheckedTechnos;
-	static std::vector<CellClass*> CleanCheckedCells;
-	static std::vector<CellClass*> CleanOptionalCells;
-	static std::vector<TechnoClass*> CleanReCheckedTechnos;
-	struct InfantryCountInCell
-	{
-		CellClass* Position;
-		int Count;
-	};
-	static std::vector<InfantryCountInCell> CleanInfantryCells;
-	struct TechnoWithDestination
-	{
-		TechnoClass* Techno;
-		CellClass* Destination;
-	};
-	static std::vector<TechnoWithDestination> CleanFinalOrder;
-	static std::vector<CellClass*> CleanDeleteCells;
-	static std::vector<TechnoClass*> CleanOptionalTechnos;
-	static std::unordered_map<int, int> PlaceCheckedCells;
 	static bool ContainersInit;
 
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
@@ -387,11 +364,6 @@ public:
 	static int GetUpgradesAmount(BuildingTypeClass const* const pBuilding, HouseClass const* const pHouse);
 	static void DrawAdjacentLines();
 	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
-	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
-	static bool IsSameBuildingType(BuildingTypeClass* pType1, BuildingTypeClass* pType2);
-	static CellStruct SimulatePlacingAction(BuildingTypeClass* pType, CellStruct rallyCell, HouseClass* pHouse);
-	static CellStruct NearbyPlacingLocation(BuildingTypeClass* pType, CellStruct cell, HouseClass* pHouse, int buildGap = 1, bool checkAdjacent = false, bool checkShroud = false);
-	static bool AutoPlaceBuilding(BuildingClass* pBuilding);
 	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
 };
 

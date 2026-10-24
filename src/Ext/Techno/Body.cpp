@@ -26,12 +26,6 @@ TechnoExt::~TechnoExt()
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 
-	if (RulesExt::Global()->ExtendedBuildingPlacing && whatAmI == AbstractType::UnitType && pType->DeploysInto)
-	{
-		auto& vec = HouseExt::Fetch(pThis->Owner)->OwnedDeployingUnits;
-		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
-	}
-
 	if (RulesExt::Global()->CheckExtraBaseNormal && pTypeExt->ExtraBaseNormal)
 	{
 		auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
@@ -1281,7 +1275,6 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->LastRearmWasFullDelay)
 		.Process(this->CanCloakDuringRearm)
 		.Process(this->WHAnimRemainingCreationInterval)
-		.Process(this->UnitAutoDeployTimer)
 		.Process(this->LastWeaponType)
 		.Process(this->LastWeaponFLH)
 		.Process(this->TrajectoryGroup)

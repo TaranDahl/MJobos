@@ -130,8 +130,6 @@ public:
 		CustomPalette Cameo_OverlayPalette;
 		Valueable<bool> ExtendedBuildingPlacing;
 		Valueable<bool> ExtendedWeaponsFactory;
-		Valueable<bool> AutoBuilding;
-		Valueable<int> AutoBuilding_Gap;
 
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
@@ -736,8 +734,6 @@ public:
 			, Cameo_OverlayPalette {}
 			, ExtendedBuildingPlacing { false }
 			, ExtendedWeaponsFactory { false }
-			, AutoBuilding { false }
-			, AutoBuilding_Gap { 1 }
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }
