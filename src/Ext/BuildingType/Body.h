@@ -66,6 +66,8 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
+	Valueable<SHPStruct*> PlaceBuilding_DirectionShape;
+
 	Valueable<bool> IsAnimDelayedBurst;
 
 	std::vector<std::optional<DirType>> AircraftDockingDirs;
@@ -104,6 +106,10 @@ public:
 	NullableIdx<VocClass> BuildingRepairedSound;
 
 	Valueable<bool> Refinery_UseNormalActiveAnim;
+
+	Valueable<int> Bib_Dir;
+	Valueable<int> NumberImpassableRows_Dir;
+	Valueable<int> WeaponsFactory_Dir;
 
 	ValueableVector<bool> HasPowerUpAnim;
 
@@ -195,6 +201,7 @@ public:
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
+		, PlaceBuilding_DirectionShape { nullptr }
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
 		, FactoryPlant_DisallowTypes {}
@@ -226,6 +233,9 @@ public:
 		, BuildingRepairedSound {}
 		, Refinery_UseNormalActiveAnim { false }
 		, HasPowerUpAnim {}
+		, Bib_Dir { 2 }
+		, NumberImpassableRows_Dir { 2 }
+		, WeaponsFactory_Dir { 2 }
 		, UndeploysInto_Sellable { false }
 		, BuildingRadioLink_SyncOwner {}
 		, GuardRetryDelay {}
@@ -273,6 +283,8 @@ public:
 		return static_cast<BuildingTypeClass*>(this->TechnoTypeExt::OwnerObject());
 	}
 
+	BuildingTypeClass* GetAnotherPlacingType(size_t direction, bool onWater);
+
 	// Ares 0.A functions
 	int GetSuperWeaponCount() const;
 	int GetSuperWeaponIndex(int index, HouseClass* pHouse) const;
@@ -316,6 +328,8 @@ public:
 
 	static void PlayBunkerSound(BuildingClass const* pThis, bool buildUp = false);
 	static bool IsPoweredAnimBlocked(BuildingClass* pBuilding, bool powered, bool poweredLight, bool poweredEffect, bool poweredSpecial);
+
+	static CellStruct GetWeaponFactoryDoor(BuildingClass* pThis);
 
 	static std::pair<int, int> GetEnhancedPower(BuildingTypeClass* pBuilding, int output, HouseClass* pHouse, BuildingClass* pPowerPlant = nullptr);
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);

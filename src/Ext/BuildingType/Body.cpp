@@ -112,6 +112,52 @@ bool BuildingTypeExt::IsPoweredAnimBlocked(BuildingClass* pBuilding, bool powere
 		&& !BuildingExt::Fetch(pBuilding)->HasPowerFromMapFile;
 }
 
+CellStruct BuildingTypeExt::GetWeaponFactoryDoor(BuildingClass* pThis)
+{
+	auto cell = pThis->GetMapCoords();
+	auto buffer = CoordStruct::Empty;
+	pThis->GetExitCoords(&buffer, 0);
+	const auto pType = pThis->Type;
+
+	switch (RulesExt::Global()->ExtendedWeaponsFactory ? BuildingTypeExt::Fetch(pType)->WeaponsFactory_Dir.Get() : 2)
+	{
+
+	case 0:
+	{
+		cell.X = static_cast<short>(buffer.X / Unsorted::LeptonsPerCell);
+		break;
+	}
+
+	case 2:
+	{
+		cell.X += static_cast<short>(pType->GetFoundationWidth() - 1);
+		cell.Y = static_cast<short>(buffer.Y / Unsorted::LeptonsPerCell);
+		break;
+	}
+
+	case 4:
+	{
+		cell.X = static_cast<short>(buffer.X / Unsorted::LeptonsPerCell);
+		cell.Y += static_cast<short>(pType->GetFoundationHeight(false) - 1);
+		break;
+	}
+
+	case 6:
+	{
+		cell.Y = static_cast<short>(buffer.Y / Unsorted::LeptonsPerCell);
+		break;
+	}
+
+	default:
+	{
+		break;
+	}
+
+	}
+
+	return cell;
+}
+
 int BuildingTypeExt::CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pType, HouseClass* pHouse)
 {
 	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pType, pHouse);
@@ -161,6 +207,16 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass*
 		checkUpgrade(pTPowersUp);
 
 	return isUpgrade ? result : -1;
+}
+
+BuildingTypeClass* BuildingTypeExt::GetAnotherPlacingType(size_t direction, bool onWater)
+{
+	const auto pType = this->OwnerObject();
+
+	if (pType->PlaceAnywhere)
+		return nullptr;
+
+	return nullptr;
 }
 
 void BuildingTypeExt::Initialize()
@@ -220,6 +276,8 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->SellBuildupLength.Read(exINI, pSection, "SellBuildupLength");
 	this->IsDestroyableObstacle.Read(exINI, pSection, "IsDestroyableObstacle");
 	this->Explodes_DuringBuildup.Read(exINI, pSection, "Explodes.DuringBuildup");
+
+	this->PlaceBuilding_DirectionShape.Read(exINI, pSection, "PlaceBuilding.DirectionShape");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
@@ -307,6 +365,12 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->AircraftDockingDir_DefaultToPoseDir.Read(exArtINI, pArtSection, "AircraftDockingDir.DefaultToPoseDir");
 
 	this->Refinery_UseNormalActiveAnim.Read(exArtINI, pArtSection, "Refinery.UseNormalActiveAnim");
+	this->Bib_Dir.Read(exINI, pSection, "Bib.Dir");
+	this->Bib_Dir = Math::max(0, this->Bib_Dir) & 6; // Only accept 0,2,4,6
+	this->NumberImpassableRows_Dir.Read(exINI, pSection, "NumberImpassableRows.Dir");
+	this->NumberImpassableRows_Dir = Math::max(0, this->NumberImpassableRows_Dir) & 6; // Only accept 0,2,4,6
+	this->WeaponsFactory_Dir.Read(exINI, pSection, "WeaponsFactory.Dir");
+	this->WeaponsFactory_Dir = Math::max(0, this->WeaponsFactory_Dir) & 6; // Only accept 0,2,4,6
 
 	this->DeployFireDelay.Read(exINI, pSection, "DeployFireDelay");
 
@@ -439,6 +503,7 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
+		.Process(this->PlaceBuilding_DirectionShape)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->AircraftDockingDir_DefaultToPoseDir)
 		.Process(this->FactoryPlant_AllowTypes)
@@ -471,6 +536,9 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->BuildingRepairedSound)
 		.Process(this->Refinery_UseNormalActiveAnim)
 		.Process(this->HasPowerUpAnim)
+		.Process(this->Bib_Dir)
+		.Process(this->NumberImpassableRows_Dir)
+		.Process(this->WeaponsFactory_Dir)
 		.Process(this->UndeploysInto_Sellable)
 		.Process(this->BuildingRadioLink_SyncOwner)
 		.Process(this->GuardRetryDelay)

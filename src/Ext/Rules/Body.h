@@ -106,6 +106,8 @@ public:
 		Nullable<bool> NoQueueUpToEnter_Buildings;
 		Nullable<bool> NoQueueUpToUnload_Buildings;
 
+		Valueable<bool> ExtendedWeaponsFactory;
+
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
 		Valueable<double> JumpjetTilt_ForwardSpeedFactor;
@@ -637,6 +639,8 @@ public:
 			, NoQueueUpToUnload { false }
 			, NoQueueUpToEnter_Buildings {}
 			, NoQueueUpToUnload_Buildings {}
+
+			, ExtendedWeaponsFactory { false }
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }
