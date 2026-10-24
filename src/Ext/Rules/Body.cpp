@@ -237,11 +237,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlacementGrid_Expand.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.Expand");
 	this->PlacementGrid_LandFrames.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.LandFrames");
 	this->PlacementGrid_WaterFrames.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.WaterFrames");
-	this->SelectedInfantryMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedInfantryMissingPCX");
-	this->SelectedVehicleMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedVehicleMissingPCX");
-	this->SelectedAircraftMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedAircraftMissingPCX");
-	this->SelectedBuildingMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedBuildingMissingPCX");
-	this->SelectedIngameTimer.Read(exINI, GameStrings::AudioVisual, "SelectedIngameTimer");
 
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
@@ -924,11 +919,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlacementGrid_Expand)
 		.Process(this->PlacementGrid_LandFrames)
 		.Process(this->PlacementGrid_WaterFrames)
-		.Process(this->SelectedInfantryMissingPCX)
-		.Process(this->SelectedVehicleMissingPCX)
-		.Process(this->SelectedAircraftMissingPCX)
-		.Process(this->SelectedBuildingMissingPCX)
-		.Process(this->SelectedIngameTimer)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

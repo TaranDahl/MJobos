@@ -257,27 +257,6 @@ DEFINE_HOOK(0x7015C9, TechnoClass_Captured_UpdateTracking, 0x6)
 		pNewOwnerExt->AddToLimboTracking(pType);
 	}
 
-	if (pTypeExt->UniqueTechno)
-	{
-		const auto pOldOwner = pThis->Owner;
-
-		if (pOldOwner->IsControlledByCurrentPlayer())
-		{
-			if (!pNewOwner->IsControlledByCurrentPlayer())
-			{
-				auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
-				vec.erase(std::remove(vec.begin(), vec.end(), pExt), vec.end());
-			}
-		}
-		else if (pNewOwner->IsControlledByCurrentPlayer())
-		{
-			auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
-
-			if (std::find(vec.begin(), vec.end(), pExt) == vec.end())
-				vec.push_back(pExt);
-		}
-	}
-
 	if (pTypeExt->Harvester_Counted)
 	{
 		auto& vec = pOwnerExt->OwnedCountedHarvesters;

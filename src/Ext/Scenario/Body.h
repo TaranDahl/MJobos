@@ -38,8 +38,6 @@ public:
 		std::vector<int> SWSidebar_Indices;
 
 		std::vector<TechnoExt*> BaseNormalTechnos;
-		std::vector<TechnoExt*> OwnedUniqueTechnos;
-
 
 		std::vector<std::wstring> RecordMessages;
 
@@ -73,7 +71,6 @@ public:
 			, SWSidebar_Enable { true }
 			, SWSidebar_Indices {}
 			, BaseNormalTechnos {}
-			, OwnedUniqueTechnos {}
 			, RecordMessages {}
 			, DefaultLS640BkgdName {}
 			, DefaultLS800BkgdName {}

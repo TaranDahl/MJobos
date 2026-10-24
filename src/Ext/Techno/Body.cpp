@@ -32,12 +32,6 @@ TechnoExt::~TechnoExt()
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 
-	if (pTypeExt->UniqueTechno)
-	{
-		auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
-		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
-	}
-
 	if (whatAmI != AbstractType::AircraftType && whatAmI != AbstractType::BuildingType
 		&& pType->Ammo > 0 && pTypeExt->ReloadInTransport.Get(RulesExt::Global()->ReloadInTransport))
 	{

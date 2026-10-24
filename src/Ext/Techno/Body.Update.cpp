@@ -7,7 +7,6 @@
 #include <Ext/House/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Ext/Scenario/Body.h>
-#include "Ext/Sidebar/SelectedButton/SelectedInfoClass.h"
 #include <Misc/FlyingStrings.h>
 #include <Utilities/AresFunctions.h>
 #include <New/Type/Affiliated/TypeConvertGroup.h>
@@ -1292,26 +1291,6 @@ void TechnoExt::UpdateTypeData(TechnoTypeClass* pCurrentType)
 		else if (pNewTypeExt->ExtraBaseNormal)
 		{
 			auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
-
-			if (std::find(vec.begin(), vec.end(), this) == vec.end())
-				vec.push_back(this);
-		}
-	}
-
-	// Reset UniqueTechno
-	if (pOwner->IsControlledByCurrentPlayer())
-	{
-		if (pOldTypeExt->UniqueTechno)
-		{
-			if (!pNewTypeExt->UniqueTechno)
-			{
-				auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
-				vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
-			}
-		}
-		else if (pNewTypeExt->UniqueTechno)
-		{
-			auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
 
 			if (std::find(vec.begin(), vec.end(), this) == vec.end())
 				vec.push_back(this);

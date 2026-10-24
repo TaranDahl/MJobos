@@ -79,9 +79,6 @@ bool Phobos::Config::HideShakeEffects = true;
 bool Phobos::Config::ShowFlashOnSelecting = false;
 bool Phobos::Config::UnitPowerDrain = false;
 int Phobos::Config::SuperWeaponSidebar_RequiredSignificance = 0;
-bool Phobos::Config::SelectedDisplay_Enable = false;
-bool Phobos::Config::SelectedDisplay_Expand = false;
-int Phobos::Config::SelectedDisplay_MaxCameo = 10;
 bool Phobos::Config::ScrollSidebarStripInTactical = true;
 bool Phobos::Config::ScrollSidebarStripWhenHoldAlt = true;
 bool Phobos::Config::ScrollSidebarStripWhenHoldCtrl = true;
@@ -164,14 +161,6 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 		Phobos::UI::DisableEmptySpawnPositions =
 			ini_uimd.ReadBool("LoadingScreen", "DisableEmptySpawnPositions", false);
 	}
-
-	Phobos::Config::SelectedDisplay_Enable = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "SelectedDisplay.Enable", false);
-
-	Phobos::Config::SelectedDisplay_Expand = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "SelectedDisplay.Expand", false);
-
-	Phobos::Config::SelectedDisplay_MaxCameo = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SelectedDisplay.MaxCameo", 10);
-
-	Phobos::Config::SelectedDisplay_MaxCameo = std::clamp(Phobos::Config::SelectedDisplay_MaxCameo, 5, 20);
 
 	// ToolTips
 	{

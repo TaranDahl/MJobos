@@ -10,8 +10,6 @@
 #include "ToggleDesignatorRange.h"
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
-#include "SelectedInfo.h"
-#include "HerosInfo.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "ToggleMessageList.h"
@@ -24,7 +22,6 @@
 #include <WWMouseClass.h>
 
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
-#include <Ext/Sidebar/SelectedButton/SelectedInfoClass.h>
 #include <Misc/MessageColumn.h>
 #include <UI/UIRoot.h>
 // #include <UI/Example/OpenMutationUI.h>
@@ -39,10 +36,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
-	MakeCommand<SelectedInfoCommandClass>();
-	MakeCommand<SelectedExpandCommandClass>();
 	// MakeCommand<Mutation::OpenMutationUICommandClass>();
-	MakeCommand<HerosInfoCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
@@ -90,9 +84,6 @@ static void MouseWheelDownCommand()
 	if (UIExt::UIRoot::Instance().HandleMouseWheel(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y, true))
 		return;
 
-	if (SelectedInfoClass::Instance.IsHovering)
-		SelectedInfoClass::Instance.ScrollRight();
-
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollDown();
 }
@@ -101,9 +92,6 @@ static void MouseWheelUpCommand()
 {
 	if (UIExt::UIRoot::Instance().HandleMouseWheel(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y, false))
 		return;
-
-	if (SelectedInfoClass::Instance.IsHovering)
-		SelectedInfoClass::Instance.ScrollLeft();
 
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollUp();
@@ -127,7 +115,6 @@ static inline bool CheckSkipScrollSidebar()
 		|| !Phobos::Config::ScrollSidebarStripWhenHoldCtrl && InputManagerClass::Instance->IsForceFireKeyPressed()
 		|| !Phobos::Config::ScrollSidebarStripWhenHoldShift && InputManagerClass::Instance->IsForceSelectKeyPressed()
 		|| !Phobos::Config::ScrollSidebarStripInTactical && WWMouseClass::Instance->XY1.X < Make_Global<int>(0xB0CE30) // TacticalClass::view_bound.Width
-		|| SelectedInfoClass::Instance.IsHovering
 		|| MessageColumnClass::Instance.IsHovering()
 		|| UIExt::UIRoot::Instance().IsBlockingAt(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y);
 }

@@ -52,10 +52,7 @@ public:
 	PhobosPCXFile SuperWeaponSidebar_CenterPCX;
 	PhobosPCXFile SuperWeaponSidebar_BottomPCX;
 	Valueable<SHPStruct*> SelectedInfo_Main;
-	Valueable<SHPStruct*> SelectedInfo_Buff;
-	Valueable<SHPStruct*> SelectedInfo_Button;
 	Valueable<SHPStruct*> SelectedInfo_Bottom;
-	Valueable<SHPStruct*> SelectedInfo_Toggle;
 	CustomPalette SelectedInfo_Palette;
 
 	SideExt(SideClass* OwnerObject) : AbstractTypeExt(OwnerObject)
@@ -89,10 +86,7 @@ public:
 		, SuperWeaponSidebar_CenterPCX {}
 		, SuperWeaponSidebar_BottomPCX {}
 		, SelectedInfo_Main { nullptr }
-		, SelectedInfo_Buff { nullptr }
-		, SelectedInfo_Button { nullptr }
 		, SelectedInfo_Bottom { nullptr }
-		, SelectedInfo_Toggle { nullptr }
 		, SelectedInfo_Palette {}
 	{ }
 

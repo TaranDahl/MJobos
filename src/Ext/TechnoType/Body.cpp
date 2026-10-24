@@ -1067,19 +1067,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 
-	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
-	this->SelectedInfo_UpperIndex.Read(exINI, pSection, "SelectedInfo.UpperIndex");
-	this->SelectedInfo_UpperColor.Read(exINI, pSection, "SelectedInfo.UpperColor");
-	this->SelectedInfo_UpperDivisor.Read(exINI, pSection, "SelectedInfo.UpperDivisor");
-	this->SelectedInfo_BelowType.Read(exINI, pSection, "SelectedInfo.BelowType");
-	this->SelectedInfo_BelowIndex.Read(exINI, pSection, "SelectedInfo.BelowIndex");
-	this->SelectedInfo_BelowColor.Read(exINI, pSection, "SelectedInfo.BelowColor");
-	this->SelectedInfo_BelowDivisor.Read(exINI, pSection, "SelectedInfo.BelowDivisor");
-	this->SelectedInfo_CameoType.Read(exINI, pSection, "SelectedInfo.CameoType");
-	this->SelectedInfo_CameoIndex.Read(exINI, pSection, "SelectedInfo.CameoIndex");
-	this->SelectedInfo_Button.Read(exINI, pSection, "SelectedInfo.Button");
-	this->UIDescription_HoveredInfo.Read(exINI, pSection, "UIDescription.HoveredInfo");
-
 	this->AmphibiousEnter.Read(exINI, pSection, "AmphibiousEnter");
 	this->AmphibiousUnload.Read(exINI, pSection, "AmphibiousUnload");
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
@@ -1090,9 +1077,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->RateDown_Reset.Read(exINI, pSection, "RateDown.Reset");
 	this->RateDown_Cover_Value.Read(exINI, pSection, "RateDown.Cover.Value");
 	this->RateDown_Cover_AmmoBelow.Read(exINI, pSection, "RateDown.Cover.AmmoBelow");
-
-	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
-
 
 	this->NoRearm_UnderEMP.Read(exINI, pSection, "NoRearm.UnderEMP");
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
@@ -1295,7 +1279,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	// Ares 2.0
 	this->Passengers_BySize.Read(exINI, pSection, "Passengers.BySize");
-	this->FakeOf.Read(exINI, pSection, "FakeOf");
 	this->Convert_Deploy.Read(exINI, pSection, "Convert.Deploy");
 
 	// Ares 3.0
@@ -1514,9 +1497,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		Debug::Log("[Developer warning] [%s] has Palette=%s set but no palette file was loaded (missing file or wrong filename). Missing palettes cause issues with lighting recalculations.\n", pArtSection, pThis->PaletteFile);
 
 	this->GreyCameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "GreyCameoPCX");
-
-	// Ares 0.1
-	this->CameoPal.LoadFromINI(&CCINIClass::INI_Art, pArtSection, "CameoPalette");
 
 	// Ares 0.2
 	this->CameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "CameoPCX");
@@ -1783,22 +1763,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->UIDescription_Unbuildable)
 
-		.Process(this->CameoPal)
 		.Process(this->CameoPCX)
 		.Process(this->GreyCameoPCX)
-
-		.Process(this->SelectedInfo_UpperType)
-		.Process(this->SelectedInfo_UpperIndex)
-		.Process(this->SelectedInfo_UpperColor)
-		.Process(this->SelectedInfo_UpperDivisor)
-		.Process(this->SelectedInfo_BelowType)
-		.Process(this->SelectedInfo_BelowIndex)
-		.Process(this->SelectedInfo_BelowColor)
-		.Process(this->SelectedInfo_BelowDivisor)
-		.Process(this->SelectedInfo_CameoType)
-		.Process(this->SelectedInfo_CameoIndex)
-		.Process(this->SelectedInfo_Button)
-		.Process(this->UIDescription_HoveredInfo)
 
 		.Process(this->AmphibiousEnter)
 		.Process(this->AmphibiousUnload)
@@ -1810,9 +1776,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->RateDown_Reset)
 		.Process(this->RateDown_Cover_Value)
 		.Process(this->RateDown_Cover_AmmoBelow)
-
-		.Process(this->UniqueTechno)
-
 
 		.Process(this->NoRearm_UnderEMP)
 		.Process(this->NoRearm_Temporal)
@@ -2009,7 +1972,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		// Ares 2.0
 		.Process(this->Passengers_BySize)
-		.Process(this->FakeOf)
 		.Process(this->Convert_Deploy)
 
 		// Ares 3.0
