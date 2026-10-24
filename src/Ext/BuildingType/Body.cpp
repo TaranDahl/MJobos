@@ -386,6 +386,8 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	// Ares 3.0
 	this->UnitSell.Read(exINI, pSection, "UnitSell");
+
+	this->LaserFencePost_Fence.Read(exINI, pSection, "LaserFencePost.Fence");
 }
 
 void BuildingTypeExt::CompleteInitialization()
@@ -509,6 +511,7 @@ void BuildingTypeExt::Serialize(T& Stm)
 
 		// Ares 3.0
 		.Process(this->UnitSell)
+		.Process(this->LaserFencePost_Fence)
 		;
 }
 
