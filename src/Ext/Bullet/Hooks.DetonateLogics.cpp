@@ -10,24 +10,21 @@ DEFINE_HOOK(0x4690D4, BulletClass_Logics_NewChecks, 0x6)
 {
 	enum { SkipShaking = 0x469130, GoToExtras = 0x469AA4 };
 
-	GET(BulletClass*, pThis, ESI);
+	GET(BulletClass*, pBullet, ESI);
 	GET(WarheadTypeClass*, pWarhead, EAX);
 	GET_BASE(CoordStruct const* const, pCoords, 0x8);
 
-	if (BulletExt::Fetch(pThis)->Status & TrajectoryStatus::Vanish)
-		return GoToExtras;
-
 	auto const pExt = WarheadTypeExt::Fetch(pWarhead);
 
-	if (auto const pTarget = abstract_cast<TechnoClass*>(pThis->Target))
+	if (auto const pTarget = abstract_cast<TechnoClass*>(pBullet->Target))
 	{
 		// Check if the WH should affect the techno target or skip it
-		if (BulletTypeExt::Fetch(pThis->Type)->Shrapnel_ObeyWarheadTriggerConditions.Get(RulesExt::Global()->Shrapnel_ObeyWarheadTriggerConditions))
+		if (BulletTypeExt::Fetch(pBullet->Type)->Shrapnel_ObeyWarheadTriggerConditions.Get(RulesExt::Global()->Shrapnel_ObeyWarheadTriggerConditions))
 		{
 			if (!pExt->IsHealthInThreshold(pTarget)
 				|| !pExt->IsVeterancyInThreshold(pTarget)
 				|| (!pExt->AffectsNeutral && pTarget->Owner->IsNeutral())
-				|| !pExt->IsInvokerAllowed(pTarget, pThis->Owner))
+				|| !pExt->IsInvokerAllowed(pTarget, pBullet->Owner))
 				return GoToExtras;
 		}
 	}
@@ -85,18 +82,7 @@ DEFINE_HOOK(0x469A69, BulletClass_Logics_DamageHouse, 0x6)
 	{
 		if (pWHExt->Directional)
 		{
-			if (const auto pTraj = pExt->Trajectory.get())
-			{
-				const auto flag = pTraj->Flag();
-
-				if ((flag != TrajectoryFlag::Engrave && flag != TrajectoryFlag::Tracing)
-					&& (pTraj->MovingVelocity.X != 0.0 || pTraj->MovingVelocity.Y != 0.0))
-				{
-					WarheadTypeExt::HitDirection = DirStruct((-1) * Math::atan2(pTraj->MovingVelocity.Y, pTraj->MovingVelocity.X)).GetValue<16>();
-					break;
-				}
-			}
-			else if (pThis->Type->Inviso)
+			if (pThis->Type->Inviso)
 			{
 				const auto delta = Point2D { pThis->SourceCoords.X - pThis->TargetCoords.X, pThis->SourceCoords.Y - pThis->TargetCoords.Y };
 

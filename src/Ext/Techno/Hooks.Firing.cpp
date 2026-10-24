@@ -312,7 +312,7 @@ DEFINE_HOOK(0x5218F3, InfantryClass_WhatWeaponShouldIUse_DeployFireWeapon, 0x6)
 #pragma region TechnoClass_GetFireError
 DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 {
-	enum { CannotFire = 0x6FCB7E, TemporarilyCannotFire = 0x6FCD0E };
+	enum { CannotFire = 0x6FCB7E };
 
 	GET(TechnoClass*, pThis, ESI);
 	GET(WeaponTypeClass*, pWeapon, EDI);
@@ -322,17 +322,14 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 	// Checking for nullptr is not required here, since the game has already executed them before calling the hook  -- Belonit
 	const auto pWH = pWeapon->Warhead;
 	const auto pWHExt = WarheadTypeExt::Fetch(pWH);
-	const int money = pWHExt->TransactMoney;
+	const int nMoney = pWHExt->TransactMoney;
 
-	if (money < 0 && pThis->Owner->Available_Money() < -money)
+	if (nMoney < 0 && pThis->Owner->Available_Money() < -nMoney)
 		return CannotFire;
 
-	const auto pBulletType = pWeapon->Projectile;
-	const auto pBulletTypeExt = BulletTypeExt::Fetch(pBulletType);
-
 	// AAOnly doesn't need to be checked if LandTargeting=1.
-	if (pThis->GetTechnoType()->LandTargeting != LandTargetingType::Land_Not_OK && pBulletType->AA
-		&& pTarget && !pTarget->IsInAir() && pBulletTypeExt->AAOnly)
+	if (pThis->GetTechnoType()->LandTargeting != LandTargetingType::Land_Not_OK && pWeapon->Projectile->AA
+		&& pTarget && !pTarget->IsInAir() && BulletTypeExt::Fetch(pWeapon->Projectile)->AAOnly)
 	{
 		return CannotFire;
 	}
@@ -396,9 +393,6 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 				return CannotFire;
 		}
 	}
-
-	if (pBulletTypeExt->CreateCapacity >= 0 && BulletExt::CheckExceededCapacity(pThis, pBulletType))
-		return (pWeapon->Damage >= 0 || (pTargetTechno && pTargetTechno->GetHealthPercentage() < RulesClass::Instance->ConditionGreen)) ? TemporarilyCannotFire : CannotFire;
 
 	return 0;
 }
@@ -997,50 +991,6 @@ DEFINE_HOOK(0x6FF2BE, TechnoClass_FireAt_BurstOffsetFix, 0x6)
 	return 0x6FF2D1;
 }
 
-DEFINE_HOOK_AGAIN(0x6FE71C, TechnoClass_Fire_BallisticScatterPhobos, 0x6);
-DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
-{
-	GET_STACK(BulletTypeClass*, pProjectile, 0x68);
-	GET(TechnoClass*, pThis, ESI);
-	GET_BASE(AbstractClass*, pTarget, 0x8);
-	GET_STACK(WeaponTypeClass*, pWeapon, STACK_OFFSET(0xB0, -0x70));
-
-	auto pExt = BulletTypeExt::Fetch(pProjectile);
-
-	bool shouldScatter = ScenarioClass::Instance->Random.RandomRanged(0, 100) <= pExt->BallisticScatter_Chance * 100;
-
-	if (!shouldScatter)
-	{
-		R->EAX(0);
-		return 0;
-	}
-
-	// defaults for !FlakScatter || Inviso
-	const int globalScatter = RulesClass::Instance->BallisticScatter;
-	int min = pExt->BallisticScatter_Min.Get(Leptons(globalScatter / 2));
-	int max = pExt->BallisticScatter_Max.Get(Leptons(globalScatter));
-
-	if (pExt->BallisticScatter_IncreaseByRange)
-	{
-		const int minInMinRange = pExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
-		const int minInMaxRange = pExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
-		const int maxInMinRange = pExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
-		const int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
-		const int minRange = pExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
-		const int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
-		const int deltaRange = maxRange - minRange;
-		const int deltaRangeReal = static_cast<int>((pTarget->GetCoords() - pThis->GetCoords()).Magnitude()) - minRange;
-		const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / static_cast<double>(deltaRange)), 0, 1);
-		min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
-		max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
-	}
-
-	int scatter = ScenarioClass::Instance->Random.RandomRanged(min, max);
-
-	R->EAX(scatter);
-	return 0;
-}
-
 static inline void SetChargeTurretDelay(TechnoClass* pThis, int rearmDelay, WeaponTypeClass* pWeapon)
 {
 	pThis->ChargeTurretDelay = rearmDelay;
@@ -1166,8 +1116,6 @@ DEFINE_HOOK(0x6F3AEB, TechnoClass_GetFLH, 0x6)
 			if (pThis->CurrentBurstIndex % 2 != 0)
 				flh.Y = -flh.Y;
 		}
-
-		TechnoExt::Fetch(pThis)->LastWeaponFLH = flh;
 	}
 	else
 	{
@@ -1178,14 +1126,6 @@ DEFINE_HOOK(0x6F3AEB, TechnoClass_GetFLH, 0x6)
 
 		if (!pTypeExt->AlternateFLH_OnTurret.Get(RulesExt::Global()->AlternateFLH_OnTurret))
 			allowOnTurret = false;
-
-		auto pCurrentPassenger = pThis->Passengers.GetFirstPassenger();
-
-		for (int i = 0; i < index && pCurrentPassenger; i++)
-			pCurrentPassenger = abstract_cast<FootClass*>(pCurrentPassenger->NextObject);
-
-		if (pCurrentPassenger)
-			TechnoExt::Fetch(pCurrentPassenger)->LastWeaponFLH = flh;
 	}
 
 	int turIdx = -1;

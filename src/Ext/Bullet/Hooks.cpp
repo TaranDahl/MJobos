@@ -52,8 +52,6 @@ namespace BulletAITemp
 
 DEFINE_HOOK(0x4666F7, BulletClass_AI, 0x6)
 {
-	enum { Detonate = 0x467E53 };
-
 	GET(BulletClass*, pThis, EBP);
 
 	const auto pBulletExt = BulletExt::Fetch(pThis);
@@ -98,43 +96,33 @@ DEFINE_HOOK(0x4666F7, BulletClass_AI, 0x6)
 		}
 	}
 
-	// Because the laser trails will be drawn before the calculation of changing the velocity direction in each frame.
-	// This will cause the laser trails to be drawn in the wrong position too early, resulting in a visual appearance resembling a "bouncing".
-	// Let trajectories draw their own laser trails after the Trajectory's OnEarlyUpdate() to avoid predicting incorrect positions or pass through targets.
-	if (const auto pTraj = pBulletExt->Trajectory.get())
+	//Because the laser trails will be drawn before the calculation of changing the velocity direction in each frame.
+	//This will cause the laser trails to be drawn in the wrong position too early, resulting in a visual appearance resembling a "bouncing".
+	//Let trajectories draw their own laser trails after the Trajectory's OnAI() to avoid predicting incorrect positions or pass through targets.
+	if (!pBulletExt->Trajectory && pBulletExt->LaserTrails.size())
 	{
-		if (pTraj->OnEarlyUpdate() && !pThis->SpawnNextAnim)
-			return Detonate;
-	}
-	else
-	{
-		if (pBulletExt->CheckOnEarlyUpdate() && !pThis->SpawnNextAnim)
-			return Detonate;
+		const CoordStruct location = pThis->GetCoords();
+		const BulletVelocity& velocity = pThis->Velocity;
 
-		if (pBulletExt->LaserTrails.size())
+		// We adjust LaserTrails to account for vanilla bug of drawing stuff one frame ahead.
+		// Pretty meh solution but works until we fix the bug - Kerbiter
+		CoordStruct drawnCoords
 		{
-			const CoordStruct location = pThis->GetCoords();
-			const BulletVelocity& velocity = pThis->Velocity;
+			(int)(location.X + velocity.X),
+			(int)(location.Y + velocity.Y),
+			(int)(location.Z + velocity.Z)
+		};
 
-			// We adjust LaserTrails to account for vanilla bug of drawing stuff one frame ahead.
-			// Pretty meh solution but works until we fix the bug - Kerbiter
-			const CoordStruct drawnCoords
-			{
-				(int)(location.X + velocity.X),
-				(int)(location.Y + velocity.Y),
-				(int)(location.Z + velocity.Z)
-			};
+		for (const auto& pTrail : pBulletExt->LaserTrails)
+		{
+			// We insert initial position so the first frame of trail doesn't get skipped - Kerbiter
+			// TODO move hack to BulletClass creation
+			if (!pTrail->LastLocation.isset())
+				pTrail->LastLocation = location;
 
-			for (const auto& pTrail : pBulletExt->LaserTrails)
-			{
-				// We insert initial position so the first frame of trail doesn't get skipped - Kerbiter
-				// TODO move hack to BulletClass creation
-				if (!pTrail->LastLocation.isset())
-					pTrail->LastLocation = location;
-
-				pTrail->Update(drawnCoords);
-			}
+			pTrail->Update(drawnCoords);
 		}
+
 	}
 
 	if (pThis->HasParachute)
@@ -395,10 +383,7 @@ constexpr bool CheckTrajectoryCanNotAlwaysSnap(const TrajectoryFlag flag)
 	return flag != TrajectoryFlag::Invalid;
 /*	return flag == TrajectoryFlag::Straight
 		|| flag == TrajectoryFlag::Bombard
-		|| flag == TrajectoryFlag::Missile
-		|| flag == TrajectoryFlag::Engrave
-		|| flag == TrajectoryFlag::Parabola
-		|| flag == TrajectoryFlag::Tracing;*/
+		|| flag == TrajectoryFlag::Parabola;*/
 }
 
 DEFINE_HOOK(0x467CCA, BulletClass_AI_TargetSnapChecks, 0x6)
@@ -509,43 +494,16 @@ DEFINE_HOOK(0x468D3F, BulletClass_ShouldExplode_AirTarget, 0x6)
 DEFINE_HOOK(0x4687F8, BulletClass_Unlimbo_FlakScatter, 0x6)
 {
 	GET(BulletClass*, pThis, EBX);
-	GET_STACK(const float, distance, STACK_OFFSET(0x5C, -0x44));
+	GET_STACK(const float, mult, STACK_OFFSET(0x5C, -0x44));
 
-	if (const auto pWeapon = pThis->WeaponType)
+	if (pThis->WeaponType)
 	{
 		auto const pTypeExt = BulletTypeExt::Fetch(pThis->Type);
-
-		if (!(ScenarioClass::Instance->Random.RandomRanged(0, 100) <= pTypeExt->BallisticScatter_Chance * 100))
-		{
-			R->EAX(0);
-			return 0;
-		}
-
 		const int defaultValue = RulesClass::Instance->BallisticScatter;
-		int min = pTypeExt->BallisticScatter_Min.Get(Leptons(0));
-		int max = pTypeExt->BallisticScatter_Max.Get(Leptons(defaultValue));
-		int result = 0;
+		const int min = pTypeExt->BallisticScatter_Min.Get(Leptons(0));
+		const int max = pTypeExt->BallisticScatter_Max.Get(Leptons(defaultValue));
 
-		if (pTypeExt->BallisticScatter_IncreaseByRange)
-		{
-			const int minInMinRange = pTypeExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
-			const int minInMaxRange = pTypeExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
-			const int maxInMinRange = pTypeExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
-			const int maxInMaxRange = pTypeExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
-			const int minRange = pTypeExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
-			const int maxRange = pTypeExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
-			const int deltaRange = maxRange - minRange;
-			const int deltaRangeReal = static_cast<int>(distance) - minRange;
-			const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / static_cast<double>(deltaRange)), 0, 1);
-			min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
-			max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
-			result = ScenarioClass::Instance->Random.RandomRanged(min, max);
-		}
-		else
-		{
-			result = static_cast<int>((distance * ScenarioClass::Instance->Random.RandomRanged(2 * min, 2 * max)) / pWeapon->Range);
-		}
-
+		const int result = (int)((mult * ScenarioClass::Instance->Random.RandomRanged(2 * min, 2 * max)) / pThis->WeaponType->Range);
 		R->EAX(result);
 	}
 
@@ -589,6 +547,19 @@ DEFINE_HOOK(0x44D46E, BuildingClass_Mission_Missile_BeforeMoveTo, 0x8)
 
 		BulletExt::ApplyArcingFix(pBullet, crdSrc, crdTgt, velocity);
 	}
+
+	return 0;
+}
+
+// Vanilla inertia effect only for bullets with ROT=0
+DEFINE_HOOK(0x415F25, AircraftClass_Fire_TrajectorySkipInertiaEffect, 0x6)
+{
+	enum { SkipCheck = 0x4160BC };
+
+	GET(BulletClass*, pThis, ESI);
+
+	if (BulletExt::Fetch(pThis)->Trajectory)
+		return SkipCheck;
 
 	return 0;
 }
