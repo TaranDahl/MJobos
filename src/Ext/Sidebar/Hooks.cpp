@@ -3,6 +3,8 @@
 
 #include <Ext/Side/Body.h>
 #include <Misc/MessageColumn.h>
+#include <WWMouseClass.h>
+#include <UI/UIRoot.h>
 
 DEFINE_HOOK(0x6A593E, SidebarClass_InitForHouse_AdditionalFiles, 0x5)
 {
@@ -105,7 +107,8 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SkipOnNewButtons, 0x7)
 
 	return (SWSidebarClass::IsEnabled() && SWSidebarClass::Instance.CurrentColumn
 		|| SWSidebarClass::Instance.ToggleButton && SWSidebarClass::Instance.ToggleButton->IsHovering
-		|| MessageColumnClass::Instance.IsBlocked())
+		|| MessageColumnClass::Instance.IsBlocked()
+		|| UIExt::UIRoot::Instance().IsBlockingAt(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y))
 		? DoNothing : 0;
 }
 

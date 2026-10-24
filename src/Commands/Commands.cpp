@@ -17,9 +17,12 @@
 #include "DeselectObject5.h"
 
 #include <CCINIClass.h>
+#include <WWMouseClass.h>
 
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 #include <Misc/MessageColumn.h>
+#include <UI/UIRoot.h>
+// #include <UI/Example/OpenMutationUI.h>
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
@@ -29,6 +32,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
+	// MakeCommand<Mutation::OpenMutationUICommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
@@ -70,12 +74,18 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 
 static void MouseWheelDownCommand()
 {
+	if (UIExt::UIRoot::Instance().HandleMouseWheel(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y, true))
+		return;
+
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollDown();
 }
 
 static void MouseWheelUpCommand()
 {
+	if (UIExt::UIRoot::Instance().HandleMouseWheel(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y, false))
+		return;
+
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollUp();
 }
@@ -94,7 +104,8 @@ DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
 
 static inline bool CheckSkipScrollSidebar()
 {
-	return MessageColumnClass::Instance.IsHovering();
+	return MessageColumnClass::Instance.IsHovering()
+		|| UIExt::UIRoot::Instance().IsBlockingAt(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y);
 }
 
 DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)
