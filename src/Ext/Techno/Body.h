@@ -8,6 +8,7 @@
 #include <New/Entity/ShieldClass.h>
 #include <New/Entity/LaserTrailClass.h>
 #include <New/Entity/AttachEffectClass.h>
+#include <New/Entity/SquadManagerClass.h>
 
 class AirstrikeClass;
 class BulletClass;
@@ -63,6 +64,8 @@ public:
 
 	AirstrikeClass* AirstrikeTargetingMe;
 
+	SquadManagerClass* SquadManager;
+
 	bool IsSelected;
 
 	// cache tint values
@@ -115,6 +118,7 @@ public:
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
 		, AirstrikeTargetingMe { nullptr }
+		, SquadManager { nullptr }
 		, DelayedFireSequencePaused { false }
 		, DelayedFireWeaponIndex { -1 }
 		, DelayedFireTimer {}

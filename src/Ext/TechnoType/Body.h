@@ -365,6 +365,9 @@ public:
 	Nullable<ParticleSystemTypeClass*> Overload_ParticleSys;
 	Nullable<int> Overload_ParticleSysCount;
 
+	ValueableVector<InfantryTypeClass*> Squad_Members;
+	Valueable<bool> Squad_IsInitAsTeam;
+
 	Nullable<double> FallingDownDamage;
 	Nullable<double> FallingDownDamage_Water;
 	Nullable<bool> FallingDownDamage_AllowEMP;
@@ -779,6 +782,9 @@ public:
 		, Overload_DeathSound {}
 		, Overload_ParticleSys {}
 		, Overload_ParticleSysCount {}
+
+		, Squad_Members {}
+		, Squad_IsInitAsTeam { false }
 
 		, FallingDownDamage {}
 		, FallingDownDamage_Water {}

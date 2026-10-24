@@ -1137,6 +1137,9 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Overload_ParticleSys.Read(exINI, pSection, "Overload.ParticleSys");
 	this->Overload_ParticleSysCount.Read(exINI, pSection, "Overload.ParticleSysCount");
 
+	this->Squad_Members.Read(exINI, pSection, "Squad.Members");
+	this->Squad_IsInitAsTeam.Read(exINI, pSection, "Squad.IsInitAsTeam");
+
 	this->FallingDownDamage.Read(exINI, pSection, "FallingDownDamage");
 	this->FallingDownDamage_Water.Read(exINI, pSection, "FallingDownDamage.Water");
 	this->FallingDownDamage_AllowEMP.Read(exINI, pSection, "FallingDownDamage.AllowEMP");
@@ -1763,6 +1766,9 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->Overload_DeathSound)
 		.Process(this->Overload_ParticleSys)
 		.Process(this->Overload_ParticleSysCount)
+
+		.Process(this->Squad_Members)
+		.Process(this->Squad_IsInitAsTeam)
 
 		.Process(this->FallingDownDamage)
 		.Process(this->FallingDownDamage_Water)
