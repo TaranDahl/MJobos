@@ -793,52 +793,8 @@ DEFINE_HOOK(0x51BAFB, InfantryClass_ChronoSparkleDelay, 0x5)
 	return 0x51BB00;
 }
 
-DEFINE_HOOK_AGAIN(0x5F4718, ObjectClass_Select, 0x7)
-DEFINE_HOOK(0x5F46AE, ObjectClass_Select, 0x7)
-{
-	GET(ObjectClass*, pThis, ESI);
-
-	pThis->IsSelected = true;
-
-	if (RulesExt::Global()->SetTabBySelectingFactory && pThis->WhatAmI() == AbstractType::Building && pThis->GetOwningHouse()->IsCurrentPlayer())
-	{
-		auto const pBldTypeExt = BuildingTypeExt::Fetch(specific_cast<BuildingClass*>(pThis)->Type);
-		const int tabIndex = pBldTypeExt->SetTabBySelecting;
-
-		if (tabIndex >= 0 && tabIndex < 4)
-		{
-			TabClass::Instance.SetTab(tabIndex);
-		}
-		else if (tabIndex < 0)
-		{
-			switch (specific_cast<BuildingClass*>(pThis)->Type->Factory)
-			{
-			case AbstractType::InfantryType:
-				TabClass::Instance.SetTab(2);
-				break;
-			case AbstractType::UnitType:
-			case AbstractType::AircraftType:
-				TabClass::Instance.SetTab(3);
-				break;
-			case AbstractType::BuildingType:
-				TabClass::Instance.SetTab(SidebarClass::Instance.ActiveTabIndex == 0 ? 1 : 0); // A controversial design, but no one has yet proposed a better one.
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-	if (!Phobos::Config::ShowFlashOnSelecting)
-		return 0;
-
-	auto const duration = RulesExt::Global()->SelectionFlashDuration;
-
-	if (duration > 0 && pThis->GetOwningHouse()->IsControlledByCurrentPlayer())
-		pThis->Flash(duration);
-
-	return 0;
-}
+// ObjectClass_Select(0x5F4718/0x5F46AE)已随底部选择栏移入
+// src/Ext/Sidebar/SelectedButton/SelectedInfoClass.cpp(增加 SelectedInfoClass 刷新标记,其余逻辑同基点)
 
 DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
 {
