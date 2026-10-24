@@ -172,6 +172,7 @@ public:
 	Nullable<int> ShadowSizeCharacteristicHeight;
 
 	Valueable<CSFText> EnemyUIName;
+	Valueable<TechnoTypeClass*> FakeOf;
 
 	bool ForceWeapon_Check;
 	Valueable<int> ForceWeapon_Naval_Decloaked;
@@ -272,6 +273,21 @@ public:
 	ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 	Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
+	CustomPalette CameoPal;
+
+	Valueable<DisplayInfoType> SelectedInfo_UpperType;
+	Valueable<int> SelectedInfo_UpperIndex;
+	Valueable<ColorStruct> SelectedInfo_UpperColor;
+	Valueable<int> SelectedInfo_UpperDivisor;
+	Valueable<DisplayInfoType> SelectedInfo_BelowType;
+	Valueable<int> SelectedInfo_BelowIndex;
+	Valueable<ColorStruct> SelectedInfo_BelowColor;
+	Valueable<int> SelectedInfo_BelowDivisor;
+	Valueable<DisplayInfoType> SelectedInfo_CameoType;
+	Valueable<int> SelectedInfo_CameoIndex;
+	Nullable<SHPStruct*> SelectedInfo_Button;
+	Nullable<CSFText> UIDescription_HoveredInfo;
+
 	Nullable<bool> AmphibiousEnter;
 	Nullable<bool> AmphibiousUnload;
 	Nullable<bool> NoQueueUpToEnter;
@@ -282,6 +298,8 @@ public:
 	Valueable<bool> RateDown_Reset;
 	Valueable<int> RateDown_Cover_Value;
 	Valueable<int> RateDown_Cover_AmmoBelow;
+
+	Valueable<bool> UniqueTechno;
 
 	Nullable<bool> NoRearm_UnderEMP;
 	Nullable<bool> NoRearm_Temporal;
@@ -591,6 +609,7 @@ public:
 		, CombatAlert_EVA {}
 
 		, EnemyUIName {}
+		, FakeOf {}
 
 		, VoiceCreated {}
 
@@ -697,6 +716,21 @@ public:
 		, BuildLimitGroup_ExtraLimit_MaxCount {}
 		, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
+		, CameoPal {}
+
+		, SelectedInfo_UpperType { DisplayInfoType::Shield }
+		, SelectedInfo_UpperIndex { 0 }
+		, SelectedInfo_UpperColor { { 153, 153, 255 } }
+		, SelectedInfo_UpperDivisor {}
+		, SelectedInfo_BelowType { DisplayInfoType::Health }
+		, SelectedInfo_BelowIndex { 0 }
+		, SelectedInfo_BelowColor { { 0, 0, 0 } }
+		, SelectedInfo_BelowDivisor {}
+		, SelectedInfo_CameoType { DisplayInfoType::Ammo }
+		, SelectedInfo_CameoIndex { 0 }
+		, SelectedInfo_Button {}
+		, UIDescription_HoveredInfo {}
+
 		, AmphibiousEnter {}
 		, AmphibiousUnload {}
 		, NoQueueUpToEnter {}
@@ -707,6 +741,8 @@ public:
 		, RateDown_Reset { false }
 		, RateDown_Cover_Value { 0 }
 		, RateDown_Cover_AmmoBelow { -2 }
+
+		, UniqueTechno { false }
 
 		, NoRearm_UnderEMP {}
 		, NoRearm_Temporal {}

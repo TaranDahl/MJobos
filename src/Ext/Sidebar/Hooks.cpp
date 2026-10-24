@@ -1,5 +1,7 @@
 #include "Body.h"
 #include "SWSidebar/SWSidebarClass.h"
+#include "UniqueButton/UniqueTechnoColumnClass.h"
+#include "SelectedButton/SelectedInfoClass.h"
 
 #include <Ext/Side/Body.h>
 #include <Misc/MessageColumn.h>
@@ -105,6 +107,8 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SkipOnNewButtons, 0x7)
 
 	return (SWSidebarClass::IsEnabled() && SWSidebarClass::Instance.CurrentColumn
 		|| SWSidebarClass::Instance.ToggleButton && SWSidebarClass::Instance.ToggleButton->IsHovering
+		|| UniqueTechnoColumnClass::Instance.Hovering >= 0
+		|| SelectedInfoClass::Instance.IsHovering
 		|| MessageColumnClass::Instance.IsBlocked())
 		? DoNothing : 0;
 }
@@ -112,6 +116,8 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SkipOnNewButtons, 0x7)
 DEFINE_HOOK(0x6A5082, SidebarClass_InitClear_InitializeNewButtons, 0x5)
 {
 	SWSidebarClass::Instance.InitClear();
+	UniqueTechnoColumnClass::Instance.InitClear();
+	SelectedInfoClass::Instance.InitClear();
 	MessageColumnClass::Instance.InitClear();
 	return 0;
 }
@@ -119,6 +125,8 @@ DEFINE_HOOK(0x6A5082, SidebarClass_InitClear_InitializeNewButtons, 0x5)
 DEFINE_HOOK(0x6A5839, SidebarClass_InitIO_InitializeNewButtons, 0x5)
 {
 	SWSidebarClass::Instance.InitIO();
+	UniqueTechnoColumnClass::Instance.InitIO();
+	SelectedInfoClass::Instance.InitIO();
 	MessageColumnClass::Instance.InitIO();
 	return 0;
 }

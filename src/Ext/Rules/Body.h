@@ -140,6 +140,12 @@ public:
 
 		Valueable<bool> BuildingProductionQueue;
 
+		PhobosPCXFile SelectedInfantryMissingPCX;
+		PhobosPCXFile SelectedVehicleMissingPCX;
+		PhobosPCXFile SelectedAircraftMissingPCX;
+		PhobosPCXFile SelectedBuildingMissingPCX;
+		Valueable<bool> SelectedIngameTimer;
+
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -671,6 +677,12 @@ public:
 			, ForceAAWeapon_InRange_ApplyRangeModifiers { false }
 
 			, BuildingProductionQueue { false }
+
+			, SelectedInfantryMissingPCX {}
+			, SelectedVehicleMissingPCX {}
+			, SelectedAircraftMissingPCX {}
+			, SelectedBuildingMissingPCX {}
+			, SelectedIngameTimer { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

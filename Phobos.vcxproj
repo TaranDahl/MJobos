@@ -38,11 +38,13 @@
     <ClCompile Include="src\Commands\DeselectObject5.cpp" />
     <ClCompile Include="src\Commands\FrameByFrame.cpp" />
     <ClCompile Include="src\Commands\FrameStep.cpp" />
+    <ClCompile Include="src\Commands\HerosInfo.cpp" />
     <ClCompile Include="src\Commands\NextIdleHarvester.cpp" />
     <ClCompile Include="src\Commands\ObjectInfo.cpp" />
     <ClCompile Include="src\Commands\QuickSave.cpp" />
     <ClCompile Include="src\Commands\SaveVariablesToFile.cpp" />
     <ClCompile Include="src\Commands\SelectCaptured.cpp" />
+    <ClCompile Include="src\Commands\SelectedInfo.cpp" />
     <ClCompile Include="src\Commands\ToggleDesignatorRange.cpp" />
     <ClCompile Include="src\Commands\ToggleDigitalDisplay.cpp" />
     <ClCompile Include="src\Commands\ToggleMessageList.cpp" />
@@ -142,10 +144,16 @@
     <!-- src\Ext\Sidebar -->
     <ClCompile Include="src\Ext\Sidebar\Body.cpp" />
     <ClCompile Include="src\Ext\Sidebar\Hooks.cpp" />
+    <ClCompile Include="src\Ext\Sidebar\SelectedButton\SelectedButtonClass.cpp" />
+    <ClCompile Include="src\Ext\Sidebar\SelectedButton\SelectedCameoClass.cpp" />
+    <ClCompile Include="src\Ext\Sidebar\SelectedButton\SelectedColumnClass.cpp" />
+    <ClCompile Include="src\Ext\Sidebar\SelectedButton\SelectedInfoClass.cpp" />
     <ClCompile Include="src\Ext\Sidebar\SWSidebar\SWButtonClass.cpp" />
     <ClCompile Include="src\Ext\Sidebar\SWSidebar\SWColumnClass.cpp" />
     <ClCompile Include="src\Ext\Sidebar\SWSidebar\SWSidebarClass.cpp" />
     <ClCompile Include="src\Ext\Sidebar\SWSidebar\ToggleSWButtonClass.cpp" />
+    <ClCompile Include="src\Ext\Sidebar\UniqueButton\UniqueTechnoButtonClass.cpp" />
+    <ClCompile Include="src\Ext\Sidebar\UniqueButton\UniqueTechnoColumnClass.cpp" />
     <!-- src\Ext\Surface -->
     <ClCompile Include="src\Ext\Surface\Body.cpp" />
     <!-- src\Ext\SWType -->
@@ -315,12 +323,14 @@
     <ClInclude Include="src\Commands\FireTacticalSW.h" />
     <ClInclude Include="src\Commands\FrameByFrame.h" />
     <ClInclude Include="src\Commands\FrameStep.h" />
+    <ClInclude Include="src\Commands\HerosInfo.h" />
     <ClInclude Include="src\Commands\NextIdleHarvester.h" />
     <ClInclude Include="src\Commands\NextTeam.h" />
     <ClInclude Include="src\Commands\ObjectInfo.h" />
     <ClInclude Include="src\Commands\QuickSave.h" />
     <ClInclude Include="src\Commands\SaveVariablesToFile.h" />
     <ClInclude Include="src\Commands\SelectCaptured.h" />
+    <ClInclude Include="src\Commands\SelectedInfo.h" />
     <ClInclude Include="src\Commands\ToggleDesignatorRange.h" />
     <ClInclude Include="src\Commands\ToggleDigitalDisplay.h" />
     <ClInclude Include="src\Commands\ToggleMessageList.h" />
@@ -363,10 +373,16 @@
     <ClInclude Include="src\Ext\Script\Body.h" />
     <ClInclude Include="src\Ext\Side\Body.h" />
     <ClInclude Include="src\Ext\Sidebar\Body.h" />
+    <ClInclude Include="src\Ext\Sidebar\SelectedButton\SelectedButtonClass.h" />
+    <ClInclude Include="src\Ext\Sidebar\SelectedButton\SelectedCameoClass.h" />
+    <ClInclude Include="src\Ext\Sidebar\SelectedButton\SelectedColumnClass.h" />
+    <ClInclude Include="src\Ext\Sidebar\SelectedButton\SelectedInfoClass.h" />
     <ClInclude Include="src\Ext\Sidebar\SWSidebar\SWButtonClass.h" />
     <ClInclude Include="src\Ext\Sidebar\SWSidebar\SWColumnClass.h" />
     <ClInclude Include="src\Ext\Sidebar\SWSidebar\SWSidebarClass.h" />
     <ClInclude Include="src\Ext\Sidebar\SWSidebar\ToggleSWButtonClass.h" />
+    <ClInclude Include="src\Ext\Sidebar\UniqueButton\UniqueTechnoButtonClass.h" />
+    <ClInclude Include="src\Ext\Sidebar\UniqueButton\UniqueTechnoColumnClass.h" />
     <ClInclude Include="src\Ext\Surface\Body.h" />
     <ClInclude Include="src\Ext\SWType\Body.h" />
     <ClInclude Include="src\Ext\SWType\NewSWType\NewSWType.h" />

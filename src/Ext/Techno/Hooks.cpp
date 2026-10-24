@@ -302,6 +302,9 @@ void TechnoExt::InitializeState(TechnoTypeClass* pType)
 	this->InitializeDisplayInfo(pType);
 	this->InitializeLaserTrails();
 
+	if (pTypeExt->UniqueTechno && pThis->Owner->IsControlledByCurrentPlayer())
+		ScenarioExt::Global()->OwnedUniqueTechnos.push_back(this);
+
 	if (!this->AE.HasTint) // already updated when initializing attach effect
 		this->UpdateTintValues();
 
