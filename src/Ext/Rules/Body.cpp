@@ -201,7 +201,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->Cameo_OverlayFrames.Read(exINI, GameStrings::AudioVisual, "Cameo.OverlayFrames");
 	this->Cameo_OverlayPalette.LoadFromINI(pINI, GameStrings::AudioVisual, "Cameo.OverlayPalette");
 	this->ExtendedBuildingPlacing.Read(exINI, GameStrings::General, "ExtendedBuildingPlacing");
-	this->ExtendedWeaponsFactory.Read(exINI, GameStrings::General, "ExtendedWeaponsFactory");
 
 	this->JumpjetTilt.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt");
 	this->JumpjetTilt_ForwardAccelFactor.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt.ForwardAccelFactor");
@@ -892,7 +891,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->Cameo_OverlayFrames)
 		.Process(this->Cameo_OverlayPalette)
 		.Process(this->ExtendedBuildingPlacing)
-		.Process(this->ExtendedWeaponsFactory)
 		.Process(this->JumpjetTilt)
 		.Process(this->JumpjetTilt_ForwardAccelFactor)
 		.Process(this->JumpjetTilt_ForwardSpeedFactor)

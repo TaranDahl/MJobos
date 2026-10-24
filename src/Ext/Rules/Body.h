@@ -129,7 +129,6 @@ public:
 		ValueableVector<int> Cameo_OverlayFrames;
 		CustomPalette Cameo_OverlayPalette;
 		Valueable<bool> ExtendedBuildingPlacing;
-		Valueable<bool> ExtendedWeaponsFactory;
 
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
@@ -733,7 +732,6 @@ public:
 			, Cameo_OverlayFrames {}
 			, Cameo_OverlayPalette {}
 			, ExtendedBuildingPlacing { false }
-			, ExtendedWeaponsFactory { false }
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }

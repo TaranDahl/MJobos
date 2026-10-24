@@ -211,8 +211,26 @@ DEFINE_HOOK(0x44D455, BuildingClass_Mission_Missile_EMPulseBulletWeapon, 0x8)
 
 #pragma endregion
 
-// Kick out stuck units when the factory building is not busy
 #pragma region KickOutStuckUnits
+
+DEFINE_HOOK(0x44955D, BuildingClass_WeaponFactoryOutsideBusy_WeaponFactoryCell, 0x6)
+{
+	enum { NotBusy = 0x44969B };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	const auto pLink = pThis->GetNthLink();
+
+	if (!pLink)
+		return NotBusy;
+
+	const auto pLinkType = pLink->GetTechnoType();
+
+	if (pLinkType->JumpJet && pLinkType->BalloonHover)
+		return NotBusy;
+
+	return 0;
+}
 
 // Attempt to kick the stuck unit out again by setting the destination
 DEFINE_HOOK(0x44E202, BuildingClass_Mission_Unload_CheckStuck, 0x6)
@@ -227,20 +245,17 @@ DEFINE_HOOK(0x44E202, BuildingClass_Mission_Unload_CheckStuck, 0x6)
 	if (const auto pUnit = abstract_cast<UnitClass*>(pThis->GetNthLink()))
 	{
 		// Detecting movement status
-		const auto pLocoDest = pUnit->Locomotor->Destination();
-
-		if (pLocoDest == CoordStruct::Empty || pLocoDest == pUnit->Location)
+		if (pUnit->Locomotor->Destination() == CoordStruct::Empty)
 		{
 			// Evacuate the congestion at the entrance
-			pThis->WeaponFactoryOutsideBusy();
-			const auto cell = BuildingTypeExt::GetWeaponFactoryDoor(pThis);
-			const auto pDest = MapClass::Instance.GetCellAt(cell);
+			reinterpret_cast<void(__thiscall*)(BuildingClass*)>(0x449540)(pThis);
+			const auto pType = pThis->Type;
+			const auto cell = pThis->GetMapCoords() + pType->FoundationOutside[10];
+			const auto door = cell - CellStruct { 1, 0 };
+			const auto pDest = MapClass::Instance.GetCellAt(door);
 
-			// Hover units may stop one cell behind their destination
-			if (pUnit->Destination != pDest)
-				pUnit->SetDestination(pDest, true);
-			else
-				pUnit->Locomotor->Move_To(CellClass::Cell2Coord(cell, Unsorted::LevelHeight * pDest->Level));
+			// Hover units may stop one cell behind their destination, should forcing them to advance one more cell
+			pUnit->SetDestination((pUnit->Destination != pDest ? pDest : MapClass::Instance.GetCellAt(cell)), true);
 		}
 	}
 
@@ -251,15 +266,6 @@ DEFINE_HOOK(0x44E202, BuildingClass_Mission_Unload_CheckStuck, 0x6)
 DEFINE_HOOK(0x44E260, BuildingClass_Mission_Unload_KickOutStuckUnits, 0x7)
 {
 	GET(BuildingClass*, pThis, EBP);
-
-	if (!pThis->IsTether)
-	{
-		if (const auto pLink = pThis->GetNthLink())
-		{
-			pThis->SendCommand(RadioCommand::NotifyUnlink, pLink);
-			pLink->Scatter(pThis->GetCoords(), true, true);
-		}
-	}
 
 	BuildingExt::KickOutStuckUnits(pThis);
 

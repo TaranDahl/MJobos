@@ -124,52 +124,6 @@ bool BuildingTypeExt::IsPoweredAnimBlocked(BuildingClass* pBuilding, bool powere
 		&& !BuildingExt::Fetch(pBuilding)->HasPowerFromMapFile;
 }
 
-CellStruct BuildingTypeExt::GetWeaponFactoryDoor(BuildingClass* pThis)
-{
-	auto cell = pThis->GetMapCoords();
-	auto buffer = CoordStruct::Empty;
-	pThis->GetExitCoords(&buffer, 0);
-	const auto pType = pThis->Type;
-
-	switch (RulesExt::Global()->ExtendedWeaponsFactory ? BuildingTypeExt::Fetch(pType)->WeaponsFactory_Dir.Get() : 2)
-	{
-
-	case 0:
-	{
-		cell.X = static_cast<short>(buffer.X / Unsorted::LeptonsPerCell);
-		break;
-	}
-
-	case 2:
-	{
-		cell.X += static_cast<short>(pType->GetFoundationWidth() - 1);
-		cell.Y = static_cast<short>(buffer.Y / Unsorted::LeptonsPerCell);
-		break;
-	}
-
-	case 4:
-	{
-		cell.X = static_cast<short>(buffer.X / Unsorted::LeptonsPerCell);
-		cell.Y += static_cast<short>(pType->GetFoundationHeight(false) - 1);
-		break;
-	}
-
-	case 6:
-	{
-		cell.Y = static_cast<short>(buffer.Y / Unsorted::LeptonsPerCell);
-		break;
-	}
-
-	default:
-	{
-		break;
-	}
-
-	}
-
-	return cell;
-}
-
 int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass const* const pBuilding, HouseClass const* const pHouse) // not including producing upgrades
 {
 	int result = 0;
@@ -206,31 +160,6 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass const* const pBuilding,
 		checkUpgrade(pTPowersUp);
 
 	return isUpgrade ? result : -1;
-}
-
-BuildingTypeClass* BuildingTypeExt::GetAnotherPlacingType(size_t direction, bool onWater)
-{
-	const auto pType = this->OwnerObject();
-
-	if (pType->PlaceAnywhere)
-		return nullptr;
-
-	const auto& types = onWater ? this->PlaceBuilding_OnWater : this->PlaceBuilding_OnLand;
-	const size_t size = types.size();
-
-	if (!size)
-		return nullptr;
-
-	direction = (direction + (16u / size)) & 0x1Fu;
-	const auto pAnotherType = types[static_cast<int>(direction * size / 32u)];
-
-	if (pAnotherType->BuildCat != pType->BuildCat
-		|| pAnotherType->PlaceAnywhere)
-	{
-		return nullptr;
-	}
-
-	return pAnotherType;
 }
 
 void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID)
@@ -582,13 +511,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	}
 	this->AircraftDockingDir_DefaultToPoseDir.Read(exArtINI, pArtSection, "AircraftDockingDir.DefaultToPoseDir");
 
-	this->Bib_Dir.Read(exINI, pSection, "Bib.Dir");
-	this->Bib_Dir = Math::max(0, this->Bib_Dir) & 6; // Only accept 0,2,4,6
-	this->NumberImpassableRows_Dir.Read(exINI, pSection, "NumberImpassableRows.Dir");
-	this->NumberImpassableRows_Dir = Math::max(0, this->NumberImpassableRows_Dir) & 6; // Only accept 0,2,4,6
-	this->WeaponsFactory_Dir.Read(exINI, pSection, "WeaponsFactory.Dir");
-	this->WeaponsFactory_Dir = Math::max(0, this->WeaponsFactory_Dir) & 6; // Only accept 0,2,4,6
-
 	this->DeployFireDelay.Read(exINI, pSection, "DeployFireDelay");
 
 	auto& preProdAnim = pThis->GetBuildingAnim(BuildingAnimSlot::PreProduction);
@@ -764,9 +686,6 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->Refinery_UseNormalActiveAnim)
 		.Process(this->AIBaseNormal)
 		.Process(this->HasPowerUpAnim)
-		.Process(this->Bib_Dir)
-		.Process(this->NumberImpassableRows_Dir)
-		.Process(this->WeaponsFactory_Dir)
 		.Process(this->UndeploysInto_Sellable)
 		.Process(this->BuildingRadioLink_SyncOwner)
 		.Process(this->GuardRetryDelay)
