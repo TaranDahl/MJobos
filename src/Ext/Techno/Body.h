@@ -9,7 +9,6 @@
 #include <New/Entity/ShieldClass.h>
 #include <New/Entity/LaserTrailClass.h>
 #include <New/Entity/AttachEffectClass.h>
-#include <New/Entity/SquadManagerClass.h>
 
 class AirstrikeClass;
 
@@ -78,8 +77,6 @@ public:
 
 
 	AirstrikeClass* AirstrikeTargetingMe;
-
-	SquadManagerClass* SquadManager;
 
 	bool IsSelected;
 	bool ResetLocomotor;
@@ -165,7 +162,6 @@ public:
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
 		, AirstrikeTargetingMe { nullptr }
-		, SquadManager { nullptr }
 		, DelayedFireSequencePaused { false }
 		, DelayedFireWeaponIndex { -1 }
 		, DelayedFireTimer {}

@@ -263,19 +263,6 @@ DEFINE_HOOK(0x7015C9, TechnoClass_Captured_UpdateTracking, 0x6)
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
 	}
 
-	if (const auto pSquad = pExt->SquadManager)
-	{
-		if (pThis->Owner != pNewOwner)
-		{
-			pSquad->RemoveMember(pThis);
-
-			if (pSquad->Members.empty())
-				SquadManagerClass::Remove(pSquad);
-
-			pExt->SquadManager = nullptr;
-		}
-	}
-
 	if (pTypeExt->UniqueTechno)
 	{
 		const auto pOldOwner = pThis->Owner;
