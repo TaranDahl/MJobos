@@ -66,6 +66,9 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
+	Nullable<bool> AutoBuilding;
+	Nullable<int> AutoBuilding_Gap;
+
 	Valueable<bool> IsAnimDelayedBurst;
 
 	std::vector<std::optional<DirType>> AircraftDockingDirs;
@@ -195,6 +198,8 @@ public:
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
+		, AutoBuilding {}
+		, AutoBuilding_Gap {}
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
 		, FactoryPlant_DisallowTypes {}
@@ -302,6 +307,28 @@ public:
 
 	static ExtContainer ExtMap;
 
+	static std::vector<CellStruct> BaseNormalCells;
+	static std::vector<TechnoClass*> CleanCheckedTechnos;
+	static std::vector<CellClass*> CleanCheckedCells;
+	static std::vector<CellClass*> CleanOptionalCells;
+	static std::vector<TechnoClass*> CleanReCheckedTechnos;
+	struct InfantryCountInCell
+	{
+		CellClass* Position;
+		int Count;
+	};
+	static std::vector<InfantryCountInCell> CleanInfantryCells;
+	struct TechnoWithDestination
+	{
+		TechnoClass* Techno;
+		CellClass* Destination;
+	};
+	static std::vector<TechnoWithDestination> CleanFinalOrder;
+	static std::vector<CellClass*> CleanDeleteCells;
+	static std::vector<TechnoClass*> CleanOptionalTechnos;
+	static std::unordered_map<int, int> PlaceCheckedCells;
+	static bool ContainersInit;
+
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
 	{
 		return AbstractExt::Fetch<BuildingTypeExt>(pThis);
@@ -321,5 +348,11 @@ public:
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
 	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
+	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
+	static bool IsSameBuildingType(BuildingTypeClass* pType1, BuildingTypeClass* pType2);
+	static CellStruct SimulatePlacingAction(BuildingTypeClass* pType, CellStruct rallyCell, HouseClass* pHouse);
+	static CellStruct NearbyPlacingLocation(BuildingTypeClass* pType, CellStruct cell, HouseClass* pHouse, int buildGap = 1, bool checkAdjacent = false, bool checkShroud = false);
+	static bool AutoPlaceBuilding(BuildingClass* pBuilding);
 };
 

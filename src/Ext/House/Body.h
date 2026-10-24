@@ -9,6 +9,16 @@
 
 #include <array>
 
+struct PlacingBuildingStruct
+{
+	BuildingTypeClass* Type;
+	BuildingTypeClass* DrawType;
+	int Times;
+	CDTimerClass Timer;
+	CellStruct TopLeft;
+	size_t PlaceType;
+};
+
 class HouseExt final : public AbstractExt, public Detach::Listener<BuildingClass>
 {
 public:
@@ -29,6 +39,8 @@ public:
 	std::vector<BuildingClass*> PowerPlantEnhancers;
 	std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 	std::vector<TechnoClass*> OwnedCountedHarvesters;
+	PlacingBuildingStruct Common;
+	PlacingBuildingStruct Combat;
 	bool ForceOnlyTargetHouseEnemy;
 	int ForceOnlyTargetHouseEnemyMode;
 

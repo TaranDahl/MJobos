@@ -106,6 +106,10 @@ public:
 		Nullable<bool> NoQueueUpToEnter_Buildings;
 		Nullable<bool> NoQueueUpToUnload_Buildings;
 
+		Valueable<bool> ExtendedBuildingPlacing;
+		Valueable<bool> AutoBuilding;
+		Valueable<int> AutoBuilding_Gap;
+
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
 		Valueable<double> JumpjetTilt_ForwardSpeedFactor;
@@ -637,6 +641,10 @@ public:
 			, NoQueueUpToUnload { false }
 			, NoQueueUpToEnter_Buildings {}
 			, NoQueueUpToUnload_Buildings {}
+
+			, ExtendedBuildingPlacing { false }
+			, AutoBuilding { false }
+			, AutoBuilding_Gap { 1 }
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }
