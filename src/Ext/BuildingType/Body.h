@@ -66,6 +66,12 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
+	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnLand;
+	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnWater;
+	std::vector<BuildingTypeClass*> PlaceBuilding_OnLand_Unique;
+	std::vector<BuildingTypeClass*> PlaceBuilding_OnWater_Unique;
+	Valueable<bool> CanBuildUnderUnits;
+
 	Valueable<bool> IsAnimDelayedBurst;
 
 	std::vector<std::optional<DirType>> AircraftDockingDirs;
@@ -84,6 +90,8 @@ public:
 	Nullable<bool> NoAlphaImageOnBuildup;
 	ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
 	ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
+	ValueableVector<TechnoTypeClass*> Adjacent_AllowedExtra;
+	ValueableVector<TechnoTypeClass*> Adjacent_DisallowedExtra;
 	Valueable<bool> Adjacent_Disallowed_Prohibit;
 	Valueable<int> Adjacent_Disallowed_ProhibitDistance;
 
@@ -195,6 +203,11 @@ public:
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
+		, PlaceBuilding_OnLand {}
+		, PlaceBuilding_OnWater {}
+		, PlaceBuilding_OnLand_Unique {}
+		, PlaceBuilding_OnWater_Unique {}
+		, CanBuildUnderUnits { false }
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
 		, FactoryPlant_DisallowTypes {}
@@ -210,6 +223,8 @@ public:
 		, NoAlphaImageOnBuildup {}
 		, Adjacent_Allowed {}
 		, Adjacent_Disallowed {}
+		, Adjacent_AllowedExtra {}
+		, Adjacent_DisallowedExtra {}
 		, Adjacent_Disallowed_Prohibit { false }
 		, Adjacent_Disallowed_ProhibitDistance { 0 }
 		, BarracksExitCell {}
@@ -301,6 +316,8 @@ public:
 	};
 
 	static ExtContainer ExtMap;
+
+	static std::vector<CellStruct> BaseNormalCells;
 
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
 	{
