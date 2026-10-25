@@ -39,6 +39,7 @@ public:
 	std::vector<BuildingClass*> PowerPlantEnhancers;
 	std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 	std::vector<TechnoClass*> OwnedCountedHarvesters;
+	std::vector<UnitClass*> OwnedDeployingUnits;
 	PlacingBuildingStruct Common;
 	PlacingBuildingStruct Combat;
 	bool ForceOnlyTargetHouseEnemy;

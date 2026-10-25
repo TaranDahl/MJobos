@@ -2,6 +2,7 @@
 
 #include <Ext/House/Body.h>
 #include <Ext/Rules/Body.h>
+#include <Ext/Techno/Body.h>
 
 #include <EventClass.h>
 
@@ -71,13 +72,26 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 	return 0;
 }
 
-// AIConstructionYard Hook #4-1 -> sub_443C60 - Prohibit AI from building construction yard and clean up invalid walls nodes.
+// Forward declarations: helpers are defined further below in this file (base layout); Mix defines them before first use.
+static inline void ClearPlacingBuildingData(PlacingBuildingStruct* const pPlace);
+template <bool slam = false>
+static inline void PlayConstructionYardAnim(BuildingClass* const pFactory);
+static inline bool CheckBuildingFoundation(BuildingTypeClass* const pBuildingType, const CellStruct topLeftCell, HouseClass* const pHouse, bool& noOccupy);
+
+/*
+	In sub_443C60
+
+	- Buildable-upon TechnoTypes Hook #6 -> Try to clean up the building space when AI is building
+	- AIConstructionYard Hook #4-1 -> Prohibit AI from building construction yard and clean up invalid walls nodes.
+	- Limbo Build Hook #2 -> Skip check limbo building
+*/
 DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 {
-	enum { CanNotBuild = 0x4454E6, BuildFailed = 0x445696 };
+	enum { CanBuild = 0x4452F0, TemporarilyCanNotBuild = 0x445237, CanNotBuild = 0x4454E6, BuildSucceeded = 0x4454D4, BuildFailed = 0x445696 };
 
 	GET(BaseNodeClass* const, pBaseNode, EBX);
 	GET(BuildingClass* const, pBuilding, EDI);
+	GET(BuildingClass* const, pFactory, ESI);
 	GET(const CellStruct, topLeftCell, EDX);
 
 	const auto pBuildingType = pBuilding->Type;
@@ -115,6 +129,201 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 
 		if (notValidWallNode())
 			return CanNotBuild;
+	}
+
+	const auto pHouse = pFactory->Owner;
+
+	if (!RulesExt::Global()->ExtendedBuildingPlacing)
+		return 0;
+
+	if (topLeftCell != CellStruct::Empty && !pBuildingType->PlaceAnywhere)
+	{
+		if (!pBuildingType->PowersUpBuilding[0])
+		{
+			bool noOccupy = true;
+			bool canBuild = CheckBuildingFoundation(pBuildingType, topLeftCell, pHouse, noOccupy);
+			const auto pHouseExt = HouseExt::Fetch(pHouse);
+			auto& place = pBuildingType->BuildCat != BuildCat::Combat ? pHouseExt->Common : pHouseExt->Combat;
+
+			do
+			{
+				if (canBuild)
+				{
+					if (noOccupy)
+						break; // Can Build
+
+					do
+					{
+						if (topLeftCell != place.TopLeft || pBuildingType != place.Type) // New command
+						{
+							place.Type = pBuildingType;
+							place.DrawType = pBuildingType;
+							place.TopLeft = topLeftCell;
+						}
+
+						if (!place.Timer.HasTimeLeft())
+						{
+							place.Timer.Start(40);
+
+							if (BuildingTypeExt::CleanUpBuildingSpace(pBuildingType, topLeftCell, pHouse))
+								break; // No place for cleaning
+						}
+
+						return TemporarilyCanNotBuild;
+					}
+					while (false);
+				}
+
+				ClearPlacingBuildingData(&place);
+				return CanNotBuild;
+			}
+			while (false);
+
+			ClearPlacingBuildingData(&place);
+		}
+		else
+		{
+			const auto pCell = MapClass::Instance.GetCellAt(topLeftCell);
+			const auto pCellBuilding = pCell->GetBuilding();
+
+			if (!pCellBuilding || !pCellBuilding->CanUpgradeBuilding(pBuildingType, pHouse))
+				return CanNotBuild;
+		}
+	}
+
+	if (pBuilding->Unlimbo(CoordStruct{ (topLeftCell.X << 8) + 128, (topLeftCell.Y << 8) + 128, 0 }, DirType::North))
+	{
+		PlayConstructionYardAnim(pFactory);
+		return CanBuild;
+	}
+
+	return CanNotBuild;
+}
+
+/*
+	In sub_7393C0
+
+	- Buildable-upon TechnoTypes Hook #9-1 -> Try to clean up the building space when is deploying
+*/
+DEFINE_HOOK(0x73946C, UnitClass_TryToDeploy_CleanUpDeploySpace, 0x6)
+{
+	enum { CanDeploy = 0x73958A, TemporarilyCanNotDeploy = 0x73953B, CanNotDeploy = 0x7394E0 };
+
+	GET(UnitClass* const, pThis, EBP);
+	GET(CellStruct, topLeftCell, ESI);
+
+	if (!RulesExt::Global()->ExtendedBuildingPlacing)
+		return 0;
+
+	const auto pTechnoExt = TechnoExt::Fetch(pThis);
+	const auto pBuildingType = pThis->Type->DeploysInto;
+	const auto pHouseExt = HouseExt::Fetch(pThis->Owner);
+	auto& vec = pHouseExt->OwnedDeployingUnits;
+
+	if (pBuildingType->GetFoundationWidth() > 2 || pBuildingType->GetFoundationHeight(false) > 2)
+		topLeftCell -= CellStruct { 1, 1 };
+
+	R->Stack<CellStruct>(STACK_OFFSET(0x28, -0x14), topLeftCell);
+
+	if (!pBuildingType->PlaceAnywhere)
+	{
+		bool noOccupy = true;
+		bool canBuild = CheckBuildingFoundation(pBuildingType, topLeftCell, pThis->Owner, noOccupy);
+
+		do
+		{
+			if (canBuild)
+			{
+				if (noOccupy)
+					break; // Can build
+
+				do
+				{
+					if (!pTechnoExt->UnitAutoDeployTimer.InProgress())
+					{
+						if (BuildingTypeExt::CleanUpBuildingSpace(pBuildingType, topLeftCell, pThis->Owner, pThis))
+							break; // No place for cleaning
+
+						if (vec.size() == 0 || std::find(vec.begin(), vec.end(), pThis) == vec.end())
+							vec.push_back(pThis);
+
+						pTechnoExt->UnitAutoDeployTimer.Start(40);
+					}
+
+					if (pThis->PrimaryFacing.Current().GetFacing<256>() != static_cast<size_t>(pBuildingType->DeployFacing))
+					{
+						const auto pLoco = pThis->Locomotor;
+
+						if (!pLoco->Is_Moving_Now())
+							pLoco->Do_Turn(DirStruct(static_cast<DirType>(pBuildingType->DeployFacing)));
+					}
+
+					return TemporarilyCanNotDeploy;
+				}
+				while (false);
+			}
+
+			if (vec.size() > 0)
+				vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+
+			pTechnoExt->UnitAutoDeployTimer.Stop();
+
+			return CanNotDeploy;
+		}
+		while (false);
+	}
+
+	if (vec.size() > 0)
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+
+	pTechnoExt->UnitAutoDeployTimer.Stop();
+
+	return CanDeploy;
+}
+
+/*
+	In sub_73FD50
+
+	- Buildable-upon TechnoTypes Hook #9-2 -> Push the owner house into deploy check
+*/
+DEFINE_HOOK(0x73FF8F, UnitClass_MouseOverObject_ShowDeployCursor, 0x6)
+{
+	if (RulesExt::Global()->ExtendedBuildingPlacing) // This IF check is not so necessary
+	{
+		GET(const UnitClass* const, pUnit, ESI);
+		LEA_STACK(HouseClass**, pHousePtr, STACK_OFFSET(0x20, -0x20));
+		*pHousePtr = pUnit->Owner;
+	}
+
+	return 0;
+}
+
+/*
+	In sub_4C6CB0
+
+	- Buildable-upon TechnoTypes Hook #10 -> Stop deploy when get stop command
+*/
+DEFINE_HOOK(0x4C7665, EventClass_RespondToEvent_StopDeployInIdleEvent, 0x6)
+{
+	if (RulesExt::Global()->ExtendedBuildingPlacing) // This IF check is not so necessary
+	{
+		GET(const UnitClass* const, pUnit, ESI);
+
+		if (pUnit->Type->DeploysInto)
+		{
+			const auto mission = pUnit->CurrentMission;
+
+			if (mission == Mission::Guard || mission == Mission::Unload)
+			{
+				if (const auto pHouseExt = HouseExt::TryFetch(pUnit->Owner))
+				{
+					auto& vec = pHouseExt->OwnedDeployingUnits;
+
+					if (vec.size() > 0)
+						vec.erase(std::remove(vec.begin(), vec.end(), pUnit), vec.end());
+				}
+			}
+		}
 	}
 
 	return 0;
@@ -216,7 +425,7 @@ static inline void ClearCurrentBuildingData(DisplayClass* const pDisplay)
 	}
 }
 
-template <bool slam = false>
+template <bool slam>
 static inline void PlayConstructionYardAnim(BuildingClass* const pFactory)
 {
 	const auto pFactoryType = pFactory->Type;
@@ -724,6 +933,47 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_Update_CheckHangUpBuilding, 0x6)
 		buildCurrent(combatPlace.Type, combatPlace.TopLeft, combatPlace.PlaceType);
 	}
 
+	if (pHouseExt->OwnedDeployingUnits.size() > 0)
+	{
+		auto& vec = pHouseExt->OwnedDeployingUnits;
+
+		for (auto it = vec.begin(); it != vec.end(); )
+		{
+			const auto pUnit = *it;
+
+			if (!pUnit->InLimbo
+				&& pUnit->IsOnMap
+				&& !pUnit->IsSinking
+				&& pUnit->Owner == pHouse
+				&& !pUnit->Destination
+				&& !pUnit->ParasiteEatingMe
+				&& !pUnit->TemporalTargetingMe
+				&& pUnit->Type->DeploysInto)
+			{
+				const auto mission = pUnit->CurrentMission;
+
+				if (mission == Mission::Unload)
+				{
+					++it;
+					continue;
+				}
+				else if (mission == Mission::Guard)
+				{
+					if (const auto pExt = TechnoExt::Fetch(pUnit))
+					{
+						if (!(pExt->UnitAutoDeployTimer.GetTimeLeft() % 8))
+							pUnit->QueueMission(Mission::Unload, true);
+
+						++it;
+						continue;
+					}
+				}
+			}
+
+			it = vec.erase(it);
+		}
+	}
+
 	return 0;
 }
 
@@ -785,6 +1035,23 @@ DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_DrawPlacingPreview, 0x6)
 			if (const auto pType = pHouseExt->Combat.DrawType)
 				drawImage(pType, pHouse, pHouseExt->Combat.TopLeft);
 
+			if (pHouseExt->OwnedDeployingUnits.size() <= 0)
+				continue;
+
+			for (const auto& pUnit : pHouseExt->OwnedDeployingUnits)
+			{
+				const auto pType = pUnit->Type->DeploysInto;
+
+				if (!pType)
+					continue;
+
+				auto displayCell = CellClass::Coord2Cell(pUnit->GetCoords()); // pUnit->GetMapCoords();
+
+				if (pType->GetFoundationWidth() > 2 || pType->GetFoundationHeight(false) > 2)
+					displayCell -= CellStruct { 1, 1 };
+
+				drawImage(pType, pHouse, displayCell);
+			}
 		}
 	}
 
