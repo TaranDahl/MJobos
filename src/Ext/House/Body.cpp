@@ -784,9 +784,10 @@ static int CountOwnedIncludeDeploy(const HouseClass* pThis, const TechnoTypeClas
 	int count = pThis->CountOwnedNow(pItem);
 
 	if (const auto pEx = pItem->DeploysInto)
+		count += pThis->CountOwnedNow(pEx);
 
 	if (const auto pEx = pItem->UndeploysInto)
-
+		count += pThis->CountOwnedNow(pEx);
 
 	return count;
 }

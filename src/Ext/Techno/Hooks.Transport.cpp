@@ -261,9 +261,6 @@ static inline bool CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 	if (pTransport->GetCell()->LandType == LandType::Water && !pTransportTypeExt->AmphibiousEnter.Get(RulesExt::Global()->AmphibiousEnter))
 		return false;
 
-	// Added to fit with techno attachment
-		return false;
-
 	const bool bySize = pTransportTypeExt->Passengers_BySize;
 	const int passengerSize = static_cast<int>(pPassenger->GetTechnoType()->Size);
 
