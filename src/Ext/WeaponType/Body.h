@@ -89,7 +89,6 @@ public:
 	Nullable<bool> KeepRange_AllowAI;
 	Nullable<bool> KeepRange_AllowPlayer;
 	Nullable<int> KeepRange_EarlyStopFrame;
-	Nullable<bool> AttackIronCurtain;
 	Valueable<bool> ResetGattlingValue;
 	Valueable<bool> AddtionalDamage_GattlingValue;
 	Valueable<double> AddtionalDamage_GattlingValue_Mult;
@@ -188,7 +187,6 @@ public:
 		, KeepRange_AllowAI {}
 		, KeepRange_AllowPlayer {}
 		, KeepRange_EarlyStopFrame {}
-		, AttackIronCurtain {}
 		, ResetGattlingValue { false }
 		, AddtionalDamage_GattlingValue { false }
 		, AddtionalDamage_GattlingValue_Mult { 1.0 }
