@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <Ext/TechnoType/Body.h>
 #include <Ext/Radio/Body.h>
@@ -33,35 +33,24 @@ public:
 	std::vector<std::unique_ptr<LaserTrailClass>> LaserTrails;
 	std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
 	AttachEffectTechnoProperties AE;
-	TechnoTypeClass* PreviousType; // Type change registered in TechnoClass::AI on current frame and used in FootClass::AI on same frame and reset after.
 	std::vector<EBolt*> ElectricBolts; // EBolts are not serialized so do not serialize this either.
 	int AnimRefCount; // Used to keep track of how many times this techno is referenced in anims f.ex Invoker, ParentBuilding etc., for pointer invalidation.
-	int SubterraneanHarvStatus; // 0 = none, 1 = created, 2 = out from factory
-	AbstractClass* SubterraneanHarvRallyPoint;
 	bool ReceiveDamage;
 	bool LastKillWasTeamTarget;
 	CDTimerClass PassengerDeletionTimer;
 	ShieldTypeClass* CurrentShieldType;
-	int LastWarpDistance;
-	int JumpjetSpeed;
 	CDTimerClass ChargeTurretTimer; // Used for charge turrets instead of RearmTimer if weapon has ChargeTurret.Delays set.
 	CDTimerClass AutoDeathTimer;
 	AnimTypeClass* MindControlRingAnimType;
 	int DamageNumberOffset;
-	int Strafe_BombsDroppedThisRound;
-	CellClass* Strafe_TargetCell;
 	int CurrentAircraftWeaponIndex;
-	bool IsInTunnel;
-	bool IsBurrowed;
 	bool HasBeenPlacedOnMap; // Set to true on first Unlimbo() call.
-	CDTimerClass DeployFireTimer;
 	bool SkipTargetChangeResetSequence;
 	bool ForceFullRearmDelay;
 	bool LastRearmWasFullDelay;
 	bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 	int WHAnimRemainingCreationInterval;
 	WeaponTypeClass* LastWeaponType;
-	int MyTargetingFrame;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 	int BeControlledThreatFrame;
@@ -118,35 +107,24 @@ public:
 		, LaserTrails {}
 		, AttachedEffects {}
 		, AE {}
-		, PreviousType { nullptr }
 		, ElectricBolts {}
 		, AnimRefCount { 0 }
-		, SubterraneanHarvStatus { 0 }
-		, SubterraneanHarvRallyPoint { nullptr }
 		, ReceiveDamage { false }
 		, LastKillWasTeamTarget { false }
 		, PassengerDeletionTimer {}
 		, CurrentShieldType { nullptr }
-		, LastWarpDistance {}
-		, JumpjetSpeed { 14 } // 0x7115B8
 		, ChargeTurretTimer {}
 		, AutoDeathTimer {}
 		, MindControlRingAnimType { nullptr }
 		, DamageNumberOffset { INT32_MIN }
-		, Strafe_BombsDroppedThisRound { 0 }
-		, Strafe_TargetCell { nullptr }
 		, CurrentAircraftWeaponIndex {}
-		, IsInTunnel { false }
-		, IsBurrowed { false }
 		, HasBeenPlacedOnMap { false }
-		, DeployFireTimer {}
 		, SkipTargetChangeResetSequence { false }
 		, ForceFullRearmDelay { false }
 		, LastRearmWasFullDelay { false }
 		, CanCloakDuringRearm { false }
 		, WHAnimRemainingCreationInterval { 0 }
 		, LastWeaponType {}
-		, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
 		, BeControlledThreatFrame { 0 }

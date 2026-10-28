@@ -1843,7 +1843,7 @@ void TechnoExt::UpdateTypeData(TechnoTypeClass* pCurrentType)
 			{
 				const int turnrate = pCurrentType->JumpjetTurnRate >= 127 ? 127 : pCurrentType->JumpjetTurnRate;
 				pJJLoco->Speed = pCurrentType->JumpjetSpeed;
-				this->JumpjetSpeed = pCurrentType->JumpjetSpeed; // keep the cached speed in sync (0x54D138 hook reads it every frame)
+				FootExt::Fetch(pFoot)->JumpjetSpeed = pCurrentType->JumpjetSpeed; // keep the cached speed in sync (0x54D138 hook reads it every frame)
 				pJJLoco->MaxSpeed = pCurrentType->JumpjetSpeed;
 				pJJLoco->Climb = pCurrentType->JumpjetClimb;
 				pJJLoco->Accel = pCurrentType->JumpjetAccel;
