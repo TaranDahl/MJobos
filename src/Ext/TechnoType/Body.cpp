@@ -799,7 +799,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->ImmuneToCrit.Read(exINI, pSection, "ImmuneToCrit");
 	this->MultiMindControl_ReleaseVictim.Read(exINI, pSection, "MultiMindControl.ReleaseVictim");
 	this->NoManualMove.Read(exINI, pSection, "NoManualMove");
-	this->NoManualEject.Read(exINI, pSection, "NoManualEject");
 	this->InitialStrength.Read(exINI, pSection, "InitialStrength");
 	if (this->InitialStrength.isset())
 		this->InitialStrength = Math::clamp(this->InitialStrength, 1, pThis->Strength);
@@ -1547,7 +1546,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->CameoPriority_Houses)
 		.Process(this->AltCameoPCX)
 		.Process(this->NoManualMove)
-		.Process(this->NoManualEject)
 		.Process(this->InitialStrength)
 		.Process(this->ReloadInTransport)
 		.Process(this->ForbidParallelAIQueues)

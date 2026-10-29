@@ -73,7 +73,6 @@ public:
 	DWORD CameoPriority_Houses;
 	PhobosPCXFile AltCameoPCX;
 	Valueable<bool> NoManualMove;
-	Valueable<bool> NoManualEject;
 	Nullable<int> InitialStrength;
 	Nullable<bool> ReloadInTransport;
 	Valueable<bool> ForbidParallelAIQueues;
@@ -551,7 +550,6 @@ public:
 		, CameoPriority_Houses { 0 }
 		, AltCameoPCX {}
 		, NoManualMove { false }
-		, NoManualEject { false }
 		, InitialStrength {}
 		, ReloadInTransport {}
 		, ForbidParallelAIQueues { false }
