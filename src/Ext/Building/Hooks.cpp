@@ -213,7 +213,7 @@ DEFINE_HOOK(0x44D455, BuildingClass_Mission_Missile_EMPulseBulletWeapon, 0x8)
 
 #pragma region KickOutStuckUnits
 
-DEFINE_HOOK(0x44955D, BuildingClass_WeaponFactoryOutsideBusy_WeaponFactoryCell, 0x6)
+DEFINE_HOOK(0x44955D, BuildingClass_WeaponFactoryOutsideBusy, 0x6)
 {
 	enum { NotBusy = 0x44969B };
 

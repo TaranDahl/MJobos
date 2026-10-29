@@ -5,7 +5,6 @@
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
-#include <Ext/Cell/Body.h>
 #include <Ext/Techno/Body.h>
 
 struct ExtendedVariable

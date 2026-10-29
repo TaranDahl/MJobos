@@ -559,6 +559,22 @@ ProgressDisplay.Others.PipsShape=PIPS.shp     ; filename - including the .shp ex
 ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp extension
 ```
 
+### Show power plant enhancer range
+
+- It is possible to show range of power plant enhancer when placing a building.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+ShowPowerPlantEnhancerRange=true   ; boolean
+```
+
+In `RA2MD.INI`:
+```ini
+[Phobos]
+ShowPowerPlantEnhancerRange=false  ; boolean
+```
+
 ### More display styles for placing grids
 
 - This feature is highly compatible with `ExtendedBuildingPlacing`. If set `DrawAdjacentBoundary` to true, it will display the four corners of the `Adjacent` boundary. If set `PlacementGrid.Expand` to true, it will display the placing grids with `place.shp` and following corresponding frame number.
@@ -708,6 +724,8 @@ In `RA2MD.INI`:
 [Phobos]
 SaveGameOnScenarioStart=true  ; boolean
 ```
+
+## Sidebar / Battle UI
 
 ### Change the scrolling action of the sidebar
 
