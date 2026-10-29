@@ -1040,6 +1040,26 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
+	this->TargetExtraThreat.Read(exINI, pSection, "TargetExtraThreat");
+	{
+		ValueableVector<double> ReadAngles {};
+		ReadAngles.Read(exINI, pSection, "TargetExtraThreat.Angles");
+
+		if (const size_t count = ReadAngles.size())
+		{
+			this->TargetExtraThreat_Angles.clear();
+			this->TargetExtraThreat_Angles.resize(count);
+
+			for (size_t i = 0; i < count; ++i)
+			{
+				const int raw = static_cast<int>(ReadAngles[i] * (65536.0 / 360.0) + 0.5);
+				this->TargetExtraThreat_Angles[i] = DirStruct(std::clamp(raw, 0, 65535));
+			}
+		}
+	}
+	this->TargetExtraThreat_Multipliers.Read(exINI, pSection, "TargetExtraThreat.Multipliers");
+	this->TargetExtraThreat_Turret.Read(exINI, pSection, "TargetExtraThreat.Turret");
+
 	this->AmphibiousEnter.Read(exINI, pSection, "AmphibiousEnter");
 	this->AmphibiousUnload.Read(exINI, pSection, "AmphibiousUnload");
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
@@ -1681,6 +1701,11 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_Nums)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
+
+		.Process(this->TargetExtraThreat)
+		.Process(this->TargetExtraThreat_Angles)
+		.Process(this->TargetExtraThreat_Multipliers)
+		.Process(this->TargetExtraThreat_Turret)
 
 		.Process(this->AmphibiousEnter)
 		.Process(this->AmphibiousUnload)

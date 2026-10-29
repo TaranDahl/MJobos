@@ -272,6 +272,11 @@ public:
 	ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 	Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
+	Valueable<bool> TargetExtraThreat;
+	ValueableVector<DirStruct> TargetExtraThreat_Angles;
+	ValueableVector<double> TargetExtraThreat_Multipliers;
+	Valueable<bool> TargetExtraThreat_Turret;
+
 	Nullable<bool> AmphibiousEnter;
 	Nullable<bool> AmphibiousUnload;
 	Nullable<bool> NoQueueUpToEnter;
@@ -696,6 +701,11 @@ public:
 		, BuildLimitGroup_ExtraLimit_Nums {}
 		, BuildLimitGroup_ExtraLimit_MaxCount {}
 		, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
+
+		, TargetExtraThreat { false }
+		, TargetExtraThreat_Angles {}
+		, TargetExtraThreat_Multipliers {}
+		, TargetExtraThreat_Turret { true }
 
 		, AmphibiousEnter {}
 		, AmphibiousUnload {}
