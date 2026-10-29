@@ -428,6 +428,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->FallingDownTargetingFix.Read(exINI, GameStrings::General, "FallingDownTargetingFix");
 	this->AIAirTargetingFix.Read(exINI, GameStrings::General, "AIAirTargetingFix");
+	this->InTransportInfantryAmmoFix.Read(exINI, GameStrings::General, "InTransportInfantryAmmoFix");
 
 	this->ReloadInTransport.Read(exINI, GameStrings::General, "ReloadInTransport");
 	this->OpenTopped_IgnoreRangefinding.Read(exINI, GameStrings::General, "OpenTopped.IgnoreRangefinding");
@@ -995,6 +996,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->MissileSpawnAttackCell)
 		.Process(this->FallingDownTargetingFix)
 		.Process(this->AIAirTargetingFix)
+		.Process(this->InTransportInfantryAmmoFix)
 		.Process(this->ReloadInTransport)
 		.Process(this->OpenTopped_IgnoreRangefinding)
 		.Process(this->OpenTopped_AllowFiringIfDeactivated)

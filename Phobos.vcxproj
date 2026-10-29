@@ -178,6 +178,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.Targeting.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Tint.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Transport.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.UpdateReload.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.WeaponEffects.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.WeaponRange.cpp" />
     <ClCompile Include="src\Ext\Techno\WeaponHelpers.cpp" />
