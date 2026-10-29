@@ -160,6 +160,12 @@ public:
 
 	std::vector<TypeConvertGroup> Convert_Pairs;
 	AEAttachInfoTypeClass AttachEffects;
+
+	Valueable<bool> LightChanging;
+	Valueable<int> SetAmbientLight;
+	Valueable<int> SetAmbientRed;
+	Valueable<int> SetAmbientGreen;
+	Valueable<int> SetAmbientBlue;
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 	Valueable<bool> InflictLocomotor;
 	Valueable<bool> RemoveInflictedLocomotor;
@@ -439,6 +445,12 @@ public:
 
 		, Convert_Pairs {}
 		, AttachEffects {}
+
+		, LightChanging { false }
+		, SetAmbientLight { -1 }
+		, SetAmbientRed { -1 }
+		, SetAmbientGreen { -1 }
+		, SetAmbientBlue { -1 }
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 		, InflictLocomotor { false }
 		, RemoveInflictedLocomotor { false }
