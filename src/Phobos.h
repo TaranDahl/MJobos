@@ -138,6 +138,10 @@ public:
 		static bool SelectedDisplay_Enable;
 		static bool SelectedDisplay_Expand;
 		static int SelectedDisplay_MaxCameo;
+		static bool ScrollSidebarStripInTactical;
+		static bool ScrollSidebarStripWhenHoldAlt;
+		static bool ScrollSidebarStripWhenHoldCtrl;
+		static bool ScrollSidebarStripWhenHoldShift;
 		static bool ShowGameTime;
 		static int ShowGameTime_BoardOpacity;
 		static bool SelectCapturedCommand;
