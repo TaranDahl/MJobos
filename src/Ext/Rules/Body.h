@@ -352,6 +352,8 @@ public:
 
 		Valueable<int> AdjacentWallDamage;
 
+		Valueable<bool> KeepAnimOnLimbo;
+
 		Valueable<int> WarheadAnimZAdjust;
 
 		Valueable<bool> IvanBombAttachToCenter;
@@ -851,6 +853,8 @@ public:
 			, Parasite_AllowWaterExit {}
 			, InfantryAutoDeploy { false }
 			, AdjacentWallDamage { 200 }
+
+			, KeepAnimOnLimbo { false }
 
 			, WarheadAnimZAdjust { -15 }
 
