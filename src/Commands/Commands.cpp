@@ -16,6 +16,7 @@
 #include "AssignRallyPoint.h"
 #include "ManualReloadAmmo.h"
 #include "AutoBuilding.h"
+#include "DistributionMode.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "AggressiveStance.h"
@@ -98,6 +99,27 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		"ManualReload",
 		"Tip:ManualReload",
 		&ManualReloadAmmoCommandClass::ManualReloadExecute);
+	if (Phobos::Config::AllowSwitchNoMoveCommand)
+		MakeCommand<SwitchNoMoveCommandClass>();
+
+	if (Phobos::Config::AllowDistributionCommand)
+	{
+		if (Phobos::Config::AllowDistributionCommand_SpreadMode)
+			MakeCommand<DistributionModeSpreadCommandClass>();
+
+		if (Phobos::Config::AllowDistributionCommand_FilterMode)
+			MakeCommand<DistributionModeFilterCommandClass>();
+
+		MakeCommand<DistributionModeHoldDownCommandClass>();
+
+		ShapeButtonHelper::RegisterButton(
+			ShapeButtonId::DistributionMode,
+			"DistributionMode",
+			"Tip:DistributionMode",
+			&DistributionModeHoldDownCommandClass::ToggleExecute,
+			1,
+			true);
+	}
 
 	if (Phobos::Config::DevelopmentCommands)
 	{
@@ -127,6 +149,9 @@ static void MouseWheelDownCommand()
 	if (SelectedInfoClass::Instance.IsHovering)
 		SelectedInfoClass::Instance.ScrollRight();
 
+	if (DistributionModeHoldDownCommandClass::Enabled && Phobos::Config::AllowDistributionCommand_SpreadModeScroll)
+		DistributionModeHoldDownCommandClass::DistributionSpreadModeReduce();
+
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollDown();
 }
@@ -138,6 +163,9 @@ static void MouseWheelUpCommand()
 
 	if (SelectedInfoClass::Instance.IsHovering)
 		SelectedInfoClass::Instance.ScrollLeft();
+
+	if (DistributionModeHoldDownCommandClass::Enabled && Phobos::Config::AllowDistributionCommand_SpreadModeScroll)
+		DistributionModeHoldDownCommandClass::DistributionSpreadModeExpand();
 
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollUp();
@@ -159,6 +187,7 @@ static inline bool CheckSkipScrollSidebar()
 {
 	return MessageColumnClass::Instance.IsHovering()
 		|| SelectedInfoClass::Instance.IsHovering
+		|| DistributionModeHoldDownCommandClass::Enabled
 		|| UIExt::UIRoot::Instance().IsBlockingAt(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y);
 }
 

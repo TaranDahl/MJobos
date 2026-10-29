@@ -40,6 +40,7 @@
     <ClCompile Include="src\Commands\DamageDisplay.cpp" />
     <ClCompile Include="src\Commands\DeselectObject.cpp" />
     <ClCompile Include="src\Commands\DeselectObject5.cpp" />
+    <ClCompile Include="src\Commands\DistributionMode.cpp" />
     <ClCompile Include="src\Commands\FrameByFrame.cpp" />
     <ClCompile Include="src\Commands\FrameStep.cpp" />
     <ClCompile Include="src\Commands\ManualReloadAmmo.cpp" />
@@ -379,6 +380,7 @@
     <ClInclude Include="src\Commands\DamageDisplay.h" />
     <ClInclude Include="src\Commands\DeselectObject.h" />
     <ClInclude Include="src\Commands\DeselectObject5.h" />
+    <ClInclude Include="src\Commands\DistributionMode.h" />
     <ClInclude Include="src\Commands\FireTacticalSW.h" />
     <ClInclude Include="src\Commands\FrameByFrame.h" />
     <ClInclude Include="src\Commands\FrameStep.h" />

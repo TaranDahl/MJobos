@@ -246,6 +246,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->SelectedAircraftMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedAircraftMissingPCX");
 	this->SelectedBuildingMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedBuildingMissingPCX");
 	this->SelectedIngameTimer.Read(exINI, GameStrings::AudioVisual, "SelectedIngameTimer");
+	this->StartDistributionModeSound.Read(exINI, GameStrings::AudioVisual, "StartDistributionModeSound");
+	this->EndDistributionModeSound.Read(exINI, GameStrings::AudioVisual, "EndDistributionModeSound");
+	this->AddDistributionModeCommandSound.Read(exINI, GameStrings::AudioVisual, "AddDistributionModeCommandSound");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -919,6 +922,9 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->SelectedAircraftMissingPCX)
 		.Process(this->SelectedBuildingMissingPCX)
 		.Process(this->SelectedIngameTimer)
+		.Process(this->StartDistributionModeSound)
+		.Process(this->EndDistributionModeSound)
+		.Process(this->AddDistributionModeCommandSound)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

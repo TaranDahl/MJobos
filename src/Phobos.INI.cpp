@@ -79,6 +79,16 @@ bool Phobos::Config::HideLaserTrailEffects = true;
 bool Phobos::Config::HideShakeEffects = true;
 bool Phobos::Config::ShowFlashOnSelecting = false;
 bool Phobos::Config::UnitPowerDrain = false;
+bool Phobos::Config::AllowSwitchNoMoveCommand = false;
+bool Phobos::Config::AllowDistributionCommand = false;
+bool Phobos::Config::AllowDistributionCommand_SpreadMode = true;
+bool Phobos::Config::AllowDistributionCommand_SpreadModeScroll = true;
+bool Phobos::Config::AllowDistributionCommand_FilterMode = true;
+bool Phobos::Config::AllowDistributionCommand_AffectsAllies = true;
+bool Phobos::Config::AllowDistributionCommand_AffectsEnemies = true;
+bool Phobos::Config::ApplyNoMoveCommand = true;
+int Phobos::Config::DistributionSpreadMode = 2;
+int Phobos::Config::DistributionFilterMode = 2;
 int Phobos::Config::SuperWeaponSidebar_RequiredSignificance = 0;
 int Phobos::Config::SkipFrameDelay = 0;
 bool Phobos::Config::AutomaticPlacingBuilding = true;
@@ -127,6 +137,11 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::HideLaserTrailEffects = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "HideLaserTrailEffects", false);
 	Phobos::Config::HideShakeEffects = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "HideShakeEffects", false);
 	Phobos::Config::ShowFlashOnSelecting = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowFlashOnSelecting", false);
+	Phobos::Config::ApplyNoMoveCommand = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "DefaultApplyNoMoveCommand", true);
+	Phobos::Config::DistributionSpreadMode = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "DefaultDistributionSpreadMode", 2);
+	Phobos::Config::DistributionSpreadMode = std::clamp(Phobos::Config::DistributionSpreadMode, 0, 3);
+	Phobos::Config::DistributionFilterMode = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "DefaultDistributionFilterMode", 2);
+	Phobos::Config::DistributionFilterMode = std::clamp(Phobos::Config::DistributionFilterMode, 0, 3);
 	Phobos::Config::SuperWeaponSidebar_RequiredSignificance = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SuperWeaponSidebar.RequiredSignificance", 0);
 	Phobos::Config::SkipFrameDelay = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SkipFrameDelay", 0);
 	if (Phobos::Config::SkipFrameDelay < 2) Phobos::Config::SkipFrameDelay = 0;
@@ -328,6 +343,13 @@ DEFINE_HOOK(0x52D21F, InitRules_ThingsThatShouldntBeSerailized, 0x6)
 	Phobos::Config::SuperWeaponSidebarCommands = pINI_RULESMD->ReadBool("GlobalControls", "SuperWeaponSidebarKeysEnabled", Phobos::Config::SuperWeaponSidebarCommands);
 	Phobos::Config::ShowPlanningPath = pINI_RULESMD->ReadBool("GlobalControls", "DebugPlanningPaths", Phobos::Config::ShowPlanningPath);
 	Phobos::Config::SelectCapturedCommand = pINI_RULESMD->ReadBool("GlobalControls", "SelectCapturedKeyEnabled", Phobos::Config::SelectCapturedCommand);
+	Phobos::Config::AllowSwitchNoMoveCommand = pINI_RULESMD->ReadBool("GlobalControls", "AllowSwitchNoMoveCommand", Phobos::Config::AllowSwitchNoMoveCommand);
+	Phobos::Config::AllowDistributionCommand = pINI_RULESMD->ReadBool("GlobalControls", "AllowDistributionCommand", Phobos::Config::AllowDistributionCommand);
+	Phobos::Config::AllowDistributionCommand_SpreadMode = pINI_RULESMD->ReadBool("GlobalControls", "AllowDistributionCommand.SpreadMode", Phobos::Config::AllowDistributionCommand_SpreadMode);
+	Phobos::Config::AllowDistributionCommand_SpreadModeScroll = pINI_RULESMD->ReadBool("GlobalControls", "AllowDistributionCommand.SpreadModeScroll", Phobos::Config::AllowDistributionCommand_SpreadModeScroll);
+	Phobos::Config::AllowDistributionCommand_FilterMode = pINI_RULESMD->ReadBool("GlobalControls", "AllowDistributionCommand.FilterMode", Phobos::Config::AllowDistributionCommand_FilterMode);
+	Phobos::Config::AllowDistributionCommand_AffectsAllies = pINI_RULESMD->ReadBool("GlobalControls", "AllowDistributionCommand.AffectsAllies", Phobos::Config::AllowDistributionCommand_AffectsAllies);
+	Phobos::Config::AllowDistributionCommand_AffectsEnemies = pINI_RULESMD->ReadBool("GlobalControls", "AllowDistributionCommand.AffectsEnemies", Phobos::Config::AllowDistributionCommand_AffectsEnemies);
 
 	return 0;
 }
