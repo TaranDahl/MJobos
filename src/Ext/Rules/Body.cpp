@@ -399,6 +399,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AllowBerzerkOnAllies.Read(exINI, GameStrings::CombatDamage, "AllowBerzerkOnAllies");
 
 	this->AttackMove_IgnoreWeaponCheck.Read(exINI, GameStrings::General, "AttackMove.IgnoreWeaponCheck");
+	this->InvisoLatencyFix.Read(exINI, GameStrings::General, "InvisoLatencyFix");
+	this->InvisoBlockageFix.Read(exINI, GameStrings::General, "InvisoBlockageFix");
 
 	this->Parasite_GrappleAnim.Read(exINI, GameStrings::AudioVisual, "Parasite.GrappleAnim");
 	this->Parasite_AllowWaterExit.Read(exINI, GameStrings::General, "Parasite.AllowWaterExit");
@@ -985,6 +987,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->TintColorForceShield)
 		.Process(this->TintColorBerserk)
 		.Process(this->AttackMove_IgnoreWeaponCheck)
+		.Process(this->InvisoLatencyFix)
+		.Process(this->InvisoBlockageFix)
 		.Process(this->Parasite_GrappleAnim)
 		.Process(this->Parasite_AllowWaterExit)
 		.Process(this->InfantryAutoDeploy)

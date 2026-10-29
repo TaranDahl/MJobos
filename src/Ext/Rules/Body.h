@@ -339,6 +339,8 @@ public:
 		Valueable<bool> AllowBerzerkOnAllies;
 
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
+		Valueable<bool> InvisoLatencyFix;
+		Valueable<bool> InvisoBlockageFix;
 
 		NullableIdx<AnimTypeClass> Parasite_GrappleAnim;
 		Nullable<bool> Parasite_AllowWaterExit;
@@ -846,6 +848,8 @@ public:
 			, TintColorBerserk { 0 }
 
 			, AttackMove_IgnoreWeaponCheck { false }
+			, InvisoLatencyFix { false }
+			, InvisoBlockageFix { false }
 
 			, Parasite_GrappleAnim {}
 			, Parasite_AllowWaterExit {}
