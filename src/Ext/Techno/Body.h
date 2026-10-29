@@ -215,6 +215,20 @@ public:
 	// deprecated stand-in for the pre-rework container of all TechnoClass extensions
 	static inline CompatExtMap<TechnoExt, TechnoClass> ExtMap {};
 
+	struct DrawFrameStruct
+	{
+		int TopLength;
+		int TopFrame;
+		SHPStruct* TopPipSHP;
+		int MidLength;
+		int MidFrame;
+		SHPStruct* MidPipSHP;
+		int MaxLength;
+		int BrdFrame;
+		Point2D* Location;
+		RectangleStruct* Bounds;
+	};
+
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 
@@ -254,6 +268,12 @@ public:
 	static int GetCustomTintColor(TechnoClass* pThis);
 	static int GetCustomTintIntensity(TechnoClass* pThis);
 	static void ApplyCustomTintValues(TechnoClass* pThis, int& color, int& intensity);
+	static void DrawFactoryProgress(BuildingClass* pThis, RectangleStruct* pBounds, Point2D basePosition);
+	static void DrawSuperProgress(BuildingClass* pThis, RectangleStruct* pBounds, Point2D basePosition);
+	static void DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds, Point2D basePosition, bool isBuilding, bool isInfantry);
+	static void DrawTemporalProgress(TechnoClass* pThis, RectangleStruct* pBounds, Point2D basePosition, bool isBuilding, bool isInfantry);
+	static void DrawVanillaStyleFootBar(DrawFrameStruct* pDraw);
+	static void DrawVanillaStyleBuildingBar(DrawFrameStruct* pDraw);
 	static Point2D GetScreenLocation(TechnoClass* pThis);
 	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor, bool isInfantry);
 	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, TechnoTypeClass* pType, BuildingSelectBracketPosition bracketPosition);
