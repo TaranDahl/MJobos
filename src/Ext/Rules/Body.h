@@ -144,6 +144,8 @@ public:
 		Valueable<bool> UpdateInLimbo_NormalPassenger;
 		Valueable<bool> UpdateInLimbo_LimboLaunch;
 
+		Valueable<bool> ExtendedScatterAction;
+
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -689,6 +691,8 @@ public:
 			, UpdateInLimbo_Occupier { false }
 			, UpdateInLimbo_NormalPassenger { false }
 			, UpdateInLimbo_LimboLaunch { false }
+
+			, ExtendedScatterAction { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
