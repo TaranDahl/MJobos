@@ -3,6 +3,8 @@
 #include <Ext/Techno/Body.h>
 #include <Ext/Scenario/Body.h>
 
+int WarheadTypeExt::HitDirection = -1;
+
 #pragma region Detonation
 
 DEFINE_HOOK(0x46920B, BulletClass_Detonate, 0x6)

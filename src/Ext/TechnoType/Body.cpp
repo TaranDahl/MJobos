@@ -1105,6 +1105,13 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->KeepTargetOnMove_NoMorePursuit.Read(exINI, pSection, "KeepTargetOnMove.NoMorePursuit");
 	this->KeepTargetOnMove_ExtraDistance.Read(exINI, pSection, "KeepTargetOnMove.ExtraDistance");
 
+	this->DirectionalArmor.Read(exINI, pSection, "DirectionalArmor");
+	this->DirectionalArmor_FrontMultiplier.Read(exINI, pSection, "DirectionalArmor.FrontMultiplier");
+	this->DirectionalArmor_SideMultiplier.Read(exINI, pSection, "DirectionalArmor.SideMultiplier");
+	this->DirectionalArmor_BackMultiplier.Read(exINI, pSection, "DirectionalArmor.BackMultiplier");
+	this->DirectionalArmor_FrontField.Read(exINI, pSection, "DirectionalArmor.FrontField");
+	this->DirectionalArmor_BackField.Read(exINI, pSection, "DirectionalArmor.BackField");
+
 	this->Power.Read(exINI, pSection, "Power");
 
 	this->AllowAirstrike.Read(exINI, pSection, "AllowAirstrike");
@@ -1732,6 +1739,13 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->KeepTargetOnMove_Weapon)
 		.Process(this->KeepTargetOnMove_NoMorePursuit)
 		.Process(this->KeepTargetOnMove_ExtraDistance)
+
+		.Process(this->DirectionalArmor)
+		.Process(this->DirectionalArmor_FrontMultiplier)
+		.Process(this->DirectionalArmor_SideMultiplier)
+		.Process(this->DirectionalArmor_BackMultiplier)
+		.Process(this->DirectionalArmor_FrontField)
+		.Process(this->DirectionalArmor_BackField)
 
 		.Process(this->Power)
 
