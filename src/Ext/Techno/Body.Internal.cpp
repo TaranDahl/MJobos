@@ -124,7 +124,8 @@ CoordStruct TechnoExt::GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FL
 		else if (pInf->Crawling && pInfTypeExt->CrouchedWeaponBurstFLHs.size() > 0)
 			pickedFLHs = pInfTypeExt->CrouchedWeaponBurstFLHs;
 	}
-	if ((int)pickedFLHs[weaponIndex].size() > pThis->CurrentBurstIndex)
+	if (pickedFLHs.size() > static_cast<size_t>(weaponIndex)
+		&& pickedFLHs[weaponIndex].size() > static_cast<size_t>(pThis->CurrentBurstIndex))
 	{
 		FLHFound = true;
 		FLH = pickedFLHs[weaponIndex][pThis->CurrentBurstIndex];
