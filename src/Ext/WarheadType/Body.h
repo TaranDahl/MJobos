@@ -160,6 +160,7 @@ public:
 
 	std::vector<TypeConvertGroup> Convert_Pairs;
 	AEAttachInfoTypeClass AttachEffects;
+	Valueable<bool> ReduceTiberium;
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 	Valueable<bool> InflictLocomotor;
 	Valueable<bool> RemoveInflictedLocomotor;
@@ -439,6 +440,7 @@ public:
 
 		, Convert_Pairs {}
 		, AttachEffects {}
+		, ReduceTiberium { false }
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 		, InflictLocomotor { false }
 		, RemoveInflictedLocomotor { false }

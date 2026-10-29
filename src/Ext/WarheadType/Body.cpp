@@ -319,6 +319,8 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->DetonateOnAllMapObjects_AffectTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.AffectTypes");
 	this->DetonateOnAllMapObjects_IgnoreTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.IgnoreTypes");
 
+	this->ReduceTiberium.Read(exINI, pSection, "ReduceTiberium");
+
 	this->Parasite_ParticleSystem.Read(exINI, pSection, "Parasite.ParticleSystem");
 	this->Parasite_DisableParticleSystem.Read(exINI, pSection, "Parasite.DisableParticleSystem");
 	this->Parasite_CullingTarget.Read(exINI, pSection, "Parasite.CullingTarget");
@@ -691,6 +693,8 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->DetonateOnAllMapObjects_AffectsHouse)
 		.Process(this->DetonateOnAllMapObjects_AffectTypes)
 		.Process(this->DetonateOnAllMapObjects_IgnoreTypes)
+
+		.Process(this->ReduceTiberium)
 
 		.Process(this->Convert_Pairs)
 		.Process(this->AttachEffects)
