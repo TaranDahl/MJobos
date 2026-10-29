@@ -77,6 +77,7 @@ public:
 	Nullable<CoordStruct> JumpjetExitCoord;
 	Nullable<int> RallySpeedType;
 	Nullable<int> RallyMovementZone;
+	Valueable<bool> AggressiveStance_Exempt;
 
 	Valueable<bool> IsAnimDelayedBurst;
 
@@ -227,6 +228,7 @@ public:
 		, FactoryPlant_DisallowTypes {}
 		, FactoryPlant_MaxCount { -1 }
 		, IsAnimDelayedBurst { true }
+		, AggressiveStance_Exempt { false }
 		, IsDestroyableObstacle { false }
 		, Explodes_DuringBuildup {}
 		, Units_RepairRate {}

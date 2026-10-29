@@ -302,6 +302,8 @@ void TechnoExt::InitializeState(TechnoTypeClass* pType)
 	this->InitializeDisplayInfo(pType);
 	this->InitializeLaserTrails();
 	this->InitializeAttachments();
+	this->InitAggressiveStance();
+	this->InitCeaseFireStance();
 
 	if (!this->AE.HasTint) // already updated when initializing attach effect
 		this->UpdateTintValues();
