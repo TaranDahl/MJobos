@@ -37,6 +37,13 @@ public:
 		bool SWSidebar_Enable;
 		std::vector<int> SWSidebar_Indices;
 
+		int CanBuildNowCount;
+		DWORD OwnerBitfield_BuildingType;
+		DWORD OwnerBitfield_InfantryType;
+		DWORD OwnerBitfield_VehicleType;
+		DWORD OwnerBitfield_NavyType;
+		DWORD OwnerBitfield_AircraftType;
+
 		std::vector<std::wstring> RecordMessages;
 
 		PhobosFixedString<64u> DefaultLS640BkgdName;
@@ -69,6 +76,12 @@ public:
 			, BaseNormalTechnos {}
 			, SWSidebar_Enable { true }
 			, SWSidebar_Indices {}
+			, CanBuildNowCount { 0 }
+			, OwnerBitfield_BuildingType { 0 }
+			, OwnerBitfield_InfantryType { 0 }
+			, OwnerBitfield_VehicleType { 0 }
+			, OwnerBitfield_NavyType { 0 }
+			, OwnerBitfield_AircraftType { 0 }
 			, RecordMessages {}
 			, DefaultLS640BkgdName {}
 			, DefaultLS800BkgdName {}

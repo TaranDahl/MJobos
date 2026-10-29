@@ -3,7 +3,11 @@
 #include <Ext/Rules/Body.h>
 #include <Ext/Scenario/Body.h>
 #include <Ext/TerrainType/Body.h>
+#include <Ext/TechnoType/Body.h>
 #include <Utilities/GeneralUtils.h>
+
+#include <EventClass.h>
+#include <MouseClass.h>
 
 // AIConstructionYard Hook #1 -> sub_740810 - Check number of construction yard before deploy.
 DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
@@ -158,6 +162,11 @@ namespace ProximityTemp
 	bool Mouse = false;
 	CellClass* CurrentCell = nullptr;
 	BuildingTypeClass* BuildType = nullptr;
+}
+
+namespace PlaceTypeTemp
+{
+	size_t PlaceType = 0;
 }
 
 /*
@@ -352,6 +361,298 @@ DEFINE_HOOK(0x4A904E, MapClass_PassesProximityCheck_RestoreResult, 0x5)
 // Let the game do the proximity and shroud check when the cell which mouse is pointing at has not changed
 DEFINE_JUMP(LJMP, 0x4AACD9, 0x4AACF5);
 DEFINE_JUMP(LJMP, 0x4A9361, 0x4A9371);
+
+/*
+	In sub_4A91B0
+
+	- Place Another Type Hook #1 -> Update direction and replace the preview type.
+*/
+DEFINE_HOOK(0x4A937D, DisplayClass_CallBuildingPlaceCheck_ReplaceBuildingType, 0x8)
+{
+	enum { SkipGameCode = 0x4A943A };
+
+	GET(const CellStruct, cell, EBP);
+
+	const auto pDisplay = &DisplayClass::Instance;
+
+	auto updateCurrentFoundation = [pDisplay, cell]()
+	{
+		if (pDisplay->CurrentFoundation_CenterCell != cell)
+		{
+			auto oldCell = pDisplay->CurrentFoundation_CenterCell;
+
+			if (oldCell != CellStruct::Empty)
+			{
+				oldCell += pDisplay->CurrentFoundation_TopLeftOffset;
+				pDisplay->MarkFoundation(&oldCell, false);
+			}
+
+			auto newCell = cell;
+
+			if (newCell != CellStruct::Empty)
+			{
+				newCell += pDisplay->CurrentFoundation_TopLeftOffset;
+				pDisplay->MarkFoundation(&newCell, true);
+			}
+
+			pDisplay->CurrentFoundation_CenterCell = cell;
+		}
+	};
+
+	const auto pCurrentBuilding = abstract_cast<BuildingClass*>(pDisplay->CurrentBuilding);
+	const auto pTypeExt = pCurrentBuilding ? BuildingTypeExt::Fetch(pCurrentBuilding->Type) : nullptr;
+
+	if (pTypeExt && pTypeExt->PlaceBuilding_Extra)
+	{
+		if (!ScrollClass::Instance.AnyMouseButtonDown)
+			updateCurrentFoundation();
+		else
+			R->EBP(pDisplay->CurrentFoundation_CenterCell.X);
+
+		const auto delta = cell - pDisplay->CurrentFoundation_CenterCell;
+
+		if (delta.Y || delta.X)
+			Phobos::Config::CurrentPlacingDirection = DirStruct(Math::atan2(-delta.Y, delta.X)).GetFacing<32>();
+
+		auto getAnotherPlacingType = [pDisplay, pTypeExt]() -> BuildingTypeClass*
+		{
+			if (pTypeExt)
+			{
+				const auto pCenterCell = MapClass::Instance.GetCellAt(pDisplay->CurrentFoundation_CenterCell);
+				const bool onWater = pCenterCell->LandType == LandType::Water;
+				return pTypeExt->GetAnotherPlacingType(Phobos::Config::CurrentPlacingDirection, onWater);
+			}
+
+			return nullptr;
+		};
+
+		if (const auto pAnotherType = getAnotherPlacingType())
+		{
+			if (pDisplay->CurrentBuildingType && pDisplay->CurrentBuildingType != pAnotherType)
+			{
+				pDisplay->CurrentBuildingType = pAnotherType;
+				pDisplay->SetActiveFoundation(pAnotherType->GetFoundationData(true));
+			}
+		}
+		else if (pCurrentBuilding)
+		{
+			if (pDisplay->CurrentBuildingType && pDisplay->CurrentBuildingType != pCurrentBuilding->Type)
+			{
+				pDisplay->CurrentBuildingType = pCurrentBuilding->Type;
+				pDisplay->SetActiveFoundation(pCurrentBuilding->Type->GetFoundationData(true));
+			}
+		}
+	}
+	else
+	{
+		updateCurrentFoundation();
+	}
+
+	return SkipGameCode;
+}
+
+/*
+	In sub_4AB9B0
+
+	- Place Another Type Hook #2 -> Keep the current foundation center cell.
+*/
+DEFINE_HOOK(0x4AB9FF, DisplayClass_LeftMouseButtonUp_MaintainCell, 0x6)
+{
+	enum { ContinueCheckUpgrade = 0x4ABA84, SkipCheckUpgrade = 0x4ABAA4 };
+
+	const auto pCellStruct = &DisplayClass::Instance.CurrentFoundation_CenterCell;
+
+	R->EBX(pCellStruct);
+
+	const auto pType = DisplayClass::Instance.CurrentBuildingType;
+
+	if (pType->WhatAmI() != AbstractType::BuildingType || !static_cast<BuildingTypeClass*>(pType)->PowersUpBuilding[0])
+		return SkipCheckUpgrade;
+
+	const auto pCellBuilding = MapClass::Instance.GetCellAt(*pCellStruct)->GetBuilding();
+
+	if (!pCellBuilding)
+		return SkipCheckUpgrade;
+
+	R->ESI(pCellBuilding);
+	return ContinueCheckUpgrade;
+}
+
+/*
+	In sub_4AB9B0
+
+	- Place Another Type Hook #3 -> Replace the placing event.
+*/
+DEFINE_HOOK(0x4ABAC0, DisplayClass_LeftMouseButtonUp_ReplaceBuildingType, 0x6)
+{
+	enum { SkipGameCode = 0x4ABBB3 };
+
+	const auto pDisplay = &DisplayClass::Instance;
+
+	const auto centerCell = pDisplay->CurrentFoundation_CenterCell;
+	const auto placeCell = centerCell + pDisplay->CurrentFoundation_TopLeftOffset;
+
+	const auto pPlace = pDisplay->CurrentBuilding;
+	const auto pType = pPlace->GetType();
+	const auto pBuildingType = abstract_cast<BuildingTypeClass*>(pType);
+
+	int placeType = 0;
+
+	if (pBuildingType && BuildingTypeExt::Fetch(pBuildingType)->PlaceBuilding_Extra)
+	{
+		const auto pCenterCell = MapClass::Instance.GetCellAt(centerCell);
+		placeType |= pCenterCell->LandType == LandType::Water;
+		placeType |= (Phobos::Config::CurrentPlacingDirection << 1);
+	}
+	else
+	{
+		const auto pTechnoType = TechnoTypeExt::GetTechnoType(pType);
+		placeType |= (pTechnoType && pTechnoType->Naval);
+	}
+
+	const int arrayIndex = pType->GetArrayIndex();
+	const auto absType = pPlace->WhatAmI();
+
+	EventClass::OutList.Add(EventClass(
+		HouseClass::CurrentPlayer->ArrayIndex,
+		EventType::Place,
+		absType,
+		arrayIndex,
+		placeType,
+		placeCell
+	));
+
+	return SkipGameCode;
+}
+
+/*
+	In sub_4C6CB0
+
+	- Place Another Type Hook #4 -> Replace the placing action.
+*/
+DEFINE_HOOK(0x4C70E1, EventClass_RespondToEvent_SetPlaceType, 0x8)
+{
+	enum { SkipGameCode = 0x4C7110 };
+
+	GET(EventClass* const, pThis, ESI);
+	GET(HouseClass* const, pHouse, EDI);
+
+	const auto cell = pThis->Place.Location;
+	const int flags = pThis->Place.IsNaval;
+	const bool isNaval = flags & 1;
+	const int arrayIndex = pThis->Place.HeapID;
+	const auto absType = pThis->Place.RTTIType;
+
+	if (absType == AbstractType::Building || absType == AbstractType::BuildingType)
+		PlaceTypeTemp::PlaceType = static_cast<size_t>(flags);
+
+	pHouse->UnitFromFactory(absType, arrayIndex, isNaval, &cell);
+	PlaceTypeTemp::PlaceType = 0;
+
+	return SkipGameCode;
+}
+
+/*
+	In sub_4FB0E0
+
+	- Place Another Type Hook #5 -> Replace the factory product while preserving
+	  the original construction flow for the current branch.
+*/
+DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
+{
+	enum { CanBuild = 0x4FB23C, CanNotBuild = 0x4FB35F };
+
+	GET(HouseClass* const, pHouse, EBP);
+	GET(TechnoClass* const, pTechno, ESI);
+	GET(FactoryClass* const, pPrimary, EBX);
+	GET(BuildingClass* const, pFactory, EDI);
+	GET_STACK(const CellStruct, topLeftCell, STACK_OFFSET(0x3C, 0x10));
+
+	if (pTechno->WhatAmI() != AbstractType::Building)
+	{
+		pFactory->SendCommand(RadioCommand::RequestLink, pTechno);
+
+		if (pTechno->Unlimbo(CoordStruct{ (topLeftCell.X << 8) + 128, (topLeftCell.Y << 8) + 128, 0 }, DirType::North))
+			return CanBuild;
+
+		ProximityTemp::Mouse = true;
+		return CanNotBuild;
+	}
+
+	const auto pDisplay = &DisplayClass::Instance;
+	auto pBuilding = static_cast<BuildingClass*>(pTechno);
+	auto pBuildingType = pBuilding->Type;
+	const auto pBufferBuilding = pBuilding;
+	const auto pBufferType = pBuildingType;
+	const auto pTypeExt = BuildingTypeExt::Fetch(pBuildingType);
+	const size_t placeType = PlaceTypeTemp::PlaceType;
+	const bool upgrade = pBuildingType->PowersUpBuilding[0];
+
+	if (pTypeExt->PlaceBuilding_Extra)
+	{
+		if (const auto pSelectType = pTypeExt->GetAnotherPlacingType(((placeType >> 1u) & 0x1Fu), (placeType & 1u)))
+			pBuildingType = pSelectType;
+	}
+
+	if (pBufferType != pBuildingType)
+		pBuilding = static_cast<BuildingClass*>(pBuildingType->CreateObject(pHouse));
+
+	pFactory->SendCommand(RadioCommand::RequestLink, pBuilding);
+
+	if (pBuilding->Unlimbo(CoordStruct{ (topLeftCell.X << 8) + 128, (topLeftCell.Y << 8) + 128, 0 }, DirType::North))
+	{
+		if (pBufferBuilding != pBuilding)
+		{
+			if (HouseClass::CurrentPlayer == pHouse)
+			{
+				if (!pDisplay->CurrentBuilding)
+				{
+					Phobos::Config::CurrentPlacingDirection = Phobos::Config::DefaultPlacingDirection;
+				}
+				else if (pDisplay->CurrentBuilding == pBufferBuilding)
+				{
+					pDisplay->CurrentBuilding = pBuilding;
+					Phobos::Config::CurrentPlacingDirection = Phobos::Config::DefaultPlacingDirection;
+				}
+
+				if (pDisplay->CurrentBuildingType == pBufferType)
+					pDisplay->CurrentBuildingType = pBuilding->Type;
+
+				if (pDisplay->CurrentBuildingCopy == pBufferBuilding)
+					pDisplay->CurrentBuildingCopy = pBuilding;
+
+				if (pDisplay->CurrentBuildingTypeCopy == pBufferType)
+					pDisplay->CurrentBuildingTypeCopy = pBuilding->Type;
+
+				if (Make_Global<BuildingClass*>(0xB0FE5C) == pBufferBuilding)
+					Make_Global<BuildingClass*>(0xB0FE5C) = pBuilding;
+
+				if (Make_Global<BuildingClass*>(0xB0FE60) == pBufferBuilding)
+					Make_Global<BuildingClass*>(0xB0FE60) = pBuilding;
+			}
+
+			pBufferBuilding->UnInit();
+			pPrimary->Object = pBuilding;
+			R->ESI(pBuilding);
+		}
+		else if (HouseClass::CurrentPlayer == pHouse
+			&& (!pDisplay->CurrentBuilding
+				|| pDisplay->CurrentBuilding == pBuilding))
+		{
+			Phobos::Config::CurrentPlacingDirection = Phobos::Config::DefaultPlacingDirection;
+		}
+
+		return CanBuild;
+	}
+
+	if (pBufferBuilding != pBuilding)
+		pBuilding->UnInit();
+
+	if (upgrade)
+		ProximityTemp::Mouse = true;
+
+	return CanNotBuild;
+}
 
 // AIConstructionYard Hook #4-1 -> sub_443C60 - Prohibit AI from building construction yard and clean up invalid walls nodes.
 DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)

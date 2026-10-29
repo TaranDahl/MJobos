@@ -6,6 +6,7 @@
 #include <Ext/Building/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/Sidebar/Body.h>
+#include <Ext/TechnoType/Body.h>
 #include <Ext/EBolt/Body.h>
 #include <Ext/SWType/Body.h>
 #include <Ext/CaptureManager/Body.h>
@@ -299,6 +300,8 @@ void Apply_Ares3_0_Patches()
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x436DA, &LetGo);
 
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x021B40, GET_OFFSET(TechnoTypeExt::RequirementsMetExtraCheck));
+
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x3207C, AresHelper::AresBaseAddress + 0x320DF);
 
@@ -419,6 +422,8 @@ void Apply_Ares3_0p1_Patches()
 
 	// Replace the TemporalClass::Detach call by LetGo in convert function:
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x441BA, &LetGo);
+
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x0225C0, GET_OFFSET(TechnoTypeExt::RequirementsMetExtraCheck));
 
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x32A5C, AresHelper::AresBaseAddress + 0x32ABF);

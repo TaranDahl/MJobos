@@ -1,7 +1,9 @@
 #include "Body.h"
 
 #include <Ext/SWType/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Ext/Techno/Body.h>
+#include <Ext/TechnoType/Body.h>
 #include <Ext/BuildingType/Body.h>
 
 //Static init
@@ -469,6 +471,38 @@ int HouseExt::CountOwnedPresentAndLimboed(TechnoTypeClass* pTechnoType) const
 	default:
 		break;
 	}
+
+	return count;
+}
+
+int HouseExt::CountOwnedPresentExt(HouseClass* pHouse, TechnoTypeClass* pTechnoType, bool upgrade, bool deploy)
+{
+	switch (pTechnoType->WhatAmI())
+	{
+	case AbstractType::BuildingType:
+		return CountOwnedPresentWithDeployOrUpgrade(pHouse, static_cast<BuildingTypeClass*>(pTechnoType), upgrade, deploy);
+	case AbstractType::InfantryType:
+		return pHouse->CountOwnedAndPresent(static_cast<InfantryTypeClass*>(pTechnoType));
+	case AbstractType::UnitType:
+		return CountOwnedPresentWithDeploy(pHouse, static_cast<UnitTypeClass*>(pTechnoType), deploy);
+	case AbstractType::AircraftType:
+		return CountOwnedPresentWithJumpjet(pHouse, static_cast<AircraftTypeClass*>(pTechnoType));
+	default:
+		return 0;
+	}
+}
+
+int HouseExt::CountOwnedPresentWithJumpjet(HouseClass* pHouse, AircraftTypeClass* pAircraftType)
+{
+	return pHouse->CountOwnedAndPresent(pAircraftType);
+}
+
+int HouseExt::CountOwnedPresentWithDeploy(HouseClass* pHouse, UnitTypeClass* pUnitType, bool deploy)
+{
+	auto count = pHouse->CountOwnedAndPresent(pUnitType);
+
+	if (deploy && pUnitType->DeploysInto)
+		count += pHouse->CountOwnedAndPresent(pUnitType->DeploysInto);
 
 	return count;
 }
@@ -1206,6 +1240,78 @@ bool HouseExt::ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass
 	return false;
 }
 #pragma endregion
+
+bool HouseExt::CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType)
+{
+	const auto pScenarioExt = ScenarioExt::Global();
+	DWORD baseBits = TechnoTypeExt::Fetch(pType)->Cameo_RequiredHouses & pType->GetOwners();
+	baseBits &= 1u << HouseClass::CurrentPlayer->Type->ArrayIndex2;
+
+	if (!baseBits)
+		return false;
+
+	switch (pType->WhatAmI())
+	{
+	case AbstractType::Building:
+	case AbstractType::BuildingType:
+		return (pScenarioExt->OwnerBitfield_BuildingType & baseBits) != 0;
+	case AbstractType::Infantry:
+	case AbstractType::InfantryType:
+		return (pScenarioExt->OwnerBitfield_InfantryType & baseBits) != 0;
+	case AbstractType::Unit:
+	case AbstractType::UnitType:
+		return pType->Naval
+			? (pScenarioExt->OwnerBitfield_NavyType & baseBits) != 0
+			: (pScenarioExt->OwnerBitfield_VehicleType & baseBits) != 0;
+	case AbstractType::Aircraft:
+	case AbstractType::AircraftType:
+		return (pScenarioExt->OwnerBitfield_AircraftType & baseBits) != 0;
+	default:
+		return false;
+	}
+}
+
+void HouseExt::RecheckOwnerBitfieldForCurrentPlayer()
+{
+	const auto pScenarioExt = ScenarioExt::Global();
+	pScenarioExt->OwnerBitfield_BuildingType = 0;
+	pScenarioExt->OwnerBitfield_InfantryType = 0;
+	pScenarioExt->OwnerBitfield_VehicleType = 0;
+	pScenarioExt->OwnerBitfield_NavyType = 0;
+	pScenarioExt->OwnerBitfield_AircraftType = 0;
+
+	for (const auto pBuilding : HouseClass::CurrentPlayer->Buildings)
+	{
+		const auto pType = pBuilding->Type;
+		const DWORD baseBits = TechnoTypeExt::Fetch(pType)->Cameo_RequiredHouses & pType->GetOwners();
+
+		switch (pType->Factory)
+		{
+		case AbstractType::Building:
+		case AbstractType::BuildingType:
+			pScenarioExt->OwnerBitfield_BuildingType |= baseBits;
+			break;
+		case AbstractType::Infantry:
+		case AbstractType::InfantryType:
+			pScenarioExt->OwnerBitfield_InfantryType |= baseBits;
+			break;
+		case AbstractType::Unit:
+		case AbstractType::UnitType:
+			if (pType->Naval)
+				pScenarioExt->OwnerBitfield_NavyType |= baseBits;
+			else
+				pScenarioExt->OwnerBitfield_VehicleType |= baseBits;
+
+			break;
+		case AbstractType::Aircraft:
+		case AbstractType::AircraftType:
+			pScenarioExt->OwnerBitfield_AircraftType |= baseBits;
+			break;
+		default:
+			break;
+		}
+	}
+}
 
 // =============================
 // container

@@ -72,7 +72,13 @@ public:
 	Valueable<int> CameoPriority;
 	PhobosPCXFile AltCameoPCX;
 	PhobosPCXFile GreyCameoPCX;
+	Nullable<bool> Cameo_AlwaysExist;
+	ValueableVector<TechnoTypeClass*> Cameo_OverrideTechnos;
+	DWORD Cameo_RequiredHouses;
+	bool IsMetTheEssentialConditions;
 	bool IsGreyCameoForCurrentPlayer;
+	bool CanBuildNowCheck;
+	int CanBuildNowCount;
 	Valueable<bool> NoManualMove;
 	Nullable<int> InitialStrength;
 	Nullable<bool> ReloadInTransport;
@@ -508,7 +514,13 @@ public:
 		, CameoPriority { 0 }
 		, AltCameoPCX {}
 		, GreyCameoPCX {}
+		, Cameo_AlwaysExist {}
+		, Cameo_OverrideTechnos {}
+		, Cameo_RequiredHouses { 0xFFFFFFFF }
+		, IsMetTheEssentialConditions { false }
 		, IsGreyCameoForCurrentPlayer { false }
+		, CanBuildNowCheck { false }
+		, CanBuildNowCount { 0 }
 		, NoManualMove { false }
 		, InitialStrength {}
 		, ReloadInTransport {}
@@ -946,6 +958,8 @@ public:
 	CoordStruct location, HouseClass* pOwner, TechnoClass* pInvoker, HouseClass* pInvokerHouse);
 
 	static WeaponTypeClass* GetWeaponType(TechnoTypeClass* pThis, int weaponIndex, bool isElite);
+	static int __fastcall RequirementsMetExtraCheck(void* pAresHouseExt, void* _, TechnoTypeClass* pType);
+	static CanBuildResult CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild);
 
 	// Ares 0.A
 	static const char* GetSelectionGroupID(ObjectTypeClass* pType);

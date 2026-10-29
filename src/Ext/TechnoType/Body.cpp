@@ -1,3 +1,4 @@
+#include <EventClass.h>
 #include <JumpjetLocomotionClass.h>
 
 #include <Ext/AircraftType/Body.h>
@@ -6,10 +7,12 @@
 #include <Ext/BulletType/Body.h>
 #include <Ext/InfantryType/Body.h>
 #include <Ext/Foot/Body.h>
+#include <Ext/House/Body.h>
 #include <Ext/UnitType/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <New/Type/InsigniaTypeClass.h>
 
+#include <Utilities/AresFunctions.h>
 #include <Utilities/AresHelper.h>
 
 namespace
@@ -730,6 +733,96 @@ TechnoClass* TechnoTypeExt::CreateUnit(CreateUnitTypeClass* pCreateUnit, DirType
 	return nullptr;
 }
 
+int __fastcall TechnoTypeExt::RequirementsMetExtraCheck(void* pAresHouseExt, void* _, TechnoTypeClass* pType)
+{
+	const int result = AresFunctions::RequirementsMet(pAresHouseExt, pType);
+
+	if (*reinterpret_cast<HouseClass**>(pAresHouseExt) == HouseClass::CurrentPlayer)
+	{
+		const auto pTypeExt = TechnoTypeExt::Fetch(pType);
+
+		if (pTypeExt->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
+			pTypeExt->IsMetTheEssentialConditions = result > 2;
+	}
+
+	return result;
+}
+
+CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild)
+{
+	const auto pTypeExt = TechnoTypeExt::Fetch(pType);
+
+	auto forceRedrawSidebar = [pType]()
+	{
+		const int tabIndex = SidebarClass::GetObjectTabIdx(pType->WhatAmI(), pType->GetArrayIndex(), 0);
+		auto& sidebar = SidebarClass::Instance;
+
+		if (tabIndex != sidebar.ActiveTabIndex)
+			return;
+
+		sidebar.SidebarNeedsRedraw = true;
+		sidebar.SidebarBackgroundNeedsRedraw = true;
+		sidebar.Tabs[tabIndex].NeedsRedraw = true;
+		sidebar.RedrawSidebar(0);
+	};
+
+	if (canBuild == CanBuildResult::Unbuildable)
+	{
+		const auto pCurrent = HouseClass::CurrentPlayer;
+		auto checkOverrideTechnos = [pCurrent, pTypeExt]()
+		{
+			for (const auto pOverrideType : pTypeExt->Cameo_OverrideTechnos)
+			{
+				if (HouseExt::CountOwnedPresentExt(pCurrent, pOverrideType, true, true))
+					return true;
+			}
+
+			return false;
+		};
+
+		if (pTypeExt->IsMetTheEssentialConditions && (checkOverrideTechnos() || HouseExt::CheckOwnerBitfieldForCurrentPlayer(pType)))
+		{
+			if (!pTypeExt->IsGreyCameoForCurrentPlayer)
+			{
+				pTypeExt->IsGreyCameoForCurrentPlayer = true;
+				forceRedrawSidebar();
+				auto buildCat = BuildCat::DontCare;
+
+				if (const auto pBldType = abstract_cast<BuildingTypeClass*>(pType))
+				{
+					buildCat = pBldType->BuildCat;
+					auto& display = DisplayClass::Instance;
+					display.SetActiveFoundation(nullptr);
+					display.CurrentBuilding = nullptr;
+					display.CurrentBuildingType = nullptr;
+					display.CurrentBuildingOwnerArrayIndex = -1;
+				}
+
+				if (pCurrent->GetPrimaryFactory(pType->WhatAmI(), pType->Naval, buildCat))
+				{
+					EventClass::OutList.Add(EventClass(
+						pCurrent->ArrayIndex,
+						EventType::AbandonAll,
+						static_cast<int>(pType->WhatAmI()),
+						pType->GetArrayIndex(),
+						pType->Naval
+					));
+				}
+			}
+
+			canBuild = CanBuildResult::TemporarilyUnbuildable;
+		}
+	}
+	else if (pTypeExt->IsGreyCameoForCurrentPlayer)
+	{
+		pTypeExt->IsGreyCameoForCurrentPlayer = false;
+		VoxClass::Play(&Make_Global<const char>(0x83FA64));
+		forceRedrawSidebar();
+	}
+
+	return canBuild;
+}
+
 // used for more WeaponX added by Ares.
 WeaponTypeClass* TechnoTypeExt::GetWeaponType(TechnoTypeClass* pThis, int weaponIndex, bool isElite)
 {
@@ -854,6 +947,9 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->VoiceCreated.Read(exINI, pSection, "VoiceCreated");
 
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");
+	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
+	this->Cameo_OverrideTechnos.Read(exINI, pSection, "Cameo.OverrideTechnos");
+	this->Cameo_RequiredHouses = pINI->ReadHouseTypesList(pSection, "Cameo.RequiredHouses", this->Cameo_RequiredHouses);
 
 	this->WarpOut.Read(exINI, pSection, "WarpOut");
 	this->WarpIn.Read(exINI, pSection, "WarpIn");
@@ -1490,7 +1586,13 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->CameoPriority)
 		.Process(this->AltCameoPCX)
 		.Process(this->GreyCameoPCX)
+		.Process(this->Cameo_AlwaysExist)
+		.Process(this->Cameo_OverrideTechnos)
+		.Process(this->Cameo_RequiredHouses)
+		.Process(this->IsMetTheEssentialConditions)
 		.Process(this->IsGreyCameoForCurrentPlayer)
+		.Process(this->CanBuildNowCheck)
+		.Process(this->CanBuildNowCount)
 		.Process(this->NoManualMove)
 		.Process(this->InitialStrength)
 		.Process(this->ReloadInTransport)
