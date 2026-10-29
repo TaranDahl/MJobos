@@ -64,6 +64,7 @@ public:
 	int EliteSpawnerRange;
 	Nullable<int> Spawner_DelayFrames;
 	Nullable<bool> Spawner_AttackImmediately;
+	Valueable<bool> Spawner_ReturnOnRepairDone;
 	Nullable<bool> Spawner_UseTurretFacing;
 	Nullable<bool> Harvester_Counted;
 	Nullable<bool> Promote_IncludeSpawns;
@@ -289,6 +290,8 @@ public:
 	Nullable<bool> NoReload_UnderEMP;
 	Nullable<bool> NoReload_Temporal;
 
+	Valueable<bool> MissileSpawnUseOtherFLHs;
+
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -499,6 +502,7 @@ public:
 		, EliteSpawnerRange { 0 }
 		, Spawner_DelayFrames {}
 		, Spawner_AttackImmediately {}
+		, Spawner_ReturnOnRepairDone { false }
 		, Spawner_UseTurretFacing {}
 		, Harvester_Counted {}
 		, Promote_IncludeSpawns {}
@@ -717,6 +721,8 @@ public:
 		, NoRearm_Temporal {}
 		, NoReload_UnderEMP {}
 		, NoReload_Temporal {}
+
+		, MissileSpawnUseOtherFLHs { false }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}
