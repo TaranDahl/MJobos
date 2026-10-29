@@ -169,8 +169,6 @@ public:
 	Valueable<bool> InflictLocomotor;
 	Valueable<bool> RemoveInflictedLocomotor;
 
-	Valueable<bool> ReduceTiberium;
-
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 	Valueable<bool> InflictLocomotor;
 	Valueable<bool> RemoveInflictedLocomotor;
@@ -465,8 +463,6 @@ public:
 
 		, InflictLocomotor { false }
 		, RemoveInflictedLocomotor { false }
-
-		, ReduceTiberium { false }
 
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 		, InflictLocomotor { false }
