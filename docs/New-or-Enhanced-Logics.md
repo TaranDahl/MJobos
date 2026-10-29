@@ -235,59 +235,6 @@ SuppressReflectDamage.Types=                       ; List of AttachEffectTypes
 SuppressReflectDamage.Groups=                      ; comma-separated list of strings (group IDs)
 ```
 
-### Attachments
-
-![Unit Attachment](your image here)
-*Attachments used in [mod name](link)*
-
-```{warning}
-This feature is not final and is under development.
-```
-
-- Technos now can be attached one to another in a tree like way. The attached units won't process any locomotion code and act like a part of a parent unit in a configurable.
-  - Currently the attached techno may only be a vehicle.
-  - When attached, the special `Attachment` (`{C5D54B98-8C98-4275-8CE4-EF75CB0CBE3E}`) locomotor is automatically casted on a unit. You may also specify it in the child unit types manually if the unit is not intended to move without a parent (f. ex. a turret).
-
-In `rulesmd.ini`:
-```ini
-[AttachmentTypes]
-0=MNT                                     ; (example)
-
-[MNT]
-RespawnAtCreation=true                    ; boolean
-RespawnDelay=-1                           ; integer, non-negative values enable the respawn timer
-InheritOwner=true                         ; boolean, whether the child inherits owner of the parent while it's attached
-InheritStateEffects=true                  ; boolean (state effects = chaos, iron curtain etc.)
-InheritCommands=true                      ; boolean
-InheritCommands.StopCommand=true          ; boolean
-InheritCommands.DeployCommand=true        ; boolean
-LowSelectionPriority=true                 ; boolean, whether the child is low priority while attached
-TransparentToMouse=false                  ; boolean, can't click on attached techno if set
-YSortPosition=default                     ; Attachment YSort position enumeration - default|underparent|overparent
-InheritDestruction=true                   ; boolean
-InheritHeightStatus=true                  ; boolean, whether the layer and InAir/OnGround/IsSurfaced inherited from parent
-OccupiesCell=true                         ; boolean
-DestructionWeapon.Child=                  ; WeaponType, detonated on child when parent is destroyed
-DestructionWeapon.Parent=                 ; WeaponType, detonated on parent when child is destroyed
-ParentDestructionMission=                 ; MissionType, queued to child when parent is destroyed
-ParentDetachmentMission=                  ; MissionType, queued to child when it's detached from parent
-
-[SOMETECHNO]                              ; TechnoType
-; used when this techno is attached
-AttachmentTopLayerMinHeight=              ; integer
-AttachmentUndergroundLayerMaxHeight=      ; integer
-; used for attaching other technos
-AttachmentX.Type=MNT                      ; AttachmentType (example)
-AttachmentX.TechnoType=                   ; TechnoType that can be attached, currently only units are supported
-AttachmentX.FLH=0,0,0                     ; integer - Forward, Lateral, Height
-AttachmentX.IsOnTurret=false              ; boolean
-AttachmentX.RotationAdjust=0              ; rotation in DirType, from -255 to 255
-
-[General]
-AttachmentTopLayerMinHeight=500           ; integer
-AttachmentUndergroundLayerMaxHeight=-256  ; integer
-```
-
 ### Custom Radiation Types
 
 ![image](_static/images/radtype-01.png)
@@ -756,29 +703,6 @@ Adjacent.DisallowedExtra=               ; List of TechnoTypes
 NoBuildAreaOnBuildup=false              ; boolean
 ```
 
-### Customized bib & impassable rows & weapons factory direction
-
-- Now you can use `ExtendedWeaponsFactory` to remove the hard coding of `WeaponsFactory` position and direction, and adjust the position of the generated unit and the direction of the unit's exit separately through the original `ExitCoord` and the newly added `WeaponsFactory.Dir`. Similarly, the directions of `Bib` and `NumberImpassableRows` can also be modified through `Bib.Dir` and `NumberImpassableRows.Dir` respectively.
-
-In `rulesmd.ini`:
-```ini
-[General]
-ExtendedWeaponsFactory=false  ; boolean
-
-[SOMEBUILDING]                ; BuildingType
-Bib.Dir=2                     ; integer
-NumberImpassableRows.Dir=2    ; integer
-WeaponsFactory.Dir=2          ; integer
-```
-
-```{note}
-- The available directions are:
-  - 0 - North (top right)
-  - 2 - East (bottom right)
-  - 4 - South (bottom left)
-  - 6 - West (top left)
-```
-
 ### Destroyable pathfinding obstacles
 
 - It is possible to make buildings be considered pathfinding obstacles that can be destroyed by setting `IsDestroyableBlockage` to true. What this does is make the building be considered impassable and impenetrable pathfinding obstacle to every unit that is not flying or have appropriate `MovementZone` (ones that allow destroyable obstacles to be overcome, e.g `(Infantry|Amphibious)Destroyer`) akin to wall overlays and TerrainTypes.
@@ -1120,43 +1044,6 @@ OnlyUseLandSequences=       ; boolean, default to [General] -> OnlyUseLandSequen
 ```
 
 ## Locomotor
-
-### AdvancedDrive Locomotor
-
-- `AdvancedDrive` locomotor (`{4A582751-9839-11d1-B709-00A024DDAFD1}`) is an improved `Drive` locomotor (`{4A582741-9839-11d1-B709-00A024DDAFD1}`) that can serve as a complete upper level replacement for it.
-- It fixes the issue where `Drive` cannot correctly crush objects during rapid turns.
-- It has smoother uphill and downhill dynamic visual effects.
-- It has the function of driving the unit backwards.
-  - `AdvancedDrive.Reverse` controls whether the unit can driving backwards. The next 5 items are all under its control.
-  - `AdvancedDrive.Reverse.FaceTarget` controls whether to maitain the frontal movement towards the enemy within `AdvancedDrive.Reverse.FaceTargetRange` and no longer automatically selects by the current orientation.
-  - `AdvancedDrive.Reverse.MinimumDistance` controls how close the unit is to its destination, allowing reversing.
-  - `AdvancedDrive.Reverse.RetreatDuration` controls how long since the unit was last injured, allowing reversing.
-  - `AdvancedDrive.Reverse.Speed` controls the speed ratio when reversing.
-- It also has the function of hovering.
-  - `AdvancedDrive.Hover` controls whether the unit can hovering above the ground. The next 6 items are all under its control.
-  - `AdvancedDrive.Hover.Sink` controls whether the unit will be destroyed when losing power on the water.
-  - `AdvancedDrive.Hover.Spin` controls whether the unit will rotating when losing power.
-  - `AdvancedDrive.Hover.Tilt` controls whether the unit will will tilt at an angle on the slope.
-  - `AdvancedDrive.Hover.Height`, `AdvancedDrive.Hover.Dampen` and `AdvancedDrive.Hover.Bob` control the state of hovering like what vanilla `HoverHeight`, `HoverDampen` and `HoverBob` do.
-
-In `rulesmd.ini`:
-```ini
-[SOMEVEHICLE]                               ; VehicleType
-Locomotor=AdvancedDrive                     ; Locomotor
-AdvancedDrive.Reverse=true                  ; boolean
-AdvancedDrive.Reverse.FaceTarget=true       ; boolean
-AdvancedDrive.Reverse.FaceTargetRange=16.0  ; floating point value
-AdvancedDrive.Reverse.MinimumDistance=2.5   ; floating point value
-AdvancedDrive.Reverse.RetreatDuration=150   ; integer, game frames
-AdvancedDrive.Reverse.Speed=0.85            ; floating point value
-AdvancedDrive.Hover=false                   ; boolean
-AdvancedDrive.Hover.Sink=true               ; boolean
-AdvancedDrive.Hover.Spin=true               ; boolean
-AdvancedDrive.Hover.Tilt=true               ; boolean
-AdvancedDrive.Hover.Height=                 ; floating point value, default to [General] -> HoverHeight
-AdvancedDrive.Hover.Dampen=                 ; floating point value, default to [General] -> HoverDampen
-AdvancedDrive.Hover.Bob=                    ; floating point value, default to [General] -> HoverBob
-```
 
 ## Projectiles
 
@@ -2686,26 +2573,6 @@ In `rulesmd.ini`:
 BuildingWaypoint=false    ; boolean
 ```
 
-### Manually empty and reload ammo
-
-- You can now use the shortcut key to manually empty and reload ammo for units. Aircraft still needs to return to the airport to reload.
-  - `CanManualReload` controls whether this type of techno can manually empty and reload ammo.
-  - `CanManualReload.WhenFull` controls whether can manually empty and reload ammo when the ammo is full.
-  - `CanManualReload.ResetROF` controls whether need to reset rearm timer when manually empty and reload ammo.
-  - `CanManualReload.DetonateWarhead` controls whether need to detonate a warhead at the techno's location with `Damage=Ammo` when manually empty and reload ammo.
-  - `CanManualReload.DetonateConsume` controls whether `CanManualReload.DetonateWarhead` require the techno to have more ammo than this value (or equal to) before reloading in order to detonate.
-  - For shortcut keys, see [User Interface -> Manually Reload](User-Interface.md#Manual-Reload).
-
-In `rulesmd.ini`:
-```ini
-[SOMETECHNO]                        ; TechnoType
-CanManualReload=false               ; boolean
-CanManualReload.WhenFull=false      ; boolean
-CanManualReload.ResetROF=true       ; boolean
-CanManualReload.DetonateWarhead=    ; WarheadType
-CanManualReload.DetonateConsume=0   ; integer
-```
-
 ### Recount burst index
 
 - You can now make technos recount their current burst index when they have changed the firing weapon or have maintained for a period of time without any targets (take the larger value of last firing weapon's `ROF` and 30 frames).
@@ -3071,7 +2938,7 @@ BurstPerTurret=0            ; integer
 ```
 
 ```{note}
-This is essentially designed to restore multi-turrets in RA1, not to help you make a Zantos. Therefore, features like different turrets using different weapons/targeting separately/calculating cooldown separately/having separate health are not within the scope of this function. Please use techno attachment for such requirements.
+This is essentially designed to restore multi-turrets in RA1, not to help you make a Zantos. Therefore, features like different turrets using different weapons/targeting separately/calculating cooldown separately/having separate health are not within the scope of this function.
 ```
 
 ### Turret Response
@@ -3463,24 +3330,6 @@ PenetratesIronCurtain=false  ; boolean
 PenetratesForceShield=       ; boolean
 ```
 
-### Knock-up warhead
-
-- You can now launch targets in an arc with projectiles. The target will be knocked up in the opposite direction of its current facing.
-  - `KnockUp` controls whether to enable this logic.
-  - `KnockUp.Range` defines the knock-up distance.
-  - `KnockUp.Speed` defines the horizontal knock-up velocity.
-  - `KnockUp.Angle` defines the knock-up angle.
-
-In `rulesmd.ini`:
-
-```ini
-[SOMEWARHEAD]            ; WarheadType
-KnockUp=false            ; boolean
-KnockUp.Range=0.0        ; floating point, cells
-KnockUp.Speed=0.0        ; floating point, cells/frame (horizontal component)
-KnockUp.Angle=45.0       ; floating point, degrees
-```
-
 ### Launch superweapons on impact
 
 - Superweapons can now be launched when a warhead is detonated.
@@ -3726,22 +3575,6 @@ ApplyPerTargetEffectsOnDetonate=      ; boolean, default to [CombatDamage] -> Ap
 ```{note}
 - Ares' warhead effects, such as EMP or IronCurtain warhead, will not be affected.
 - Ares' warhead effect controllers, such as `EffectsRequireDamage`, only affect Ares' effects. So they have nothing to do with this.
-```
-
-### Traction warhead
-
-- `Traction` pulls affected targets toward the explosion point.
-  - `Traction` controls whether to enable this logic.
-  - `Traction.Range` is treated as a movement "budget" (floating point, in cells) used to limit how far the pull can progress.
-  - `Traction.Speed` controls the linear movement speed applied when the pull occurs (cells/frame).
-
-In `rulesmd.ini`:
-
-```ini
-[SOMEWARHEAD]            ; WarheadType
-Traction=false           ; boolean
-Traction.Range=0.0       ; floating point, cells
-Traction.Speed=0.0       ; floating point, cells/frame
 ```
 
 ### Trigger specific NotHuman infantry Death anim sequence
