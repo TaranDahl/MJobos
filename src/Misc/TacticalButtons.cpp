@@ -200,6 +200,31 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 							}
 						}
 					}
+
+					if (pCurCell && checkSteps > 1)
+					{
+						const int height = pJjLoco ? pJjLoco->Height : pFoot->GetTechnoType()->GetFlightLevel();
+						CoordStruct drawCoords { curCoord.X, curCoord.Y, (height + pCurCell->Level * 104) };
+
+						if (checkLength == distance)
+						{
+							const auto pAircraft = abstract_cast<AircraftClass*, true>(pFoot);
+
+							if (!pAircraft || !AircraftTypeExt::Fetch(pAircraft->Type)->ExtendedAircraftMissions_RearApproach.Get(RulesExt::Global()->ExtendedAircraftMissions)
+								|| !pDestination || (pAircraft->DockNowHeadingTo != pDestination && pAircraft->SpawnOwner != pDestination))
+							{
+								const auto destination = pFoot->Locomotor->Destination();
+
+								if (destination != CoordStruct::Empty)
+								{
+									drawCoords.X = destination.X;
+									drawCoords.Y = destination.Y;
+								}
+							}
+						}
+
+						TechnoExt::DrawExtraImage(pFoot, pCurCell, drawCoords, pFace->DesiredFacing);
+					}
 				}
 				else
 				{
@@ -246,6 +271,14 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 							pathCells.emplace_back(pCell, cellLevel);
 						}
 
+						int height = (pCell->ContainsBridge() && cellLevel == (pCell->Level + 4)) ? CellClass::BridgeHeight : 0;
+
+						if (locomotion_cast<HoverLocomotionClass*>(pFoot->Locomotor))
+							height += RulesClass::Instance->HoverHeight;
+
+						CoordStruct drawCoords = pCell->GetCoords();
+						drawCoords.Z += height;
+						TechnoExt::DrawExtraImage(pFoot, pCell, drawCoords, DirStruct(face << 13));
 					}
 				}
 				else if (!InputManagerClass::Instance->IsForceMoveKeyPressed())
