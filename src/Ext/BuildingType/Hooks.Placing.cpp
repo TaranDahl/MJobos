@@ -3,6 +3,56 @@
 #include <Ext/Rules/Body.h>
 #include <Ext/TerrainType/Body.h>
 
+static inline void PlayConstructionYardAnim(BuildingClass* pFactory)
+{
+	const auto pFactoryType = pFactory->Type;
+
+	if (!pFactoryType->ConstructionYard)
+		return;
+
+	VocClass::PlayGlobal(RulesClass::Instance->BuildingSlam, 0x2000, 1.0);
+	pFactory->DestroyNthAnim(BuildingAnimSlot::PreProduction);
+	pFactory->DestroyNthAnim(BuildingAnimSlot::Idle);
+
+	const bool damaged = pFactory->GetHealthPercentage() <= RulesClass::Instance->ConditionYellow;
+	const auto pAnimName = damaged ? pFactoryType->BuildingAnim[8].Damaged : pFactoryType->BuildingAnim[8].Anim;
+
+	if (pAnimName && *pAnimName)
+		pFactory->PlayAnim(pAnimName, BuildingAnimSlot::Production, damaged, false);
+}
+
+DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_LimboBuild, 0x5)
+{
+	enum { BuildSucceeded = 0x4FB649 };
+
+	GET(HouseClass* const, pHouse, EBP);
+	GET(TechnoClass* const, pTechno, ESI);
+	GET(BuildingClass* const, pFactory, EDI);
+
+	if (pTechno->WhatAmI() != AbstractType::Building)
+		return 0;
+
+	auto const pBuilding = static_cast<BuildingClass*>(pTechno);
+	const auto pTypeExt = BuildingTypeExt::Fetch(pBuilding->Type);
+
+	if (!pTypeExt->LimboBuild)
+		return 0;
+
+	BuildingTypeExt::CreateLimboBuilding(pBuilding, pBuilding->Type, pHouse, pTypeExt->LimboBuildID);
+
+	auto& display = DisplayClass::Instance;
+
+	if (display.CurrentBuilding == pBuilding && HouseClass::CurrentPlayer == pHouse)
+	{
+		display.SetActiveFoundation(nullptr);
+		display.CurrentBuilding = nullptr;
+		display.CurrentBuildingType = nullptr;
+	}
+
+	PlayConstructionYardAnim(pFactory);
+	return BuildSucceeded;
+}
+
 // AIConstructionYard Hook #1 -> sub_740810 - Check number of construction yard before deploy.
 DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
 {
@@ -291,13 +341,32 @@ DEFINE_JUMP(LJMP, 0x4A9361, 0x4A9371);
 // AIConstructionYard Hook #4-1 -> sub_443C60 - Prohibit AI from building construction yard and clean up invalid walls nodes.
 DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 {
-	enum { CanNotBuild = 0x4454E6, BuildFailed = 0x445696 };
+	enum { BuildSucceeded = 0x4454D4, CanNotBuild = 0x4454E6, BuildFailed = 0x445696 };
 
 	GET(BaseNodeClass* const, pBaseNode, EBX);
 	GET(BuildingClass* const, pBuilding, EDI);
+	GET(BuildingClass* const, pFactory, ESI);
 	GET(const CellStruct, topLeftCell, EDX);
 
 	const auto pBuildingType = pBuilding->Type;
+	const auto pTypeExt = BuildingTypeExt::Fetch(pBuildingType);
+
+	if (pTypeExt->LimboBuild)
+	{
+		BuildingTypeExt::CreateLimboBuilding(pBuilding, pBuildingType, pFactory->Owner, pTypeExt->LimboBuildID);
+
+		if (pBaseNode)
+		{
+			pBaseNode->Placed = true;
+			pBaseNode->Attempts = 0;
+
+			if (pFactory->Owner->ProducingBuildingTypeIndex == pBuildingType->ArrayIndex)
+				pFactory->Owner->ProducingBuildingTypeIndex = -1;
+		}
+
+		PlayConstructionYardAnim(pFactory);
+		return BuildSucceeded;
+	}
 
 	// Prohibit AI from building construction yard
 	if (RulesExt::Global()->AIForbidConYard && pBuildingType->ConstructionYard)
@@ -345,12 +414,20 @@ DEFINE_HOOK(0x42EB8E, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x6)
 	GET(BaseClass* const, pBase, ESI);
 	GET(BaseNodeClass* const, pBaseNode, EAX);
 
-	if (RulesExt::Global()->AIForbidConYard && pBaseNode->Placed)
+	if (pBaseNode->Placed)
 	{
 		const auto index = pBaseNode->BuildingTypeIndex;
 
-		if (index >= 0 && index < BuildingTypeClass::Array.Count && BuildingTypeClass::Array.Items[index]->ConstructionYard)
-			return Invalid;
+		if (index >= 0 && index < BuildingTypeClass::Array.Count)
+		{
+			const auto pType = BuildingTypeClass::Array.Items[index];
+
+			if ((RulesExt::Global()->AIForbidConYard && pType->ConstructionYard)
+				|| BuildingTypeExt::Fetch(pType)->LimboBuild)
+			{
+				return Invalid;
+			}
+		}
 	}
 
 	return reinterpret_cast<bool(__thiscall*)(HouseClass*, BaseNodeClass*)>(0x50CAD0)(pBase->Owner, pBaseNode) ? Valid : Invalid;
@@ -406,4 +483,13 @@ DEFINE_HOOK(0x5887C1, MapClass_BuildingToWall_SkipExtraWalls, 0x6)
 	}
 
 	return NextDirection;
+}
+
+DEFINE_HOOK(0x6A8E34, StripClass_Update_LimboBuild, 0x7)
+{
+	enum { SkipGameCode = 0x6A8F49 };
+
+	GET(BuildingClass* const, pBuilding, ESI);
+
+	return BuildingTypeExt::BuildLimboBuilding(pBuilding) ? SkipGameCode : 0;
 }

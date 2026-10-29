@@ -59,6 +59,8 @@ public:
 	Valueable<bool> SpyEffect_Custom;
 	ValueableIdx<SuperWeaponTypeClass> SpyEffect_VictimSuperWeapon;
 	ValueableIdx<SuperWeaponTypeClass> SpyEffect_InfiltratorSuperWeapon;
+	Valueable<bool> LimboBuild;
+	Valueable<int> LimboBuildID;
 
 	Nullable<bool> ConsideredVehicle;
 	Valueable<bool> ZShapePointMove_OnBuildup;
@@ -206,6 +208,8 @@ public:
 		, SpyEffect_Custom { false }
 		, SpyEffect_VictimSuperWeapon {}
 		, SpyEffect_InfiltratorSuperWeapon {}
+		, LimboBuild { false }
+		, LimboBuildID { -1 }
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
@@ -349,5 +353,8 @@ public:
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
 	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	static bool BuildLimboBuilding(BuildingClass* pBuilding);
+	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
+	static bool DeleteLimboBuilding(BuildingClass* pBuilding, int ID);
 };
 
