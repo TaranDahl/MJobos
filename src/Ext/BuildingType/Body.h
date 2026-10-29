@@ -121,6 +121,7 @@ public:
 	NullableIdx<VocClass> BuildingRepairedSound;
 
 	Valueable<bool> Refinery_UseNormalActiveAnim;
+	Nullable<bool> AIBaseNormal;
 
 	ValueableVector<bool> HasPowerUpAnim;
 
@@ -257,6 +258,7 @@ public:
 		, BunkerStateUpdateDelay {}
 		, BuildingRepairedSound {}
 		, Refinery_UseNormalActiveAnim { false }
+		, AIBaseNormal {}
 		, HasPowerUpAnim {}
 		, UndeploysInto_Sellable { false }
 		, BuildingRadioLink_SyncOwner {}
@@ -335,6 +337,7 @@ public:
 	static ExtContainer ExtMap;
 
 	static std::vector<CellStruct> BaseNormalCells;
+	static void DrawAdjacentLines();
 
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
 	{

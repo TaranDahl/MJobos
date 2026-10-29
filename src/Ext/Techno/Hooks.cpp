@@ -305,6 +305,9 @@ void TechnoExt::InitializeState(TechnoTypeClass* pType)
 	this->InitAggressiveStance();
 	this->InitCeaseFireStance();
 
+	if (RulesExt::Global()->CheckExtraBaseNormal && pTypeExt->ExtraBaseNormal)
+		ScenarioExt::Global()->BaseNormalTechnos.push_back(this);
+
 	if (!this->AE.HasTint) // already updated when initializing attach effect
 		this->UpdateTintValues();
 

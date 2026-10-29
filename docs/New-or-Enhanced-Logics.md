@@ -688,6 +688,7 @@ DetachedReport=  ; Sound entry
   - `Adjacent.Allowed` lists BuildingTypes this BuildingType can be placed off (within distance defined by `Adjacent`). If empty, any BuildingType not listed in `Adjacent.Disallowed` is okay.
   - `Adjacent.Disallowed` lists BuildingTypes this BuildingType cannot be placed off from. If empty, any BuildingTypes are okay as long as `Adjacent.Allowed` is empty or they are listed on it.
     - `Adjacent.Disallowed.Prohibit` if set to true makes this behaviour strict and disallows placement even if there are eligible buildings around if the placement is within range of a disallowed one. `Adjacent.Disallowed.ProhibitDistance` can be used to override `Adjacent` for this check if set to value higher than 0.
+  - If `CheckExtraBaseNormal` ([Check building adjacent by all technos](Fixed-or-Improved-Logics.md#check-building-adjacent-by-all-technos)) is set to true, `Adjacent.AllowedExtra` and `Adjacent.DisallowedExtra` work for TechnoTypes the same way `Adjacent.Allowed` and `Adjacent.Disallowed` work for BuildingTypes.
   - If `NoBuildAreaOnBuildup` is set to true, no building can be built next to this building regardless of any other settings if it is currently displaying its buildup animation.
 
 In `rulesmd.ini`:
@@ -697,6 +698,8 @@ Adjacent.Allowed=                       ; List of BuildingTypes
 Adjacent.Disallowed=                    ; List of BuildingTypes
 Adjacent.Disallowed.Prohibit=false      ; boolean
 Adjacent.Disallowed.ProhibitDistance=0  ; integer, cell offset
+Adjacent.AllowedExtra=                  ; List of TechnoTypes
+Adjacent.DisallowedExtra=               ; List of TechnoTypes
 NoBuildAreaOnBuildup=false              ; boolean
 ```
 

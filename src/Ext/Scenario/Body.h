@@ -32,6 +32,7 @@ public:
 
 		std::vector<TechnoExt*> AutoDeathObjects;
 		std::vector<TechnoExt*> TransportReloaders; // Objects that can reload ammo in limbo
+		std::vector<TechnoExt*> BaseNormalTechnos;
 
 		bool SWSidebar_Enable;
 		std::vector<int> SWSidebar_Indices;
@@ -73,6 +74,7 @@ public:
 			, Variables { }
 			, AutoDeathObjects {}
 			, TransportReloaders {}
+			, BaseNormalTechnos {}
 			, SWSidebar_Enable { true }
 			, SWSidebar_Indices {}
 			, CanBuildNowCount { 0 }

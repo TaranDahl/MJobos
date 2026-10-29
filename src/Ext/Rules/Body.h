@@ -114,6 +114,7 @@ public:
 		Valueable<bool> NoQueueUpToUnload;
 		Nullable<bool> NoQueueUpToEnter_Buildings;
 		Nullable<bool> NoQueueUpToUnload_Buildings;
+		Valueable<bool> CheckExtraBaseNormal;
 
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
@@ -304,6 +305,8 @@ public:
 		Valueable<bool> AIForbidConYard;
 		Valueable<bool> AINodeWallsOnly;
 		Valueable<bool> AICleanWallNode;
+		Valueable<int> AIAdjacentMax;
+		Nullable<int> AIAdjacentMax_Campaign;
 
 		Valueable<bool> AttackMove_Aggressive;
 		Valueable<bool> AttackMove_UpdateTarget;
@@ -691,6 +694,7 @@ public:
 			, NoQueueUpToUnload { false }
 			, NoQueueUpToEnter_Buildings {}
 			, NoQueueUpToUnload_Buildings {}
+			, CheckExtraBaseNormal { false }
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }
@@ -863,6 +867,8 @@ public:
 			, AIForbidConYard { false }
 			, AINodeWallsOnly { false }
 			, AICleanWallNode { false }
+			, AIAdjacentMax { -1 }
+			, AIAdjacentMax_Campaign {}
 			, AttackMove_Aggressive { false }
 			, AttackMove_UpdateTarget { false }
 			, MindControl_ThreatDelay { 0 }

@@ -355,6 +355,8 @@ public:
 	Nullable<int> AIAttackMoveTargetingDelay;
 	Nullable<int> PlayerAttackMoveTargetingDelay;
 	Nullable<bool> DistributeTargetingFrame;
+	Valueable<bool> ExtraBaseNormal;
+	Valueable<bool> ExtraBaseForAllyBuilding;
 
 	Nullable<bool> AttackMove_Aggressive;
 	Nullable<bool> AttackMove_UpdateTarget;
@@ -858,6 +860,8 @@ public:
 		, AIAttackMoveTargetingDelay {}
 		, PlayerAttackMoveTargetingDelay {}
 		, DistributeTargetingFrame {}
+		, ExtraBaseNormal { false }
+		, ExtraBaseForAllyBuilding { false }
 
 		, DigitalDisplay_Health_FakeAtDisguise {}
 
