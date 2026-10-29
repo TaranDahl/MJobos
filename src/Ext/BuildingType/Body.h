@@ -172,6 +172,8 @@ public:
 	// Ares 3.0
 	Nullable<bool> UnitSell;
 
+	Valueable<BuildingTypeClass*> LaserFencePost_Fence;
+
 	BuildingTypeExt(BuildingTypeClass* OwnerObject) : TechnoTypeExt(OwnerObject)
 		, PowersUp_Owner { AffectedHouse::Owner }
 		, PowersUp_Buildings {}
@@ -299,6 +301,7 @@ public:
 
 		// Ares 3.0
 		, UnitSell {}
+		, LaserFencePost_Fence {}
 	{ }
 
 	// typed owner accessor (shadows the TechnoTypeClass one from the base)

@@ -691,3 +691,177 @@ DEFINE_HOOK(0x42EBA2, BaseClass_GetBaseNodeIndex_AIAdjacentMax, 0x8)
 }
 
 #pragma endregion
+
+static inline bool IsSameFenceType(const BuildingTypeClass* const pPostType, const BuildingTypeClass* const pFenceType)
+{
+	if (const auto pSpecificType = BuildingTypeExt::Fetch(pPostType)->LaserFencePost_Fence.Get())
+	{
+		if (pSpecificType != pFenceType)
+			return false;
+	}
+	else
+	{
+		const auto count = BuildingTypeClass::Array.Count;
+
+		for (int i = 0; i < count; ++i)
+		{
+			const auto pSearchType = BuildingTypeClass::Array.Items[i];
+
+			if (pSearchType->LaserFence)
+			{
+				if (pSearchType != pFenceType)
+					return false;
+
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+static inline bool CanDrawGrid(bool draw)
+{
+	if (ProximityTemp::Exist)
+	{
+		ProximityTemp::Exist = false;
+		return false;
+	}
+
+	return draw;
+}
+
+// Laser fence use GetBuilding to check whether can build and draw, so no need to change
+
+/*
+	In sub_6D5C50
+
+	- Buildable-upon TechnoTypes Hook #8-1 -> Don't draw overlay wall grid when have occupiers
+*/
+DEFINE_HOOK(0x6D5D38, TacticalClass_DrawOverlayWallGrid_DisableWhenHaveTechnos, 0x8)
+{
+	enum { Valid = 0x6D5D40, Invalid = 0x6D5F0F };
+
+	GET(bool, valid, EAX);
+
+	return CanDrawGrid(valid) ? Valid : Invalid;
+}
+
+/*
+	In sub_6D59D0
+
+	- Buildable-upon TechnoTypes Hook #8-2 -> Don't draw firestorm wall grid when have occupiers
+*/
+DEFINE_HOOK(0x6D5A9D, TacticalClass_DrawFirestormWallGrid_DisableWhenHaveTechnos, 0x8)
+{
+	enum { Valid = 0x6D5AA5, Invalid = 0x6D5C2F };
+
+	GET(bool, valid, EAX);
+
+	return CanDrawGrid(valid) ? Valid : Invalid;
+}
+
+/*
+	In sub_588750
+
+	- Buildable-upon TechnoTypes Hook #8-3 -> Don't place overlay wall when have occupiers
+*/
+DEFINE_HOOK(0x588873, MapClass_BuildingToWall_DisableWhenHaveTechnos, 0x8)
+{
+	enum { Valid = 0x58887B, Invalid = 0x588935 };
+
+	GET(bool, valid, EAX);
+
+	return CanDrawGrid(valid) ? Valid : Invalid;
+}
+
+/*
+	In sub_588570
+
+	- Buildable-upon TechnoTypes Hook #8-4 -> Don't place firestorm wall when have occupiers
+*/
+DEFINE_HOOK(0x588664, MapClass_BuildingToFirestormWall_DisableWhenHaveTechnos, 0x8)
+{
+	enum { Valid = 0x58866C, Invalid = 0x588730 };
+
+	GET(bool, valid, EAX);
+
+	return CanDrawGrid(valid) ? Valid : Invalid;
+}
+
+/*
+	In sub_453060
+
+	- Customized Laser Fence Hook #2 -> Select the specific laser fence type
+*/
+DEFINE_HOOK(0x452E2C, BuildingClass_CreateLaserFence_FindSpecificIndex, 0x5)
+{
+	enum { SkipGameCode = 0x452E50 };
+
+	GET(BuildingClass* const, pThis, EDI);
+
+	if (const auto pFenceType = BuildingTypeExt::Fetch(pThis->Type)->LaserFencePost_Fence.Get())
+	{
+		if (pFenceType->LaserFence)
+		{
+			R->EBP(pFenceType->ArrayIndex);
+			R->EAX(BuildingTypeClass::Array.Count);
+			return SkipGameCode;
+		}
+	}
+
+	return 0;
+}
+
+/*
+	In sub_440580
+
+	- Customized Laser Fence Hook #3 -> Skip uninit inappropriate laser fence
+*/
+DEFINE_HOOK(0x440AE9, BuildingClass_Unlimbo_SkipUninitFence, 0x7)
+{
+	enum { SkipGameCode = 0x440B07 };
+
+	GET(BuildingClass* const, pFence, EDI);
+	GET(BuildingClass* const, pThis, ESI);
+
+	return IsSameFenceType(pThis->Type, pFence->Type) ? 0 : SkipGameCode;
+}
+
+static inline bool IsMatchedPostType(const BuildingTypeClass* const pThisType, const BuildingTypeClass* const pPostType)
+{
+	const auto pThisTypeExt = BuildingTypeExt::Fetch(pThisType);
+	const auto pPostTypeExt = BuildingTypeExt::Fetch(pPostType);
+
+	return pThisTypeExt->LaserFencePost_Fence.Get() == pPostTypeExt->LaserFencePost_Fence.Get();
+}
+
+/*
+	In sub_452BB0
+
+	- Customized Laser Fence Hook #4 -> Only accept specific fence post
+*/
+DEFINE_HOOK(0x452CB4, BuildingClass_FindLaserFencePost_CheckLaserFencePost, 0x7)
+{
+	enum { SkipGameCode = 0x452D2C };
+
+	GET(BuildingClass* const, pPost, ESI);
+	GET(BuildingClass* const, pThis, EDI);
+
+	return IsMatchedPostType(pThis->Type, pPost->Type) ? 0 : SkipGameCode;
+}
+
+/*
+	In sub_6D5730
+
+	- Customized Laser Fence Hook #5 -> Break draw inappropriate laser fence grids
+*/
+DEFINE_HOOK(0x6D5815, TacticalClass_DrawLaserFenceGrid_SkipDrawLaserFence, 0x6)
+{
+	enum { SkipGameCode = 0x6D59A6 };
+
+	GET(BuildingTypeClass* const, pPostType, ECX);
+
+	// Have used CurrentBuilding->Type yet, so simply use static_cast
+	return IsMatchedPostType(static_cast<BuildingClass*>(DisplayClass::Instance.CurrentBuilding)->Type, pPostType) ? 0 : SkipGameCode;
+}
