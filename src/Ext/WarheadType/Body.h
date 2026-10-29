@@ -169,11 +169,6 @@ public:
 	Valueable<bool> InflictLocomotor;
 	Valueable<bool> RemoveInflictedLocomotor;
 
-	Valueable<bool> LightChanging;
-	Valueable<int> SetAmbientLight;
-	Valueable<int> SetAmbientRed;
-	Valueable<int> SetAmbientGreen;
-	Valueable<int> SetAmbientBlue;
 	Valueable<bool> ReduceTiberium;
 
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
@@ -471,11 +466,6 @@ public:
 		, InflictLocomotor { false }
 		, RemoveInflictedLocomotor { false }
 
-		, LightChanging { false }
-		, SetAmbientLight { -1 }
-		, SetAmbientRed { -1 }
-		, SetAmbientGreen { -1 }
-		, SetAmbientBlue { -1 }
 		, ReduceTiberium { false }
 
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
