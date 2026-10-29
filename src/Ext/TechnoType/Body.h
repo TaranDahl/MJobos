@@ -412,6 +412,10 @@ public:
 	Valueable<bool> Cloneable;
 	ValueableVector<BuildingTypeClass*> ClonedAt;
 	Valueable<TechnoTypeClass*> ClonedAs;
+	Valueable<int> DefaultVisualCharacter;
+	Nullable<int> DefaultVisualCharacterToSelf;
+	Nullable<int> DefaultVisualCharacterToAlly;
+	Nullable<int> DefaultVisualCharacterToEnemy;
 
 	Nullable<Leptons> Spawner_RecycleRange;
 	ValueableVector<AnimTypeClass*> Spawner_RecycleAnim;
@@ -948,6 +952,11 @@ public:
 		, Spawner_RecycleAnim { }
 		, Spawner_RecycleCoord { {0,0,0} }
 		, Spawner_RecycleOnTurret {}
+
+		, DefaultVisualCharacter { 0 }
+		, DefaultVisualCharacterToSelf { }
+		, DefaultVisualCharacterToAlly { }
+		, DefaultVisualCharacterToEnemy { }
 
 		, SuppressKillWeapons { false }
 		, SuppressKillWeapons_Types { }
