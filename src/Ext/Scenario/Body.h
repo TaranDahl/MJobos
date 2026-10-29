@@ -42,6 +42,7 @@ public:
 		DWORD OwnerBitfield_VehicleType;
 		DWORD OwnerBitfield_NavyType;
 		DWORD OwnerBitfield_AircraftType;
+		std::set<int> Smudges;
 
 		std::vector<std::wstring> RecordMessages;
 
@@ -80,6 +81,7 @@ public:
 			, OwnerBitfield_VehicleType { 0 }
 			, OwnerBitfield_NavyType { 0 }
 			, OwnerBitfield_AircraftType { 0 }
+			, Smudges {}
 			, RecordMessages {}
 			, DefaultLS640BkgdName {}
 			, DefaultLS800BkgdName {}

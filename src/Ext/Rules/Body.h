@@ -139,6 +139,7 @@ public:
 		Valueable<bool> ForceAAWeapon_InRange_ApplyRangeModifiers;
 
 		Valueable<bool> BuildingProductionQueue;
+		Valueable<int> SmudgeUpdateTime;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -675,6 +676,7 @@ public:
 			, ForceAAWeapon_InRange_ApplyRangeModifiers { false }
 
 			, BuildingProductionQueue { false }
+			, SmudgeUpdateTime { 0 }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
