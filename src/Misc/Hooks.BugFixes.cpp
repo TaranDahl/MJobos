@@ -1517,6 +1517,30 @@ static size_t __fastcall HexStr2Int_replacement(const char* str)
 DEFINE_FUNCTION_JUMP(CALL, 0x6E8305, HexStr2Int_replacement); // TaskForce
 DEFINE_FUNCTION_JUMP(CALL, 0x6E5FA6, HexStr2Int_replacement); // TagType
 
+namespace InvisoBlockageFix
+{
+	CoordStruct SourceCoords = { 0, 0, 0 };
+}
+
+DEFINE_HOOK(0x468670, BulletClass_Unlimbo_Start_InvisoBlockageFix, 0x6)
+{
+	GET_STACK(int, returnAddress, 0);
+	GET(BulletClass*, pThis, ECX);
+
+	if (!RulesExt::Global()->InvisoBlockageFix || returnAddress != 0x6FF01A || !pThis->Type->Inviso)
+		return 0;
+
+	REF_STACK(CoordStruct*, pSourceCoords, 0x4);
+
+	if (auto const pOwner = pThis->Owner)
+	{
+		InvisoBlockageFix::SourceCoords = pOwner->GetCoords();
+		pSourceCoords = &InvisoBlockageFix::SourceCoords;
+	}
+
+	return 0;
+}
+
 #define Hook_AIPlayerLogFix(addr, mode, size, reg1, reg2) \
 DEFINE_HOOK(addr, ##mode##_AIPlayerLogFix, size) \
 { \

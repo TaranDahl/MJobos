@@ -7,6 +7,7 @@
 #include "VirtualTrajectories/TracingTrajectory.h"
 
 #include <Ext/Bullet/Body.h>
+#include <Ext/Rules/Body.h>
 #include <Ext/Techno/Body.h>
 
 TrajectoryTypePointer::TrajectoryTypePointer(TrajectoryFlag flag)
@@ -907,9 +908,15 @@ DEFINE_HOOK(0x467BAC, BulletClass_Update_TrajectoriesCheckObstacle, 0x6)
 // The vanilla Ranged check would override the trajectory's detonation decision, so trajectories opt out via ShouldSkipRangedCheck().
 DEFINE_HOOK(0x467C1C, BulletClass_AI_RangedCheck_Trajectories, 0x6)
 {
-	enum { SkipToNoRanged = 0x467C26 };
+	enum { Continue = 0x467C22, SkipToNoRanged = 0x467C26 };
 
 	GET(BulletClass*, pThis, EBP);
+	GET(BulletTypeClass*, pType, EAX);
+
+	const bool applyInvisoLatencyFix = RulesExt::Global()->InvisoLatencyFix;
+
+	if (applyInvisoLatencyFix)
+		R->CL(pType->Inviso || pType->Ranged);
 
 	if (auto const pExt = BulletExt::TryFetch(pThis))
 	{
@@ -917,7 +924,7 @@ DEFINE_HOOK(0x467C1C, BulletClass_AI_RangedCheck_Trajectories, 0x6)
 			return SkipToNoRanged;
 	}
 
-	return 0;
+	return applyInvisoLatencyFix ? Continue : 0;
 }
 
 /* ROT > 0. We temporarily do not need to make changes to the Bridge interaction for this scenario, but we will leave it here for now, as it may be used later.

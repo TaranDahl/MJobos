@@ -358,6 +358,8 @@ public:
 		Valueable<bool> AllowBerzerkOnAllies;
 
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
+		Valueable<bool> InvisoLatencyFix;
+		Valueable<bool> InvisoBlockageFix;
 
 
 		Valueable<bool> VHPScan_Enhanced;
@@ -894,6 +896,8 @@ public:
 			, TintColorBerserk { 0 }
 
 			, AttackMove_IgnoreWeaponCheck { false }
+			, InvisoLatencyFix { false }
+			, InvisoBlockageFix { false }
 
 			, Decloak_OnBlockingMovement { true }
 			, Decloak_OnCloakingWithLowHealth { true }
