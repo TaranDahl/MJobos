@@ -97,22 +97,6 @@ static inline float GetRotateRadian(const UnitClass* pThis, bool detail, bool ch
 	return static_cast<float>((detail ? GetTurretRadian(pThis) : pThis->SecondaryFacing.Current().GetRadian<32>()) - (change ? GetPrimaryRadian(pThis) : pThis->PrimaryFacing.Current().GetRadian<32>()));
 }
 
-static size_t GetTurretFacing(const UnitClass* pThis)
-{
-	const auto pType = pThis->Type;
-	const auto pTypeExt = UnitTypeExt::Fetch(pType);
-	const int turretROT = pType->ROT;
-
-	if (turretROT > 6)
-		return pThis->SecondaryFacing.Current().GetFacing<32>();
-	else if (turretROT > 4)
-		return pThis->SecondaryFacing.Current().GetFacing<64>();
-	else if (turretROT > 2)
-		return pThis->SecondaryFacing.Current().GetFacing<128>();
-
-	return pThis->SecondaryFacing.Current().GetFacing<256>();
-}
-
 DEFINE_HOOK(0x73BA12, UnitClass_DrawAsVXL_RewriteTurretDrawing, 0x6)
 {
 	enum { SkipGameCode = 0x73BEA4 };
