@@ -333,6 +333,10 @@ public:
 	Nullable<int> InitialSpawnsNumber;
 	ValueableVector<AircraftTypeClass*> Spawns_Queue;
 
+	Valueable<bool> Cloneable;
+	ValueableVector<BuildingTypeClass*> ClonedAt;
+	Valueable<TechnoTypeClass*> ClonedAs;
+
 	Nullable<Leptons> Spawner_RecycleRange;
 	ValueableVector<AnimTypeClass*> Spawner_RecycleAnim;
 	Valueable<CoordStruct> Spawner_RecycleCoord;
@@ -759,6 +763,10 @@ public:
 
 		, InitialSpawnsNumber { }
 		, Spawns_Queue { }
+
+		, Cloneable { true }
+		, ClonedAt { }
+		, ClonedAs { }
 
 		, Spawner_RecycleRange {}
 		, Spawner_RecycleAnim { }
