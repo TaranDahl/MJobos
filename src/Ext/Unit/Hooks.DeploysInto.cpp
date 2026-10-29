@@ -2,6 +2,8 @@
 
 #include "Body.h"
 
+#include <Ext/BuildingType/Body.h>
+#include <Ext/BuildingType/ProximityTemp.h>
 #include <Ext/TerrainType/Body.h>
 #include <Ext/CaptureManager/Body.h>
 #include <Ext/Building/Body.h>
@@ -159,6 +161,23 @@ DEFINE_HOOK(0x73FEC1, UnitClass_WhatAction_DeploysIntoDesyncFix, 0x6)
 
 // Exclude the specific unit who want to deploy
 // Allow placing buildings on top of TerrainType with CanBeBuiltOn
+static inline void MarkPlacementGridOccupier(ObjectClass* const pObject, HouseClass* const pOwner)
+{
+	const auto absType = pObject->WhatAmI();
+
+	if (!RulesExt::Global()->PlacementGrid_Expand
+		|| pObject == UnitExt::Deployer
+		|| (absType != AbstractType::Infantry && absType != AbstractType::Unit))
+	{
+		return;
+	}
+
+	const auto pTechno = static_cast<TechnoClass*>(pObject);
+
+	if (pTechno->GetTechnoType()->Speed > 0 && BuildingTypeExt::CheckOccupierCanLeave(pOwner, pTechno->Owner))
+		ProximityTemp::Exist = true;
+}
+
 DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 {
 	enum { CanNotExistHere = 0x47C6D1, CanExistHere = 0x47C6A0 };
@@ -166,6 +185,8 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 	GET(const CellClass* const, pCell, EDI);
 	GET(const BuildingTypeClass* const, pBuildingType, EAX);
 	GET_STACK(HouseClass* const, pOwner, STACK_OFFSET(0x18, 0xC));
+
+	ProximityTemp::Exist = false;
 
 	if (!Game::IsActive)
 		return CanExistHere;
@@ -217,6 +238,7 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 				else
 				{
 					const auto pBuilding = abstract_cast<BuildingClass*, true>(pObject);
+					MarkPlacementGridOccupier(pObject, pOwner);
 
 					if (!pBuilding || pOwner != pBuilding->Owner || !pBuilding->Type->LaserFence)
 						return CanNotExistHere;
@@ -255,7 +277,10 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 				if (pObject == UnitExt::Deployer)
 					skipFlag = true;
 				else
+				{
+					MarkPlacementGridOccupier(pObject, pOwner);
 					return CanNotExistHere;
+				}
 			}
 			else if (const auto pTerrain = abstract_cast<TerrainClass*, true>(pObject))
 			{

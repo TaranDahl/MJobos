@@ -1,4 +1,5 @@
 #include "Body.h"
+#include "ProximityTemp.h"
 
 #include <Ext/Rules/Body.h>
 #include <Ext/Scenario/Body.h>
@@ -219,6 +220,9 @@ DEFINE_HOOK(0x4A8F20, DisplayClass_BuildingProximityCheck_SetContext, 0x5)
 {
 	GET(BuildingTypeClass*, pType, ESI);
 
+	if (RulesExt::Global()->PlacementGrid_Expand)
+		BuildingTypeExt::BaseNormalCells.clear();
+
 	ProximityTemp::Build = false;
 	ProximityTemp::BuildType = pType;
 
@@ -321,7 +325,16 @@ DEFINE_HOOK(0x4A902C, MapClass_PassesProximityCheck_BaseNormalExtra, 0x5)
 	REF_STACK(bool, canBuild, STACK_OFFSET(0x30, 0xC));
 
 	if (canBuild)
-		return CheckCompleted;
+	{
+		if (!RulesExt::Global()->PlacementGrid_Expand)
+			return CheckCompleted;
+
+		canBuild = false;
+		ProximityTemp::Build = true;
+
+		GET_STACK(const CellStruct, currentCell, STACK_OFFSET(0x30, -0x20));
+		BuildingTypeExt::BaseNormalCells.push_back(currentCell);
+	}
 
 	return 0;
 }
@@ -395,6 +408,8 @@ DEFINE_HOOK(0x4A904E, MapClass_PassesProximityCheck_RestoreResult, 0x5)
 			}
 		}
 	}
+	if (RulesExt::Global()->PlacementGrid_Expand)
+		R->Stack<bool>(STACK_OFFSET(0x30, 0xC), ProximityTemp::Build);
 
 	return 0;
 }
@@ -402,6 +417,58 @@ DEFINE_HOOK(0x4A904E, MapClass_PassesProximityCheck_RestoreResult, 0x5)
 // Let the game do the proximity and shroud check when the cell which mouse is pointing at has not changed
 DEFINE_JUMP(LJMP, 0x4AACD9, 0x4AACF5);
 DEFINE_JUMP(LJMP, 0x4A9361, 0x4A9371);
+
+// Record the current grid cell before the game chooses the placing-grid frame.
+DEFINE_HOOK(0x47EEBC, CellClass_DrawPlaceGrid_RecordCell, 0x6)
+{
+	GET(CellClass*, pCell, ESI);
+	ProximityTemp::CurrentCell = pCell;
+	return 0;
+}
+
+// Choose the configured placing-grid frame.
+DEFINE_HOOK(0x47EF52, CellClass_DrawPlaceGrid_DrawGrids, 0x6)
+{
+	const auto pRules = RulesExt::Global();
+
+	if (!pRules->PlacementGrid_Expand)
+		return 0;
+
+	const auto pCell = ProximityTemp::CurrentCell;
+	const auto cell = pCell->MapCoords;
+	const auto pObj = DisplayClass::Instance.CurrentBuildingType;
+	const auto range = static_cast<short>((pObj && pObj->WhatAmI() == AbstractType::BuildingType)
+		? static_cast<BuildingTypeClass*>(pObj)->Adjacent + 1
+		: 0);
+
+	const auto maxX = static_cast<short>(cell.X + range);
+	const auto maxY = static_cast<short>(cell.Y + range);
+	const auto minX = static_cast<short>(cell.X - range);
+	const auto minY = static_cast<short>(cell.Y - range);
+
+	bool green = false;
+
+	for (const auto& baseCell : BuildingTypeExt::BaseNormalCells)
+	{
+		if (baseCell.X >= minX && baseCell.Y >= minY && baseCell.X <= maxX && baseCell.Y <= maxY)
+		{
+			green = true;
+			break;
+		}
+	}
+
+	const auto foot = ProximityTemp::Exist;
+	ProximityTemp::Exist = false;
+	const bool land = pCell->LandType != LandType::Water;
+	const auto frames = land ? pRules->PlacementGrid_LandFrames.Get() : pRules->PlacementGrid_WaterFrames.Get();
+	auto frame = foot ? frames.X : (green ? frames.Z : frames.Y);
+
+	if (frame >= Make_Global<SHPStruct*>(0x8A03FC)->Frames) // place.shp
+		frame = 0;
+
+	R->EDI(frame);
+	return 0;
+}
 
 // AIConstructionYard Hook #4-1 -> sub_443C60 - Prohibit AI from building construction yard and clean up invalid walls nodes.
 DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
