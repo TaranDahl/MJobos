@@ -46,6 +46,7 @@
 #include <CRT.h>
 #include <Locomotion/TestLocomotionClass.h>
 #include <Locomotion/AttachmentLocomotionClass.h>
+#include <Locomotion/AdvancedDriveLocomotionClass.h>
 
 #include <unordered_set>
 
@@ -1377,6 +1378,7 @@ if(_strcmpi(parser.value(), #name) == 0){ value = __uuidof(name ## LocomotionCla
 			PARSE_IF_IS_PHOBOS_LOCO(Test);
 #endif
 			PARSE_IF_IS_PHOBOS_LOCO(Attachment);
+			PARSE_IF_IS_PHOBOS_LOCO(AdvancedDrive);
 
 #undef PARSE_IF_IS_PHOBOS_LOCO
 

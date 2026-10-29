@@ -17,9 +17,10 @@ enum class EventTypeExt : uint8_t
 	ApproachObject = 0x80,
 	TogglePlayerAutoRepair = 0x81,
 	ManualReload = 0x82,
+	ToggleReversingStance = 0x85,
 
 	FIRST = ApproachObject,
-	LAST = ManualReload
+	LAST = ToggleReversingStance
 };
 
 #pragma pack(push, 1)
@@ -45,6 +46,10 @@ public:
 		{
 			TargetClass Whom;
 		} ManualReloadEvent;
+		struct ToggleReversingStance
+		{
+			TargetClass Whom;
+		} ToggleReversingStance;
 	};
 
 	bool AddEvent();
@@ -56,6 +61,8 @@ public:
 
 	static void RaiseManualReloadEvent(TechnoClass* pTechno);
 	void RespondToManualReloadEvent();
+	static void RaiseToggleReversingStance(TechnoClass* pTechno);
+	void RespondToToggleReversingStance();
 
 	static size_t GetDataSize(EventTypeExt type);
 	static bool IsValidType(EventTypeExt type);

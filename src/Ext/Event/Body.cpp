@@ -6,6 +6,8 @@
 #include <Ext/Techno/Body.h>
 #include <Ext/TechnoType/Body.h>
 #include <Ext/WarheadType/Body.h>
+#include <Ext/UnitType/Body.h>
+#include <Locomotion/AdvancedDriveLocomotionClass.h>
 
 #include <Helpers/Macro.h>
 #include <ShapeButtonClass.h>
@@ -27,6 +29,9 @@ void EventExt::RespondEvent()
 		break;
 	case EventTypeExt::ManualReload:
 		this->RespondToManualReloadEvent();
+		break;
+	case EventTypeExt::ToggleReversingStance:
+		this->RespondToToggleReversingStance();
 		break;
 	default:
 		break;
@@ -79,6 +84,34 @@ void EventExt::RespondToManualReloadEvent()
 	}
 }
 
+void EventExt::RaiseToggleReversingStance(TechnoClass* pTechno)
+{
+	EventExt eventExt {};
+	eventExt.Type = EventTypeExt::ToggleReversingStance;
+	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
+	eventExt.Frame = Unsorted::CurrentFrame;
+	eventExt.ToggleReversingStance.Whom = TargetClass(pTechno);
+	eventExt.AddEvent();
+	Debug::LogGame("Adding event TOGGLE_REVERSING\n");
+}
+
+void EventExt::RespondToToggleReversingStance()
+{
+	if (const auto pUnit = this->ToggleReversingStance.Whom.As_Unit())
+	{
+		if (pUnit->IsAlive && !pUnit->Berzerk && UnitTypeExt::Fetch(pUnit->Type)->AdvancedDrive_Reverse)
+		{
+			if (const auto pLoco = locomotion_cast<AdvancedDriveLocomotionClass*>(pUnit->Locomotor))
+			{
+				if (pLoco->IsForward)
+					pLoco->ShouldReverse = true;
+				else
+					pLoco->ShouldForward = true;
+			}
+		}
+	}
+}
+
 size_t EventExt::GetDataSize(EventTypeExt type)
 {
 	switch (type)
@@ -89,6 +122,8 @@ size_t EventExt::GetDataSize(EventTypeExt type)
 		return sizeof(EventExt::TogglePlayerAutoRepair);
 	case EventTypeExt::ManualReload:
 		return sizeof(EventExt::ManualReloadEvent);
+	case EventTypeExt::ToggleReversingStance:
+		return sizeof(EventExt::ToggleReversingStance);
 	default:
 		break;
 	}
@@ -103,6 +138,7 @@ bool EventExt::IsValidType(EventTypeExt type)
 	case EventTypeExt::ApproachObject:
 	case EventTypeExt::TogglePlayerAutoRepair:
 	case EventTypeExt::ManualReload:
+	case EventTypeExt::ToggleReversingStance:
 		return true;
 	default:
 		return false;
