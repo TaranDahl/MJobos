@@ -13,7 +13,7 @@
 class AirstrikeClass;
 class BulletClass;
 
-class TechnoExt : public RadioExt, public Detach::Listener<AirstrikeClass>
+class TechnoExt : public RadioExt, public Detach::Listener<AirstrikeClass>, public Detach::Listener<AbstractClass>
 {
 public:
 	using base_type = TechnoClass;
@@ -50,6 +50,12 @@ public:
 	int WHAnimRemainingCreationInterval;
 	WeaponTypeClass* LastWeaponType;
 	int ScatteringStopFrame;
+	bool HasCachedClickMission;
+	Mission CachedMission;
+	AbstractClass* CachedCell;
+	AbstractClass* CachedTarget;
+	bool HasCachedClickEvent;
+	EventType CachedEventType;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 	int BeControlledThreatFrame;
@@ -119,6 +125,12 @@ public:
 		, WHAnimRemainingCreationInterval { 0 }
 		, LastWeaponType {}
 		, ScatteringStopFrame { 0 }
+		, HasCachedClickMission { false }
+		, CachedMission { Mission::None }
+		, CachedCell { nullptr }
+		, CachedTarget { nullptr }
+		, HasCachedClickEvent { false }
+		, CachedEventType { EventType::LAST_EVENT }
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
 		, BeControlledThreatFrame { 0 }
@@ -196,6 +208,7 @@ public:
 	bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> const& attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts, bool requireAnims = false) const;
 	int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr, bool requireAnims = false) const;
 	void InitializeDisplayInfo(TechnoTypeClass* pType);
+	void UpdateCachedClick();
 	void ApplyMindControlRangeLimit();
 	int ApplyForceWeaponInRange(AbstractClass* pTarget);
 	void ResetDelayedFireTimer();
@@ -207,6 +220,7 @@ public:
 
 	virtual ~TechnoExt() override;
 	virtual void OnDetach(AirstrikeClass* pTarget, bool removed) override;
+	virtual void OnDetach(AbstractClass* pTarget, bool removed) override;
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 	virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 

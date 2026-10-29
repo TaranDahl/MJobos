@@ -1368,6 +1368,12 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->WHAnimRemainingCreationInterval)
 		.Process(this->LastWeaponType)
 		.Process(this->ScatteringStopFrame)
+		.Process(this->HasCachedClickMission)
+		.Process(this->CachedMission)
+		.Process(this->CachedCell)
+		.Process(this->CachedTarget)
+		.Process(this->HasCachedClickEvent)
+		.Process(this->CachedEventType)
 		.Process(this->FiringObstacleCell)
 		.Process(this->IsDetachingForCloak)
 		.Process(this->BeControlledThreatFrame)
@@ -1410,6 +1416,17 @@ void TechnoExt::OnDetach(AirstrikeClass* pTarget, bool removed)
 {
 	if (removed)
 		AnnounceInvalidPointer(this->AirstrikeTargetingMe, pTarget);
+}
+
+void TechnoExt::OnDetach(AbstractClass* pTarget, bool removed)
+{
+	if (this->HasCachedClickMission && this->CachedTarget == pTarget)
+	{
+		this->HasCachedClickMission = false;
+		this->CachedMission = Mission::None;
+		this->CachedCell = nullptr;
+		this->CachedTarget = nullptr;
+	}
 }
 
 void TechnoExt::LoadFromStream(PhobosStreamReader& Stm)
