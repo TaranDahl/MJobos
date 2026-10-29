@@ -220,7 +220,6 @@ DEFINE_HOOK(0x7410D6, UnitClass_GetFireError_LogTetherButNoLink, 0x7)
 #pragma endregion
 
 // TODO Debug hooks
-||||||| 1f4acf8f8
 #pragma region RocketUpdateTargetPosition
 
 DEFINE_HOOK(0x6B75AC, SpawnManagerClass_AI_SetDestinationForMissiles, 0x5)
