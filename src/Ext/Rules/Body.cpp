@@ -452,6 +452,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "PlayerGuardAreaTargetingDelay");
 	this->AIAttackMoveTargetingDelay.Read(exINI, GameStrings::General, "AIAttackMoveTargetingDelay");
 	this->PlayerAttackMoveTargetingDelay.Read(exINI, GameStrings::General, "PlayerAttackMoveTargetingDelay");
+	this->FollowTargetSelf.Read(exINI, GameStrings::General, "FollowTargetSelf");
 	this->DistributeTargetingFrame.Read(exINI, GameStrings::General, "DistributeTargetingFrame");
 	this->DistributeTargetingFrame_AIOnly.Read(exINI, GameStrings::General, "DistributeTargetingFrame.AIOnly");
 
@@ -1039,6 +1040,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerGuardAreaTargetingDelay)
 		.Process(this->AIAttackMoveTargetingDelay)
 		.Process(this->PlayerAttackMoveTargetingDelay)
+		.Process(this->FollowTargetSelf)
 		.Process(this->DistributeTargetingFrame)
 		.Process(this->DistributeTargetingFrame_AIOnly)
 		.Process(this->CanTargetAI_IronCurtained)

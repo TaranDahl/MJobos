@@ -247,7 +247,7 @@ DEFINE_HOOK(0x6B7282, SpawnManagerClass_AI_PromoteSpawns, 0x5)
 
 DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 {
-	enum { Recycle = 0x6B77FF, NoRecycle = 0x6B7838 };
+	enum { Recycle = 0x6B7809, NoRecycle = 0x6B7838 };
 
 	GET(SpawnManagerClass* const, pThis, ESI);
 	GET(AircraftClass* const, pSpawner, EDI);
@@ -281,8 +281,9 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 	if (shouldRecycleSpawned())
 	{
 		AnimExt::CreateRandomAnim(pCarrierTypeExt->Spawner_RecycleAnim, spawnerCrd, pSpawner, pSpawner->Owner, true);
+		pSpawner->Limbo(); // Remove from ATC first
 		pSpawner->SetLocation(pCarrier->GetCoords());
-		return Recycle;
+		return Recycle; // Skip vanilla Limbo()
 	}
 
 	return NoRecycle;
@@ -307,8 +308,10 @@ DEFINE_HOOK(0x4D962B, FootClass_SetDestination_RecycleFLH, 0x5)
 			*pDestCrd += TechnoExt::GetFLHAbsoluteCoords(pCarrier, FLH, pCarrierTypeExt->Spawner_RecycleOnTurret.Get(RulesExt::Global()->Spawner_RecycleOnTurret)) - pCarrier->GetCoords();
 		}
 	}
-	else if (!pThis->GetTechnoType()->MissileSpawn && pDest->WhatAmI() == AbstractType::Building
-		&& pThis->SendCommand(RadioCommand::QueryCanEnter, static_cast<BuildingClass*>(pDest)) != RadioCommand::AnswerPositive)
+	else if ((pDest->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None
+		&& (((pDest->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None)
+			? RulesExt::Global()->FollowTargetSelf.Get() && locomotion_cast<JumpjetLocomotionClass*>((static_cast<FootClass*>(pDest))->Locomotor)
+			: !pThis->GetTechnoType()->MissileSpawn && (pThis->SendCommand(RadioCommand::QueryCanEnter, static_cast<BuildingClass*>(pDest)) != RadioCommand::AnswerPositive)))
 	{
 		GET(CoordStruct*, pDestCrd, EAX);
 		auto crd = pDest->GetCoords();

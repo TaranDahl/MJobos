@@ -345,6 +345,7 @@ public:
 		Nullable<int> PlayerGuardAreaTargetingDelay;
 		Nullable<int> AIAttackMoveTargetingDelay;
 		Nullable<int> PlayerAttackMoveTargetingDelay;
+		Valueable<bool> FollowTargetSelf;
 		Valueable<bool> DistributeTargetingFrame;
 		Valueable<bool> DistributeTargetingFrame_AIOnly;
 
@@ -894,6 +895,7 @@ public:
 			, PlayerGuardAreaTargetingDelay {}
 			, AIAttackMoveTargetingDelay {}
 			, PlayerAttackMoveTargetingDelay {}
+			, FollowTargetSelf { false }
 			, DistributeTargetingFrame { false }
 			, DistributeTargetingFrame_AIOnly { true }
 			, CanTargetAI_IronCurtained { false }
