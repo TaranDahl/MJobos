@@ -2251,20 +2251,6 @@ Explodes.KillPassengers=      ; boolean, default to [General] -> Explodes.KillPa
 Explodes.DuringBuildup=       ; boolean, default to [General] -> Explodes.DuringBuildup
 ```
 
-### Infantry firing while moving
-
-- In vanilla, there is a hardcoded behavior that the infantries can not fire until they stop, even if they have `OpportunityFire=yes` set. Now you can bypass this restriction by using the following flag.
-  - Mind that you still need `OpportunityFire=yes` to make them acquire target when moving. However, if `OpportunityFire=no` is set, they can still do that if you use the "ctrl+shift" command, just like the units on the ground do.
-  - Additionally, the behavior that "rocketeers can not fire when they have buildings beneath them" is also caused by this hardcode. You can use the flag to bypass this behavior as well.
-  - The vanilla flag `JumpJetTurn` will affect the visual behavior when the infantry is firing while moving. You need to set it to **no** if you want to make the infantry always facing the target during the attack.
-  - Setting this flag on types except infantry is useless.
-
-In `rulesmd.ini`:
-```ini
-[SOMETECHNO]                 ; InfantryType
-FiringByPassMovingCheck=true ; boolean
-```
-
 ### Forbid parallel AI queues
 
 - You can now set if specific types of factories do not have AI production cloning issue instead of Ares' indiscriminate behavior of `AllowParallelAIQueues=no`.

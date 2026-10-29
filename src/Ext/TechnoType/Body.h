@@ -310,10 +310,6 @@ public:
 	Valueable<bool> KeepWarping;
 	Nullable<int> KeepWarping_Distance;
 
-	Valueable<bool> FiringByPassMovingCheck;
-
-
-
 	Nullable<bool> ExplodeOnDestroy;
 	Nullable<bool> FireDeathWeaponOnCrushed;
 
@@ -785,10 +781,6 @@ public:
 
 		, KeepWarping { false }
 		, KeepWarping_Distance {}
-
-		, FiringByPassMovingCheck { false }
-
-
 
 		, ExplodeOnDestroy {}
 		, FireDeathWeaponOnCrushed {}

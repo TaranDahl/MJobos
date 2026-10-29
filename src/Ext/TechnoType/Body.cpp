@@ -1086,10 +1086,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
 	this->KeepWarping_Distance.Read(exINI, pSection, "KeepWarping.Distance");
 
-	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
-
-
-
 	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 
@@ -1790,10 +1786,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 
 		.Process(this->KeepWarping)
 		.Process(this->KeepWarping_Distance)
-
-		.Process(this->FiringByPassMovingCheck)
-
-
 
 		.Process(this->ExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
