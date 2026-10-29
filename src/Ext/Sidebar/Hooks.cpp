@@ -7,6 +7,8 @@
 #include <Ext/House/Body.h>
 #include <Ext/TechnoType/Body.h>
 #include <Misc/MessageColumn.h>
+#include <WWMouseClass.h>
+#include <UI/UIRoot.h>
 
 DEFINE_HOOK(0x6A593E, SidebarClass_InitForHouse_AdditionalFiles, 0x5)
 {
@@ -313,7 +315,8 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SkipOnNewButtons, 0x7)
 		|| SWSidebarClass::Instance.ToggleButton && SWSidebarClass::Instance.ToggleButton->IsHovering
 		|| UniqueTechnoColumnClass::Instance.Hovering >= 0
 		|| SelectedInfoClass::Instance.IsHovering
-		|| MessageColumnClass::Instance.IsBlocked())
+		|| MessageColumnClass::Instance.IsBlocked()
+		|| UIExt::UIRoot::Instance().IsBlockingAt(WWMouseClass::Instance->XY1.X, WWMouseClass::Instance->XY1.Y))
 		? DoNothing : 0;
 }
 
