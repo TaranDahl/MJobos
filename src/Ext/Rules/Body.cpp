@@ -383,6 +383,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatLightDetailLevel_CheckColored.Read(exINI, GameStrings::AudioVisual, "CombatLightDetailLevel.CheckColored");
 	this->LightFlashAlphaImageDetailLevel.Read(exINI, GameStrings::AudioVisual, "LightFlashAlphaImageDetailLevel");
 	this->BuildingTypeSelectable.Read(exINI, GameStrings::General, "BuildingTypeSelectable");
+	this->AllyShareControl.Read(exINI, GameStrings::General, "AllyShareControl");
 
 	this->UseRetintFix.Read(exINI, GameStrings::AudioVisual, "UseRetintFix");
 
@@ -974,6 +975,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanTarget_IronCurtained)
 		.Process(this->AutoTarget_IronCurtained)
 		.Process(this->BuildingTypeSelectable)
+		.Process(this->AllyShareControl)
 		.Process(this->ProneSpeed_Crawls)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)
