@@ -1413,6 +1413,7 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->ShouldBeDead)
 		.Process(this->PreventCrewEscape)
 		.Process(this->LastHurtFrame)
+		.Process(this->IsWreckage)
 		;
 }
 

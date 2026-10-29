@@ -454,6 +454,9 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->Ammo.Read(exINI, pSection, "Ammo");
 
+	this->SuppressWreckage.Read(exINI, pSection, "SuppressWreckage");
+	this->ActivateWreckage.Read(exINI, pSection, "ActivateWreckage");
+
 	// Convert.From & Convert.To
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
 
@@ -828,6 +831,8 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->DamageAreaTarget)
 
 		.Process(this->Ammo)
+		.Process(this->SuppressWreckage)
+		.Process(this->ActivateWreckage)
 		;
 }
 

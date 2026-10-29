@@ -139,6 +139,11 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 	if (pWHExt->CanTargetHouse(pSourceHouse, pThis))
 		pExt->LastHurtFrame = Unsorted::CurrentFrame;
+	if (*args->Damage && pWHExt->ActivateWreckage)
+	{
+		pExt->IsWreckage = false;
+		pThis->Reactivate();
+	}
 
 	// Shield Receive Damage
 	if (!args->IgnoreDefenses)
@@ -227,14 +232,65 @@ DEFINE_HOOK(0x702819, TechnoClass_ReceiveDamage_Decloak, 0xA)
 
 DEFINE_HOOK(0x701DFF, TechnoClass_ReceiveDamage_FlyingStrings, 0x7)
 {
-	if (!Phobos::DisplayDamageNumbers)
-		return 0;
-
 	GET(TechnoClass* const, pThis, ESI);
 	GET(int* const, pDamage, EBX);
+	GET(const DamageState, state, EAX);
+	GET(WarheadTypeClass* const, pWH, EBP);
 
-	if (*pDamage)
+	if (Phobos::DisplayDamageNumbers && *pDamage)
 		GeneralUtils::DisplayDamageNumberString(*pDamage, DamageDisplayType::Regular, pThis->GetRenderCoords(), TechnoExt::Fetch(pThis)->DamageNumberOffset);
+
+	if ((state == DamageState::NowDead) && !WarheadTypeExt::Fetch(pWH)->SuppressWreckage && RulesExt::Global()->EnableWreckageSpawn)
+	{
+		const auto pType = pThis->GetTechnoType();
+		const auto pTypeExt = TechnoTypeExt::Fetch(pType);
+		const auto& vec = pTypeExt->WreckageType;
+
+		if (!vec.empty())
+		{
+			const auto pWreckageType = vec[ScenarioClass::Instance->Random.RandomRanged(0, (vec.size() - 1))];
+
+			if ((pThis->GetCell()->LandType != LandType::Water || pTypeExt->WreckageLeaveOnWater)
+				&& (!pThis->IsInAir() || pTypeExt->WreckageLeaveInAir)
+				&& (pWreckageType != pType || !TechnoExt::Fetch(pThis)->IsWreckage))
+			{
+				GET_STACK(HouseClass* const, pAttackerHosue, STACK_OFFSET(0xC4, 0x1C));
+
+				if (const auto pOwner = HouseExt::GetHouseKind(pTypeExt->WreckageOwner, false, pThis->Owner, pAttackerHosue, pThis->Owner))
+				{
+					const auto pWreckage = static_cast<TechnoClass*>(pWreckageType->CreateObject(pOwner));
+					pWreckage->Health = static_cast<int>(pWreckageType->Strength * pTypeExt->WreckageInitialHealthPercent.Get(RulesExt::Global()->WreckageInitialHealthPercent));
+
+					if (pTypeExt->WreckageSwapLocomotor
+						&& pWreckage->AbstractFlags & AbstractFlags::Foot
+						&& pThis->AbstractFlags & AbstractFlags::Foot)
+					{
+						const auto pFoot = static_cast<FootClass*>(pThis);
+						const auto pWreckageFoot = static_cast<FootClass*>(pWreckage);
+						std::swap(pFoot->Locomotor, pWreckageFoot->Locomotor);
+						pWreckageFoot->Locomotor->Link_To_Object(pWreckageFoot);
+						pFoot->Locomotor->Link_To_Object(pFoot);
+						pWreckageFoot->Locomotor->Stop_Moving();
+					}
+
+					++Unsorted::ScenarioInit;
+					pWreckage->Unlimbo((pWreckage->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None ? pThis->GetCoords() : pThis->Location, DirType::North);
+					--Unsorted::ScenarioInit;
+					pWreckage->PrimaryFacing.SetCurrent(pThis->PrimaryFacing.Current());
+					pWreckage->SecondaryFacing.SetCurrent(pThis->SecondaryFacing.Current());
+
+					if (pTypeExt->WreckageDeactive)
+					{
+						TechnoExt::Fetch(pWreckage)->IsWreckage = true;
+						pWreckage->Deactivate();
+					}
+
+					if (pTypeExt->WreckageMarkUp)
+						pWreckage->Mark(MarkType::Up);
+				}
+			}
+		}
+	}
 
 	return 0;
 }

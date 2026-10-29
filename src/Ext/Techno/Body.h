@@ -112,6 +112,8 @@ public:
 	bool PreventCrewEscape;
 	int LastHurtFrame;
 
+	bool IsWreckage;
+
 	TechnoExt(TechnoClass* OwnerObject) : RadioExt(OwnerObject)
 		, TypeExtData { nullptr }
 		, Shield {}
@@ -178,6 +180,7 @@ public:
 		, DropCrateType { Powerup::Money }
 		, PreventCrewEscape { false }
 		, LastHurtFrame { 0 }
+		, IsWreckage { false }
 	{ }
 
 	void OnEarlyUpdate();

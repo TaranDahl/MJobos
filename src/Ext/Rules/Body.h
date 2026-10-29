@@ -578,6 +578,9 @@ public:
 		// Global default per-sequence game-speed normalization flags for infantry
 		std::vector<int> CustomSequenceNormalized;
 
+		Valueable<bool> EnableWreckageSpawn;
+		Valueable<double> WreckageInitialHealthPercent;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, HarvesterDumpAmount { 0.0f }
@@ -1089,6 +1092,9 @@ public:
 
 			, CustomSequenceRates(42, -1)
 			, CustomSequenceNormalized(42, -1)
+
+			, EnableWreckageSpawn { false }
+			, WreckageInitialHealthPercent { 0.1 }
 		{ }
 
 		virtual ~ExtData() = default;

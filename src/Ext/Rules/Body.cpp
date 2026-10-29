@@ -484,6 +484,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->Sinkable_SquidGrab.Read(exINI, GameStrings::General, "Sinkable.SquidGrab");
 	this->SinkSpeed.Read(exINI, GameStrings::General, "SinkSpeed");
 
+	this->EnableWreckageSpawn.Read(exINI, GameStrings::General, "EnableWreckageSpawn");
+	this->WreckageInitialHealthPercent.Read(exINI, GameStrings::General, "WreckageInitialHealthPercent");
+
 	this->CreateAnimsOnZeroDamage.Read(exINI, GameStrings::General, "CreateAnimsOnZeroDamage");
 	this->Conventional_IgnoreUnits.Read(exINI, GameStrings::General, "Conventional.IgnoreUnits");
 	this->DecloakDamagedTargets.Read(exINI, GameStrings::General, "DecloakDamagedTargets");
@@ -1175,6 +1178,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->Cloak_KickOutParasite)
 		.Process(this->CustomSequenceRates)
 		.Process(this->CustomSequenceNormalized)
+		.Process(this->EnableWreckageSpawn)
+		.Process(this->WreckageInitialHealthPercent)
     ;
 }
 

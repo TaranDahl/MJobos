@@ -1341,6 +1341,15 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Unsellable.Read(exINI, pSection, "Unsellable");
 	this->KeepAlive.Read(exINI, pSection, "KeepAlive");
 
+	this->WreckageType.Read(exINI, pSection, "WreckageType");
+	this->WreckageInitialHealthPercent.Read(exINI, pSection, "WreckageInitialHealthPercent");
+	this->WreckageDeactive.Read(exINI, pSection, "WreckageDeactive");
+	this->WreckageMarkUp.Read(exINI, pSection, "WreckageMarkUp");
+	this->WreckageOwner.Read(exINI, pSection, "WreckageOwner");
+	this->WreckageLeaveOnWater.Read(exINI, pSection, "WreckageLeaveOnWater");
+	this->WreckageLeaveInAir.Read(exINI, pSection, "WreckageLeaveInAir");
+	this->WreckageSwapLocomotor.Read(exINI, pSection, "WreckageSwapLocomotor");
+
 	if (pThis->Gunner)
 	{
 		size_t weaponCount = pThis->WeaponCount;
@@ -2000,6 +2009,15 @@ void TechnoTypeExt::Serialize(T& Stm)
 		// Ares 3.0
 		.Process(this->Unsellable)
 		.Process(this->KeepAlive)
+
+		.Process(this->WreckageType)
+		.Process(this->WreckageInitialHealthPercent)
+		.Process(this->WreckageDeactive)
+		.Process(this->WreckageMarkUp)
+		.Process(this->WreckageOwner)
+		.Process(this->WreckageLeaveOnWater)
+		.Process(this->WreckageLeaveInAir)
+		.Process(this->WreckageSwapLocomotor)
 		;
 }
 void TechnoTypeExt::LoadFromStream(PhobosStreamReader& Stm)

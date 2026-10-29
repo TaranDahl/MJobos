@@ -2416,6 +2416,16 @@ int WarpPerStep::TemporalClassFake::_GetWarpPerStep(int helperCount)
 }
 DEFINE_FUNCTION_JUMP(LJMP, 0x71AB10, WarpPerStep::TemporalClassFake::_GetWarpPerStep)
 
+DEFINE_HOOK(0x70FC85, TechnoClass_Activate_End, 0x5)
+{
+	GET(TechnoClass*, pThis, ECX);
+
+	if (!pThis->Deactivated && TechnoExt::Fetch(pThis)->IsWreckage)
+		pThis->Deactivate();
+
+	return 0;
+}
+
 namespace DeactivateTemp
 {
 	class TechnoClassFake final : public TechnoClass
