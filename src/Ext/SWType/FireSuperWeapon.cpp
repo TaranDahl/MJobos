@@ -32,7 +32,7 @@ void SWTypeExt::FireSuperWeaponExt(SuperClass* pSW, const CellStruct& cell)
 		pTypeExt->ApplyAttachmentTransform(pHouse);
 
 	if (pTypeExt->Convert_Pairs.size() > 0)
-		pTypeExt->ApplyTypeConversion(pSW);
+		pTypeExt->ApplyTypeConversion(pHouse);
 
 	if (pTypeExt->SW_Link.size() > 0)
 		pTypeExt->ApplyLinkedSW(pSW);
@@ -356,10 +356,10 @@ void SWTypeExt::ApplyAttachmentTransform(HouseClass* pHouse)
 		AttachmentTransformGroup::Trasform(pAttachment, this->Attachment_Transform, pHouse);
 }
 
-void SWTypeExt::ApplyTypeConversion(SuperClass* pSW)
+void SWTypeExt::ApplyTypeConversion(HouseClass* pHouse)
 {
-	for (const auto pTargetFoot : FootClass::Array)
-		TypeConvertGroup::Convert(pTargetFoot, this->Convert_Pairs, pSW->Owner);
+	for (const auto pTarget : TechnoClass::Array)
+		TypeConvertGroup::Convert(pTarget, this->Convert_Pairs, pHouse);
 }
 
 void SWTypeExt::HandleEMPulseLaunch(SuperClass* pSW, const CellStruct& cell) const
