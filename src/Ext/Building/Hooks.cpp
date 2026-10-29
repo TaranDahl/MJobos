@@ -500,6 +500,18 @@ DEFINE_HOOK(0x449149, BuildingClass_Captured_FactoryPlant2, 0x6)
 
 #pragma endregion
 
+DEFINE_HOOK(0x448480, BuildingClass_SetOwningHouse_CapturedEVA, 0x5)
+{
+	GET(HouseClass*, pToHouse, EBX);
+
+	if (pToHouse->IsControlledByCurrentPlayer())
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_WeCaptureABuilding.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+	else
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_OurBuildingIsCaptured.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+
+	return 0x44848F;
+}
+
 #pragma region DestroyableObstacle
 
 template <bool remove = false>
