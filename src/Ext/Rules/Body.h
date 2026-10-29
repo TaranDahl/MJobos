@@ -140,6 +140,9 @@ public:
 
 		Valueable<bool> BuildingProductionQueue;
 		Valueable<int> SmudgeUpdateTime;
+		Valueable<bool> UpdateInLimbo_Occupier;
+		Valueable<bool> UpdateInLimbo_NormalPassenger;
+		Valueable<bool> UpdateInLimbo_LimboLaunch;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -679,6 +682,9 @@ public:
 
 			, BuildingProductionQueue { false }
 			, SmudgeUpdateTime { 0 }
+			, UpdateInLimbo_Occupier { false }
+			, UpdateInLimbo_NormalPassenger { false }
+			, UpdateInLimbo_LimboLaunch { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

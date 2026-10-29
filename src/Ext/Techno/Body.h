@@ -69,6 +69,8 @@ public:
 	CDTimerClass DelayedFireTimer;
 	AnimClass* CurrentDelayedFireAnim;
 
+	BuildingClass* BuildingOccupying;
+
 	AirstrikeClass* AirstrikeTargetingMe;
 
 	AttachmentClass* ParentAttachment;
@@ -137,6 +139,7 @@ public:
 		, LastTargetID { 0xFFFFFFFF }
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
+		, BuildingOccupying {}
 		, AirstrikeTargetingMe { nullptr }
 		, ParentAttachment { nullptr }
 		, ChildAttachments {}

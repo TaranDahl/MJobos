@@ -213,6 +213,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->BuildingProductionQueue.Read(exINI, GameStrings::General, "BuildingProductionQueue");
 	this->SmudgeUpdateTime.Read(exINI, GameStrings::AudioVisual, "SmudgeUpdateTime");
+	this->UpdateInLimbo_Occupier.Read(exINI, GameStrings::General, "UpdateInLimbo.Occupier");
+	this->UpdateInLimbo_NormalPassenger.Read(exINI, GameStrings::General, "UpdateInLimbo.NormalPassenger");
+	this->UpdateInLimbo_LimboLaunch.Read(exINI, GameStrings::General, "UpdateInLimbo.Parasite");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -834,6 +837,9 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->FallingDownDamage_AllowEMP)
 		.Process(this->BuildingProductionQueue)
 		.Process(this->SmudgeUpdateTime)
+		.Process(this->UpdateInLimbo_Occupier)
+		.Process(this->UpdateInLimbo_NormalPassenger)
+		.Process(this->UpdateInLimbo_LimboLaunch)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)
