@@ -72,6 +72,10 @@ public:
 	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnWater;
 	std::vector<BuildingTypeClass*> PlaceBuilding_OnLand_Unique;
 	std::vector<BuildingTypeClass*> PlaceBuilding_OnWater_Unique;
+	Valueable<SHPStruct*> PlaceBuilding_DirectionShape;
+	CustomPalette PlaceBuilding_DirectionPalette;
+	Valueable<bool> PlaceBuilding_Extra;
+	Nullable<bool> Cameo_ShouldCount;
 	Valueable<bool> CanBuildUnderUnits;
 	Valueable<bool> JustHasRallyPoint;
 	Nullable<CoordStruct> JumpjetExitCoord;
@@ -223,6 +227,10 @@ public:
 		, PlaceBuilding_OnWater {}
 		, PlaceBuilding_OnLand_Unique {}
 		, PlaceBuilding_OnWater_Unique {}
+		, PlaceBuilding_DirectionShape { nullptr }
+		, PlaceBuilding_DirectionPalette {}
+		, PlaceBuilding_Extra { false }
+		, Cameo_ShouldCount {}
 		, CanBuildUnderUnits { false }
 		, JustHasRallyPoint { false }
 		, JumpjetExitCoord { }
@@ -365,6 +373,7 @@ public:
 	static std::vector<TechnoClass*> CleanOptionalTechnos;
 	static std::unordered_map<int, int> PlaceCheckedCells;
 	static bool ContainersInit;
+	BuildingTypeClass* GetAnotherPlacingType(size_t direction, bool onWater);
 
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
 	{

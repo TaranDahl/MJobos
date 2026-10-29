@@ -3,7 +3,7 @@
 #include <Ext/Aircraft/Body.h>
 #include <Ext/Scenario/Body.h>
 #include "Ext/Techno/Body.h"
-#include "Ext/TechnoType/Body.h"
+#include <Ext/TechnoType/Body.h>
 #include "Ext/Building/Body.h"
 #include <Ext/Event/Body.h>
 

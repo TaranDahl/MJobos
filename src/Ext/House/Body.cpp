@@ -4,6 +4,7 @@
 #include <Ext/Scenario/Body.h>
 #include <Ext/Techno/Body.h>
 #include <Ext/TechnoType/Body.h>
+#include <Ext/BuildingType/Body.h>
 
 //Static init
 

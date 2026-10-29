@@ -39,6 +39,7 @@ public:
 	Valueable<bool> HealthBar_Permanent;
 	Valueable<bool> HealthBar_Permanent_PipScale;
 	Valueable<CSFText> UIDescription;
+	Valueable<CSFText> UIDescription_Unbuildable;
 	Valueable<bool> LowSelectionPriority;
 	Valueable<bool> LowDeployPriority;
 	std::vector<PhobosFixedString<0x20>> WeaponGroupAs;
@@ -72,6 +73,14 @@ public:
 	Nullable<bool> MultiMindControl_ReleaseVictim;
 	Valueable<int> CameoPriority;
 	PhobosPCXFile AltCameoPCX;
+	PhobosPCXFile GreyCameoPCX;
+	Nullable<bool> Cameo_AlwaysExist;
+	ValueableVector<TechnoTypeClass*> Cameo_OverrideTechnos;
+	DWORD Cameo_RequiredHouses;
+	bool IsMetTheEssentialConditions;
+	bool IsGreyCameoForCurrentPlayer;
+	bool CanBuildNowCheck;
+	int CanBuildNowCount;
 	Valueable<bool> NoManualMove;
 	Nullable<int> InitialStrength;
 	Nullable<bool> ReloadInTransport;
@@ -305,13 +314,6 @@ public:
 	Valueable<int> RateDown_Cover_Value;
 	Valueable<int> RateDown_Cover_AmmoBelow;
 
-	Nullable<bool> Cameo_AlwaysExist;
-	ValueableVector<TechnoTypeClass*> Cameo_OverrideTechnos;
-	DWORD Cameo_RequiredHouses;
-	bool IsMetTheEssentialConditions;
-	bool IsGreyCameoForCurrentPlayer;
-	bool CanBuildNowCheck;
-	int CanBuildNowCount;
 	Valueable<bool> CanManualReload;
 	Valueable<bool> CanManualReload_WhenFull;
 	Valueable<bool> CanManualReload_ResetROF;
@@ -547,6 +549,7 @@ public:
 		, HealthBar_Permanent { false }
 		, HealthBar_Permanent_PipScale { false }
 		, UIDescription {}
+		, UIDescription_Unbuildable {}
 		, LowSelectionPriority { false }
 		, LowDeployPriority { false }
 		, WeaponGroupAs {}
@@ -580,6 +583,14 @@ public:
 		, MultiMindControl_ReleaseVictim {}
 		, CameoPriority { 0 }
 		, AltCameoPCX {}
+		, GreyCameoPCX {}
+		, Cameo_AlwaysExist {}
+		, Cameo_OverrideTechnos {}
+		, Cameo_RequiredHouses { 0xFFFFFFFF }
+		, IsMetTheEssentialConditions { false }
+		, IsGreyCameoForCurrentPlayer { false }
+		, CanBuildNowCheck { false }
+		, CanBuildNowCount { 0 }
 		, NoManualMove { false }
 		, InitialStrength {}
 		, ReloadInTransport {}
@@ -811,13 +822,6 @@ public:
 		, RateDown_Cover_Value { 0 }
 		, RateDown_Cover_AmmoBelow { -2 }
 
-		, Cameo_AlwaysExist {}
-		, Cameo_OverrideTechnos {}
-		, Cameo_RequiredHouses { 0xFFFFFFFF }
-		, IsMetTheEssentialConditions { false }
-		, IsGreyCameoForCurrentPlayer { false }
-		, CanBuildNowCheck { false }
-		, CanBuildNowCount { 0 }
 		, CanManualReload { false }
 		, CanManualReload_WhenFull { false }
 		, CanManualReload_ResetROF { true }
