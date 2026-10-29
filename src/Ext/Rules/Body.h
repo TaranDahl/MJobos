@@ -424,6 +424,7 @@ public:
 		ValueableIdx<ColorScheme> UnifiedTechnoColor_Ally;
 		ValueableIdx<ColorScheme> UnifiedTechnoColor_Enemy;
 		ValueableIdx<ColorScheme> UnifiedTechnoColor_Neutral;
+		Valueable<bool> ExtraTargeting;
 
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
@@ -1040,6 +1041,9 @@ public:
 			, UnifiedTechnoColor_Ally { -1 }
 			, UnifiedTechnoColor_Enemy { -1 }
 			, UnifiedTechnoColor_Neutral { -1 }
+
+			, ExtraTargeting { false }
+
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 

@@ -165,6 +165,135 @@ DEFINE_HOOK(0x4D6E97, FootClass_MissionAreaGuard_Pursuit, 0x6)
 
 #pragma endregion
 
+#pragma region ExtraTargeting
+
+bool TechnoExt::ExtraTargeting(TechnoClass* pThis, bool area)
+{
+	if (!RulesExt::Global()->ExtraTargeting
+		|| pThis->IsALoaner
+		|| pThis->SpawnOwner
+		|| !pThis->Owner->IsControlledByHuman()
+		|| pThis->PlanningToken
+		|| TechnoTypeExt::Fetch(pThis->GetTechnoType())->ExtraTargeting_Excluded)
+	{
+		return false;
+	}
+
+	auto coord = (area && pThis->ArchiveTarget ? pThis->ArchiveTarget : pThis)->GetCoords();
+	pThis->ShouldLoseTargetNow = true;
+	const bool hasTarget = pThis->TargetAndEstimateDamage(coord, area ? ThreatType::Area : ThreatType::Range);
+	pThis->ShouldLoseTargetNow = hasTarget;
+
+	return hasTarget;
+}
+
+// 按s时
+DEFINE_HOOK(0x4C7655, EventClass_RespondToEvent_ExtraTargeting_Idle, 0x7)
+{
+	enum { SkipGameCode = 0x4C765C };
+
+	GET(TechnoClass*, pTechno, ESI);
+
+	TechnoExt::ExtraTargeting(pTechno);
+
+	R->EAX(pTechno->WhatAmI());
+	return SkipGameCode;
+}
+
+// 步兵载具执行AttackMove的攻击任务且目标死亡时
+DEFINE_HOOK(0x4D4E72, FootClass_MissionAttack_ExtraTargeting, 0x6)
+{
+	enum { ApproachTarget = 0x4D4E64 };
+
+	GET(FootClass*, pThis, ESI);
+
+	return pThis->MegaMissionIsAttackMove() && TechnoExt::ExtraTargeting(pThis) ? ApproachTarget : 0;
+}
+
+// 建筑开火中且目标死亡时
+DEFINE_HOOK(0x44AF90, BuildingClass_MissionAttack_ExtraTargeting, 0x5)
+{
+	enum { AttackTarget = 0x44AFED };
+
+	GET(BuildingClass*, pThis, ESI);
+
+	return TechnoExt::ExtraTargeting(pThis) ? AttackTarget : 0;
+}
+
+// 飞机执行AttackMove的攻击任务且目标死亡时
+DEFINE_HOOK(0x417FE0, AircraftClass_MissionAttack_ExtraTargeting, 0x6)
+{
+	GET(AircraftClass*, pThis, ECX);
+
+	if (!pThis->Target && pThis->MegaMissionIsAttackMove())
+		TechnoExt::ExtraTargeting(pThis);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x709918, TechnoClass_TargetAndEstimateDamage_CheckTarget, 0x6)
+{
+	enum { CanTargeting = 0x709926 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	return RulesExt::Global()->ExtraTargeting
+		&& pThis->QueuedMission != Mission::Attack
+		&& (pThis->WhatAmI() != AbstractType::Unit
+			|| !UnitExt::Fetch(static_cast<UnitClass*>(pThis))->KeepTargetOnMove)
+		&& pThis->Owner->IsControlledByHuman()
+		? CanTargeting
+		: 0;
+}
+
+DEFINE_HOOK(0x709957, TechnoClass_TargetAndEstimateDamage_SetTarget, 0x6)
+{
+	enum { SkipSetTarget = 0x709966 };
+
+	GET(TechnoClass*, pThis, ESI);
+	GET(AbstractClass*, pTarget, EDI);
+
+	if (pTarget && (!RulesExt::Global()->ExtraTargeting || (pThis->QueuedMission != Mission::Attack && pThis->Target != pTarget)))
+		pThis->SetTarget(pTarget);
+
+	return SkipSetTarget;
+}
+
+// 受到伤害时
+DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_DoRetaliate, 0x7)
+{
+	enum { SkipGameCode = 0x702B47 };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	if (RulesExt::Global()->ExtraTargeting && pThis->Owner->IsControlledByHuman())
+	{
+		auto mission = pThis->GetCurrentMission();
+
+		// AttackMove
+		if (mission == Mission::Attack)
+		{
+			if (pThis->MegaMissionIsAttackMove())
+				TechnoExt::ExtraTargeting(pThis);
+		}
+		// Other auto-target-able missions
+		else if (mission == Mission::Harvest || mission == Mission::Move || mission == Mission::Guard || mission == Mission::Area_Guard)
+		{
+			// If pThis has target, do targeting, else reset timer and it will do targeting next frame.
+			if (pThis->Target)
+				TechnoExt::ExtraTargeting(pThis, mission == Mission::Area_Guard);
+			else
+				pThis->TargetingTimer.Stop();
+		}
+
+		return SkipGameCode;
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
 #pragma region AttackWall
 
 DEFINE_HOOK(0x6F8C18, TechnoClass_ScanToAttackWall_PlayerDestroyWall, 0x6)

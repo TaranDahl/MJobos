@@ -1047,44 +1047,56 @@ DEFINE_HOOK(0x4C7512, EventClass_Execute_StopCommand, 0x6)
 	return 0;
 }
 
-DEFINE_HOOK(0x4C7462, EventClass_Execute_MegaMission_MoveCommand, 0x5)
+DEFINE_HOOK(0x4C7462, EventClass_RespondToEvent_ExtraTargeting_MegaMission, 0x5)
 {
-	enum { SkipGameCode = 0x4C74C0 };
+	enum { SkipGameCode = 0x4C74C0, SkipSetTarget = 0x4C746D };
 
 	GET(TechnoClass*, pTechno, EDI);
-
-	if (pTechno->WhatAmI() != AbstractType::Unit)
-		return 0;
-
 	GET(EventClass*, pThis, ESI);
+	GET(AbstractClass*, pTarget, EBX);
+
 	auto const mission = static_cast<Mission>(pThis->MegaMission.Mission);
-	auto const pExt = UnitExt::Fetch(static_cast<UnitClass*>(pTechno));
 
-	if (mission == Mission::Move)
+	if (const auto pUnit = abstract_cast<UnitClass*, true>(pTechno))
 	{
-		// Explicitly reset subterranean harvester state machine.
-		pExt->SubterraneanHarvStatus = 0;
-		pExt->SubterraneanHarvRallyPoint = nullptr;
+		auto const pExt = UnitExt::Fetch(pUnit);
 
-		// Do not explicitly reset target for KeepTargetOnMove vehicles when issued move command.
-		if (pExt->TypeExtData->KeepTargetOnMove && pTechno->Target)
+		if (mission == Mission::Move)
 		{
-			GET(AbstractClass*, pTarget, EBX);
+			// Explicitly reset subterranean harvester state machine.
+			pExt->SubterraneanHarvStatus = 0;
+			pExt->SubterraneanHarvRallyPoint = nullptr;
 
-			if (!pTarget && pTechno->IsCloseEnoughToAttack(pTechno->Target))
+			// Do not explicitly reset target for KeepTargetOnMove vehicles when issued move command.
+			if (pExt->TypeExtData->KeepTargetOnMove && pTechno->Target)
 			{
-				auto const pDestination = pThis->MegaMission.Destination.As_Abstract();
-				pTechno->SetDestination(pDestination, true);
-				pExt->KeepTargetOnMove = true;
+				if (!pTarget && pTechno->IsCloseEnoughToAttack(pTechno->Target))
+				{
+					auto const pDestination = pThis->MegaMission.Destination.As_Abstract();
+					pTechno->SetDestination(pDestination, true);
+					pExt->KeepTargetOnMove = true;
 
-				return SkipGameCode;
+					return SkipGameCode;
+				}
 			}
 		}
+
+		pExt->KeepTargetOnMove = false;
 	}
 
-	pExt->KeepTargetOnMove = false;
+	if (pTarget || !pTechno->GetTechnoType()->OpportunityFire)
+		return 0;
 
-	return 0;
+	auto currentMission = pTechno->GetCurrentMission();
+
+	if (currentMission == Mission::Attack || currentMission == Mission::Area_Guard || !TechnoExt::ExtraTargeting(pTechno))
+	{
+		// These missions won't change to the queued mission if the techno has target.
+		pTechno->TargetingTimer.Stop();
+		return 0;
+	}
+
+	return SkipSetTarget;
 }
 
 #pragma endregion

@@ -457,6 +457,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->LightFlashAlphaImageDetailLevel.Read(exINI, GameStrings::AudioVisual, "LightFlashAlphaImageDetailLevel");
 	this->BuildingTypeSelectable.Read(exINI, GameStrings::General, "BuildingTypeSelectable");
 
+	this->ExtraTargeting.Read(exINI, GameStrings::General, "ExtraTargeting");
+
 	this->UseRetintFix.Read(exINI, GameStrings::AudioVisual, "UseRetintFix");
 
 	this->UnifiedRadarColor.Read(exINI, GameStrings::AudioVisual, "UnifiedRadarColor");
@@ -1167,6 +1169,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnifiedTechnoColor_Ally)
 		.Process(this->UnifiedTechnoColor_Enemy)
 		.Process(this->UnifiedTechnoColor_Neutral)
+		.Process(this->ExtraTargeting)
 		.Process(this->ProneSpeed_Crawls)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)

@@ -440,5 +440,6 @@ public:
 	static bool MultiWeaponCanFire(TechnoClass* const pThis, AbstractClass* const pTarget, WeaponTypeClass* const pWeaponType);
 	static bool HasWeaponsDisabled(TechnoClass* pThis);
 	static FireError GetFireErrorIgnoreDisableWeapons(TechnoClass* pThis, AbstractClass* pTarget, int weaponIndex, bool ignoreRange);
+	static bool ExtraTargeting(TechnoClass* pThis, bool area = false);
 };
 
