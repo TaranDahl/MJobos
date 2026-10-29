@@ -242,6 +242,8 @@ public:
 	Valueable<bool> AffectsInvokerOnly_Reverse;
 	Nullable<bool> AffectsInvokerOnly_IgnoreInvokerState;
 
+	Nullable<bool> AutoTargetWalls;
+
 	Valueable<bool> ReverseEngineer;
 
 	Valueable<bool> CanKill;
@@ -571,6 +573,8 @@ public:
 		, KillWeapon_OnFirer_AffectsHouse { AffectedHouse::All }
 		, KillWeapon_AffectsTarget { AffectedTarget::All }
 		, KillWeapon_OnFirer_AffectsTarget { AffectedTarget::All }
+
+		, AutoTargetWalls {}
 
 		, ReverseEngineer { false }
 

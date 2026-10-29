@@ -298,6 +298,10 @@ public:
 		Valueable<bool> RallyPointIgnoreReachability;
 		Valueable<bool> RallyPointAreaGuard;
 
+		Valueable<bool> PlayerDestroyWalls;
+		Valueable<int> AutoTargetWalls;
+		Valueable<bool> EndAutoTargetingIfFindWalls;
+		Valueable<bool> DestroyOwnerlessWalls;
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<bool> JumpjetClimbIgnoreBuilding;
@@ -918,6 +922,10 @@ public:
 			, RallyPointIgnoreReachability { false }
 			, RallyPointAreaGuard { false }
 
+			, PlayerDestroyWalls { false }
+			, AutoTargetWalls { 1 }
+			, EndAutoTargetingIfFindWalls { true }
+			, DestroyOwnerlessWalls { false }
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
 			, JumpjetClimbIgnoreBuilding { false }

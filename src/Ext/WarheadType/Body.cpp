@@ -478,6 +478,8 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	// AttachEffect
 	this->AttachEffects.LoadFromINI(pINI, pSection);
 
+	this->AutoTargetWalls.Read(exINI, pSection, "AutoTargetWalls");
+
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 	this->InflictLocomotor.Read(exINI, pSection, "InflictLocomotor");
 	this->RemoveInflictedLocomotor.Read(exINI, pSection, "RemoveInflictedLocomotor");
@@ -807,6 +809,8 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->ElectricAssaultLevel)
 
 		.Process(this->AirstrikeTargets)
+		.Process(this->AutoTargetWalls)
+
 
 		.Process(this->CanKill)
 

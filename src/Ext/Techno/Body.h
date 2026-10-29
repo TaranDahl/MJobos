@@ -70,6 +70,7 @@ public:
 	EventType CachedEventType;
 	CoordStruct LastWeaponFLH;
 	std::shared_ptr<PhobosMap<BulletTypeClass*, BulletGroupData>> TrajectoryGroup;
+	CellClass* AutoTargetedWallCell;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 	int BeControlledThreatFrame;
@@ -167,6 +168,7 @@ public:
 		, CachedEventType { EventType::LAST_EVENT }
 		, LastWeaponFLH {}
 		, TrajectoryGroup {}
+		, AutoTargetedWallCell{ nullptr }
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
 		, BeControlledThreatFrame { 0 }

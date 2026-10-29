@@ -28,6 +28,15 @@ void TechnoExt::OnEarlyUpdate()
 	this->UpdateCachedClick();
 	this->UpdateLastTargetCrd();
 
+	if (auto pCell = this->AutoTargetedWallCell)
+	{
+		if (pCell->OverlayTypeIndex == -1)
+		{
+			this->OwnerObject()->SetTarget(nullptr);
+			this->AutoTargetedWallCell = nullptr;
+		}
+	}
+
 	if (this->CheckDeathConditions())
 		return;
 
