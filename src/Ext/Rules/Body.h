@@ -440,6 +440,7 @@ public:
 		Valueable<bool> DisableOveroptimizationInTargeting;
 
 		Valueable<bool> CylinderRangefinding;
+		Valueable<bool> StopPlanningOnEnter;
 
 		Valueable<int> PenetratesTransport_Level;
 
@@ -936,6 +937,7 @@ public:
 			, MindControlRingOffset { 140 }
 
 			, CylinderRangefinding { false }
+			, StopPlanningOnEnter { true }
 
 			, PenetratesTransport_Level { 10 }
 

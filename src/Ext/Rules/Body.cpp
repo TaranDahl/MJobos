@@ -501,6 +501,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ParadropEndDelay.Read(exINI, GameStrings::General, "ParadropEndDelay");
 
 	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
+	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 
 	this->PenetratesTransport_Level.Read(exINI, GameStrings::CombatDamage, "PenetratesTransport.Level");
 
@@ -1052,6 +1053,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->LeptonMindControlOffset)
 		.Process(this->MindControlRingOffset)
 		.Process(this->CylinderRangefinding)
+		.Process(this->StopPlanningOnEnter)
 		.Process(this->PenetratesTransport_Level)
 		.Process(this->UnitsUnsellable)
 		.Process(this->DriverKilled_KeptPassengers)
