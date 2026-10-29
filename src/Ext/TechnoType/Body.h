@@ -369,6 +369,11 @@ public:
 
 	std::vector<LaserTrailDataEntry> LaserTrailData;
 
+	Valueable<bool> IgnoredByMouse;
+	Nullable<bool> IgnoredByMouse_ToSelf;
+	Nullable<bool> IgnoredByMouse_ToAlly;
+	Nullable<bool> IgnoredByMouse_ToEnemy;
+
 	Valueable<bool> SuppressKillWeapons;
 	ValueableVector<WeaponTypeClass*> SuppressKillWeapons_Types;
 
@@ -547,6 +552,10 @@ public:
 		, WarpInWeapon_UseDistanceAsDamage { false }
 
 		, LaserTrailData {}
+		, IgnoredByMouse { false }
+		, IgnoredByMouse_ToSelf { }
+		, IgnoredByMouse_ToAlly { }
+		, IgnoredByMouse_ToEnemy { }
 		, AlternateFLH_OnTurret {}
 		, AlternateFLH_ApplyVehicle {}
 		, DestroyAnim_Random {}
