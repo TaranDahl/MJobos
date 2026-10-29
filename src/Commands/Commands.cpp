@@ -21,6 +21,7 @@
 #include "FireTacticalSW.h"
 #include "AggressiveStance.h"
 #include "CeaseFireStance.h"
+#include "UnifiedTechnoColor.h"
 #include "ToggleMessageList.h"
 #include "DeselectObject.h"
 #include "DeselectObject5.h"
@@ -73,6 +74,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SelectedExpandCommandClass>();
 	MakeCommand<HerosInfoCommandClass>();
 	// MakeCommand<Mutation::OpenMutationUICommandClass>();
+	MakeCommand<UnifiedTechnoColorCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
