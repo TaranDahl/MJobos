@@ -75,6 +75,7 @@ public:
 
 	SHPStruct* TurretShape;
 
+	Nullable<bool> WalkFrameFirst;
 	Nullable<bool> BarrelOverTurret;
 	Valueable<int> BarrelOffset;
 	Valueable<int> ExtraBarrelCount;
@@ -136,6 +137,7 @@ public:
 		, Deploy_NoTiberium { false }
 		, HoverDrownable {}
 		, TurretShape { nullptr }
+		, WalkFrameFirst {}
 		, BarrelOverTurret { }
 		, BarrelOffset { 0 }
 		, ExtraBarrelCount { 0 }
