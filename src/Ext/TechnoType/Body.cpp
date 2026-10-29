@@ -1080,6 +1080,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->DistributeTargetingFrame.Read(exINI, pSection, "DistributeTargetingFrame");
 
 	this->BunkerableAnyway.Read(exINI, pSection, "BunkerableAnyway");
+	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 
 	this->DigitalDisplay_Health_FakeAtDisguise.Read(exINI, pSection, "DigitalDisplay.Health.FakeAtDisguise");
 
@@ -1728,6 +1729,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->ApproachTarget_PursuitTarget)
 
 		.Process(this->BunkerableAnyway)
+		.Process(this->CanBeBuiltOn)
 		.Process(this->KeepTargetOnMove)
 		.Process(this->KeepTargetOnMove_Weapon)
 		.Process(this->KeepTargetOnMove_NoMorePursuit)
