@@ -10,21 +10,24 @@ DEFINE_HOOK(0x4690D4, BulletClass_Logics_NewChecks, 0x6)
 {
 	enum { SkipShaking = 0x469130, GoToExtras = 0x469AA4 };
 
-	GET(BulletClass*, pBullet, ESI);
+	GET(BulletClass*, pThis, ESI);
 	GET(WarheadTypeClass*, pWarhead, EAX);
 	GET_BASE(CoordStruct const* const, pCoords, 0x8);
 
+	if (BulletExt::Fetch(pThis)->Status & TrajectoryStatus::Vanish)
+		return GoToExtras;
+
 	auto const pExt = WarheadTypeExt::Fetch(pWarhead);
 
-	if (auto const pTarget = abstract_cast<TechnoClass*>(pBullet->Target))
+	if (auto const pTarget = abstract_cast<TechnoClass*>(pThis->Target))
 	{
 		// Check if the WH should affect the techno target or skip it
-		if (BulletTypeExt::Fetch(pBullet->Type)->Shrapnel_ObeyWarheadTriggerConditions.Get(RulesExt::Global()->Shrapnel_ObeyWarheadTriggerConditions))
+		if (BulletTypeExt::Fetch(pThis->Type)->Shrapnel_ObeyWarheadTriggerConditions.Get(RulesExt::Global()->Shrapnel_ObeyWarheadTriggerConditions))
 		{
 			if (!pExt->IsHealthInThreshold(pTarget)
 				|| !pExt->IsVeterancyInThreshold(pTarget)
 				|| (!pExt->AffectsNeutral && pTarget->Owner->IsNeutral())
-				|| !pExt->IsInvokerAllowed(pTarget, pBullet->Owner))
+				|| !pExt->IsInvokerAllowed(pTarget, pThis->Owner))
 				return GoToExtras;
 		}
 	}
@@ -514,11 +517,10 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 		if (!pWHExt->UnlimboDetonate_ForceLocation)
 		{
 			const auto pType = pTechno->GetTechnoType();
-			const auto nCell = MapClass::Instance.NearByLocation(CellClass::Coord2Cell(location),
-									pType->SpeedType, -1, pType->MovementZone, false, 1, 1, true,
-									false, false, true, CellStruct::Empty, false, false);
+			const auto cell = MapClass::Instance.NearByLocation(CellClass::Coord2Cell(location), pType->SpeedType,
+				-1, pType->MovementZone, false, 1, 1, true, false, false, true, CellStruct::Empty, false, false);
 
-			const auto pCell = MapClass::Instance.TryGetCellAt(nCell);
+			const auto pCell = MapClass::Instance.TryGetCellAt(cell);
 
 			if (pCell)
 			{

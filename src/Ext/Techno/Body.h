@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Ext/TechnoType/Body.h>
+#include <Ext/Bullet/Body.h>
 #include <Ext/Radio/Body.h>
 #include <Utilities/Container.h>
 #include <Utilities/Detach.h>
@@ -56,6 +57,8 @@ public:
 	AbstractClass* CachedTarget;
 	bool HasCachedClickEvent;
 	EventType CachedEventType;
+	CoordStruct LastWeaponFLH;
+	std::shared_ptr<PhobosMap<BulletTypeClass*, BulletGroupData>> TrajectoryGroup;
 	CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 	bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 	int BeControlledThreatFrame;
@@ -136,6 +139,8 @@ public:
 		, CachedTarget { nullptr }
 		, HasCachedClickEvent { false }
 		, CachedEventType { EventType::LAST_EVENT }
+		, LastWeaponFLH {}
+		, TrajectoryGroup {}
 		, FiringObstacleCell {}
 		, IsDetachingForCloak { false }
 		, BeControlledThreatFrame { 0 }
