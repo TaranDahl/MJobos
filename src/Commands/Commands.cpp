@@ -13,6 +13,7 @@
 #include "ShowCurrentInfo.h"
 #include "AssignRallyPoint.h"
 #include "ManualReloadAmmo.h"
+#include "AutoBuilding.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "AggressiveStance.h"
@@ -51,6 +52,8 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		"Tip:CeaseFire",
 		&CeaseFireStanceClass::CeaseFireExecute);
 	MakeCommand<ManualReloadAmmoCommandClass>();
+	MakeCommand<AutoBuildingCommandClass>();
+	MakeCommand<AutoBuildingCombatCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();

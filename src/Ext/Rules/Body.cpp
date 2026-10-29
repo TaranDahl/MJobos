@@ -191,6 +191,10 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->NoQueueUpToUnload_Buildings.Read(exINI, GameStrings::General, "NoQueueUpToUnload.Buildings");
 	this->CheckExtraBaseNormal.Read(exINI, GameStrings::General, "CheckExtraBaseNormal");
 
+	this->ExtendedBuildingPlacing.Read(exINI, GameStrings::General, "ExtendedBuildingPlacing");
+	this->AutoBuilding.Read(exINI, GameStrings::General, "AutoBuilding");
+	this->AutoBuilding_Gap.Read(exINI, GameStrings::General, "AutoBuilding.Gap");
+
 	this->JumpjetTilt.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt");
 	this->JumpjetTilt_ForwardAccelFactor.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt.ForwardAccelFactor");
 	this->JumpjetTilt_ForwardSpeedFactor.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt.ForwardSpeedFactor");
@@ -855,6 +859,9 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoQueueUpToEnter_Buildings)
 		.Process(this->NoQueueUpToUnload_Buildings)
 		.Process(this->CheckExtraBaseNormal)
+		.Process(this->ExtendedBuildingPlacing)
+		.Process(this->AutoBuilding)
+		.Process(this->AutoBuilding_Gap)
 		.Process(this->JumpjetTilt)
 		.Process(this->JumpjetTilt_ForwardAccelFactor)
 		.Process(this->JumpjetTilt_ForwardSpeedFactor)

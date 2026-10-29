@@ -78,6 +78,8 @@ bool Phobos::Config::ShowFlashOnSelecting = false;
 bool Phobos::Config::UnitPowerDrain = false;
 int Phobos::Config::SuperWeaponSidebar_RequiredSignificance = 0;
 int Phobos::Config::SkipFrameDelay = 0;
+bool Phobos::Config::AutomaticPlacingBuilding = true;
+bool Phobos::Config::AutomaticPlacingCombatBuilding = true;
 bool Phobos::Config::ShowGameTime = false;
 int Phobos::Config::ShowGameTime_BoardOpacity = 40;
 bool Phobos::Config::SelectCapturedCommand = false;
@@ -119,6 +121,8 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::SuperWeaponSidebar_RequiredSignificance = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SuperWeaponSidebar.RequiredSignificance", 0);
 	Phobos::Config::SkipFrameDelay = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SkipFrameDelay", 0);
 	if (Phobos::Config::SkipFrameDelay < 2) Phobos::Config::SkipFrameDelay = 0;
+	Phobos::Config::AutomaticPlacingBuilding = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "AutomaticPlacingBuilding", true);
+	Phobos::Config::AutomaticPlacingCombatBuilding = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "AutomaticPlacingCombatBuilding", true);
 	Phobos::Config::ShowGameTime = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowGameTime", false);
 	Phobos::Config::ShowGameTime_BoardOpacity = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "ShowGameTime.BoardOpacity", 40);
 

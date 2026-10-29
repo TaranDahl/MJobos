@@ -67,6 +67,12 @@ TechnoExt::~TechnoExt()
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 
+	if (RulesExt::Global()->ExtendedBuildingPlacing && whatAmI == AbstractType::UnitType && pType->DeploysInto)
+	{
+		auto& vec = HouseExt::Fetch(pThis->Owner)->OwnedDeployingUnits;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+	}
+
 	if (whatAmI != AbstractType::AircraftType && whatAmI != AbstractType::BuildingType
 		&& pType->Ammo > 0 && pTypeExt->ReloadInTransport.Get(RulesExt::Global()->ReloadInTransport))
 	{
@@ -1565,6 +1571,7 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->UnitIdleIsSelected)
 		.Process(this->UnitIdleActionTimer)
 		.Process(this->UnitIdleActionGapTimer)
+		.Process(this->UnitAutoDeployTimer)
 		.Process(this->LastWeaponType)
 		.Process(this->ScatteringStopFrame)
 		.Process(this->HasCachedClickMission)

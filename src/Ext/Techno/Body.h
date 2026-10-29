@@ -58,6 +58,7 @@ public:
 	bool UnitIdleIsSelected;
 	CDTimerClass UnitIdleActionTimer;
 	CDTimerClass UnitIdleActionGapTimer;
+	CDTimerClass UnitAutoDeployTimer;
 	WeaponTypeClass* LastWeaponType;
 	int ScatteringStopFrame;
 	bool HasCachedClickMission;
@@ -153,6 +154,7 @@ public:
 		, UnitIdleIsSelected { false }
 		, UnitIdleActionTimer {}
 		, UnitIdleActionGapTimer {}
+		, UnitAutoDeployTimer {}
 		, LastWeaponType {}
 		, ScatteringStopFrame { 0 }
 		, HasCachedClickMission { false }
