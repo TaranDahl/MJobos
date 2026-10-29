@@ -11,6 +11,7 @@
 #include <New/Entity/AttachEffectClass.h>
 #include <New/Entity/AttachmentClass.h>
 #include <New/Entity/ShiftSchedule.h>
+#include <New/Entity/SquadManagerClass.h>
 
 class AirstrikeClass;
 class BulletClass;
@@ -96,6 +97,7 @@ public:
 	CellClass* LastOccupationCell;
 	// Ares
 	std::optional<bool> AltOccupation; // if the unit marks cell occupation flags, this is set to whether it uses the "high" occupation members
+	SquadManagerClass* SquadManager;
 
 	bool IsSelected;
 
@@ -181,6 +183,7 @@ public:
 		, ThisOccupationCell { nullptr }
 		, LastOccupationCell { nullptr }
 		, AltOccupation {}
+		, SquadManager { nullptr }
 		, DelayedFireSequencePaused { false }
 		, DelayedFireWeaponIndex { -1 }
 		, DelayedFireTimer {}

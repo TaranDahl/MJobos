@@ -255,6 +255,19 @@ DEFINE_HOOK(0x7015C9, TechnoClass_Captured_UpdateTracking, 0x6)
 		pNewOwnerExt->AddToLimboTracking(pType);
 	}
 
+	if (const auto pSquad = pExt->SquadManager)
+	{
+		if (pThis->Owner != pNewOwner)
+		{
+			pSquad->RemoveMember(pThis);
+
+			if (pSquad->Members.empty())
+				SquadManagerClass::Remove(pSquad);
+
+			pExt->SquadManager = nullptr;
+		}
+	}
+
 	if (pTypeExt->Harvester_Counted)
 	{
 		auto& vec = pOwnerExt->OwnedCountedHarvesters;

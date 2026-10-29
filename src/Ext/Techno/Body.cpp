@@ -55,6 +55,14 @@ TechnoExt::~TechnoExt()
 		this->ChildAttachments.clear();
 	}
 
+	if (const auto pSquad = this->SquadManager)
+	{
+		pSquad->RemoveMember(pThis);
+
+		if (pSquad->Members.empty())
+			SquadManagerClass::Remove(pSquad);
+	}
+
 	if (pTypeExt->AutoDeath_Behavior.isset())
 	{
 		auto& vec = ScenarioExt::Global()->AutoDeathObjects;
@@ -1686,6 +1694,7 @@ void TechnoExt::Serialize(T& Stm)
 		.Process(this->JumpjetFromAirport)
 		.Process(this->AggressiveStance)
 		.Process(this->CeaseFireStance)
+		.Process(this->SquadManager)
 		.Process(this->AirstrikeTargetingMe)
 		.Process(this->ParentAttachment)
 		.Process(this->ChildAttachments)

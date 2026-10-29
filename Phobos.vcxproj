@@ -296,6 +296,7 @@
     <ClCompile Include="src\New\Entity\LaserTrailClass.cpp" />
     <ClCompile Include="src\New\Entity\ShiftSchedule.cpp" />
     <ClCompile Include="src\New\Entity\ShieldClass.cpp" />
+    <ClCompile Include="src\New\Entity\SquadManagerClass.cpp" />
     <!-- src\New\Type -->
     <ClCompile Include="src\New\Type\AttachEffectTypeClass.cpp" />
     <ClCompile Include="src\New\Type\AttachmentTypeClass.cpp" />
@@ -455,6 +456,7 @@
     <ClInclude Include="src\New\Entity\LaserTrailClass.h" />
     <ClInclude Include="src\New\Entity\ShiftSchedule.h" />
     <ClInclude Include="src\New\Entity\ShieldClass.h" />
+    <ClInclude Include="src\New\Entity\SquadManagerClass.h" />
     <!-- src\New\Type -->
     <ClInclude Include="src\New\Type\AttachEffectTypeClass.h" />
     <ClInclude Include="src\New\Type\AttachmentTypeClass.h" />
