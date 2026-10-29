@@ -129,6 +129,10 @@ public:
 	Valueable<bool> Refinery_UseNormalActiveAnim;
 	Nullable<bool> AIBaseNormal;
 
+	Valueable<int> Bib_Dir;
+	Valueable<int> NumberImpassableRows_Dir;
+	Valueable<int> WeaponsFactory_Dir;
+
 	ValueableVector<bool> HasPowerUpAnim;
 
 	Valueable<bool> UndeploysInto_Sellable;
@@ -274,6 +278,9 @@ public:
 		, Refinery_UseNormalActiveAnim { false }
 		, AIBaseNormal {}
 		, HasPowerUpAnim {}
+		, Bib_Dir { 2 }
+		, NumberImpassableRows_Dir { 2 }
+		, WeaponsFactory_Dir { 2 }
 		, UndeploysInto_Sellable { false }
 		, BuildingRadioLink_SyncOwner {}
 		, GuardRetryDelay {}
@@ -321,6 +328,8 @@ public:
 	{
 		return static_cast<BuildingTypeClass*>(this->TechnoTypeExt::OwnerObject());
 	}
+
+	BuildingTypeClass* GetAnotherPlacingType(size_t direction, bool onWater);
 
 	// Ares 0.A functions
 	int GetSuperWeaponCount() const;
@@ -373,7 +382,6 @@ public:
 	static std::vector<TechnoClass*> CleanOptionalTechnos;
 	static std::unordered_map<int, int> PlaceCheckedCells;
 	static bool ContainersInit;
-	BuildingTypeClass* GetAnotherPlacingType(size_t direction, bool onWater);
 
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
 	{
@@ -389,6 +397,8 @@ public:
 
 	static void PlayBunkerSound(BuildingClass const* pThis, bool buildUp = false);
 	static bool IsPoweredAnimBlocked(BuildingClass* pBuilding, bool powered, bool poweredLight, bool poweredEffect, bool poweredSpecial);
+
+	static CellStruct GetWeaponFactoryDoor(BuildingClass* pThis);
 
 	static std::pair<int, int> GetEnhancedPower(BuildingTypeClass* pBuilding, int output, HouseClass* pHouse, BuildingClass* pPowerPlant = nullptr);
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);

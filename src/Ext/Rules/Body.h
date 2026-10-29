@@ -123,6 +123,8 @@ public:
 		Valueable<bool> AutoBuilding;
 		Valueable<int> AutoBuilding_Gap;
 
+		Valueable<bool> ExtendedWeaponsFactory;
+
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
 		Valueable<double> JumpjetTilt_ForwardSpeedFactor;
@@ -712,6 +714,8 @@ public:
 			, ExtendedBuildingPlacing { false }
 			, AutoBuilding { false }
 			, AutoBuilding_Gap { 1 }
+
+			, ExtendedWeaponsFactory { false }
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }

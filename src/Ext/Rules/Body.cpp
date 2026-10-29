@@ -198,6 +198,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AutoBuilding.Read(exINI, GameStrings::General, "AutoBuilding");
 	this->AutoBuilding_Gap.Read(exINI, GameStrings::General, "AutoBuilding.Gap");
 
+	this->ExtendedWeaponsFactory.Read(exINI, GameStrings::General, "ExtendedWeaponsFactory");
+
 	this->JumpjetTilt.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt");
 	this->JumpjetTilt_ForwardAccelFactor.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt.ForwardAccelFactor");
 	this->JumpjetTilt_ForwardSpeedFactor.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt.ForwardSpeedFactor");
@@ -868,6 +870,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->Cameo_OverlayShapes)
 		.Process(this->Cameo_OverlayFrames)
 		.Process(this->Cameo_OverlayPalette)
+		.Process(this->ExtendedWeaponsFactory)
 		.Process(this->JumpjetTilt)
 		.Process(this->JumpjetTilt_ForwardAccelFactor)
 		.Process(this->JumpjetTilt_ForwardSpeedFactor)
