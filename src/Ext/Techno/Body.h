@@ -10,11 +10,17 @@
 #include <New/Entity/LaserTrailClass.h>
 #include <New/Entity/AttachEffectClass.h>
 #include <New/Entity/AttachmentClass.h>
+#include <New/Entity/ShiftSchedule.h>
 
 class AirstrikeClass;
 class BulletClass;
+struct ShiftSchedule;
 
-class TechnoExt : public RadioExt, public Detach::Listener<AirstrikeClass>, public Detach::Listener<AbstractClass>
+class TechnoExt : public RadioExt,
+	public Detach::Listener<AirstrikeClass>,
+	public Detach::Listener<AbstractClass>,
+	public Detach::Listener<TechnoClass>,
+	public Detach::Listener<HouseClass>
 {
 public:
 	using base_type = TechnoClass;
@@ -113,6 +119,10 @@ public:
 
 	bool ShouldBeDead;
 
+	std::unique_ptr<ShiftSchedule> QueuedShift;
+	TechnoClass* ShiftApplier;
+	HouseClass* ShiftApplierHouse;
+
 	int DropCrate; // Drop crate on death, modified by map action
 	Powerup DropCrateType;
 
@@ -186,6 +196,9 @@ public:
 		, FallingDownTracked { false }
 		, OnParachuted { false }
 		, HoverShutdown { false }
+		, QueuedShift {}
+		, ShiftApplier { nullptr }
+		, ShiftApplierHouse { nullptr }
 		, LastTargetCrd { CoordStruct::Empty }
 		, LastTargetCrdClearTimer {}
 		, ShouldBeDead { false }
@@ -266,6 +279,8 @@ public:
 	virtual ~TechnoExt() override;
 	virtual void OnDetach(AirstrikeClass* pTarget, bool removed) override;
 	virtual void OnDetach(AbstractClass* pTarget, bool removed) override;
+	virtual void OnDetach(TechnoClass* pTarget, bool removed) override;
+	virtual void OnDetach(HouseClass* pTarget, bool removed) override;
 	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 	virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 
