@@ -73,6 +73,7 @@ public:
 	AnimClass* CurrentDelayedFireAnim;
 
 	BuildingClass* BuildingOccupying;
+	bool JumpjetFromAirport;
 
 	AirstrikeClass* AirstrikeTargetingMe;
 
@@ -150,6 +151,7 @@ public:
 		, AccumulatedGattlingValue { 0 }
 		, ShouldUpdateGattlingValue { false }
 		, BuildingOccupying {}
+		, JumpjetFromAirport { false }
 		, AirstrikeTargetingMe { nullptr }
 		, ParentAttachment { nullptr }
 		, ChildAttachments {}

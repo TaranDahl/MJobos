@@ -961,3 +961,20 @@ DEFINE_HOOK(0x6F9F7B, TechnoClass_Update_EstimateHealth, 0x7)
 }
 
 #pragma endregion
+
+#pragma region JumpjetSpeedType
+
+DEFINE_HOOK(0x54B36A, JumpjetLocomotionClass_MoveTo_JumpjetSpeedType, 0x5)
+{
+	GET(ILocomotion* const, iloco, ESI);
+	REF_STACK(SpeedType, speedType, STACK_OFFSET(0x5C, -0x54));
+
+	__assume(iloco != nullptr);
+	const auto pLoco = static_cast<JumpjetLocomotionClass*>(iloco);
+	const auto pTypeExt = TechnoExt::Fetch(pLoco->LinkedTo)->TypeExtData;
+	speedType = static_cast<SpeedType>(pTypeExt->JumpjetSpeedType.Get());
+
+	return 0;
+}
+
+#pragma endregion

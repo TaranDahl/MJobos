@@ -1,6 +1,7 @@
 #include "Body.h"
 
 #include <EventClass.h>
+#include <FlyLocomotionClass.h>
 
 #include <Ext/AircraftType/Body.h>
 #include <Ext/Anim/Body.h>
@@ -1157,6 +1158,38 @@ DEFINE_HOOK(0x418CF3, AircraftClass_Mission_Attack_PlanningFix, 0x5)
 	GET(AircraftClass*, pThis, ESI);
 
 	return pThis->Ammo <= 0 || !pThis->TryNextPlanningTokenNode() ? 0 : SkipIdle;
+}
+
+#pragma endregion
+
+#pragma region AircraftFlight
+
+DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_FlightCrash, 0x5)
+{
+	GET(FootClass* const, pLinkedTo, EAX);
+
+	const int crashSpeed = TechnoTypeExt::Fetch(pLinkedTo->GetTechnoType())->FlightCrash;
+
+	if (crashSpeed >= 0)
+		R->ECX(crashSpeed);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_FlightClimb, 0x6)
+{
+	GET(int, vZ, EAX);
+	GET(const int, height, EDI);
+	GET(FlyLocomotionClass* const, pThis, ESI);
+	GET(FootClass* const, pLinkedTo, ECX);
+
+	const int climbSpeed = TechnoTypeExt::Fetch(pLinkedTo->GetTechnoType())->FlightClimb;
+
+	if (climbSpeed >= 0)
+		vZ = climbSpeed;
+
+	R->EAX(Math::min(vZ, (pThis->FlightLevel - height)));
+	return 0;
 }
 
 #pragma endregion

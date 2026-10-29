@@ -302,6 +302,12 @@ public:
 	Nullable<CoordStruct> ExitCoord;
 
 	Valueable<bool> IgnoreRallyPoint;
+	Valueable<int> FlightClimb;
+	Valueable<int> FlightCrash;
+
+	Valueable<UnitTypeClass*> ThisIsAJumpjet;
+
+	Valueable<int> JumpjetSpeedType;
 
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
@@ -774,6 +780,12 @@ public:
 		, ExitCoord {}
 
 		, IgnoreRallyPoint { false }
+		, FlightClimb { -1 }
+		, FlightCrash { -1 }
+
+		, ThisIsAJumpjet { nullptr }
+
+		, JumpjetSpeedType { 3 }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}
