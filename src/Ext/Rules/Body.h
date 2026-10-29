@@ -328,6 +328,7 @@ public:
 
 		Valueable<bool> BuildingWaypoints;
 		Valueable<bool> BuildingTypeSelectable;
+		Valueable<bool> CrushBuildingOnAnyCell;
 
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
@@ -835,6 +836,7 @@ public:
 			, FireDeathWeaponOnCrushed { false }
 			, BuildingWaypoints { false }
 			, BuildingTypeSelectable { false }
+			, CrushBuildingOnAnyCell { false }
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 
