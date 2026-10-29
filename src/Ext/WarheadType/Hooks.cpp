@@ -122,19 +122,6 @@ DEFINE_HOOK(0x4898BF, MapClass_DamageArea_Cylinder_6, 0x5)
 #pragma endregion
 
 #pragma region AffectsAir and AffectsGround
-/*
-DEFINE_HOOK(0x489416, MapClass_DamageArea_CheckHeight_1, 0x6)
-{
-	enum { SkipThisObject = 0x489547 };
-
-	GET_BASE(WarheadTypeClass* const, pWH, 0x0C);
-	GET(TechnoClass*, pTechno, EBX);
-
-	const auto pWHExt = WarheadTypeExt::Fetch(pWH);
-
-	return (pTechno->IsInAir() ? pWHExt->AffectsAir : pWHExt->AffectsGround) ? 0 : SkipThisObject;
-}
-*/
 DEFINE_HOOK(0x489710, MapClass_DamageArea_CheckHeight_2, 0x7)
 {
 	enum { SkipThisObject = 0x4899B3 };

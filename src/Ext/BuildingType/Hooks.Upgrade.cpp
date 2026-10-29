@@ -65,28 +65,6 @@ DEFINE_HOOK(0x4408EB, BuildingClass_Unlimbo_UpgradeBuildings, 0xA)
 }
 
 #pragma region UpgradesInteraction
-/*
-static int BuildLimitRemaining(HouseClass const* const pHouse, BuildingTypeClass const* const pItem)
-{
-	const int BuildLimit = pItem->BuildLimit;
-
-	if (BuildLimit >= 0)
-		return BuildLimit - BuildingTypeExt::GetUpgradesAmount(pItem, pHouse);
-	else
-		return -BuildLimit - pHouse->CountOwnedEver(pItem);
-}
-
-static CanBuildResult CheckBuildLimit(HouseClass const* const pHouse, BuildingTypeClass const* const pItem, bool const includeQueued)
-{
-	const int BuildLimit = pItem->BuildLimit;
-	const int Remaining = BuildLimitRemaining(pHouse, pItem);
-
-	if (BuildLimit >= 0 && Remaining <= 0)
-		return (includeQueued && FactoryClass::FindByOwnerAndProduct(pHouse, pItem)) ? CanBuildResult::Buildable : CanBuildResult::Unbuildable;
-
-	return Remaining > 0 ? CanBuildResult::Buildable : CanBuildResult::TemporarilyUnbuildable;
-}
-*/
 DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x3)
 {
 	GET(HouseClass* const, pThis, ECX);

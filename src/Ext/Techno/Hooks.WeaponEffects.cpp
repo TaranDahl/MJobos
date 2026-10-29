@@ -286,18 +286,6 @@ DEFINE_HOOK(0x6FF660, TechnoClass_FireAt_ObstacleCellUnset, 0x6)
 	return 0;
 }
 
-namespace LaserZapContext
-{
-	TechnoClass* pThis = nullptr;
-}
-
-DEFINE_HOOK(0x6FD210, TechnoClass_LaserZap_SetContext, 0x7)
-{
-	GET(TechnoClass*, pThis, ECX);
-	LaserZapContext::pThis = pThis;
-	return 0;
-}
-
 // Allow drawing single color lasers with thickness.
 DEFINE_HOOK(0x6FD446, TechnoClass_LaserZap_IsSingleColor, 0x7)
 {
