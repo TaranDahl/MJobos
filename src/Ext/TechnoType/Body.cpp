@@ -1342,6 +1342,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->ExtraBaseForAllyBuilding.Read(exINI, pSection, "ExtraBaseForAllyBuilding");
 
 	this->BunkerableAnyway.Read(exINI, pSection, "BunkerableAnyway");
+	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 
 	this->DigitalDisplay_Health_FakeAtDisguise.Read(exINI, pSection, "DigitalDisplay.Health.FakeAtDisguise");
 
@@ -2067,6 +2068,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->ApproachTarget_PursuitTarget)
 
 		.Process(this->BunkerableAnyway)
+		.Process(this->CanBeBuiltOn)
 		.Process(this->KeepTargetOnMove)
 		.Process(this->KeepTargetOnMove_Weapon)
 		.Process(this->KeepTargetOnMove_NoMorePursuit)

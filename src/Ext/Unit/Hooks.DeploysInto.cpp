@@ -5,6 +5,7 @@
 #include <Ext/BuildingType/Body.h>
 #include <Ext/BuildingType/ProximityTemp.h>
 #include <Ext/TerrainType/Body.h>
+#include <Ext/TechnoType/Body.h>
 #include <Ext/CaptureManager/Body.h>
 #include <Ext/Building/Body.h>
 
@@ -178,6 +179,25 @@ static inline void MarkPlacementGridOccupier(ObjectClass* const pObject, HouseCl
 		ProximityTemp::Exist = true;
 }
 
+// Allow placing buildings on top of TechnoTypes with CanBeBuiltOn or under units
+static inline bool CheckCanNotExistHere(FootClass* const pTechno, bool canBuildUnderUnits,
+	bool& skipFlag, bool& builtOnCanBeBuiltOn)
+{
+	if (pTechno == UnitExt::Deployer)
+	{
+		skipFlag = true;
+		return false;
+	}
+
+	if (canBuildUnderUnits || TechnoTypeExt::Fetch(pTechno->GetTechnoType())->CanBeBuiltOn)
+	{
+		builtOnCanBeBuiltOn = true;
+		return false;
+	}
+
+	return true;
+}
+
 DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 {
 	enum { CanNotExistHere = 0x47C6D1, CanExistHere = 0x47C6A0 };
@@ -190,6 +210,8 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 	if (!Game::IsActive)
 		return CanExistHere;
+
+	const bool canBuildUnderUnits = BuildingTypeExt::Fetch(pBuildingType)->CanBuildUnderUnits.Get();
 
 	auto isTerrainBuildable = [](TerrainClass* pTerrain) -> bool
 	{
@@ -204,14 +226,26 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 	{
 		for (auto pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
 		{
-			if (pObject->WhatAmI() == AbstractType::Building)
+			switch (pObject->WhatAmI())
 			{
-				return CanNotExistHere;
-			}
-			else if (const auto pTerrain = abstract_cast<TerrainClass*, true>(pObject))
-			{
-				if (!isTerrainBuildable(pTerrain))
-					return CanNotExistHere;
+				case AbstractType::Building:
+				{
+					if (!TechnoTypeExt::Fetch(pObject->GetTechnoType())->CanBeBuiltOn)
+						return CanNotExistHere;
+
+					break;
+				}
+
+				case AbstractType::Terrain:
+				{
+					if (!isTerrainBuildable(static_cast<TerrainClass*>(pObject)))
+						return CanNotExistHere;
+
+					break;
+				}
+
+				default:
+					break;
 			}
 		}
 	}
@@ -222,27 +256,59 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 		for (auto pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
 		{
-			if (const auto pTerrain = abstract_cast<TerrainClass*, true>(pObject))
-			{
-				if (!isTerrainBuildable(pTerrain))
-					return CanNotExistHere;
+			MarkPlacementGridOccupier(pObject, pOwner);
 
-				builtOnCanBeBuiltOn = true;
-			}
-			else if (pObject->AbstractFlags & AbstractFlags::Techno)
+			switch (pObject->WhatAmI())
 			{
-				if (pObject == UnitExt::Deployer)
+				case AbstractType::Aircraft:
 				{
-					skipFlag = true;
-				}
-				else
-				{
-					const auto pBuilding = abstract_cast<BuildingClass*, true>(pObject);
-					MarkPlacementGridOccupier(pObject, pOwner);
-
-					if (!pBuilding || pOwner != pBuilding->Owner || !pBuilding->Type->LaserFence)
+					if (!canBuildUnderUnits && !TechnoTypeExt::Fetch(pObject->GetTechnoType())->CanBeBuiltOn)
 						return CanNotExistHere;
+
+					builtOnCanBeBuiltOn = true;
+					break;
 				}
+
+				case AbstractType::Building:
+				{
+					const auto pBuilding = static_cast<BuildingClass*>(pObject);
+					const auto pType = pBuilding->Type;
+
+					if (TechnoTypeExt::Fetch(pType)->CanBeBuiltOn)
+					{
+						builtOnCanBeBuiltOn = true;
+					}
+					else if (pOwner != pBuilding->Owner || !pType->LaserFence)
+					{
+						return CanNotExistHere;
+					}
+
+					break;
+				}
+
+				case AbstractType::Infantry:
+				case AbstractType::Unit:
+				{
+					if (CheckCanNotExistHere(static_cast<FootClass*>(pObject), canBuildUnderUnits,
+						skipFlag, builtOnCanBeBuiltOn))
+					{
+						return CanNotExistHere;
+					}
+
+					break;
+				}
+
+				case AbstractType::Terrain:
+				{
+					if (!isTerrainBuildable(static_cast<TerrainClass*>(pObject)))
+						return CanNotExistHere;
+
+					builtOnCanBeBuiltOn = true;
+					break;
+				}
+
+				default:
+					break;
 			}
 		}
 
@@ -261,8 +327,11 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 		for (auto pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
 		{
-			if (pObject->WhatAmI() == AbstractType::Building)
-				return CanNotExistHere;
+			if (const auto pBuilding = abstract_cast<BuildingClass*, true>(pObject))
+			{
+				if (!TechnoTypeExt::Fetch(pBuilding->Type)->CanBeBuiltOn)
+					return CanNotExistHere;
+			}
 		}
 	}
 	else
@@ -272,22 +341,51 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 		for (auto pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
 		{
-			if (pObject->AbstractFlags & AbstractFlags::Techno)
-			{
-				if (pObject == UnitExt::Deployer)
-					skipFlag = true;
-				else
-				{
-					MarkPlacementGridOccupier(pObject, pOwner);
-					return CanNotExistHere;
-				}
-			}
-			else if (const auto pTerrain = abstract_cast<TerrainClass*, true>(pObject))
-			{
-				if (!isTerrainBuildable(pTerrain))
-					return CanNotExistHere;
+			MarkPlacementGridOccupier(pObject, pOwner);
 
-				builtOnCanBeBuiltOn = true;
+			switch (pObject->WhatAmI())
+			{
+				case AbstractType::Aircraft:
+				{
+					if (!canBuildUnderUnits && !TechnoTypeExt::Fetch(pObject->GetTechnoType())->CanBeBuiltOn)
+						return CanNotExistHere;
+
+					builtOnCanBeBuiltOn = true;
+					break;
+				}
+
+				case AbstractType::Building:
+				{
+					if (!TechnoTypeExt::Fetch(pObject->GetTechnoType())->CanBeBuiltOn)
+						return CanNotExistHere;
+
+					builtOnCanBeBuiltOn = true;
+					break;
+				}
+
+				case AbstractType::Infantry:
+				case AbstractType::Unit:
+				{
+					if (CheckCanNotExistHere(static_cast<FootClass*>(pObject), canBuildUnderUnits,
+						skipFlag, builtOnCanBeBuiltOn))
+					{
+						return CanNotExistHere;
+					}
+
+					break;
+				}
+
+				case AbstractType::Terrain:
+				{
+					if (!isTerrainBuildable(static_cast<TerrainClass*>(pObject)))
+						return CanNotExistHere;
+
+					builtOnCanBeBuiltOn = true;
+					break;
+				}
+
+				default:
+					break;
 			}
 		}
 

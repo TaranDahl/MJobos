@@ -5,6 +5,7 @@
 #include <Ext/Scenario/Body.h>
 #include <Ext/TerrainType/Body.h>
 #include <Utilities/GeneralUtils.h>
+#include <Ext/TechnoType/Body.h>
 
 static inline void PlayConstructionYardAnim(BuildingClass* pFactory)
 {
@@ -122,26 +123,39 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 	return 0;
 }
 
-// Buildable-upon TerrainTypes Hook #3 - Remove them when buildings are placed on them.
+// Buildable-upon TerrainTypes/TechnoTypes Hook #3 - Remove them when buildings are placed on them.
 DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
 {
-	GET(ObjectClass*, pObject, EDI);
+	GET(ObjectClass*, pPlaceObject, EDI);
 	GET(CellClass*, pCell, EAX);
 
-	if (pObject->WhatAmI() == AbstractType::Building)
+	if (pPlaceObject->WhatAmI() == AbstractType::Building)
 	{
-		if (auto const pTerrain = pCell->GetTerrain(false))
+		for (auto pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
 		{
-			auto const pType = pTerrain->Type;
-			auto const pTypeExt = TerrainTypeExt::Fetch(pType);
-			bool const canBuild = pType->SpawnsTiberium
-				? pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Tibtree_CanBeBuiltOn)
-				: pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Terrain_CanBeBuiltOn);
-
-			if (canBuild)
+			if (const auto pTechno = abstract_cast<TechnoClass*, true>(pObject))
 			{
-				pCell->RemoveContent(pTerrain, false);
-				TerrainTypeExt::Remove(pTerrain);
+				if (TechnoTypeExt::Fetch(pTechno->GetTechnoType())->CanBeBuiltOn)
+				{
+					pTechno->KillPassengers(nullptr);
+					pTechno->Stun();
+					pTechno->Limbo();
+					pTechno->UnInit();
+				}
+			}
+			else if (const auto pTerrain = abstract_cast<TerrainClass*, true>(pObject))
+			{
+				auto const pType = pTerrain->Type;
+				auto const pTypeExt = TerrainTypeExt::Fetch(pType);
+				bool const canBuild = pType->SpawnsTiberium
+					? pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Tibtree_CanBeBuiltOn)
+					: pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Terrain_CanBeBuiltOn);
+
+				if (canBuild)
+				{
+					pCell->RemoveContent(pTerrain, false);
+					TerrainTypeExt::Remove(pTerrain);
+				}
 			}
 		}
 	}

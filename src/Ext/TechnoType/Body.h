@@ -365,6 +365,7 @@ public:
 	Valueable<bool> ApproachTarget_PursuitTarget;
 
 	Valueable<bool> BunkerableAnyway;
+	Valueable<bool> CanBeBuiltOn;
 	Valueable<bool> KeepTargetOnMove;
 	Valueable<int> KeepTargetOnMove_Weapon;
 	Valueable<bool> KeepTargetOnMove_NoMorePursuit;
@@ -872,6 +873,7 @@ public:
 		, ApproachTarget_PursuitTarget { false }
 
 		, BunkerableAnyway { false }
+		, CanBeBuiltOn { false }
 		, KeepTargetOnMove { false }
 		, KeepTargetOnMove_Weapon { -1 }
 		, KeepTargetOnMove_NoMorePursuit { true }
