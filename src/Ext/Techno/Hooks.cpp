@@ -308,6 +308,9 @@ void TechnoExt::InitializeState(TechnoTypeClass* pType)
 	if (RulesExt::Global()->CheckExtraBaseNormal && pTypeExt->ExtraBaseNormal)
 		ScenarioExt::Global()->BaseNormalTechnos.push_back(this);
 
+	if (pTypeExt->UniqueTechno && pThis->Owner->IsControlledByCurrentPlayer())
+		ScenarioExt::Global()->OwnedUniqueTechnos.push_back(this);
+
 	if (!this->AE.HasTint) // already updated when initializing attach effect
 		this->UpdateTintValues();
 

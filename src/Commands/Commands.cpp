@@ -8,6 +8,8 @@
 #include "FrameStep.h"
 #include "ToggleDigitalDisplay.h"
 #include "ToggleDesignatorRange.h"
+#include "SelectedInfo.h"
+#include "HerosInfo.h"
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
 #include "ShowCurrentInfo.h"
@@ -27,6 +29,7 @@
 #include <ShapeButtonClass.h>
 
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
+#include <Ext/Sidebar/SelectedButton/SelectedInfoClass.h>
 #include <Misc/MessageColumn.h>
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
@@ -61,6 +64,9 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		"Reversing",
 		"Tip:Reversing",
 		&ReversingStanceClass::ReversingExecute);
+	MakeCommand<SelectedInfoCommandClass>();
+	MakeCommand<SelectedExpandCommandClass>();
+	MakeCommand<HerosInfoCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
@@ -111,12 +117,18 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 
 static void MouseWheelDownCommand()
 {
+	if (SelectedInfoClass::Instance.IsHovering)
+		SelectedInfoClass::Instance.ScrollRight();
+
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollDown();
 }
 
 static void MouseWheelUpCommand()
 {
+	if (SelectedInfoClass::Instance.IsHovering)
+		SelectedInfoClass::Instance.ScrollLeft();
+
 	if (MessageColumnClass::Instance.IsHovering())
 		MessageColumnClass::Instance.ScrollUp();
 }
@@ -135,7 +147,8 @@ DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
 
 static inline bool CheckSkipScrollSidebar()
 {
-	return MessageColumnClass::Instance.IsHovering();
+	return MessageColumnClass::Instance.IsHovering()
+		|| SelectedInfoClass::Instance.IsHovering;
 }
 
 DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)

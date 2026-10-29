@@ -8,6 +8,8 @@
 #include <Ext/Surface/Body.h>
 #include <Ext/House/Body.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
+#include <Ext/Sidebar/UniqueButton/UniqueTechnoColumnClass.h>
+#include <Ext/Sidebar/SelectedButton/SelectedInfoClass.h>
 
 #include <sstream>
 #include <iomanip>
@@ -266,6 +268,25 @@ DEFINE_HOOK(0x4AE51E, DisplayClass_GetToolTip_HelpText, 0x6)
 			R->EAX(0);
 			return ApplyToolTip;
 		}
+	}
+
+	const auto uniqueIndex = UniqueTechnoColumnClass::Instance.Hovering;
+
+	if (uniqueIndex >= 0)
+	{
+		auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
+
+		if (uniqueIndex < static_cast<int>(vec.size()))
+		{
+			R->EAX(vec[uniqueIndex]->TypeExtData->OwnerObject()->UIName);
+			return ApplyToolTip;
+		}
+	}
+
+	if (SelectedInfoClass::Instance.IsHovering)
+	{
+		R->EAX(0);
+		return ApplyToolTip;
 	}
 
 	return 0;

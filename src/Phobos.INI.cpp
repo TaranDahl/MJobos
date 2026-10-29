@@ -83,6 +83,9 @@ int Phobos::Config::SuperWeaponSidebar_RequiredSignificance = 0;
 int Phobos::Config::SkipFrameDelay = 0;
 bool Phobos::Config::AutomaticPlacingBuilding = true;
 bool Phobos::Config::AutomaticPlacingCombatBuilding = true;
+bool Phobos::Config::SelectedDisplay_Enable = false;
+bool Phobos::Config::SelectedDisplay_Expand = false;
+int Phobos::Config::SelectedDisplay_MaxCameo = 10;
 bool Phobos::Config::ShowGameTime = false;
 int Phobos::Config::ShowGameTime_BoardOpacity = 40;
 bool Phobos::Config::SelectCapturedCommand = false;
@@ -129,6 +132,15 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	if (Phobos::Config::SkipFrameDelay < 2) Phobos::Config::SkipFrameDelay = 0;
 	Phobos::Config::AutomaticPlacingBuilding = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "AutomaticPlacingBuilding", true);
 	Phobos::Config::AutomaticPlacingCombatBuilding = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "AutomaticPlacingCombatBuilding", true);
+
+	Phobos::Config::SelectedDisplay_Enable = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "SelectedDisplay.Enable", false);
+
+	Phobos::Config::SelectedDisplay_Expand = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "SelectedDisplay.Expand", false);
+
+	Phobos::Config::SelectedDisplay_MaxCameo = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SelectedDisplay.MaxCameo", 10);
+
+	Phobos::Config::SelectedDisplay_MaxCameo = std::clamp(Phobos::Config::SelectedDisplay_MaxCameo, 5, 20);
+
 	Phobos::Config::ShowGameTime = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowGameTime", false);
 	Phobos::Config::ShowGameTime_BoardOpacity = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "ShowGameTime.BoardOpacity", 40);
 

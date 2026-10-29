@@ -125,6 +125,9 @@ public:
 		static int SkipFrameDelay;
 		static bool AutomaticPlacingBuilding;
 		static bool AutomaticPlacingCombatBuilding;
+		static bool SelectedDisplay_Enable;
+		static bool SelectedDisplay_Expand;
+		static int SelectedDisplay_MaxCameo;
 		static bool ShowGameTime;
 		static int ShowGameTime_BoardOpacity;
 		static bool SelectCapturedCommand;

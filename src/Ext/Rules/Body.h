@@ -168,6 +168,12 @@ public:
 		Valueable<Vector3D<int>> PlacementGrid_LandFrames;
 		Valueable<Vector3D<int>> PlacementGrid_WaterFrames;
 
+		PhobosPCXFile SelectedInfantryMissingPCX;
+		PhobosPCXFile SelectedVehicleMissingPCX;
+		PhobosPCXFile SelectedAircraftMissingPCX;
+		PhobosPCXFile SelectedBuildingMissingPCX;
+		Valueable<bool> SelectedIngameTimer;
+
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -759,6 +765,12 @@ public:
 			, PlacementGrid_Expand { false }
 			, PlacementGrid_LandFrames { { 1, 0, 0 } }
 			, PlacementGrid_WaterFrames { { 1, 0, 0 } }
+
+			, SelectedInfantryMissingPCX {}
+			, SelectedVehicleMissingPCX {}
+			, SelectedAircraftMissingPCX {}
+			, SelectedBuildingMissingPCX {}
+			, SelectedIngameTimer { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
