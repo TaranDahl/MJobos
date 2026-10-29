@@ -2254,61 +2254,74 @@ DEFINE_HOOK(0x4893C3, MapClass_DamageArea_DamageAir, 0x6)
 // Note: Ares hook at 0x489562(0x6) and return 0
 DEFINE_JUMP(LJMP, 0x489568, 0x489592);
 
-DEFINE_HOOK(0x4896BF, DamageArea_DamageItemsFix1, 0x6)
+DEFINE_NAKED_HOOK(0x4896BF, DamageArea_DamageItemsFix1)
 {
-	enum { CheckNextCell = 0x4899BE, CheckThisObject = 0x4896DD };
-
-	GET(const CellClass* const, pCell, EBX);
-
-	DamageAreaTemp::CheckingCell = pCell;
-	auto pObject = pCell->FirstObject;
-
-	if (pObject)
+	// Use:
+	// ebx -> pCell , no change
+	// esi -> pObject , CHECK_THIS_OBJECT: change , CHECK_NEXT_CELL: will be covered later
+	// eax -> returnAddress , will be covered later
+	__asm
 	{
-		R->ESI(pObject);
-		return CheckThisObject;
+		mov dword ptr [DamageAreaTemp::CheckingCell], ebx
+
+		mov esi, [ebx]CellClass.FirstObject
+		test esi, esi
+		jnz CHECK_THIS_OBJECT
+
+		mov esi, [ebx]CellClass.AltObject
+		test esi, esi
+		jz CHECK_NEXT_CELL
+
+		mov byte ptr [DamageAreaTemp::CheckingCellAlt], 1
+
+	CHECK_THIS_OBJECT:
+
+		mov eax, 0x4896DD
+		jmp eax
+
+	CHECK_NEXT_CELL:
+
+		mov eax, 0x4899BE
+		jmp eax
 	}
-
-	pObject = pCell->AltObject;
-
-	if (!pObject)
-		return CheckNextCell;
-
-	DamageAreaTemp::CheckingCellAlt = true;
-
-	R->ESI(pObject);
-	return CheckThisObject;
 }
 
-DEFINE_HOOK(0x4899B3, DamageArea_DamageItemsFix2, 0x5)
+DEFINE_NAKED_HOOK(0x4899B3, DamageArea_DamageItemsFix2)
 {
-	enum { CheckNextCell = 0x4899BE, CheckThisObject = 0x4896DD };
-
-	GET(const ObjectClass*, pObject, ESI);
-
-	pObject = pObject->NextObject;
-
-	if (pObject)
+	// Use:
+	// esi -> pObject , CHECK_THIS_OBJECT: change , CHECK_NEXT_CELL: will be covered later
+	// eax -> returnAddress , will be covered later
+	__asm
 	{
-		R->ESI(pObject);
-		return CheckThisObject;
+		mov esi, [esi]ObjectClass.NextObject
+		test esi, esi
+		jnz CHECK_THIS_OBJECT
+
+		mov al, [DamageAreaTemp::CheckingCellAlt]
+		test al, al
+		jnz CHECK_NEXT_CELL_RESET
+
+		mov esi, [DamageAreaTemp::CheckingCell]
+		mov esi, [esi]CellClass.AltObject
+		test esi, esi
+		jz CHECK_NEXT_CELL
+
+		mov byte ptr [DamageAreaTemp::CheckingCellAlt], 1
+
+	CHECK_THIS_OBJECT:
+
+		mov eax, 0x4896DD
+		jmp eax
+
+	CHECK_NEXT_CELL_RESET:
+
+		mov byte ptr [DamageAreaTemp::CheckingCellAlt], 0
+
+	CHECK_NEXT_CELL:
+
+		mov eax, 0x4899BE
+		jmp eax
 	}
-
-	if (DamageAreaTemp::CheckingCellAlt)
-	{
-		DamageAreaTemp::CheckingCellAlt = false;
-		return CheckNextCell;
-	}
-
-	pObject = DamageAreaTemp::CheckingCell->AltObject;
-
-	if (!pObject)
-		return CheckNextCell;
-
-	DamageAreaTemp::CheckingCellAlt = true;
-
-	R->ESI(pObject);
-	return CheckThisObject;
 }
 
 DEFINE_HOOK(0x489BDB, DamageArea_RockerItemsFix1, 0x6)
