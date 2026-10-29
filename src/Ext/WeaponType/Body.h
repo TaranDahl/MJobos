@@ -133,7 +133,7 @@ public:
 		, Bolt_Duration { 17 }
 		, Bolt_FollowFLH {}
 		, IvanBomb_Visibility {}
-		, Strafing {}
+		, Strafing { }
 		, Strafing_Shots {}
 		, Strafing_SimulateBurst {}
 		, Strafing_UseAmmoPerShot {}

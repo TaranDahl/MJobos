@@ -607,7 +607,7 @@ public:
 		, JumpjetRotateOnCrash {}
 		, ShadowSizeCharacteristicHeight { }
 
-		, AutoDeath_Behavior {}
+		, AutoDeath_Behavior { }
 		, AutoDeath_AllowLimboed {}
 		, AutoDeath_VanishAnimation {}
 		, AutoDeath_OnAmmoDepletion { false }
@@ -719,9 +719,9 @@ public:
 		, DroppodType {}
 		, TiberiumEaterType {}
 
-		, Convert_Undeploy {}
-		, Convert_HumanToComputer {}
-		, Convert_ComputerToHuman {}
+		, Convert_Undeploy { }
+		, Convert_HumanToComputer { }
+		, Convert_ComputerToHuman { }
 		, Convert_ResetMindControl {}
 
 		, Tint_Color {}

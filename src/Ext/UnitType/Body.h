@@ -138,12 +138,12 @@ public:
 		, HoverDrownable {}
 		, TurretShape { nullptr }
 		, WalkFrameFirst {}
-		, BarrelOverTurret {}
+		, BarrelOverTurret { }
 		, BarrelOffset { 0 }
 		, ExtraBarrelCount { 0 }
-		, ExtraBarrelOffsets {}
+		, ExtraBarrelOffsets { }
 		, ExtraTurretCount { 0 }
-		, ExtraTurretOffsets {}
+		, ExtraTurretOffsets { }
 		, BurstPerTurret { 0 }
 	{ }
 
