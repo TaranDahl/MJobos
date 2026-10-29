@@ -75,6 +75,10 @@ bool Phobos::Config::HideShakeEffects = true;
 bool Phobos::Config::ShowFlashOnSelecting = false;
 bool Phobos::Config::UnitPowerDrain = false;
 int Phobos::Config::SuperWeaponSidebar_RequiredSignificance = 0;
+bool Phobos::Config::ScrollSidebarStripInTactical = true;
+bool Phobos::Config::ScrollSidebarStripWhenHoldAlt = true;
+bool Phobos::Config::ScrollSidebarStripWhenHoldCtrl = true;
+bool Phobos::Config::ScrollSidebarStripWhenHoldShift = true;
 bool Phobos::Config::ShowGameTime = false;
 int Phobos::Config::ShowGameTime_BoardOpacity = 40;
 bool Phobos::Config::SelectCapturedCommand = false;
@@ -113,6 +117,10 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::HideShakeEffects = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "HideShakeEffects", false);
 	Phobos::Config::ShowFlashOnSelecting = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowFlashOnSelecting", false);
 	Phobos::Config::SuperWeaponSidebar_RequiredSignificance = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SuperWeaponSidebar.RequiredSignificance", 0);
+	Phobos::Config::ScrollSidebarStripInTactical = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ScrollSidebarStripInTactical", true);
+	Phobos::Config::ScrollSidebarStripWhenHoldAlt = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ScrollSidebarStripWhenHoldAlt", true);
+	Phobos::Config::ScrollSidebarStripWhenHoldCtrl = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ScrollSidebarStripWhenHoldCtrl", true);
+	Phobos::Config::ScrollSidebarStripWhenHoldShift = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ScrollSidebarStripWhenHoldShift", true);
 	Phobos::Config::ShowGameTime = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowGameTime", false);
 	Phobos::Config::ShowGameTime_BoardOpacity = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "ShowGameTime.BoardOpacity", 40);
 
