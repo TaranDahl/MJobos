@@ -22,7 +22,7 @@
   <PropertyGroup>
     <GenerateManifest>false</GenerateManifest>
     <IntDir>$(Configuration)\IntDir\</IntDir>
-    <IncludePath>$(ExpandedIncludePath);$(MSBuildThisFileDirectory)src\;$(YRppDir);$(IntDir)Generated;$(VC_IncludePath)</IncludePath>
+    <IncludePath>$(ExpandedIncludePath);$(MSBuildThisFileDirectory)src\;$(YRppDir);$(IntDir)Generated;$(SolutionDir)ecsdk;$(VC_IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(Configuration)\</OutDir>
     <CoreLibraryDependencies></CoreLibraryDependencies>

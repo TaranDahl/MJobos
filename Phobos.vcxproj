@@ -20,6 +20,16 @@
   </ItemGroup>
   <!-- Compiled files -->
   <ItemGroup>
+    <!-- ECsdk/ -->
+    <ClCompile Include="ECSDK\cJSON.cpp" />
+    <ClCompile Include="ECSDK\EC.cpp" />
+    <ClCompile Include="ECSDK\EC.Misc.cpp" />
+    <ClCompile Include="ECSDK\ExtJson.cpp" />
+    <ClCompile Include="ECSDK\IH.Ext.cpp" />
+    <ClCompile Include="ECSDK\IH.File.cpp" />
+    <ClCompile Include="ECSDK\IH.Initial.cpp" />
+    <ClCompile Include="ECSDK\IH.Loader.cpp" />
+    <ClCompile Include="ECSDK\SyringeEx.cpp" />
     <!-- src/ -->
     <ClCompile Include="src\Ext\TeamType\Hooks.cpp" />
     <ClCompile Include="src\Phobos.COM.cpp" />
@@ -364,6 +374,21 @@
   <ItemGroup>
     <!-- lib\ -->
     <ClInclude Include="lib\nameof\nameof.h" />
+    <!-- ECsdk/ -->
+    <ClInclude Include="ECSDK\cJSON.h" />
+    <ClInclude Include="ECSDK\EC.h" />
+    <ClInclude Include="ECSDK\EC.Listener.h" />
+    <ClInclude Include="ECSDK\EC.Misc.h" />
+    <ClInclude Include="ECSDK\ExtJson.h" />
+    <ClInclude Include="ECSDK\IH.Config.h" />
+    <ClInclude Include="ECSDK\IH.Ext.h" />
+    <ClInclude Include="ECSDK\IH.File.h" />
+    <ClInclude Include="ECSDK\IH.h" />
+    <ClInclude Include="ECSDK\IH.Initial.h" />
+    <ClInclude Include="ECSDK\IH.InitialService.h" />
+    <ClInclude Include="ECSDK\IH.Loader.h" />
+    <ClInclude Include="ECSDK\Phobos.ECInit.h" />
+    <ClInclude Include="ECSDK\SyringeEx.h" />
     <!-- src/ -->
     <ClInclude Include="src\Phobos.COM.h" />
     <ClInclude Include="src\Phobos.CRT.h" />
