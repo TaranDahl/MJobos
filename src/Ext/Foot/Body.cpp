@@ -177,6 +177,26 @@ void FootExt::UpdateTypeData(TechnoTypeClass* pCurrentType)
 
 	this->UpdateSelfOwnedAttachEffects();
 
+	// Reset ExtraBaseNormal
+	if (RulesExt::Global()->CheckExtraBaseNormal)
+	{
+		if (pOldTypeExt->ExtraBaseNormal)
+		{
+			if (!pNewTypeExt->ExtraBaseNormal)
+			{
+				auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
+				vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+			}
+		}
+		else if (pNewTypeExt->ExtraBaseNormal)
+		{
+			auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
+
+			if (std::find(vec.begin(), vec.end(), this) == vec.end())
+				vec.push_back(this);
+		}
+	}
+
 	if (auto const pShield = this->Shield.get())
 		pShield->ConvertCheck(pCurrentType);
 

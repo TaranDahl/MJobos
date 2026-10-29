@@ -304,6 +304,16 @@ In `RA2MD.INI`:
 ShowPlacementPreview=yes   ; boolean
 ```
 
+### Draw adjacent boundary
+
+- When `DrawAdjacentBoundary` is enabled, the four corners of the building's `Adjacent` placement boundary are displayed while placing a building.
+
+In `RA2MD.INI`:
+```ini
+[Phobos]
+DrawAdjacentBoundary=false  ; boolean
+```
+
 ### Real time timers
 
 - Timers can now display values in real time, taking game speed into account. This can be enabled with `RealTimeTimers=true`.

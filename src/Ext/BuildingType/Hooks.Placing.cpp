@@ -1,7 +1,9 @@
 #include "Body.h"
 
 #include <Ext/Rules/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Ext/TerrainType/Body.h>
+#include <Utilities/GeneralUtils.h>
 
 // AIConstructionYard Hook #1 -> sub_740810 - Check number of construction yard before deploy.
 DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
@@ -281,6 +283,69 @@ DEFINE_HOOK(0x4A902C, MapClass_PassesProximityCheck_BaseNormalExtra, 0x5)
 */
 DEFINE_HOOK(0x4A904E, MapClass_PassesProximityCheck_RestoreResult, 0x5)
 {
+	GET_STACK(bool, canBuild, STACK_OFFSET(0x30, 0xC));
+	GET_STACK(const int, idxHouse, STACK_OFFSET(0x30, 0x8));
+
+	if (RulesExt::Global()->CheckExtraBaseNormal && !canBuild)
+	{
+		const auto& baseNormalTechnos = ScenarioExt::Global()->BaseNormalTechnos;
+
+		if (!baseNormalTechnos.empty())
+		{
+			GET(const int, topLeftX, EBP);
+			GET_STACK(const int, foundationWidth, STACK_OFFSET(0x30, -0x1C));
+			GET_STACK(const int, topLeftY, STACK_OFFSET(0x30, -0xC));
+			GET_STACK(const int, foundationHeight, STACK_OFFSET(0x30, 0x4));
+
+			const auto pBuildType = ProximityTemp::BuildType;
+			const auto pBuildTypeExt = BuildingTypeExt::Fetch(pBuildType);
+			const auto range = pBuildType->Adjacent + 1;
+			const auto maxX = topLeftX + range + foundationWidth;
+			const auto maxY = topLeftY + range + foundationHeight;
+			const auto minX = topLeftX - range;
+			const auto minY = topLeftY - range;
+
+			for (const auto pExt : baseNormalTechnos)
+			{
+				const auto pTechno = pExt->OwnerObject();
+
+				if (!TechnoExt::IsActive(pTechno))
+					continue;
+
+				const auto technoMapCell = pTechno->GetMapCoords();
+
+				if (technoMapCell.X < minX || technoMapCell.Y < minY || technoMapCell.X >= maxX || technoMapCell.Y >= maxY)
+					continue;
+
+				const auto pTypeExt = pExt->TypeExtData;
+				const auto pOwner = pTechno->Owner;
+
+				if (pOwner->ArrayIndex == idxHouse)
+				{
+					if (!pTypeExt->ExtraBaseNormal)
+						continue;
+				}
+				else if (!RulesClass::Instance->BuildOffAlly || !pOwner->IsAlliedWith(HouseClass::Array.Items[idxHouse]) || !pTypeExt->ExtraBaseForAllyBuilding)
+				{
+					continue;
+				}
+
+				const auto& extraAllowed = pBuildTypeExt->Adjacent_AllowedExtra;
+
+				if (!extraAllowed.empty() && !extraAllowed.Contains(pTypeExt->OwnerObject()))
+					continue;
+
+				const auto& extraDisallowed = pBuildTypeExt->Adjacent_DisallowedExtra;
+
+				if (!extraDisallowed.empty() && extraDisallowed.Contains(pTypeExt->OwnerObject()))
+					continue;
+
+				R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
+				break;
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -407,3 +472,56 @@ DEFINE_HOOK(0x5887C1, MapClass_BuildingToWall_SkipExtraWalls, 0x6)
 
 	return NextDirection;
 }
+
+#pragma region AIAdjacentMax
+
+DEFINE_HOOK_AGAIN(0x42EB6A, BaseClass_GetBaseNodeIndex_AIAdjacentMax, 0x8);
+DEFINE_HOOK(0x42EBA2, BaseClass_GetBaseNodeIndex_AIAdjacentMax, 0x8)
+{
+	GET(BaseClass*, pThis, ESI);
+	GET(const int, nodeIdx, EDI);
+
+	bool isValid = reinterpret_cast<bool(__thiscall*)(BaseClass*, int)>(0x42E780)(pThis, nodeIdx);
+	const int rangeLimit = SessionClass::IsCampaign()
+		? RulesExt::Global()->AIAdjacentMax_Campaign.Get(RulesExt::Global()->AIAdjacentMax.Get())
+		: RulesExt::Global()->AIAdjacentMax.Get();
+
+	if (rangeLimit >= 0 && isValid)
+	{
+		const auto node = pThis->BaseNodes[nodeIdx];
+		const auto pOwner = pThis->Owner;
+		const auto pBuildingType = BuildingTypeClass::Array[node.BuildingTypeIndex];
+		const CellStruct offset
+		{
+			static_cast<short>(pBuildingType->GetFoundationWidth() / 2),
+			static_cast<short>(pBuildingType->GetFoundationHeight(false) / 2)
+		};
+		const auto center = node.MapCoords + offset;
+		const auto cellList = GeneralUtils::AdjacentCellsInRange(rangeLimit);
+		bool hasAdjacent = false;
+
+		for (const auto& cell : cellList)
+		{
+			const auto pBuilding = MapClass::Instance.GetCellAt(cell + center)->GetBuilding();
+
+			if (!pBuilding || pBuilding->Owner != pOwner)
+				continue;
+
+			const auto pType = pBuilding->Type;
+			const auto baseNormalDefault = (!pType->UndeploysInto || !pType->ResourceGatherer) && !pBuilding->IsStrange();
+
+			if (BuildingTypeExt::Fetch(pType)->AIBaseNormal.Get(baseNormalDefault))
+			{
+				hasAdjacent = true;
+				break;
+			}
+		}
+
+		isValid = hasAdjacent;
+	}
+
+	R->AL(isValid);
+	return R->Origin() + 0x8;
+}
+
+#pragma endregion

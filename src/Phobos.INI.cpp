@@ -50,6 +50,7 @@ bool Phobos::Config::SuperWeaponSidebarCommands = false;
 bool Phobos::Config::ShowPlanningPath = false;
 bool Phobos::Config::ArtImageSwap = false;
 bool Phobos::Config::ShowPlacementPreview = false;
+bool Phobos::Config::DrawAdjacentBoundary = false;
 bool Phobos::Config::EnableSelectBox = false;
 bool Phobos::Config::DigitalDisplay_Enable = false;
 bool Phobos::Config::MessageApplyHoverState = false;
@@ -94,6 +95,7 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::PriorityDeployFiltering = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "PriorityDeployFiltering", true);
 	Phobos::Config::TypeSelectUseIFVMode = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "TypeSelectUseIFVMode", true);
 	Phobos::Config::ShowPlacementPreview = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowPlacementPreview", true);
+	Phobos::Config::DrawAdjacentBoundary = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "DrawAdjacentBoundary", false);
 	Phobos::Config::MessageApplyHoverState = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "MessageApplyHoverState", false);
 	Phobos::Config::MessageDisplayInCenter = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "MessageDisplayInCenter", false);
 	Phobos::Config::MessageDisplayInCenter_BoardOpacity = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "MessageDisplayInCenter.BoardOpacity", 40);
