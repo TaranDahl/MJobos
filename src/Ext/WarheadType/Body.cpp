@@ -286,6 +286,9 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Shield_Respawn_Types.Read(exINI, pSection, "Shield.Respawn.Types");
 	this->Shield_SelfHealing_Types.Read(exINI, pSection, "Shield.SelfHealing.Types");
 
+	this->Directional.Read(exINI, pSection, "Directional");
+	this->Directional_Multiplier.Read(exINI, pSection, "Directional.Multiplier");
+
 	this->NotHuman_DeathSequence.Read(exINI, pSection, "NotHuman.DeathSequence");
 	this->LaunchSW.Read(exINI, pSection, "LaunchSW");
 	this->LaunchSW_RealLaunch.Read(exINI, pSection, "LaunchSW.RealLaunch");
@@ -365,6 +368,9 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
 
 	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
+
+	this->NoCellSpread.Read(exINI, pSection, "NoCellSpread");
+	this->NoCellSpread_SnapDistance.Read(exINI, pSection, "NoCellSpread_SnapDistance");
 
 	this->CanKill.Read(exINI, pSection, "CanKill");
 
@@ -676,6 +682,9 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->SpawnsCrate_Types)
 		.Process(this->SpawnsCrate_Weights)
 
+		.Process(this->Directional)
+		.Process(this->Directional_Multiplier)
+
 		.Process(this->NotHuman_DeathSequence)
 		.Process(this->LaunchSW)
 		.Process(this->LaunchSW_RealLaunch)
@@ -773,6 +782,9 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->BuildingUndeploy_Leave)
 
 		.Process(this->CombatAlert_Suppress)
+
+		.Process(this->NoCellSpread)
+		.Process(this->NoCellSpread_SnapDistance)
 
 		.Process(this->KillWeapon)
 		.Process(this->KillWeapon_OnFirer)

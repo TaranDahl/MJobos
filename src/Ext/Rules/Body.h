@@ -263,6 +263,13 @@ public:
 		Nullable<double> DamageAlliesMultiplier_Berzerk;
 		Nullable<double> DamageEnemiesMultiplier_Berzerk;
 
+		Valueable<bool> DirectionalArmor;
+		Valueable<float> DirectionalArmor_FrontMultiplier;
+		Valueable<float> DirectionalArmor_SideMultiplier;
+		Valueable<float> DirectionalArmor_BackMultiplier;
+		Valueable<float> DirectionalArmor_FrontField;
+		Valueable<float> DirectionalArmor_BackField;
+
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
 
@@ -802,6 +809,12 @@ public:
 			, DamageOwnerMultiplier_Berzerk {}
 			, DamageAlliesMultiplier_Berzerk {}
 			, DamageEnemiesMultiplier_Berzerk {}
+			, DirectionalArmor { false }
+			, DirectionalArmor_FrontMultiplier { 1.0 }
+			, DirectionalArmor_SideMultiplier { 1.0 }
+			, DirectionalArmor_BackMultiplier { 1.0 }
+			, DirectionalArmor_FrontField { 0.5 }
+			, DirectionalArmor_BackField { 0.5 }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }

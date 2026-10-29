@@ -136,6 +136,9 @@ public:
 	NullableVector<ShieldTypeClass*> Shield_Respawn_Types;
 	NullableVector<ShieldTypeClass*> Shield_SelfHealing_Types;
 
+	Valueable<bool> Directional;
+	Valueable<double> Directional_Multiplier;
+
 	Valueable<int> NotHuman_DeathSequence;
 	ValueableIdxVector<SuperWeaponTypeClass> LaunchSW;
 	Valueable<bool> LaunchSW_RealLaunch;
@@ -212,6 +215,9 @@ public:
 	Valueable<bool> BuildingUndeploy_Leave;
 
 	Nullable<bool> CombatAlert_Suppress;
+
+	Valueable<bool> NoCellSpread;
+	Valueable<Leptons> NoCellSpread_SnapDistance;
 
 	Valueable<WeaponTypeClass*> KillWeapon;
 	Valueable<WeaponTypeClass*> KillWeapon_OnFirer;
@@ -419,6 +425,9 @@ public:
 		, SpawnsCrate_Types {}
 		, SpawnsCrate_Weights {}
 
+		, Directional { false }
+		, Directional_Multiplier { 1.0 }
+
 		, NotHuman_DeathSequence { -1 }
 		, LaunchSW {}
 		, LaunchSW_RealLaunch { true }
@@ -495,6 +504,9 @@ public:
 		, BuildingUndeploy_Leave { false }
 
 		, CombatAlert_Suppress {}
+
+		, NoCellSpread { false }
+		, NoCellSpread_SnapDistance { Leptons(128) }
 
 		, ElectricAssaultLevel { 1 }
 
@@ -648,6 +660,7 @@ public:
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 
+	static int HitDirection;
 	static WarheadTypeClass* LocomotorWarhead;
 
 	static void DetonateAt(WarheadTypeClass* pThis, AbstractClass* pTarget, TechnoClass* pOwner, int damage, HouseClass* pFiringHouse = nullptr);
