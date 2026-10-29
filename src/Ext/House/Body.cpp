@@ -2,6 +2,7 @@
 
 #include <Ext/SWType/Body.h>
 #include <Ext/Techno/Body.h>
+#include <Ext/BuildingType/Body.h>
 
 //Static init
 
@@ -467,6 +468,24 @@ int HouseExt::CountOwnedPresentAndLimboed(TechnoTypeClass* pTechnoType) const
 		break;
 	default:
 		break;
+	}
+
+	return count;
+}
+
+int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade, bool deploy)
+{
+	auto count = pHouse->CountOwnedAndPresent(pBuildingType);
+
+	if (deploy && pBuildingType->UndeploysInto)
+		count += pHouse->CountOwnedAndPresent(pBuildingType->UndeploysInto);
+
+	if (upgrade)
+	{
+		const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse);
+
+		if (upgrades != -1)
+			count += upgrades;
 	}
 
 	return count;

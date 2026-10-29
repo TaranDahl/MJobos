@@ -763,6 +763,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->HealthBar_Permanent.Read(exINI, pSection, "HealthBar.Permanent");
 	this->HealthBar_Permanent_PipScale.Read(exINI, pSection, "HealthBar.Permanent.PipScale");
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
+	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 	this->LowSelectionPriority.Read(exINI, pSection, "LowSelectionPriority");
 	this->LowDeployPriority.Read(exINI, pSection, "LowDeployPriority");
 
@@ -1333,6 +1334,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->ShadowIndex_Frame.Read(exArtINI, pArtSection, "ShadowIndex.Frame");
 
 	this->AltCameoPCX.Read(pArtINI, pArtSection, "AltCameoPCX");
+	this->GreyCameoPCX.Read(pArtINI, pArtSection, "GreyCameoPCX");
 
 	this->LaserTrailData.clear();
 	for (size_t i = 0; ; ++i)
@@ -1454,6 +1456,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->HealthBar_Permanent)
 		.Process(this->HealthBar_Permanent_PipScale)
 		.Process(this->UIDescription)
+		.Process(this->UIDescription_Unbuildable)
 		.Process(this->LowSelectionPriority)
 		.Process(this->LowDeployPriority)
 		.Process(this->MindControlRangeLimit)
@@ -1486,6 +1489,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->MultiMindControl_ReleaseVictim)
 		.Process(this->CameoPriority)
 		.Process(this->AltCameoPCX)
+		.Process(this->GreyCameoPCX)
+		.Process(this->IsGreyCameoForCurrentPlayer)
 		.Process(this->NoManualMove)
 		.Process(this->InitialStrength)
 		.Process(this->ReloadInTransport)

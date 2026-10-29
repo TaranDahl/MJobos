@@ -224,6 +224,28 @@ int BuildingTypeExt::CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pType, 
 	return pHouse->CountOwnedNow(pType);
 }
 
+BuildingTypeClass* BuildingTypeExt::GetAnotherPlacingType(size_t direction, bool onWater)
+{
+	const auto pType = this->OwnerObject();
+
+	if (pType->PlaceAnywhere)
+		return nullptr;
+
+	const auto& types = onWater ? this->PlaceBuilding_OnWater : this->PlaceBuilding_OnLand;
+	const size_t size = types.size();
+
+	if (!size)
+		return nullptr;
+
+	direction = (direction + (16u / size)) & 0x1Fu;
+	const auto pAnotherType = types[static_cast<int>(direction * size / 32u)];
+
+	if (pAnotherType->BuildCat != pType->BuildCat || pAnotherType->PlaceAnywhere)
+		return nullptr;
+
+	return pAnotherType;
+}
+
 int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse) // not including producing upgrades
 {
 	int result = 0;
@@ -336,6 +358,10 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		std::sort(vec.begin(), vec.end());
 		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
 	}
+	this->PlaceBuilding_DirectionShape.Read(exINI, pSection, "PlaceBuilding.DirectionShape");
+	this->PlaceBuilding_DirectionPalette.LoadFromINI(pINI, pSection, "PlaceBuilding.DirectionPalette");
+	this->PlaceBuilding_Extra.Read(exINI, pSection, "PlaceBuilding.Extra");
+	this->Cameo_ShouldCount.Read(exINI, pSection, "Cameo.ShouldCount");
 	this->CanBuildUnderUnits.Read(exINI, pSection, "CanBuildUnderUnits");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
@@ -563,6 +589,10 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->PlaceBuilding_OnWater)
 		.Process(this->PlaceBuilding_OnLand_Unique)
 		.Process(this->PlaceBuilding_OnWater_Unique)
+		.Process(this->PlaceBuilding_DirectionShape)
+		.Process(this->PlaceBuilding_DirectionPalette)
+		.Process(this->PlaceBuilding_Extra)
+		.Process(this->Cameo_ShouldCount)
 		.Process(this->CanBuildUnderUnits)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->AircraftDockingDir_DefaultToPoseDir)

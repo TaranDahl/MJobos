@@ -38,6 +38,7 @@ public:
 	Valueable<bool> HealthBar_Permanent;
 	Valueable<bool> HealthBar_Permanent_PipScale;
 	Valueable<CSFText> UIDescription;
+	Valueable<CSFText> UIDescription_Unbuildable;
 	Valueable<bool> LowSelectionPriority;
 	Valueable<bool> LowDeployPriority;
 	std::vector<PhobosFixedString<0x20>> WeaponGroupAs;
@@ -70,6 +71,8 @@ public:
 	Nullable<bool> MultiMindControl_ReleaseVictim;
 	Valueable<int> CameoPriority;
 	PhobosPCXFile AltCameoPCX;
+	PhobosPCXFile GreyCameoPCX;
+	bool IsGreyCameoForCurrentPlayer;
 	Valueable<bool> NoManualMove;
 	Nullable<int> InitialStrength;
 	Nullable<bool> ReloadInTransport;
@@ -471,6 +474,7 @@ public:
 		, HealthBar_Permanent { false }
 		, HealthBar_Permanent_PipScale { false }
 		, UIDescription {}
+		, UIDescription_Unbuildable {}
 		, LowSelectionPriority { false }
 		, LowDeployPriority { false }
 		, WeaponGroupAs {}
@@ -503,6 +507,8 @@ public:
 		, MultiMindControl_ReleaseVictim {}
 		, CameoPriority { 0 }
 		, AltCameoPCX {}
+		, GreyCameoPCX {}
+		, IsGreyCameoForCurrentPlayer { false }
 		, NoManualMove { false }
 		, InitialStrength {}
 		, ReloadInTransport {}

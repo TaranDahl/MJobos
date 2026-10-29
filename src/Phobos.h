@@ -89,6 +89,9 @@ public:
 		static bool SuperWeaponSidebarCommands;
 		static bool ArtImageSwap;
 		static bool ShowPlacementPreview;
+		static size_t DefaultPlacingDirection;
+		static size_t CurrentPlacingDirection;
+		static bool ShowBuildingStatistics;
 		static bool DrawAdjacentBoundary;
 		static bool EnableBuildingPlacementPreview;
 		static bool EnableSelectBox;

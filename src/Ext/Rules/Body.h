@@ -106,6 +106,9 @@ public:
 		Nullable<bool> NoQueueUpToEnter_Buildings;
 		Nullable<bool> NoQueueUpToUnload_Buildings;
 		Valueable<bool> CheckExtraBaseNormal;
+		Valueable<SHPStruct*> Cameo_OverlayShapes;
+		ValueableVector<int> Cameo_OverlayFrames;
+		CustomPalette Cameo_OverlayPalette;
 
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
@@ -641,6 +644,9 @@ public:
 			, NoQueueUpToEnter_Buildings {}
 			, NoQueueUpToUnload_Buildings {}
 			, CheckExtraBaseNormal { false }
+			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
+			, Cameo_OverlayFrames {}
+			, Cameo_OverlayPalette {}
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }
