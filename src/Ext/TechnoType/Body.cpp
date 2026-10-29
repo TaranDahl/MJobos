@@ -1078,6 +1078,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->AIAttackMoveTargetingDelay.Read(exINI, pSection, "AIAttackMoveTargetingDelay");
 	this->PlayerAttackMoveTargetingDelay.Read(exINI, pSection, "PlayerAttackMoveTargetingDelay");
 	this->DistributeTargetingFrame.Read(exINI, pSection, "DistributeTargetingFrame");
+	this->AIDefendBase_Ignore.Read(exINI, pSection, "AIDefendBase.Ignore");
 
 	this->BunkerableAnyway.Read(exINI, pSection, "BunkerableAnyway");
 
@@ -1718,6 +1719,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->AIAttackMoveTargetingDelay)
 		.Process(this->PlayerAttackMoveTargetingDelay)
 		.Process(this->DistributeTargetingFrame)
+		.Process(this->AIDefendBase_Ignore)
 
 		.Process(this->DigitalDisplay_Health_FakeAtDisguise)
 

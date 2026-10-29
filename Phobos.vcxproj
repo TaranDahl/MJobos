@@ -167,6 +167,7 @@
     <ClCompile Include="src\Ext\Techno\Body.Internal.cpp" />
     <ClCompile Include="src\Ext\Techno\Body.Update.cpp" />
     <ClCompile Include="src\Ext\Techno\Body.Visuals.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.AIProtectBase.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Airstrike.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Cloak.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.cpp" />

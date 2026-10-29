@@ -309,6 +309,7 @@ public:
 	Nullable<int> AIAttackMoveTargetingDelay;
 	Nullable<int> PlayerAttackMoveTargetingDelay;
 	Nullable<bool> DistributeTargetingFrame;
+	Valueable<bool> AIDefendBase_Ignore;
 
 	Nullable<bool> AttackMove_Aggressive;
 	Nullable<bool> AttackMove_UpdateTarget;
@@ -734,6 +735,7 @@ public:
 		, AIAttackMoveTargetingDelay {}
 		, PlayerAttackMoveTargetingDelay {}
 		, DistributeTargetingFrame {}
+		, AIDefendBase_Ignore { false }
 
 		, DigitalDisplay_Health_FakeAtDisguise {}
 
