@@ -302,6 +302,16 @@ public:
 		Valueable<int> AutoTargetWalls;
 		Valueable<bool> EndAutoTargetingIfFindWalls;
 		Valueable<bool> DestroyOwnerlessWalls;
+		Valueable<bool> PlayerGuardModePursuit;
+		Valueable<double> PlayerGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Valueable<Leptons> PlayerGuardModeGuardRangeMax;
+		Valueable<Leptons> PlayerGuardStationaryStray;
+		Valueable<bool> AIGuardModePursuit;
+		Valueable<double> AIGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> AIGuardModeGuardRangeAddend;
+		Valueable<Leptons> AIGuardModeGuardRangeMax;
+		Valueable<Leptons> AIGuardStationaryStray;
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<bool> JumpjetClimbIgnoreBuilding;
@@ -926,6 +936,16 @@ public:
 			, AutoTargetWalls { 1 }
 			, EndAutoTargetingIfFindWalls { true }
 			, DestroyOwnerlessWalls { false }
+			, PlayerGuardModePursuit { true }
+			, PlayerGuardModeGuardRangeMultiplier { 2.0 }
+			, PlayerGuardModeGuardRangeAddend { Leptons(0) }
+			, PlayerGuardModeGuardRangeMax { Leptons(4096) }
+			, PlayerGuardStationaryStray { Leptons(-256) }
+			, AIGuardModePursuit { true }
+			, AIGuardModeGuardRangeMultiplier { 2.0 }
+			, AIGuardModeGuardRangeAddend { Leptons(0) }
+			, AIGuardModeGuardRangeMax { Leptons(4096) }
+			, AIGuardStationaryStray { Leptons(-256) }
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
 			, JumpjetClimbIgnoreBuilding { false }

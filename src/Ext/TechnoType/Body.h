@@ -355,6 +355,16 @@ public:
 	Valueable<int> JumpjetSpeedType;
 	Valueable<bool> Engineer_CanAutoFire;
 
+	Nullable<bool> PlayerGuardModePursuit;
+	Nullable<Leptons> PlayerGuardModeStray;
+	Nullable<double> PlayerGuardModeGuardRangeMultiplier;
+	Nullable<Leptons> PlayerGuardModeGuardRangeAddend;
+	Nullable<Leptons> PlayerGuardStationaryStray;
+	Nullable<bool> AIGuardModePursuit;
+	Nullable<Leptons> AIGuardModeStray;
+	Nullable<double> AIGuardModeGuardRangeMultiplier;
+	Nullable<Leptons> AIGuardModeGuardRangeAddend;
+	Nullable<Leptons> AIGuardStationaryStray;
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -889,6 +899,16 @@ public:
 		, JumpjetSpeedType { 3 }
 		, Engineer_CanAutoFire { false }
 
+		, PlayerGuardModePursuit {}
+		, PlayerGuardModeStray {}
+		, PlayerGuardModeGuardRangeMultiplier {}
+		, PlayerGuardModeGuardRangeAddend {}
+		, PlayerGuardStationaryStray {}
+		, AIGuardModePursuit {}
+		, AIGuardModeStray {}
+		, AIGuardModeGuardRangeMultiplier {}
+		, AIGuardModeGuardRangeAddend {}
+		, AIGuardStationaryStray {}
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}
 		, VeteranReload {}

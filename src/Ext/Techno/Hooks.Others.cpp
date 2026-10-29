@@ -120,6 +120,51 @@ DEFINE_HOOK(0x6F8BB2, TechnoClass_TryAutoTargetObject_Engineer2, 0x6)
 
 #pragma endregion
 
+#pragma region GuardRange
+
+DEFINE_HOOK(0x4D6E83, FootClass_MissionAreaGuard_FollowStray, 0x6)
+{
+	enum { SkipGameCode = 0x4D6E8F };
+
+	GET(FootClass* const, pThis, ESI);
+
+	int range = RulesClass::Instance->GuardModeStray;
+
+	if (const auto pTypeExt = TechnoExt::Fetch(pThis)->TypeExtData)
+		range = pThis->Owner->IsControlledByHuman() ? pTypeExt->PlayerGuardModeStray.Get(Leptons(range)) : pTypeExt->AIGuardModeStray.Get(Leptons(range));
+
+	R->EDI(range);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x4D6E97, FootClass_MissionAreaGuard_Pursuit, 0x6)
+{
+	enum { KeepTarget = 0x4D6ED1, RemoveTarget = 0x4D6EB3 };
+
+	GET(FootClass* const, pThis, ESI);
+	GET(int, range, EDI);
+	GET(AbstractClass* const, pFocus, EAX);
+
+	const auto pTypeExt = TechnoExt::Fetch(pThis)->TypeExtData;
+	const bool isPlayer = pThis->Owner->IsControlledByHuman();
+
+	if ((pFocus->AbstractFlags & AbstractFlags::Foot) == AbstractFlags::None)
+	{
+		const Leptons stationaryStray = isPlayer ? pTypeExt->PlayerGuardStationaryStray.Get(RulesExt::Global()->PlayerGuardStationaryStray) : pTypeExt->AIGuardStationaryStray.Get(RulesExt::Global()->AIGuardStationaryStray);
+
+		if (stationaryStray != Leptons(-256))
+			range = stationaryStray;
+	}
+
+	return ((!(isPlayer ? pTypeExt->PlayerGuardModePursuit.Get(RulesExt::Global()->PlayerGuardModePursuit) : pTypeExt->AIGuardModePursuit.Get(RulesExt::Global()->AIGuardModePursuit))
+			|| (!pThis->IsFiring && !pThis->Destination))
+		&& pThis->DistanceFrom(pFocus) > range)
+		? RemoveTarget
+		: KeepTarget;
+}
+
+#pragma endregion
+
 #pragma region AttackWall
 
 DEFINE_HOOK(0x6F8C18, TechnoClass_ScanToAttackWall_PlayerDestroyWall, 0x6)

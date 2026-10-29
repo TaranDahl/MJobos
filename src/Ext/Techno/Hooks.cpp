@@ -2089,10 +2089,14 @@ static int GetGuardRange(TechnoClass* pThis, int control)
 		}
 	}
 
-	// Game doubles the range likely to make area guard behave better for shorter range units.
-	// From observed results does not seem to affect target scan range otherwise f.ex on guard mission.
-	range *= 2;
-	const int maxRange = pTypeExt->MaxGuardRange.Get();
+	const bool isPlayer = pThis->Owner->IsControlledByHuman();
+	const auto pRulesExt = RulesExt::Global();
+	const auto [multiplier, addend, guardRangeMax] = isPlayer
+		? std::make_tuple(pTypeExt->PlayerGuardModeGuardRangeMultiplier.Get(pRulesExt->PlayerGuardModeGuardRangeMultiplier), pTypeExt->PlayerGuardModeGuardRangeAddend.Get(pRulesExt->PlayerGuardModeGuardRangeAddend), pRulesExt->PlayerGuardModeGuardRangeMax.Get())
+		: std::make_tuple(pTypeExt->AIGuardModeGuardRangeMultiplier.Get(pRulesExt->AIGuardModeGuardRangeMultiplier), pTypeExt->AIGuardModeGuardRangeAddend.Get(pRulesExt->AIGuardModeGuardRangeAddend), pRulesExt->AIGuardModeGuardRangeMax.Get());
+
+	range = static_cast<int>(range * multiplier + static_cast<int>(addend));
+	const int maxRange = std::min(static_cast<int>(pTypeExt->MaxGuardRange.Get()), static_cast<int>(guardRangeMax));
 
 	if (control == 2) // Control = 2, used for Patrol mission.
 	{
