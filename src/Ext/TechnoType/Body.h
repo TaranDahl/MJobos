@@ -144,6 +144,9 @@ public:
 
 	Nullable<bool> DestroyAnim_Random;
 
+	Nullable<bool> ExplodeOnDestroy;
+	Nullable<bool> FireDeathWeaponOnCrushed;
+
 	Nullable<bool> UseDisguiseMovementSpeed;
 
 	Nullable<int> OpenTopped_RangeBonus;
@@ -533,6 +536,9 @@ public:
 		, AlternateFLH_OnTurret {}
 		, AlternateFLH_ApplyVehicle {}
 		, DestroyAnim_Random {}
+
+		, ExplodeOnDestroy {}
+		, FireDeathWeaponOnCrushed {}
 
 		, UseDisguiseMovementSpeed {}
 
