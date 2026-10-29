@@ -11,6 +11,7 @@
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
 #include "ShowCurrentInfo.h"
+#include "AssignRallyPoint.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "ToggleMessageList.h"
@@ -32,6 +33,8 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
+	MakeCommand<AssignRallyPointCommandClass>();
+	MakeCommand<AssignSecondaryRallyPointCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();

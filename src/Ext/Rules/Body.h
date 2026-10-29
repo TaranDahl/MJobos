@@ -240,6 +240,8 @@ public:
 		Valueable<bool> DrawInsignia_UsePixelSelectionBracketDelta;
 		ValueableVector<AnimTypeClass*> Promote_VeteranAnimation;
 		ValueableVector<AnimTypeClass*> Promote_EliteAnimation;
+		Valueable<bool> RallyPointIgnoreReachability;
+		Valueable<bool> RallyPointAreaGuard;
 
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
@@ -765,6 +767,9 @@ public:
 			, DropPodTrailer { }
 			, DropPodDefaultTrailer { }
 			, PodImage { }
+			, RallyPointIgnoreReachability { false }
+			, RallyPointAreaGuard { false }
+
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
 			, JumpjetClimbIgnoreBuilding { false }

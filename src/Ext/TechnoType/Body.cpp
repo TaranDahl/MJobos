@@ -1159,6 +1159,9 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
 
 	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
+	this->ExitCoord.Read(exINI, pSection, "ExitCoord");
+
+	this->IgnoreRallyPoint.Read(exINI, pSection, "IgnoreRallyPoint");
 
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
@@ -1830,6 +1833,9 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->VeteranCritChance)
 
 		.Process(this->MissileSpawnUseOtherFLHs)
+		.Process(this->ExitCoord)
+
+		.Process(this->IgnoreRallyPoint)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

@@ -299,6 +299,9 @@ public:
 	Nullable<bool> NoReload_Temporal;
 
 	Valueable<bool> MissileSpawnUseOtherFLHs;
+	Nullable<CoordStruct> ExitCoord;
+
+	Valueable<bool> IgnoreRallyPoint;
 
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
@@ -752,6 +755,9 @@ public:
 		, NoReload_Temporal {}
 
 		, MissileSpawnUseOtherFLHs { false }
+		, ExitCoord {}
+
+		, IgnoreRallyPoint { false }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}

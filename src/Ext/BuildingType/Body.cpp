@@ -240,6 +240,10 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
 	}
 	this->CanBuildUnderUnits.Read(exINI, pSection, "CanBuildUnderUnits");
+	this->JustHasRallyPoint.Read(exINI, pSection, "JustHasRallyPoint");
+	this->JumpjetExitCoord.Read(exINI, pSection, "JumpjetExitCoord");
+	this->RallySpeedType.Read(exINI, pSection, "RallySpeedType");
+	this->RallyMovementZone.Read(exINI,pSection,"RallyMovementZone");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
@@ -260,6 +264,8 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Adjacent_Disallowed_ProhibitDistance.Read(exINI, pSection, "Adjacent.Disallowed.ProhibitDistance");
 
 	this->BarracksExitCell.Read(exINI, pSection, "BarracksExitCell");
+
+	this->HasSecondaryRallyPoint.Read(exINI, pSection, "HasSecondaryRallyPoint");
 
 	this->Overpower_KeepOnline.Read(exINI, pSection, "Overpower.KeepOnline");
 	this->Overpower_ChargeWeapon.Read(exINI, pSection, "Overpower.ChargeWeapon");
@@ -466,6 +472,10 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->PlaceBuilding_OnLand_Unique)
 		.Process(this->PlaceBuilding_OnWater_Unique)
 		.Process(this->CanBuildUnderUnits)
+		.Process(this->JustHasRallyPoint)
+		.Process(this->JumpjetExitCoord)
+		.Process(this->RallySpeedType)
+		.Process(this->RallyMovementZone)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->AircraftDockingDir_DefaultToPoseDir)
 		.Process(this->FactoryPlant_AllowTypes)
@@ -487,6 +497,7 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->Adjacent_Disallowed_Prohibit)
 		.Process(this->Adjacent_Disallowed_ProhibitDistance)
 		.Process(this->BarracksExitCell)
+		.Process(this->HasSecondaryRallyPoint)
 		.Process(this->Overpower_KeepOnline)
 		.Process(this->Overpower_ChargeWeapon)
 		.Process(this->DisableDamageSound)

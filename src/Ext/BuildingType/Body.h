@@ -71,6 +71,10 @@ public:
 	std::vector<BuildingTypeClass*> PlaceBuilding_OnLand_Unique;
 	std::vector<BuildingTypeClass*> PlaceBuilding_OnWater_Unique;
 	Valueable<bool> CanBuildUnderUnits;
+	Valueable<bool> JustHasRallyPoint;
+	Nullable<CoordStruct> JumpjetExitCoord;
+	Nullable<int> RallySpeedType;
+	Nullable<int> RallyMovementZone;
 
 	Valueable<bool> IsAnimDelayedBurst;
 
@@ -96,6 +100,8 @@ public:
 	Valueable<int> Adjacent_Disallowed_ProhibitDistance;
 
 	Nullable<Point2D> BarracksExitCell;
+
+	Valueable<bool> HasSecondaryRallyPoint;
 
 	Valueable<int> Overpower_KeepOnline;
 	Valueable<int> Overpower_ChargeWeapon;
@@ -208,6 +214,10 @@ public:
 		, PlaceBuilding_OnLand_Unique {}
 		, PlaceBuilding_OnWater_Unique {}
 		, CanBuildUnderUnits { false }
+		, JustHasRallyPoint { false }
+		, JumpjetExitCoord { }
+		, RallySpeedType { }
+		, RallyMovementZone { }
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
 		, FactoryPlant_DisallowTypes {}
@@ -228,6 +238,7 @@ public:
 		, Adjacent_Disallowed_Prohibit { false }
 		, Adjacent_Disallowed_ProhibitDistance { 0 }
 		, BarracksExitCell {}
+		, HasSecondaryRallyPoint { false }
 		, Overpower_KeepOnline { 2 }
 		, Overpower_ChargeWeapon { 1 }
 		, DisableDamageSound { false }
