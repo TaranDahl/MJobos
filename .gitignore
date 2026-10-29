@@ -33,6 +33,9 @@ out
 __pycache__/
 *.py[cod]
 
+# Brainstorm visual companion session files
+.superpowers/
+
 # migration working docs (local only)
 /MIGRATION-PLAN.md
 /拆分清单.md
