@@ -352,6 +352,9 @@ public:
 
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
 
+
+		Valueable<bool> VHPScan_Enhanced;
+
 		NullableIdx<AnimTypeClass> Parasite_GrappleAnim;
 		Nullable<bool> Parasite_AllowWaterExit;
 
@@ -879,6 +882,8 @@ public:
 			, Decloak_OnBlockingMovement { true }
 			, Decloak_OnCloakingWithLowHealth { true }
 			, Decloak_OnCrushing { true }
+
+			, VHPScan_Enhanced { false }
 
 			, Parasite_GrappleAnim {}
 			, Parasite_AllowWaterExit {}

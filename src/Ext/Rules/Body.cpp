@@ -419,6 +419,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->Decloak_OnCloakingWithLowHealth.Read(exINI, GameStrings::General, "Decloak.OnCloakingWithLowHealth");
 	this->Decloak_OnCrushing.Read(exINI, GameStrings::General, "Decloak.OnCrushing");
 
+	this->VHPScan_Enhanced.Read(exINI, GameStrings::CombatDamage, "VHPScan.Enhanced");
+
 	this->Parasite_GrappleAnim.Read(exINI, GameStrings::AudioVisual, "Parasite.GrappleAnim");
 	this->Parasite_AllowWaterExit.Read(exINI, GameStrings::General, "Parasite.AllowWaterExit");
 
@@ -1017,6 +1019,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->Decloak_OnBlockingMovement)
 		.Process(this->Decloak_OnCloakingWithLowHealth)
 		.Process(this->Decloak_OnCrushing)
+		.Process(this->VHPScan_Enhanced)
 		.Process(this->Parasite_GrappleAnim)
 		.Process(this->Parasite_AllowWaterExit)
 		.Process(this->InfantryAutoDeploy)
