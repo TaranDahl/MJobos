@@ -1291,6 +1291,11 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
 	this->Cameo_OverrideTechnos.Read(exINI, pSection, "Cameo.OverrideTechnos");
 	this->Cameo_RequiredHouses = pINI->ReadHouseTypesList(pSection, "Cameo.RequiredHouses", this->Cameo_RequiredHouses);
+	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
+	this->CanManualReload_WhenFull.Read(exINI, pSection, "CanManualReload.WhenFull");
+	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
+	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
+	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
 
 	this->NoRearm_UnderEMP.Read(exINI, pSection, "NoRearm.UnderEMP");
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
@@ -2004,6 +2009,11 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->IsGreyCameoForCurrentPlayer)
 		.Process(this->CanBuildNowCheck)
 		.Process(this->CanBuildNowCount)
+		.Process(this->CanManualReload)
+		.Process(this->CanManualReload_WhenFull)
+		.Process(this->CanManualReload_ResetROF)
+		.Process(this->CanManualReload_DetonateWarhead)
+		.Process(this->CanManualReload_DetonateConsume)
 
 		.Process(this->NoRearm_UnderEMP)
 		.Process(this->NoRearm_Temporal)

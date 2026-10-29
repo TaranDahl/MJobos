@@ -12,6 +12,7 @@
 #include "SelectCaptured.h"
 #include "ShowCurrentInfo.h"
 #include "AssignRallyPoint.h"
+#include "ManualReloadAmmo.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "AggressiveStance.h"
@@ -49,6 +50,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		"CeaseFire",
 		"Tip:CeaseFire",
 		&CeaseFireStanceClass::CeaseFireExecute);
+	MakeCommand<ManualReloadAmmoCommandClass>();
 	MakeCommand<ToggleMessageListCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 	MakeCommand<DeselectObjectCommandClass>();
@@ -70,6 +72,12 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		SWSidebarClass::Commands[8] = MakeCommand<FireTacticalSWCommandClass<8>>();
 		SWSidebarClass::Commands[9] = MakeCommand<FireTacticalSWCommandClass<9>>();
 	}
+
+	ShapeButtonHelper::RegisterButton(
+		ShapeButtonId::ManualReload,
+		"ManualReload",
+		"Tip:ManualReload",
+		&ManualReloadAmmoCommandClass::ManualReloadExecute);
 
 	if (Phobos::Config::DevelopmentCommands)
 	{
