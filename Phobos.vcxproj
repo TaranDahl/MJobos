@@ -181,6 +181,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.Cloak.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.CloneProduction.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.Facing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Firing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.IgnoredByMouse.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Misc.cpp" />

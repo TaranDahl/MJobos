@@ -49,6 +49,9 @@ public:
 	bool LastRearmWasFullDelay;
 	bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 	int WHAnimRemainingCreationInterval;
+	bool UnitIdleIsSelected;
+	CDTimerClass UnitIdleActionTimer;
+	CDTimerClass UnitIdleActionGapTimer;
 	WeaponTypeClass* LastWeaponType;
 	int ScatteringStopFrame;
 	bool HasCachedClickMission;
@@ -134,6 +137,9 @@ public:
 		, LastRearmWasFullDelay { false }
 		, CanCloakDuringRearm { false }
 		, WHAnimRemainingCreationInterval { 0 }
+		, UnitIdleIsSelected { false }
+		, UnitIdleActionTimer {}
+		, UnitIdleActionGapTimer {}
 		, LastWeaponType {}
 		, ScatteringStopFrame { 0 }
 		, HasCachedClickMission { false }
@@ -226,6 +232,13 @@ public:
 	int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr, bool requireAnims = false) const;
 	void InitializeDisplayInfo(TechnoTypeClass* pType);
 	void UpdateCachedClick();
+	void StopIdleAction();
+	void ApplyIdleAction();
+	void ManualIdleAction();
+	void CheckIdleAction();
+	void UpdateIdleDir();
+	void SetTurretDir(DirStruct desiredDir, bool limited = false);
+	void StopRotateWithNewROT(int ROT = -1);
 	void ApplyMindControlRangeLimit();
 	int ApplyForceWeaponInRange(AbstractClass* pTarget);
 	void ResetDelayedFireTimer();
