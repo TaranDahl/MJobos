@@ -99,6 +99,7 @@ public:
 	std::vector<ValueableVector<int>> SW_Next_RandomWeightsData;
 	std::vector<ValueableVector<int>> SW_Link_RandomWeightsData;
 
+	std::vector<AttachmentTransformGroup> Attachment_Transform;
 	std::vector<TypeConvertGroup> Convert_Pairs;
 
 	Valueable<bool> UseWeeds;
@@ -182,6 +183,7 @@ public:
 		, SW_Next_RandomWeightsData {}
 		, ShowTimer_Priority { 0 }
 		, ShowTimer_Percentage { false }
+		, Attachment_Transform {}
 		, Convert_Pairs {}
 		, ShowDesignatorRange { true }
 		, TabIndex { 1 }
@@ -232,6 +234,7 @@ public:
 	void ApplyLimboKill(HouseClass* pHouse);
 	void ApplyDetonation(HouseClass* pHouse, const CellStruct& cell);
 	void ApplySWNext(SuperClass* pSW, const CellStruct& cell);
+	void ApplyAttachmentTransform(HouseClass* pHouse);
 	void ApplyTypeConversion(SuperClass* pSW);
 	void HandleEMPulseLaunch(SuperClass* pSW, const CellStruct& cell) const;
 	std::vector<BuildingClass*> GetEMPulseCannons(HouseClass* pOwner, const CellStruct& cell) const;

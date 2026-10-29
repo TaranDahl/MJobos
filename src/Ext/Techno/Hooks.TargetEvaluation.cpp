@@ -358,8 +358,37 @@ DEFINE_FUNCTION_JUMP(VTABLE, 0x7EB418, InfantryClass__GetFireError_Wrapper)
 static Action __fastcall UnitClass__WhatAction_Wrapper(UnitClass* pThis, void* _, ObjectClass* pObj, bool ignoreForce)
 {
 	AresScheme::Prefix(pThis, pObj, -1, false);
-	auto const result = pThis->UnitClass::MouseOverObject(pObj, ignoreForce);
+	auto result = pThis->UnitClass::MouseOverObject(pObj, ignoreForce);
 	AresScheme::Suffix();
+
+	auto const pExt = TechnoExt::Fetch(pThis);
+	if (!pExt->ParentAttachment)
+		return result;
+
+	switch (result)
+	{
+	case Action::Repair:
+		result = Action::NoRepair;
+		break;
+
+	case Action::Self_Deploy:
+		if (pThis->Type->DeploysInto)
+			result = Action::NoDeploy;
+		break;
+
+	case Action::Sabotage:
+	case Action::Capture:
+	case Action::Enter:
+		result = Action::NoEnter;
+		break;
+
+	case Action::GuardArea:
+	case Action::AttackMoveNav:
+	case Action::Move:
+		result = Action::NoMove;
+		break;
+	}
+
 	return result;
 }
 DEFINE_FUNCTION_JUMP(VTABLE, 0x7F5CE4, UnitClass__WhatAction_Wrapper)

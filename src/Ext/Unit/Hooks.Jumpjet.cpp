@@ -23,7 +23,7 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 	{
 		pThis->SecondaryFacing.SetDesired(tgtDir);
 	}
-	else // 0x736FB6
+	else if (!TechnoExt::HasAttachmentLoco(pThis) || !TechnoExt::Fetch(pThis)->ParentAttachment) // 0x736FB6
 	{
 		if (const auto jjLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
 		{

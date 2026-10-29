@@ -61,10 +61,17 @@ public:
 		{
 			if (Tactical_IsInSelectionRect(pThis, rect, selected) && ObjectClass_IsSelectable(selected.Object))
 			{
-				if ((selected.Object->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+				if (const auto pTechno = abstract_cast<TechnoClass*, true>(selected.Object))
 				{
-					if (!TechnoExt::Fetch(static_cast<TechnoClass*>(selected.Object))->TypeExtData->LowSelectionPriority)
-						return true;
+					const auto pExt = TechnoExt::Fetch(static_cast<TechnoClass*>(selected.Object));
+
+					if (!pExt->TypeExtData->LowSelectionPriority)
+					{
+						const auto pParent = pExt->ParentAttachment;
+
+						if (!pParent || !pParent->GetType()->LowSelectionPriority)
+							return true;
+					}
 				}
 			}
 		}
@@ -72,8 +79,8 @@ public:
 		return false;
 	}
 
-	// Reversed from Tactical::Select
-	static void Tactical_SelectFiltered(TacticalClass* pThis, LTRBStruct* pRect, callback_type check_callback, bool bPriorityFiltering)
+	static // Reversed from Tactical::Select
+	void Tactical_SelectFiltered(TacticalClass* pThis, LTRBStruct* pRect, callback_type check_callback, bool priorityFiltering)
 	{
 		Unsorted::MoveFeedback = true;
 
@@ -89,8 +96,14 @@ public:
 
 				if (auto const pTypeExt = TechnoTypeExt::TryFetch(pTechnoType)) // If pTechnoType is nullptr so will be pTypeExt
 				{
-					if (bPriorityFiltering && pTypeExt->LowSelectionPriority)
+					const auto pExt = TechnoExt::Fetch(static_cast<TechnoClass*>(pObject));
+
+					if (priorityFiltering // Attached units shouldn't be selected regardless of the setting
+						&& (pExt->ParentAttachment && pExt->ParentAttachment->GetType()->LowSelectionPriority
+							|| Phobos::Config::PrioritySelectionFiltering && pTypeExt->LowSelectionPriority))
+					{
 						continue;
+					}
 
 					if (Game::IsTypeSelecting())
 					{

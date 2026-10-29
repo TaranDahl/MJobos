@@ -13,6 +13,7 @@
 #include <New/Type/Affiliated/DroppodTypeClass.h>
 #include <New/Type/Affiliated/TiberiumEaterTypeClass.h>
 #include <New/Type/Affiliated/CreateUnitTypeClass.h>
+#include <New/Type/AttachmentTypeClass.h>
 
 class Matrix3D;
 class ParticleSystemTypeClass;
@@ -342,6 +343,10 @@ public:
 	ValueableVector<AnimTypeClass*> Promote_EliteAnimation;
 
 	Nullable<AffectedHouse> RadarInvisibleToHouse;
+
+	ValueableVector<AttachmentTypeClass*> AttachmentTypes;
+	Valueable<int> AttachmentTopLayerMinHeight;
+	Valueable<int> AttachmentUndergroundLayerMaxHeight;
 
 	struct LaserTrailDataEntry
 	{
@@ -779,6 +784,10 @@ public:
 		, Overload_DeathSound {}
 		, Overload_ParticleSys {}
 		, Overload_ParticleSysCount {}
+
+		, AttachmentTypes {}
+		, AttachmentTopLayerMinHeight { RulesExt::Global()->AttachmentTopLayerMinHeight }
+		, AttachmentUndergroundLayerMaxHeight { RulesExt::Global()->AttachmentUndergroundLayerMaxHeight }
 
 		, FallingDownDamage {}
 		, FallingDownDamage_Water {}

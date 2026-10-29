@@ -176,6 +176,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.ReceiveDamage.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.TargetEvaluation.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Targeting.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.TechnoAttachment.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Tint.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Transport.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.WeaponEffects.cpp" />
@@ -232,6 +233,7 @@
     <ClCompile Include="src\Interop\ScenarioExt.cpp" />
     <ClCompile Include="src\Interop\Version.cpp" />
     <!-- src\Locomotion -->
+    <ClCompile Include="src\Locomotion\AttachmentLocomotionClass.cpp" />
     <ClCompile Include="src\Locomotion\TestLocomotionClass.cpp" />
     <!-- src\Misc -->
     <ClCompile Include="src\Misc\BlittersFix.cpp" />
@@ -239,6 +241,7 @@
     <ClCompile Include="src\Misc\ExceptionHandler.Dialog.cpp" />
     <ClCompile Include="src\Misc\ExceptionHandler.Report.cpp" />
     <ClCompile Include="src\Misc\FlyingStrings.cpp" />
+    <ClCompile Include="src\Misc\Hooks.AI.cpp" />
     <ClCompile Include="src\Misc\Hooks.AlphaImage.cpp" />
     <ClCompile Include="src\Misc\Hooks.Ares.cpp" />
     <ClCompile Include="src\Misc\Hooks.BugFixes.cpp" />
@@ -263,11 +266,13 @@
     <!-- src\New\Entity -->
     <ClCompile Include="src\New\Entity\Ares\RadarJammerClass.cpp" />
     <ClCompile Include="src\New\Entity\AttachEffectClass.cpp" />
+    <ClCompile Include="src\New\Entity\AttachmentClass.cpp" />
     <ClCompile Include="src\New\Entity\BannerClass.cpp" />
     <ClCompile Include="src\New\Entity\LaserTrailClass.cpp" />
     <ClCompile Include="src\New\Entity\ShieldClass.cpp" />
     <!-- src\New\Type -->
     <ClCompile Include="src\New\Type\AttachEffectTypeClass.cpp" />
+    <ClCompile Include="src\New\Type\AttachmentTypeClass.cpp" />
     <ClCompile Include="src\New\Type\BannerTypeClass.cpp" />
     <ClCompile Include="src\New\Type\DigitalDisplayTypeClass.cpp" />
     <ClCompile Include="src\New\Type\InsigniaTypeClass.cpp" />
@@ -390,6 +395,7 @@
     <ClInclude Include="src\Interop\ScenarioExt.h" />
     <ClInclude Include="src\Interop\Version.h" />
     <!-- src\Locomotion -->
+    <ClInclude Include="src\Locomotion\AttachmentLocomotionClass.h" />
     <ClInclude Include="src\Locomotion\TestLocomotionClass.h" />
     <!-- src\Misc -->
     <ClInclude Include="src\Misc\BlittersFix.h" />
@@ -403,11 +409,13 @@
     <!-- src\New\Entity -->
     <ClInclude Include="src\New\Entity\Ares\RadarJammerClass.h" />
     <ClInclude Include="src\New\Entity\AttachEffectClass.h" />
+    <ClInclude Include="src\New\Entity\AttachmentClass.h" />
     <ClInclude Include="src\New\Entity\BannerClass.h" />
     <ClInclude Include="src\New\Entity\LaserTrailClass.h" />
     <ClInclude Include="src\New\Entity\ShieldClass.h" />
     <!-- src\New\Type -->
     <ClInclude Include="src\New\Type\AttachEffectTypeClass.h" />
+    <ClInclude Include="src\New\Type\AttachmentTypeClass.h" />
     <ClInclude Include="src\New\Type\BannerTypeClass.h" />
     <ClInclude Include="src\New\Type\DigitalDisplayTypeClass.h" />
     <ClInclude Include="src\New\Type\EVATypeClass.h" />

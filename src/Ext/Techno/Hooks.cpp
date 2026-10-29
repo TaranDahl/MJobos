@@ -301,6 +301,7 @@ void TechnoExt::InitializeState(TechnoTypeClass* pType)
 	this->InitializeAttachEffects();
 	this->InitializeDisplayInfo(pType);
 	this->InitializeLaserTrails();
+	this->InitializeAttachments();
 
 	if (!this->AE.HasTint) // already updated when initializing attach effect
 		this->UpdateTintValues();
@@ -999,6 +1000,10 @@ DEFINE_HOOK(0x5F4021, ObjectClass_Update_FallingDown_ToDead, 0x6)
 	if (const auto pTechno = abstract_cast<TechnoClass*, true>(pThis))
 	{
 		const auto pExt = TechnoExt::Fetch(pTechno);
+
+		if (pExt->ParentAttachment)
+			return 0;
+
 		const bool onParachuted = pExt->OnParachuted;
 		pExt->OnParachuted = false;
 

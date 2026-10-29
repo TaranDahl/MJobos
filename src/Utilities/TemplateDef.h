@@ -45,6 +45,7 @@
 #include <Powerups.h>
 #include <CRT.h>
 #include <Locomotion/TestLocomotionClass.h>
+#include <Locomotion/AttachmentLocomotionClass.h>
 
 #include <unordered_set>
 
@@ -522,6 +523,34 @@ namespace detail
 			{
 				Debug::INIParseFailed(pSection, pKey, parser.value(), "Invalid Mission name");
 			}
+		}
+
+		return false;
+	}
+
+	template <>
+	inline bool read<AttachmentYSortPosition>(AttachmentYSortPosition& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			if (_strcmpi(parser.value(), "default") == 0)
+			{
+				value = AttachmentYSortPosition::Default;
+			}
+			else if (_strcmpi(parser.value(), "underparent") == 0)
+			{
+				value = AttachmentYSortPosition::UnderParent;
+			}
+			else if (_strcmpi(parser.value(), "overparent") == 0)
+			{
+				value = AttachmentYSortPosition::OverParent;
+			}
+			else
+			{
+				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected an attachment YSort position");
+				return false;
+			}
+			return true;
 		}
 
 		return false;
@@ -1329,6 +1358,7 @@ if(_strcmpi(parser.value(), #name) == 0){ value = __uuidof(name ## LocomotionCla
 #ifdef CUSTOM_LOCO_EXAMPLE_ENABLED // Add semantic parsing for loco
 			PARSE_IF_IS_PHOBOS_LOCO(Test);
 #endif
+			PARSE_IF_IS_PHOBOS_LOCO(Attachment);
 
 #undef PARSE_IF_IS_PHOBOS_LOCO
 

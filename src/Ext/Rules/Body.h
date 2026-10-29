@@ -331,6 +331,9 @@ public:
 
 		Valueable<double> DamagedSpeed;
 
+		Valueable<int> AttachmentTopLayerMinHeight;
+		Valueable<int> AttachmentUndergroundLayerMaxHeight;
+
 		Valueable<bool> HarvesterScanAfterUnload;
 
 		Valueable<bool> AnimCraterDestroyTiberium;
@@ -833,6 +836,9 @@ public:
 			, ProneSpeed_NoCrawls { 1.5 }
 
 			, DamagedSpeed { 0.75 }
+
+			, AttachmentTopLayerMinHeight { 500 }
+			, AttachmentUndergroundLayerMaxHeight { -256 }
 
 			, HarvesterScanAfterUnload { false }
 
