@@ -353,6 +353,7 @@ public:
 	Valueable<UnitTypeClass*> ThisIsAJumpjet;
 
 	Valueable<int> JumpjetSpeedType;
+	Valueable<bool> Engineer_CanAutoFire;
 
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
@@ -886,6 +887,7 @@ public:
 		, ThisIsAJumpjet { nullptr }
 
 		, JumpjetSpeedType { 3 }
+		, Engineer_CanAutoFire { false }
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}

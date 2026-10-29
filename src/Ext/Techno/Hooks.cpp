@@ -2063,6 +2063,9 @@ static int GetGuardRange(TechnoClass* pThis, int control)
 		return 0;
 	}
 
+	if (pThis->IsEngineer() && !pTypeExt->Engineer_CanAutoFire)
+		return 0;
+
 	// Set range from weapon range if GuardRange is not set.
 	if (!range)
 	{

@@ -1323,6 +1323,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		this->ThisIsAJumpjet = nullptr;
 
 	this->JumpjetSpeedType.Read(exINI, pSection, "JumpjetSpeedType");
+	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
 
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
@@ -2101,6 +2102,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->ExitCoord)
 
 		.Process(this->IgnoreRallyPoint)
+		.Process(this->Engineer_CanAutoFire)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

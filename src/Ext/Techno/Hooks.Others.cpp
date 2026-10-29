@@ -76,6 +76,50 @@ DEFINE_HOOK(0x703B0B, TechnoClass_VisualCharacter_Normal, 0x5)
 
 #pragma endregion
 
+#pragma region EngineerAutoFire
+
+DEFINE_HOOK(0x6F8EF1, TechnoClass_SelectAutoTarget_Engineer, 0x6)
+{
+	enum { SkipGameCode = 0x6F8EF7 };
+
+	GET(InfantryTypeClass* const, pType, EAX);
+
+	R->CL(pType->Engineer && !TechnoTypeExt::Fetch(pType)->Engineer_CanAutoFire);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x709249, TechnoClass_CanPassiveAcquireNow_Engineer1, 0xA)
+{
+	enum { SkipGameCode = 0x709253 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	R->AL(pThis->IsEngineer() && !TechnoExt::Fetch(pThis)->TypeExtData->Engineer_CanAutoFire);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x6F8AEC, TechnoClass_TryAutoTargetObject_Engineer1, 0x6)
+{
+	enum { SkipGameCode = 0x6F8AF2 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	R->AL(pThis->IsEngineer() && !TechnoExt::Fetch(pThis)->TypeExtData->Engineer_CanAutoFire);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x6F8BB2, TechnoClass_TryAutoTargetObject_Engineer2, 0x6)
+{
+	enum { SkipGameCode = 0x6F8BB8 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	R->AL(pThis->IsEngineer() && !TechnoExt::Fetch(pThis)->TypeExtData->Engineer_CanAutoFire);
+	return SkipGameCode;
+}
+
+#pragma endregion
+
 #pragma region DebugLogInGreatestThreat
 
 DEFINE_HOOK(0x6F9C80, TechnoClass_GreatestThreat_LogDeadInTechnoArray, 0x6)
