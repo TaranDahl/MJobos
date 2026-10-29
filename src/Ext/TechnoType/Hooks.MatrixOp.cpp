@@ -62,6 +62,22 @@ static double GetPrimaryRadian(UnitClass* pThis)
 	return pThis->PrimaryFacing.Current().GetRadian<32>();
 }
 
+static size_t GetTurretFacing(const UnitClass* pThis)
+{
+	const auto pType = pThis->Type;
+	const auto pTypeExt = UnitTypeExt::Fetch(pType);
+	const int turretROT = pType->ROT;
+
+	if (turretROT > 6)
+		return pThis->SecondaryFacing.Current().GetFacing<32>();
+	else if (turretROT > 4)
+		return pThis->SecondaryFacing.Current().GetFacing<64>();
+	else if (turretROT > 2)
+		return pThis->SecondaryFacing.Current().GetFacing<128>();
+
+	return pThis->SecondaryFacing.Current().GetFacing<256>();
+}
+
 DEFINE_HOOK(0x73BA12, UnitClass_DrawAsVXL_RewriteTurretDrawing, 0x6)
 {
 	enum { SkipGameCode = 0x73BEA4 };
@@ -526,13 +542,60 @@ DEFINE_PATCH(0x40F271, 0x00, 0x00, 0x00, 0x08); // 128M voxel cache
 
 DEFINE_HOOK(0x73B748, UnitClass_DrawVXL_ResetKeyForTurretUse, 0x7)
 {
+	enum { SkipGameCode = 0x73B79F };
+
 	REF_STACK(PhobosVoxelIndexKey, key, STACK_OFFSET(0x1C4, -0x1B0));
 
-	// Main body drawing completed, then enable accurate drawing of turrets and barrels
-	if (key.Base.Is_Valid_Key() && key.IsJumpjetKey())
-		key.Base.Invalidate();
+	if (!key.Base.Is_Valid_Key())
+		return 0;
 
-	return 0;
+	// Preserve the upstream Jumpjet cache invalidation path verbatim.
+	if (key.IsJumpjetKey())
+	{
+		key.Base.Invalidate();
+		return 0;
+	}
+
+	GET(const UnitClass* const, pThis, EBP);
+	GET(const UnitTypeClass* const, pDrawType, EBX);
+	REF_STACK(int, turretFrame, STACK_OFFSET(0x1C4, -0x18C));
+
+	const auto pDrawTypeExt = UnitTypeExt::Fetch(pDrawType);
+	if (*pDrawTypeExt->TurretOffset.GetEx() == CoordStruct::Empty
+		&& pDrawTypeExt->ExtraTurretCount <= 0
+		&& pDrawTypeExt->ExtraBarrelCount <= 0)
+	{
+		key.Base.Value &= ~0x3FFu;
+	}
+	else
+	{
+		key.Base.Value &= ~0x1Fu;
+	}
+
+	if ((pThis->Type->TurretCount <= 0 || pThis->Type->IsGattling) && !pThis->Type->DisableVoxelCache)
+	{
+		key.Base.MinorVoxel.TurretWeaponIndex = GetTurretFacing(pThis);
+		key.Base.MinorVoxel.TurretFacing = 0;
+	}
+	else
+	{
+		key.Base.MinorVoxel.TurretWeaponIndex = 0;
+		key.Base.MinorVoxel.TurretFacing = pThis->SecondaryFacing.Current().GetFacing<32>();
+	}
+
+	if (!pDrawTypeExt->WalkFrameFirst.Get(RulesExt::Global()->WalkFrameFirst))
+	{
+		const auto pTurretHva = pDrawType->TurretVoxel.HVA;
+		if (!pTurretHva || pTurretHva->FrameCount <= 1)
+			turretFrame = 0;
+		else if (pDrawType->MainVoxel.HVA->FrameCount > 1)
+			turretFrame = pThis->TurretAnimFrame % pTurretHva->FrameCount;
+	}
+
+	key.Base.MinorVoxel.TurretFrameIndex = turretFrame & 0xFFu;
+	R->ESI(key.Base.Value);
+
+	return SkipGameCode;
 }
 
 // Visual bugfix : Teleport loco vxls could not tilt

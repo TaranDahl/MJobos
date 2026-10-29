@@ -149,6 +149,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ToolTip_Background_BlurSize.Read(exINI, GameStrings::AudioVisual, "ToolTip.Background.BlurSize");
 	this->RadialIndicatorVisibility.Read(exINI, GameStrings::AudioVisual, "RadialIndicatorVisibility");
 	this->DrawTurretShadow.Read(exINI, GameStrings::AudioVisual, "DrawTurretShadow");
+	this->WalkFrameFirst.Read(exINI, GameStrings::AudioVisual, "WalkFrameFirst");
 	this->AnimRemapDefaultColorScheme.Read(exINI, GameStrings::AudioVisual, "AnimRemapDefaultColorScheme");
 	this->TimerBlinkColorScheme.Read(exINI, GameStrings::AudioVisual, "TimerBlinkColorScheme");
 	this->ShowDesignatorRange.Read(exINI, GameStrings::AudioVisual, "ShowDesignatorRange");
@@ -877,6 +878,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->FreeMCV_CreditsThreshold)
 		.Process(this->RadialIndicatorVisibility)
 		.Process(this->DrawTurretShadow)
+		.Process(this->WalkFrameFirst)
 		.Process(this->IsVoiceCreatedGlobal)
 		.Process(this->SetTabBySelectingFactory)
 		.Process(this->SelectionFlashDuration)

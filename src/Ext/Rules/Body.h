@@ -206,6 +206,7 @@ public:
 		Valueable<int> FreeMCV_CreditsThreshold;
 		Valueable<AffectedHouse> RadialIndicatorVisibility;
 		Valueable<bool> DrawTurretShadow;
+		Valueable<bool> WalkFrameFirst;
 		ValueableIdx<ColorScheme> AnimRemapDefaultColorScheme;
 		ValueableIdx<ColorScheme> TimerBlinkColorScheme;
 
@@ -730,6 +731,7 @@ public:
 			, FreeMCV_CreditsThreshold { 1500 }
 			, RadialIndicatorVisibility { AffectedHouse::Allies }
 			, DrawTurretShadow { false }
+			, WalkFrameFirst { true }
 			, IsVoiceCreatedGlobal { false }
 			, SetTabBySelectingFactory { false }
 			, SelectionFlashDuration { 0 }
