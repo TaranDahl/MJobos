@@ -304,6 +304,19 @@ In `RA2MD.INI`:
 ShowPlacementPreview=yes   ; boolean
 ```
 
+### More display styles for placing grids
+
+- `PlacementGrid.Expand` enables configurable frames from `place.shp` while placing a building.
+- `PlacementGrid.LandFrames` and `PlacementGrid.WaterFrames` select frames for cells occupied by movable infantry or units, cells outside the building's adjacent range, and normal in-range cells respectively.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+PlacementGrid.Expand=false       ; boolean
+PlacementGrid.LandFrames=1,0,0   ; integer, zero-based frame index - have movable technos, near boundary, is normal
+PlacementGrid.WaterFrames=1,0,0  ; integer, zero-based frame index - have movable technos, near boundary, is normal
+```
+
 ### Real time timers
 
 - Timers can now display values in real time, taking game speed into account. This can be enabled with `RealTimeTimers=true`.

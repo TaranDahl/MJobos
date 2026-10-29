@@ -165,6 +165,18 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass*
 	return isUpgrade ? result : -1;
 }
 
+bool BuildingTypeExt::CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse)
+{
+	if (!pOccupierHouse || !pBuildingHouse)
+		return false;
+	else if (pOccupierHouse->IsAlliedWith(pBuildingHouse))
+		return true;
+	else if (SessionClass::IsCampaign() && pBuildingHouse->IsControlledByHuman() && pOccupierHouse->IsControlledByHuman())
+		return true;
+
+	return false;
+}
+
 void BuildingTypeExt::Initialize()
 {
 	TechnoTypeExt::Initialize();
