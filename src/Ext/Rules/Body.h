@@ -163,6 +163,7 @@ public:
 		Valueable<bool> AllowDeployControlledMCV;
 
 		Valueable<bool> TypeSelectUseIFVMode;
+		Valueable<bool> Cameo_AlwaysExist;
 
 		Valueable<bool> IronCurtain_KeptOnDeploy;
 		Valueable<IronCurtainEffect> IronCurtain_EffectOnOrganics;
@@ -688,6 +689,7 @@ public:
 			, AllowDeployControlledMCV { false }
 
 			, TypeSelectUseIFVMode { false }
+			, Cameo_AlwaysExist { false }
 
 			, IronCurtain_KeptOnDeploy { true }
 			, IronCurtain_EffectOnOrganics { IronCurtainEffect::Kill }

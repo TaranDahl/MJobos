@@ -285,6 +285,14 @@ public:
 	Valueable<int> RateDown_Cover_Value;
 	Valueable<int> RateDown_Cover_AmmoBelow;
 
+	Nullable<bool> Cameo_AlwaysExist;
+	ValueableVector<TechnoTypeClass*> Cameo_OverrideTechnos;
+	DWORD Cameo_RequiredHouses;
+	bool IsMetTheEssentialConditions;
+	bool IsGreyCameoForCurrentPlayer;
+	bool CanBuildNowCheck;
+	int CanBuildNowCount;
+
 	Nullable<bool> NoRearm_UnderEMP;
 	Nullable<bool> NoRearm_Temporal;
 	Nullable<bool> NoReload_UnderEMP;
@@ -717,6 +725,14 @@ public:
 		, RateDown_Cover_Value { 0 }
 		, RateDown_Cover_AmmoBelow { -2 }
 
+		, Cameo_AlwaysExist {}
+		, Cameo_OverrideTechnos {}
+		, Cameo_RequiredHouses { 0xFFFFFFFF }
+		, IsMetTheEssentialConditions { false }
+		, IsGreyCameoForCurrentPlayer { false }
+		, CanBuildNowCheck { false }
+		, CanBuildNowCount { 0 }
+
 		, NoRearm_UnderEMP {}
 		, NoRearm_Temporal {}
 		, NoReload_UnderEMP {}
@@ -951,6 +967,8 @@ public:
 	CoordStruct location, HouseClass* pOwner, TechnoClass* pInvoker, HouseClass* pInvokerHouse);
 
 	static WeaponTypeClass* GetWeaponType(TechnoTypeClass* pThis, int weaponIndex, bool isElite);
+	static int __fastcall RequirementsMetExtraCheck(void* pAresHouseExt, void* _, TechnoTypeClass* pType);
+	static CanBuildResult CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild);
 
 	// Ares 0.A
 	static const char* GetSelectionGroupID(ObjectTypeClass* pType);
