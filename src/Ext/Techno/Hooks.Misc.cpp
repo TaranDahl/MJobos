@@ -299,8 +299,10 @@ DEFINE_HOOK(0x4D962B, FootClass_SetDestination_RecycleFLH, 0x5)
 			*pDestCrd += TechnoExt::GetFLHAbsoluteCoords(pCarrier, FLH, pCarrierTypeExt->Spawner_RecycleOnTurret.Get(RulesExt::Global()->Spawner_RecycleOnTurret)) - pCarrier->GetCoords();
 		}
 	}
-	else if (!pThis->GetTechnoType()->MissileSpawn && pDest->WhatAmI() == AbstractType::Building
-		&& pThis->SendCommand(RadioCommand::QueryCanEnter, static_cast<BuildingClass*>(pDest)) != RadioCommand::AnswerPositive)
+	else if ((pDest->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None
+		&& (((pDest->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None)
+			? RulesExt::Global()->FollowTargetSelf.Get() && locomotion_cast<JumpjetLocomotionClass*>((static_cast<FootClass*>(pDest))->Locomotor)
+			: !pThis->GetTechnoType()->MissileSpawn && (pThis->SendCommand(RadioCommand::QueryCanEnter, static_cast<BuildingClass*>(pDest)) != RadioCommand::AnswerPositive)))
 	{
 		GET(CoordStruct*, pDestCrd, EAX);
 		auto crd = pDest->GetCoords();
