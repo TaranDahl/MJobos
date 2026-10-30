@@ -176,6 +176,7 @@ public:
 		Valueable<bool> ForceAAWeapon_InRange_ApplyRangeModifiers;
 
 		Valueable<bool> BuildingProductionQueue;
+		Valueable<bool> IgnoreCenterMinorRadarEvent;
 		Valueable<int> SmudgeUpdateTime;
 		Valueable<bool> UpdateInLimbo_Occupier;
 		Valueable<bool> UpdateInLimbo_NormalPassenger;
@@ -838,6 +839,7 @@ public:
 			, ForceAAWeapon_InRange_ApplyRangeModifiers { false }
 
 			, BuildingProductionQueue { false }
+			, IgnoreCenterMinorRadarEvent { false }
 			, SmudgeUpdateTime { 0 }
 			, UpdateInLimbo_Occupier { false }
 			, UpdateInLimbo_NormalPassenger { false }
