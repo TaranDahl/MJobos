@@ -1329,6 +1329,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
 	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
 	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
+	this->ReorganizeToWhenDefeated_Excluded.Read(exINI, pSection, "ReorganizeToWhenDefeated.Excluded");
 
 	this->NoRearm_UnderEMP.Read(exINI, pSection, "NoRearm.UnderEMP");
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
@@ -2130,6 +2131,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->CanManualReload_DetonateWarhead)
 		.Process(this->CanManualReload_DetonateConsume)
 		.Process(this->UniqueTechno)
+		.Process(this->ReorganizeToWhenDefeated_Excluded)
 
 		.Process(this->NoRearm_UnderEMP)
 		.Process(this->NoRearm_Temporal)

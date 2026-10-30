@@ -444,6 +444,7 @@ public:
 		Valueable<int> AttachmentUndergroundLayerMaxHeight;
 
 		Valueable<bool> HarvesterScanAfterUnload;
+		Valueable<AffectedHouse> ReorganizeToWhenDefeated;
 
 		Valueable<int> TunnelSimpleDistTooFar;
 		Valueable<int> TunnelPathingDistTooFar;
@@ -1079,6 +1080,7 @@ public:
 			, AttachmentUndergroundLayerMaxHeight { -256 }
 
 			, HarvesterScanAfterUnload { false }
+			, ReorganizeToWhenDefeated { AffectedHouse::None }
 
 			, TunnelSimpleDistTooFar { 12 }
 			, TunnelPathingDistTooFar { 15 }

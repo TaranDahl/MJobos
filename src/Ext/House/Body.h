@@ -236,6 +236,8 @@ public:
 	static bool ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass* pType, bool ignoreQueued);
 	static bool CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType);
 	static void RecheckOwnerBitfieldForCurrentPlayer();
+	static void ReorganizeAllTo(HouseClass* pFromHouse, HouseClass* pToHouse);
+	static void __fastcall DecideTechnosFate(HouseClass* pHouse);
 
 	static void CalculatePowerSurplus(HouseClass* pThis);
 };

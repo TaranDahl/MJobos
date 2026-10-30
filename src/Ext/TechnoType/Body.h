@@ -345,6 +345,7 @@ public:
 	Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
 	Valueable<int> CanManualReload_DetonateConsume;
 	Valueable<bool> UniqueTechno;
+	Valueable<bool> ReorganizeToWhenDefeated_Excluded;
 
 	Nullable<bool> NoRearm_UnderEMP;
 	Nullable<bool> NoRearm_Temporal;
@@ -906,6 +907,7 @@ public:
 		, CanManualReload_DetonateWarhead {}
 		, CanManualReload_DetonateConsume { 0 }
 		, UniqueTechno { false }
+		, ReorganizeToWhenDefeated_Excluded { false }
 
 		, NoRearm_UnderEMP {}
 		, NoRearm_Temporal {}

@@ -7,6 +7,7 @@
 #include <Ext/WarheadType/Body.h>
 #include <Ext/Sidebar/Body.h>
 #include <Ext/TechnoType/Body.h>
+#include <Ext/House/Body.h>
 #include <Ext/EBolt/Body.h>
 #include <Ext/SWType/Body.h>
 #include <Ext/CaptureManager/Body.h>
@@ -298,6 +299,8 @@ void Apply_Ares3_0_Patches()
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x436DA, &LetGo);
 
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x021B40, GET_OFFSET(TechnoTypeExt::RequirementsMetExtraCheck));
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x24AC9, &HouseExt::DecideTechnosFate);
 
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x3207C, AresHelper::AresBaseAddress + 0x320DF);
@@ -421,6 +424,8 @@ void Apply_Ares3_0p1_Patches()
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x441BA, &LetGo);
 
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x0225C0, GET_OFFSET(TechnoTypeExt::RequirementsMetExtraCheck));
+	// Replace the DestroyAll when defeated:
+	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x255E9, &HouseExt::DecideTechnosFate);
 
 	// SuperClass_Launch_SkipRelatedTags:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x32A5C, AresHelper::AresBaseAddress + 0x32ABF);

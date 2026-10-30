@@ -490,6 +490,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AttachmentUndergroundLayerMaxHeight.Read(exINI, GameStrings::General, "AttachmentUndergroundLayerMaxHeight");
 
 	this->HarvesterScanAfterUnload.Read(exINI, GameStrings::General, "HarvesterScanAfterUnload");
+	this->ReorganizeToWhenDefeated.Read(exINI, GameStrings::General, "ReorganizeToWhenDefeated");
 
 	this->TunnelSimpleDistTooFar.Read(exINI, GameStrings::General, "TunnelSimpleDistTooFar");
 	this->TunnelPathingDistTooFar.Read(exINI, GameStrings::General, "TunnelPathingDistTooFar");
@@ -1204,6 +1205,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->HarvesterScanAfterUnload)
 		.Process(this->TunnelSimpleDistTooFar)
 		.Process(this->TunnelPathingDistTooFar)
+		.Process(this->ReorganizeToWhenDefeated)
 		.Process(this->AnimCraterDestroyTiberium)
 		.Process(this->BerzerkTargeting)
 		.Process(this->AllowBerzerkOnAllies)
