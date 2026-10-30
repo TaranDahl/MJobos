@@ -374,6 +374,8 @@ public:
 	Valueable<int> DigInSpeed;
 	Valueable<int> DigOutSpeed;
 	Valueable<int> DigEndROT;
+	Valueable<bool> KeepWarping;
+	Nullable<int> KeepWarping_Distance;
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -930,6 +932,8 @@ public:
 		, DigInSpeed { -1 }
 		, DigOutSpeed { -1 }
 		, DigEndROT { -1 }
+		, KeepWarping { false }
+		, KeepWarping_Distance {}
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}
 		, VeteranReload {}

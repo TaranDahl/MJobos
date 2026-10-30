@@ -186,10 +186,17 @@ DEFINE_HOOK(0x71A82C, TemporalClass_AI_Opentopped_WarpDistance, 0xC)
 {
 	GET(TemporalClass* const, pThis, ESI);
 
-	if (auto const pTransport = pThis->Owner->Transporter)
+	auto const pTechno = pThis->Owner;
+
+	if (auto const pTransport = pTechno->Transporter)
 	{
 		auto const pExt = TechnoExt::Fetch(pTransport)->TypeExtData;
 		R->EDX(pExt->OpenTopped_WarpDistance.Get(RulesClass::Instance->OpenToppedWarpDistance));
+		return 0x71A838;
+	}
+	else if (auto const pTypeExt = TechnoTypeExt::Fetch(pTechno->GetTechnoType()))
+	{
+		R->EDX(pTypeExt->KeepWarping_Distance.Get(RulesClass::Instance->OpenToppedWarpDistance));
 		return 0x71A838;
 	}
 

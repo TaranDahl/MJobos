@@ -1360,6 +1360,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
 	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
 	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
+	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
+	this->KeepWarping_Distance.Read(exINI, pSection, "KeepWarping.Distance");
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
 
@@ -2126,14 +2128,14 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->NoRearm_Temporal)
 		.Process(this->NoReload_UnderEMP)
 		.Process(this->NoReload_Temporal)
-
 		.Process(this->FlightClimb)
 		.Process(this->FlightCrash)
 
 		.Process(this->ThisIsAJumpjet)
 
 		.Process(this->JumpjetSpeedType)
-
+		.Process(this->KeepWarping)
+		.Process(this->KeepWarping_Distance)
 		.Process(this->AdditionalVeteranAbilities)
 		.Process(this->AdditionalEliteAbilities)
 		.Process(this->VeteranReload)

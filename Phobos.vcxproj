@@ -210,6 +210,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.Facing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Firing.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.IgnoredByMouse.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.KeepWarping.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Misc.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Others.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Pips.cpp" />
