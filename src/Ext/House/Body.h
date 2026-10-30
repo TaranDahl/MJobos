@@ -60,6 +60,7 @@ public:
 	CDTimerClass CombatAlertTimer;
 	CDTimerClass AISuperWeaponDelayTimer;
 	CDTimerClass AIFireSaleDelayTimer;
+	CDTimerClass SpyEffect_RadarJamTimer;
 
 	//Read from INI
 	Nullable<bool> RepairBaseNodes[3];
@@ -129,6 +130,7 @@ public:
 		, TeamDelay(-1)
 		, FreeRadar(false)
 		, ForceRadar(false)
+		, SpyEffect_RadarJamTimer {}
 		, PlayerAutoRepair(true)
 		, BeaconsPlacedOrder { 0, 0, 0 }
 	{ }
