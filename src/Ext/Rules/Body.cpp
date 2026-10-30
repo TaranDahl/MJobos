@@ -631,6 +631,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AIGuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeAddend");
 	this->AIGuardModeGuardRangeMax.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeMax");
 	this->AIGuardStationaryStray.Read(exINI, GameStrings::General, "AIGuardStationaryStray");
+	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 
 	this->PenetratesTransport_Level.Read(exINI, GameStrings::CombatDamage, "PenetratesTransport.Level");
 
@@ -1292,6 +1293,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIGuardModeGuardRangeAddend)
 		.Process(this->AIGuardModeGuardRangeMax)
 		.Process(this->AIGuardStationaryStray)
+		.Process(this->StopPlanningOnEnter)
 		.Process(this->PenetratesTransport_Level)
 		.Process(this->UnitsUnsellable)
 		.Process(this->DriverKilled_KeptPassengers)
