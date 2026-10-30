@@ -68,6 +68,7 @@ public:
 	Valueable<bool> Spawner_ReturnOnRepairDone;
 	Nullable<bool> Spawner_UseTurretFacing;
 	Nullable<bool> Harvester_Counted;
+	Valueable<bool> HarvesterQuickUnloader;
 	Nullable<bool> Promote_IncludeSpawns;
 	Valueable<bool> ImmuneToCrit;
 	Nullable<bool> MultiMindControl_ReleaseVictim;
@@ -620,6 +621,7 @@ public:
 		, Spawner_ReturnOnRepairDone { false }
 		, Spawner_UseTurretFacing {}
 		, Harvester_Counted {}
+		, HarvesterQuickUnloader { false }
 		, Promote_IncludeSpawns {}
 		, ImmuneToCrit { false }
 		, MultiMindControl_ReleaseVictim {}

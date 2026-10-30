@@ -42,6 +42,7 @@ public:
 	std::vector<UnitClass*> OwnedDeployingUnits;
 	PlacingBuildingStruct Common;
 	PlacingBuildingStruct Combat;
+	int LastRefineryBuildFrame;
 	bool ForceOnlyTargetHouseEnemy;
 	int ForceOnlyTargetHouseEnemyMode;
 
@@ -98,6 +99,7 @@ public:
 		, PowerPlantEnhancers {}
 		, OwnedLimboDeliveredBuildings {}
 		, OwnedCountedHarvesters {}
+		, LastRefineryBuildFrame { -1 }
 		, LimboAircraft {}
 		, LimboBuildings {}
 		, LimboInfantry {}
