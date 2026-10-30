@@ -537,6 +537,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->KeepAnimOnLimbo.Read(exINI, GameStrings::General, "KeepAnimOnLimbo");
 
+	this->ExtendedStray.Read(exINI, GameStrings::General, "ExtendedStray");
+
 	this->WarheadAnimZAdjust.Read(exINI, GameStrings::AudioVisual, "WarheadAnimZAdjust");
 
 	this->IvanBombAttachToCenter.Read(exINI, GameStrings::CombatDamage, "IvanBombAttachToCenter");
@@ -1225,6 +1227,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AdjacentWallDamage)
 		.Process(this->KeepAnimOnLimbo)
 		.Process(this->AISellCapturedBuilding)
+		.Process(this->ExtendedStray)
 		.Process(this->WarheadAnimZAdjust)
 		.Process(this->IvanBombAttachToCenter)
 		.Process(this->IvanBomb_Visibility)

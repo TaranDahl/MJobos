@@ -480,6 +480,8 @@ public:
 
 		Valueable<bool> KeepAnimOnLimbo;
 
+		Valueable<bool> ExtendedStray;
+
 		Valueable<int> WarheadAnimZAdjust;
 
 		Valueable<bool> IvanBombAttachToCenter;
@@ -1111,6 +1113,8 @@ public:
 			, AISellCapturedBuilding { true }
 
 			, KeepAnimOnLimbo { false }
+
+			, ExtendedStray { false }
 
 			, WarheadAnimZAdjust { -15 }
 
