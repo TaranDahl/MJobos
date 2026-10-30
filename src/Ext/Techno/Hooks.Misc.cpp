@@ -239,7 +239,7 @@ DEFINE_HOOK(0x6B7282, SpawnManagerClass_AI_PromoteSpawns, 0x5)
 
 DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 {
-	enum { Recycle = 0x6B77FF, NoRecycle = 0x6B7838 };
+	enum { Recycle = 0x6B7809, NoRecycle = 0x6B7838 };
 
 	GET(SpawnManagerClass* const, pThis, ESI);
 	GET(AircraftClass* const, pSpawner, EDI);
@@ -273,8 +273,9 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 	if (shouldRecycleSpawned())
 	{
 		AnimExt::CreateRandomAnim(pCarrierTypeExt->Spawner_RecycleAnim, spawnerCrd, pSpawner, pSpawner->Owner, true);
+		pSpawner->Limbo(); // Remove from ATC first
 		pSpawner->SetLocation(pCarrier->GetCoords());
-		return Recycle;
+		return Recycle; // Skip vanilla Limbo()
 	}
 
 	return NoRecycle;
