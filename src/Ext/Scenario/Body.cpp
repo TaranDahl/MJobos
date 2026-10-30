@@ -299,12 +299,3 @@ DEFINE_HOOK(0x68AD2F, ScenarioClass_LoadFromINI, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK(0x55B4E1, LogicClass_Update_BeforeAll, 0x5)
-{
-	VeinholeMonsterClass::UpdateAllVeinholes();
-
-	ScenarioExt::Global()->UpdateAutoDeathObjectsInLimbo();
-	ScenarioExt::Global()->UpdateTransportReloaders();
-
-	return 0;
-}

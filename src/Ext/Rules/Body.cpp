@@ -268,6 +268,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->EndDistributionModeSound.Read(exINI, GameStrings::AudioVisual, "EndDistributionModeSound");
 	this->AddDistributionModeCommandSound.Read(exINI, GameStrings::AudioVisual, "AddDistributionModeCommandSound");
 
+	this->CleanUpAirBarrier.Read(exINI, GameStrings::General, "CleanUpAirBarrier");
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
 	this->ForbidParallelAIQueues_Building.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Building");
@@ -991,6 +992,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->StartDistributionModeSound)
 		.Process(this->EndDistributionModeSound)
 		.Process(this->AddDistributionModeCommandSound)
+		.Process(this->CleanUpAirBarrier)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

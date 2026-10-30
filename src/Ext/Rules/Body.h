@@ -195,6 +195,7 @@ public:
 		ValueableIdx<VocClass> EndDistributionModeSound;
 		ValueableIdx<VocClass> AddDistributionModeCommandSound;
 
+		Valueable<int> CleanUpAirBarrier;
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -842,6 +843,7 @@ public:
 			, EndDistributionModeSound { -1 }
 			, AddDistributionModeCommandSound { -1 }
 
+			, CleanUpAirBarrier { 0 }
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
 			, ForbidParallelAIQueues_Building { false }
