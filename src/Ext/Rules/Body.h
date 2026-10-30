@@ -437,6 +437,9 @@ public:
 
 		Valueable<bool> HarvesterScanAfterUnload;
 
+		Valueable<int> TunnelSimpleDistTooFar;
+		Valueable<int> TunnelPathingDistTooFar;
+
 		Valueable<bool> AnimCraterDestroyTiberium;
 
 		Valueable<AffectedHouse> BerzerkTargeting;
@@ -1055,6 +1058,9 @@ public:
 			, AttachmentUndergroundLayerMaxHeight { -256 }
 
 			, HarvesterScanAfterUnload { false }
+
+			, TunnelSimpleDistTooFar { 12 }
+			, TunnelPathingDistTooFar { 15 }
 
 			, AnimCraterDestroyTiberium { true }
 

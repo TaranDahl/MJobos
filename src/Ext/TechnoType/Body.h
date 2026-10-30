@@ -365,6 +365,10 @@ public:
 	Nullable<double> AIGuardModeGuardRangeMultiplier;
 	Nullable<Leptons> AIGuardModeGuardRangeAddend;
 	Nullable<Leptons> AIGuardStationaryStray;
+	Valueable<int> DigStartROT;
+	Valueable<int> DigInSpeed;
+	Valueable<int> DigOutSpeed;
+	Valueable<int> DigEndROT;
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -911,6 +915,10 @@ public:
 		, AIGuardModeGuardRangeMultiplier {}
 		, AIGuardModeGuardRangeAddend {}
 		, AIGuardStationaryStray {}
+		, DigStartROT { -1 }
+		, DigInSpeed { -1 }
+		, DigOutSpeed { -1 }
+		, DigEndROT { -1 }
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}
 		, VeteranReload {}

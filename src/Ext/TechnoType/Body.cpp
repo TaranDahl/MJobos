@@ -1335,6 +1335,10 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->AIGuardModeGuardRangeMultiplier.Read(exINI, pSection, "AIGuardModeGuardRangeMultiplier");
 	this->AIGuardModeGuardRangeAddend.Read(exINI, pSection, "AIGuardModeGuardRangeAddend");
 	this->AIGuardStationaryStray.Read(exINI, pSection, "AIGuardStationaryStray");
+	this->DigStartROT.Read(exINI, pSection, "DigStartROT");
+	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
+	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
+	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
 	ReadAdditionalAbilities(exINI, pSection, "VeteranAbilities", this->AdditionalVeteranAbilities);
 	ReadAdditionalAbilities(exINI, pSection, "EliteAbilities", this->AdditionalEliteAbilities);
 
@@ -2126,6 +2130,10 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->AIGuardModeGuardRangeMultiplier)
 		.Process(this->AIGuardModeGuardRangeAddend)
 		.Process(this->AIGuardStationaryStray)
+		.Process(this->DigStartROT)
+		.Process(this->DigInSpeed)
+		.Process(this->DigOutSpeed)
+		.Process(this->DigEndROT)
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)
