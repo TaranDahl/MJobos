@@ -380,6 +380,7 @@ public:
 	Valueable<int> DigEndROT;
 	Valueable<bool> KeepWarping;
 	Nullable<int> KeepWarping_Distance;
+	Valueable<bool> FiringByPassMovingCheck;
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -942,6 +943,7 @@ public:
 		, DigEndROT { -1 }
 		, KeepWarping { false }
 		, KeepWarping_Distance {}
+		, FiringByPassMovingCheck { false }
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}
 		, VeteranReload {}
