@@ -475,6 +475,7 @@ public:
 		Valueable<bool> InfantryAutoDeploy;
 
 		Valueable<int> AdjacentWallDamage;
+		Valueable<bool> AISellCapturedBuilding;
 
 		Valueable<bool> KeepAnimOnLimbo;
 
@@ -1105,6 +1106,7 @@ public:
 			, Parasite_AllowWaterExit {}
 			, InfantryAutoDeploy { false }
 			, AdjacentWallDamage { 200 }
+			, AISellCapturedBuilding { true }
 
 			, KeepAnimOnLimbo { false }
 

@@ -532,6 +532,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->InfantryAutoDeploy.Read(exINI, GameStrings::General, "InfantryAutoDeploy");
 
 	this->AdjacentWallDamage.Read(exINI, GameStrings::CombatDamage, "AdjacentWallDamage");
+	this->AISellCapturedBuilding.Read(exINI, GameStrings::General, "AISellCapturedBuilding");
 
 	this->KeepAnimOnLimbo.Read(exINI, GameStrings::General, "KeepAnimOnLimbo");
 
@@ -1221,6 +1222,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->InfantryAutoDeploy)
 		.Process(this->AdjacentWallDamage)
 		.Process(this->KeepAnimOnLimbo)
+		.Process(this->AISellCapturedBuilding)
 		.Process(this->WarheadAnimZAdjust)
 		.Process(this->IvanBombAttachToCenter)
 		.Process(this->IvanBomb_Visibility)

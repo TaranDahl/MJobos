@@ -134,6 +134,7 @@ public:
 	Valueable<int> WeaponsFactory_Dir;
 
 	ValueableVector<bool> HasPowerUpAnim;
+	Nullable<bool> AISellCapturedBuilding;
 
 	Valueable<bool> UndeploysInto_Sellable;
 
@@ -281,6 +282,7 @@ public:
 		, Bib_Dir { 2 }
 		, NumberImpassableRows_Dir { 2 }
 		, WeaponsFactory_Dir { 2 }
+		, AISellCapturedBuilding {}
 		, UndeploysInto_Sellable { false }
 		, BuildingRadioLink_SyncOwner {}
 		, GuardRetryDelay {}
