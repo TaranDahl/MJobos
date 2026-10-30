@@ -157,6 +157,8 @@ public:
 	Nullable<bool> DestroyAnim_Random;
 
 	Valueable<TechnoTypeClass*> DefaultDisguise;
+	Nullable<bool> ExplodeOnDestroy;
+	Nullable<bool> FireDeathWeaponOnCrushed;
 	Nullable<bool> UseDisguiseMovementSpeed;
 
 	Nullable<int> OpenTopped_RangeBonus;
@@ -680,6 +682,8 @@ public:
 		, DestroyAnim_Random {}
 
 		, DefaultDisguise { nullptr }
+		, ExplodeOnDestroy {}
+		, FireDeathWeaponOnCrushed {}
 		, UseDisguiseMovementSpeed {}
 
 		, OpenTopped_RangeBonus {}

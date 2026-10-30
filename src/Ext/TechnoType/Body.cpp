@@ -1096,6 +1096,9 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->DestroyAnim_Random.Read(exINI, pSection, "DestroyAnim.Random");
 
+	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
+	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
+
 	this->UseDisguiseMovementSpeed.Read(exINI, pSection, "UseDisguiseMovementSpeed");
 
 	this->OpenTopped_RangeBonus.Read(exINI, pSection, "OpenTopped.RangeBonus");
@@ -1925,6 +1928,8 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->IgnoredByMouse_ToAlly)
 		.Process(this->IgnoredByMouse_ToEnemy)
 		.Process(this->DestroyAnim_Random)
+		.Process(this->ExplodeOnDestroy)
+		.Process(this->FireDeathWeaponOnCrushed)
 		.Process(this->UseDisguiseMovementSpeed)
 		.Process(this->WeaponBurstFLHs)
 		.Process(this->EliteWeaponBurstFLHs)

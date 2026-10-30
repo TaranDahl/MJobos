@@ -411,6 +411,9 @@ public:
 		Valueable<bool> CanTargetAI_IronCurtained;
 		Valueable<bool> CanTarget_IronCurtained;
 		Valueable<bool> AutoTarget_IronCurtained;
+		Valueable<bool> UseGlobalDeathWeaponDamage;
+		Valueable<bool> NonVehExplodeOnDestroy;
+		Valueable<bool> FireDeathWeaponOnCrushed;
 
 		Valueable<bool> BuildingWaypoints;
 		Valueable<bool> BuildingTypeSelectable;
@@ -1036,6 +1039,9 @@ public:
 			, CanTargetAI_IronCurtained { false }
 			, CanTarget_IronCurtained { true }
 			, AutoTarget_IronCurtained { true }
+			, UseGlobalDeathWeaponDamage { false }
+			, NonVehExplodeOnDestroy { false }
+			, FireDeathWeaponOnCrushed { false }
 			, BuildingWaypoints { false }
 			, BuildingTypeSelectable { false }
 			, UnifiedRadarColor { false }

@@ -522,6 +522,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CanTargetAI_IronCurtained.Read(exINI, GameStrings::CombatDamage, "CanTargetAI.IronCurtained");
 	this->CanTarget_IronCurtained.Read(exINI, GameStrings::CombatDamage, "CanTarget.IronCurtained");
 	this->AutoTarget_IronCurtained.Read(exINI, GameStrings::CombatDamage, "AutoTarget.IronCurtained");
+	this->UseGlobalDeathWeaponDamage.Read(exINI, GameStrings::CombatDamage, "UseGlobalDeathWeaponDamage");
+	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
+	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
 
 	this->InfantryAutoDeploy.Read(exINI, GameStrings::General, "InfantryAutoDeploy");
 
@@ -1165,6 +1168,9 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanTargetAI_IronCurtained)
 		.Process(this->CanTarget_IronCurtained)
 		.Process(this->AutoTarget_IronCurtained)
+		.Process(this->UseGlobalDeathWeaponDamage)
+		.Process(this->NonVehExplodeOnDestroy)
+		.Process(this->FireDeathWeaponOnCrushed)
 		.Process(this->BuildingTypeSelectable)
 		.Process(this->UnifiedRadarColor)
 		.Process(this->UnifiedRadarColor_Land)
