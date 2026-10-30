@@ -482,6 +482,7 @@ public:
 		Valueable<bool> FallingDownTargetingFix;
 		Valueable<bool> AIAirTargetingFix;
 
+		Valueable<bool> InTransportInfantryAmmoFix;
 		Valueable<bool> ReloadInTransport;
 		Valueable<bool> OpenTopped_IgnoreRangefinding;
 		Valueable<bool> OpenTopped_AllowFiringIfDeactivated;
@@ -1105,6 +1106,7 @@ public:
 			, FallingDownTargetingFix { false }
 			, AIAirTargetingFix { false }
 
+			, InTransportInfantryAmmoFix { false }
 			, ReloadInTransport { false }
 			, OpenTopped_IgnoreRangefinding { false }
 			, OpenTopped_AllowFiringIfDeactivated { true }
