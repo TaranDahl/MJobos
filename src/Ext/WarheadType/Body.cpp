@@ -329,6 +329,7 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->SetAmbientRed.Read(exINI, pSection, "SetAmbientRed");
 	this->SetAmbientGreen.Read(exINI, pSection, "SetAmbientGreen");
 	this->SetAmbientBlue.Read(exINI, pSection, "SetAmbientBlue");
+	this->ReduceTiberium.Read(exINI, pSection, "ReduceTiberium");
 
 	this->Parasite_ParticleSystem.Read(exINI, pSection, "Parasite.ParticleSystem");
 	this->Parasite_DisableParticleSystem.Read(exINI, pSection, "Parasite.DisableParticleSystem");
@@ -737,6 +738,7 @@ void WarheadTypeExt::Serialize(T& Stm)
 		.Process(this->SetAmbientRed)
 		.Process(this->SetAmbientGreen)
 		.Process(this->SetAmbientBlue)
+		.Process(this->ReduceTiberium)
 
 		.Process(this->Convert_Pairs)
 		.Process(this->AttachEffects)

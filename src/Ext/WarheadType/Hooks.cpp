@@ -186,6 +186,15 @@ DEFINE_HOOK(0x489710, MapClass_DamageArea_CheckHeight_2, 0x7)
 
 #pragma endregion
 
+DEFINE_HOOK(0x48962A, MapClass_DamageArea_ReduceTiberium, 0x6)
+{
+	enum { ReduceTiberium = 0x48964F };
+
+	GET(WarheadTypeClass* const, pWH, ESI);
+
+	return WarheadTypeExt::Fetch(pWH)->ReduceTiberium ? ReduceTiberium : 0;
+}
+
 DEFINE_HOOK(0x48A551, WarheadTypeClass_AnimList_SplashList, 0x6)
 {
 	GET(WarheadTypeClass* const, pThis, ESI);
