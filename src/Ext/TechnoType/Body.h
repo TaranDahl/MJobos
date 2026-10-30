@@ -393,6 +393,7 @@ public:
 	Nullable<bool> DistributeTargetingFrame;
 	Valueable<bool> ExtraBaseNormal;
 	Valueable<bool> ExtraBaseForAllyBuilding;
+	Valueable<bool> AIDefendBase_Ignore;
 
 	Nullable<bool> AttackMove_Aggressive;
 	Nullable<bool> AttackMove_UpdateTarget;
@@ -944,6 +945,7 @@ public:
 		, DistributeTargetingFrame {}
 		, ExtraBaseNormal { false }
 		, ExtraBaseForAllyBuilding { false }
+		, AIDefendBase_Ignore { false }
 
 		, DigitalDisplay_Health_FakeAtDisguise {}
 

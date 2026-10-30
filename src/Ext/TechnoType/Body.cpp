@@ -1365,6 +1365,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->DistributeTargetingFrame.Read(exINI, pSection, "DistributeTargetingFrame");
 	this->ExtraBaseNormal.Read(exINI, pSection, "ExtraBaseNormal");
 	this->ExtraBaseForAllyBuilding.Read(exINI, pSection, "ExtraBaseForAllyBuilding");
+	this->AIDefendBase_Ignore.Read(exINI, pSection, "AIDefendBase.Ignore");
 
 	this->BunkerableAnyway.Read(exINI, pSection, "BunkerableAnyway");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
@@ -2153,6 +2154,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->DistributeTargetingFrame)
 		.Process(this->ExtraBaseNormal)
 		.Process(this->ExtraBaseForAllyBuilding)
+		.Process(this->AIDefendBase_Ignore)
 
 		.Process(this->DigitalDisplay_Health_FakeAtDisguise)
 
