@@ -459,6 +459,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatLightDetailLevel_CheckColored.Read(exINI, GameStrings::AudioVisual, "CombatLightDetailLevel.CheckColored");
 	this->LightFlashAlphaImageDetailLevel.Read(exINI, GameStrings::AudioVisual, "LightFlashAlphaImageDetailLevel");
 	this->BuildingTypeSelectable.Read(exINI, GameStrings::General, "BuildingTypeSelectable");
+	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
 
 	this->ExtraTargeting.Read(exINI, GameStrings::General, "ExtraTargeting");
 
@@ -1189,6 +1190,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnifiedTechnoColor_Enemy)
 		.Process(this->UnifiedTechnoColor_Neutral)
 		.Process(this->ExtraTargeting)
+		.Process(this->CrushBuildingOnAnyCell)
 		.Process(this->ProneSpeed_Crawls)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)

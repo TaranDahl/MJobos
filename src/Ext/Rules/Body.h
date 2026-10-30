@@ -417,6 +417,7 @@ public:
 
 		Valueable<bool> BuildingWaypoints;
 		Valueable<bool> BuildingTypeSelectable;
+		Valueable<bool> CrushBuildingOnAnyCell;
 
 		Valueable<bool> UnifiedRadarColor;
 		Valueable<ColorStruct> UnifiedRadarColor_Land;
@@ -1063,6 +1064,7 @@ public:
 
 			, ExtraTargeting { false }
 
+			, CrushBuildingOnAnyCell { false }
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 
