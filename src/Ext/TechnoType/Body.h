@@ -191,6 +191,7 @@ public:
 
 	Valueable<bool> NoSecondaryWeaponFallback;
 	Valueable<bool> NoSecondaryWeaponFallback_AllowAA;
+	Valueable<bool> NoAutoFire_AI;
 	Nullable<bool> AllowWeaponSelectAgainstWalls;
 
 	Nullable<bool> JumpjetRotateOnCrash;
@@ -715,6 +716,7 @@ public:
 		, AutoTargetOwnPosition_Self { false }
 		, NoSecondaryWeaponFallback { false }
 		, NoSecondaryWeaponFallback_AllowAA { false }
+		, NoAutoFire_AI { false }
 		, AllowWeaponSelectAgainstWalls {}
 		, JumpjetRotateOnCrash {}
 		, ShadowSizeCharacteristicHeight { }

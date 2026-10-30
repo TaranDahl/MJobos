@@ -1144,6 +1144,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->NoSecondaryWeaponFallback.Read(exINI, pSection, "NoSecondaryWeaponFallback");
 	this->NoSecondaryWeaponFallback_AllowAA.Read(exINI, pSection, "NoSecondaryWeaponFallback.AllowAA");
+	this->NoAutoFire_AI.Read(exINI, pSection, "NoAutoFire.AI");
 	this->AllowWeaponSelectAgainstWalls.Read(exINI, pSection, "AllowWeaponSelectAgainstWalls");
 
 	this->JumpjetRotateOnCrash.Read(exINI, pSection, "JumpjetRotateOnCrash");
@@ -1966,6 +1967,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->AutoTargetOwnPosition_Self)
 		.Process(this->NoSecondaryWeaponFallback)
 		.Process(this->NoSecondaryWeaponFallback_AllowAA)
+		.Process(this->NoAutoFire_AI)
 		.Process(this->AllowWeaponSelectAgainstWalls)
 		.Process(this->JumpjetRotateOnCrash)
 		.Process(this->ShadowSizeCharacteristicHeight)

@@ -215,6 +215,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.LoadGameTips.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Misc.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Others.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.NoAutoFire.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Pips.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.PlanWaypoint.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.ReceiveDamage.cpp" />
