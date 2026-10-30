@@ -219,6 +219,7 @@
     <ClCompile Include="src\Ext\Techno\Hooks.ReceiveDamage.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Scatter.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.RepairHealing.cpp" />
+    <ClCompile Include="src\Ext\Techno\Hooks.SharedControl.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.TargetEvaluation.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.Targeting.cpp" />
     <ClCompile Include="src\Ext\Techno\Hooks.TechnoAttachment.cpp" />

@@ -432,6 +432,7 @@ public:
 		ValueableIdx<ColorScheme> UnifiedTechnoColor_Enemy;
 		ValueableIdx<ColorScheme> UnifiedTechnoColor_Neutral;
 		Valueable<bool> ExtraTargeting;
+		Valueable<bool> AllyShareControl;
 
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
@@ -1065,6 +1066,7 @@ public:
 			, ExtraTargeting { false }
 
 			, CrushBuildingOnAnyCell { false }
+			, AllyShareControl { false }
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 

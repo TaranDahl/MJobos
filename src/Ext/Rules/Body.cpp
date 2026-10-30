@@ -462,6 +462,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
 
 	this->ExtraTargeting.Read(exINI, GameStrings::General, "ExtraTargeting");
+	this->AllyShareControl.Read(exINI, GameStrings::General, "AllyShareControl");
 
 	this->UseRetintFix.Read(exINI, GameStrings::AudioVisual, "UseRetintFix");
 
@@ -1191,6 +1192,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnifiedTechnoColor_Neutral)
 		.Process(this->ExtraTargeting)
 		.Process(this->CrushBuildingOnAnyCell)
+		.Process(this->AllyShareControl)
 		.Process(this->ProneSpeed_Crawls)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)
