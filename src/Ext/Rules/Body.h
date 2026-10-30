@@ -143,6 +143,9 @@ public:
 		Valueable<bool> ForceAAWeapon_InRange_ApplyRangeModifiers;
 
 		Valueable<bool> BuildingProductionQueue;
+		Valueable<bool> PlacementGrid_Expand;
+		Valueable<Vector3D<int>> PlacementGrid_LandFrames;
+		Valueable<Vector3D<int>> PlacementGrid_WaterFrames;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -679,6 +682,9 @@ public:
 			, ForceAAWeapon_InRange_ApplyRangeModifiers { false }
 
 			, BuildingProductionQueue { false }
+			, PlacementGrid_Expand { false }
+			, PlacementGrid_LandFrames { { 1, 0, 0 } }
+			, PlacementGrid_WaterFrames { { 1, 0, 0 } }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

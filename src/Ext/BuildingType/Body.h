@@ -68,6 +68,11 @@ public:
 
 	Nullable<bool> AutoBuilding;
 	Nullable<int> AutoBuilding_Gap;
+	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnLand;
+	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnWater;
+	std::vector<BuildingTypeClass*> PlaceBuilding_OnLand_Unique;
+	std::vector<BuildingTypeClass*> PlaceBuilding_OnWater_Unique;
+	Valueable<bool> CanBuildUnderUnits;
 
 	Valueable<bool> IsAnimDelayedBurst;
 
@@ -87,6 +92,8 @@ public:
 	Nullable<bool> NoAlphaImageOnBuildup;
 	ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
 	ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
+	ValueableVector<TechnoTypeClass*> Adjacent_AllowedExtra;
+	ValueableVector<TechnoTypeClass*> Adjacent_DisallowedExtra;
 	Valueable<bool> Adjacent_Disallowed_Prohibit;
 	Valueable<int> Adjacent_Disallowed_ProhibitDistance;
 
@@ -200,6 +207,11 @@ public:
 		, SellBuildupLength { 23 }
 		, AutoBuilding {}
 		, AutoBuilding_Gap {}
+		, PlaceBuilding_OnLand {}
+		, PlaceBuilding_OnWater {}
+		, PlaceBuilding_OnLand_Unique {}
+		, PlaceBuilding_OnWater_Unique {}
+		, CanBuildUnderUnits { false }
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
 		, FactoryPlant_DisallowTypes {}
@@ -215,6 +227,8 @@ public:
 		, NoAlphaImageOnBuildup {}
 		, Adjacent_Allowed {}
 		, Adjacent_Disallowed {}
+		, Adjacent_AllowedExtra {}
+		, Adjacent_DisallowedExtra {}
 		, Adjacent_Disallowed_Prohibit { false }
 		, Adjacent_Disallowed_ProhibitDistance { 0 }
 		, BarracksExitCell {}

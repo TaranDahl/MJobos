@@ -1,8 +1,10 @@
 #include "Body.h"
+#include "ProximityTemp.h"
 
 #include <Ext/House/Body.h>
 #include <Ext/Rules/Body.h>
 #include <Ext/Techno/Body.h>
+#include <Ext/TerrainType/Body.h>
 
 #include <EventClass.h>
 
@@ -69,6 +71,292 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 		}
 	}
 
+	return 0;
+}
+
+// Buildable-upon TerrainTypes Hook #3 - Remove them when buildings are placed on them.
+DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
+{
+	GET(ObjectClass*, pObject, EDI);
+	GET(CellClass*, pCell, EAX);
+
+	if (pObject->WhatAmI() == AbstractType::Building)
+	{
+		if (auto const pTerrain = pCell->GetTerrain(false))
+		{
+			auto const pType = pTerrain->Type;
+			auto const pTypeExt = TerrainTypeExt::Fetch(pType);
+			bool const canBuild = pType->SpawnsTiberium
+				? pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Tibtree_CanBeBuiltOn)
+				: pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Terrain_CanBeBuiltOn);
+
+			if (canBuild)
+			{
+				pCell->RemoveContent(pTerrain, false);
+				TerrainTypeExt::Remove(pTerrain);
+			}
+		}
+	}
+
+	return 0;
+}
+
+// Buildable-upon TerrainTypes Hook #4 -> Allow placing walls on top of terrain
+DEFINE_HOOK(0x5FD2B6, OverlayClass_Unlimbo_SkipTerrainCheck, 0x9)
+{
+	enum { Unlimbo = 0x5FD2CA, NoUnlimbo = 0x5FD2C3 };
+
+	GET(CellClass* const, pCell, EAX);
+
+	if (!Game::IsActive)
+		return Unlimbo;
+
+	if (auto const pTerrain = pCell->GetTerrain(false))
+	{
+		auto const pType = pTerrain->Type;
+		auto const pTypeExt = TerrainTypeExt::Fetch(pType);
+		bool const canBuild = pType->SpawnsTiberium
+			? pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Tibtree_CanBeBuiltOn)
+			: pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Terrain_CanBeBuiltOn);
+
+		if (!canBuild)
+			return NoUnlimbo;
+
+		pCell->RemoveContent(pTerrain, false);
+		TerrainTypeExt::Remove(pTerrain);
+	}
+
+	return Unlimbo;
+}
+
+// Buildable-upon TerrainTypes Hook #5 -> Ignore when flushing building foundations for placement.
+DEFINE_HOOK(0x45EF3A, BuildingTypeClass_FlushForPlacement_BuildableTerrain, 0x7)
+{
+	enum { Disallow = 0x45F00B, Continue = 0x45EF4A };
+
+	GET(ObjectClass* const, pObject, ESI);
+
+	if (auto const pTerrain = abstract_cast<TerrainClass*>(pObject))
+	{
+		auto const pType = pTerrain->Type;
+		auto const pTypeExt = TerrainTypeExt::Fetch(pType);
+		bool const canBuild = pType->SpawnsTiberium
+			? pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Tibtree_CanBeBuiltOn)
+			: pTypeExt->CanBeBuiltOn.Get(RulesExt::Global()->Terrain_CanBeBuiltOn);
+
+		if (!canBuild)
+			return Disallow;
+	}
+
+	return Continue;
+}
+
+// Buildable Proximity Helper
+namespace ProximityTemp
+{
+	int DistanceOverride = 0;
+	bool SkipDisallowed = false;
+	bool Build = false;
+	bool Exist = false;
+	bool Mouse = false;
+	CellClass* CurrentCell = nullptr;
+	BuildingTypeClass* BuildType = nullptr;
+}
+
+/*
+	In sub_4A8EB0
+
+	- BaseNormal extra checking Hook #1-1 -> Set context and clear up data
+*/
+DEFINE_HOOK(0x4A8F20, DisplayClass_BuildingProximityCheck_SetContext, 0x5)
+{
+	GET(BuildingTypeClass*, pType, ESI);
+
+	if (RulesExt::Global()->PlacementGrid_Expand)
+		BuildingTypeExt::BaseNormalCells.clear();
+
+	ProximityTemp::Build = false;
+	ProximityTemp::BuildType = pType;
+
+	return 0;
+}
+
+/*
+	In sub_4A8EB0
+
+	- BaseNormal extra checking Hook #1-2 -> Check allowed range
+*/
+DEFINE_HOOK(0x4A8F3E, DisplayClass_BuildingProximityCheck_BeforeChecks, 0x6)
+{
+	enum { SkipGameCode = 0x4A8F44, ReturnFromFunction = 0x4A904E };
+
+	GET(BuildingTypeClass*, pType, ESI);
+	GET_STACK(const int, houseArrayIndex, STACK_OFFSET(0x30, 0x8));
+	GET_STACK(CellStruct*, foundationData, STACK_OFFSET(0x30, 0xC));
+	GET_STACK(CellStruct*, currentPosition, STACK_OFFSET(0x30, 0x10));
+
+	const auto pTypeExt = BuildingTypeExt::Fetch(pType);
+	ProximityTemp::BuildType = pType;
+	ProximityTemp::SkipDisallowed = false;
+
+	if (pTypeExt->Adjacent_Disallowed_Prohibit && pTypeExt->Adjacent_Disallowed_ProhibitDistance > 0 && ProximityTemp::DistanceOverride == 0)
+	{
+		ProximityTemp::DistanceOverride = pTypeExt->Adjacent_Disallowed_ProhibitDistance;
+		bool result = DisplayClass::Instance.PassesProximityCheck(pType, houseArrayIndex, foundationData, currentPosition);
+		ProximityTemp::DistanceOverride = 0;
+
+		if (!result)
+		{
+			R->Stack<bool>(STACK_OFFSET(0x30, 0xC), false);
+			BuildingTypeExt::BaseNormalCells.clear();
+			return ReturnFromFunction;
+		}
+
+		ProximityTemp::SkipDisallowed = true;
+	}
+
+	int distance = ProximityTemp::DistanceOverride > 0 ? ProximityTemp::DistanceOverride : pType->Adjacent;
+	R->EAX(distance);
+	return SkipGameCode;
+}
+
+/*
+	In sub_4A8EB0
+
+	- BaseNormal extra checking Hook #1-3 -> Check allowed building
+*/
+DEFINE_HOOK(0x4A8FD7, DisplayClass_BuildingProximityCheck_BuildArea, 0x6)
+{
+	enum { SkipBuilding = 0x4A902C, ReturnFromFunction = 0x4A904E };
+
+	GET(BuildingClass*, pCellBuilding, ESI);
+	GET_STACK(const int, houseArrayIndex, STACK_OFFSET(0x30, 0x8));
+
+	auto const pTypeExt = BuildingTypeExt::Fetch(pCellBuilding->Type);
+
+	if (pTypeExt->NoBuildAreaOnBuildup && pCellBuilding->CurrentMission == Mission::Construction)
+		return SkipBuilding;
+
+	auto const pTmpTypeExt = BuildingTypeExt::Fetch(ProximityTemp::BuildType);
+	auto const& pBuildingsAllowed = pTmpTypeExt->Adjacent_Allowed;
+
+	if (pBuildingsAllowed.size() > 0 && !pBuildingsAllowed.Contains(pCellBuilding->Type))
+		return SkipBuilding;
+
+	if (!ProximityTemp::SkipDisallowed && pCellBuilding->Owner->ArrayIndex == houseArrayIndex)
+	{
+		auto const& pBuildingsDisallowed = pTmpTypeExt->Adjacent_Disallowed;
+
+		if (pBuildingsDisallowed.size() > 0 && pBuildingsDisallowed.Contains(pCellBuilding->Type))
+		{
+			if (pTmpTypeExt->Adjacent_Disallowed_Prohibit)
+			{
+				R->Stack<bool>(STACK_OFFSET(0x30, 0xC), false);
+				BuildingTypeExt::BaseNormalCells.clear();
+				return ReturnFromFunction;
+			}
+			else
+			{
+				return SkipBuilding;
+			}
+		}
+	}
+
+	return 0;
+}
+
+/*
+	In sub_4A8EB0
+
+	- BaseNormal extra checking Hook #1-4 -> Break loop or record cell for drawing
+*/
+DEFINE_HOOK(0x4A902C, MapClass_PassesProximityCheck_BaseNormalExtra, 0x5)
+{
+	enum { CheckCompleted = 0x4A904E };
+
+	REF_STACK(bool, canBuild, STACK_OFFSET(0x30, 0xC));
+
+	if (canBuild)
+	{
+		if (!RulesExt::Global()->PlacementGrid_Expand)
+			return CheckCompleted;
+
+		canBuild = false;
+		ProximityTemp::Build = true;
+
+		GET_STACK(const CellStruct, currentCell, STACK_OFFSET(0x30, -0x20));
+		BuildingTypeExt::BaseNormalCells.push_back(currentCell);
+	}
+
+	return 0;
+}
+
+/*
+	In sub_4A8EB0
+
+	- BaseNormal extra checking Hook #1-5 -> Restore the correct result
+*/
+DEFINE_HOOK(0x4A904E, MapClass_PassesProximityCheck_RestoreResult, 0x5)
+{
+	if (RulesExt::Global()->PlacementGrid_Expand)
+		R->Stack<bool>(STACK_OFFSET(0x30, 0xC), ProximityTemp::Build);
+
+	return 0;
+}
+
+// Let the game do the proximity and shroud check when the cell which mouse is pointing at has not changed
+DEFINE_JUMP(LJMP, 0x4AACD9, 0x4AACF5);
+DEFINE_JUMP(LJMP, 0x4A9361, 0x4A9371);
+
+// Record the current grid cell before the game chooses the placing-grid frame.
+DEFINE_HOOK(0x47EEBC, CellClass_DrawPlaceGrid_RecordCell, 0x6)
+{
+	GET(CellClass*, pCell, ESI);
+	ProximityTemp::CurrentCell = pCell;
+	return 0;
+}
+
+// Choose the configured placing-grid frame.
+DEFINE_HOOK(0x47EF52, CellClass_DrawPlaceGrid_DrawGrids, 0x6)
+{
+	const auto pRules = RulesExt::Global();
+
+	if (!pRules->PlacementGrid_Expand)
+		return 0;
+
+	const auto pCell = ProximityTemp::CurrentCell;
+	const auto cell = pCell->MapCoords;
+	const auto pObj = DisplayClass::Instance.CurrentBuildingType;
+	const auto range = static_cast<short>((pObj && pObj->WhatAmI() == AbstractType::BuildingType)
+		? static_cast<BuildingTypeClass*>(pObj)->Adjacent + 1
+		: 0);
+
+	const auto maxX = static_cast<short>(cell.X + range);
+	const auto maxY = static_cast<short>(cell.Y + range);
+	const auto minX = static_cast<short>(cell.X - range);
+	const auto minY = static_cast<short>(cell.Y - range);
+
+	bool green = false;
+
+	for (const auto& baseCell : BuildingTypeExt::BaseNormalCells)
+	{
+		if (baseCell.X >= minX && baseCell.Y >= minY && baseCell.X <= maxX && baseCell.Y <= maxY)
+		{
+			green = true;
+			break;
+		}
+	}
+
+	const auto foot = ProximityTemp::Exist;
+	ProximityTemp::Exist = false;
+	const bool land = pCell->LandType != LandType::Water;
+	const auto frames = land ? pRules->PlacementGrid_LandFrames.Get() : pRules->PlacementGrid_WaterFrames.Get();
+	auto frame = foot ? frames.X : (green ? frames.Z : frames.Y);
+
+	if (frame >= Make_Global<SHPStruct*>(0x8A03FC)->Frames) // place.shp
+		frame = 0;
+
+	R->EDI(frame);
 	return 0;
 }
 

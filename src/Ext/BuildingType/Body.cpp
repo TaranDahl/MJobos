@@ -1005,7 +1005,6 @@ bool BuildingTypeExt::AutoPlaceBuilding(BuildingClass* pBuilding)
 				return true;
 		}
 	}
-
 	return false;
 }
 
@@ -1069,6 +1068,23 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->AutoBuilding.Read(exINI, pSection, "AutoBuilding");
 	this->AutoBuilding_Gap.Read(exINI, pSection, "AutoBuilding.Gap");
+	this->PlaceBuilding_OnLand.Read(exINI, pSection, "PlaceBuilding.OnLand");
+	this->PlaceBuilding_OnWater.Read(exINI, pSection, "PlaceBuilding.OnWater");
+	if (this->PlaceBuilding_OnLand.size())
+	{
+		auto& vec = this->PlaceBuilding_OnLand_Unique;
+		vec = this->PlaceBuilding_OnLand;
+		std::sort(vec.begin(), vec.end());
+		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+	}
+	if (this->PlaceBuilding_OnWater.size())
+	{
+		auto& vec = this->PlaceBuilding_OnWater_Unique;
+		vec = this->PlaceBuilding_OnWater;
+		std::sort(vec.begin(), vec.end());
+		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+	}
+	this->CanBuildUnderUnits.Read(exINI, pSection, "CanBuildUnderUnits");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
@@ -1083,6 +1099,8 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoAlphaImageOnBuildup.Read(exINI, pSection, "NoAlphaImageOnBuildup");
 	this->Adjacent_Allowed.Read(exINI, pSection, "Adjacent.Allowed");
 	this->Adjacent_Disallowed.Read(exINI, pSection, "Adjacent.Disallowed");
+	this->Adjacent_AllowedExtra.Read(exINI, pSection, "Adjacent.AllowedExtra");
+	this->Adjacent_DisallowedExtra.Read(exINI, pSection, "Adjacent.DisallowedExtra");
 	this->Adjacent_Disallowed_Prohibit.Read(exINI, pSection, "Adjacent.Disallowed.Prohibit");
 	this->Adjacent_Disallowed_ProhibitDistance.Read(exINI, pSection, "Adjacent.Disallowed.ProhibitDistance");
 
@@ -1290,6 +1308,11 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->SellBuildupLength)
 		.Process(this->AutoBuilding)
 		.Process(this->AutoBuilding_Gap)
+		.Process(this->PlaceBuilding_OnLand)
+		.Process(this->PlaceBuilding_OnWater)
+		.Process(this->PlaceBuilding_OnLand_Unique)
+		.Process(this->PlaceBuilding_OnWater_Unique)
+		.Process(this->CanBuildUnderUnits)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->AircraftDockingDir_DefaultToPoseDir)
 		.Process(this->FactoryPlant_AllowTypes)
@@ -1306,6 +1329,8 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->NoAlphaImageOnBuildup)
 		.Process(this->Adjacent_Allowed)
 		.Process(this->Adjacent_Disallowed)
+		.Process(this->Adjacent_AllowedExtra)
+		.Process(this->Adjacent_DisallowedExtra)
 		.Process(this->Adjacent_Disallowed_Prohibit)
 		.Process(this->Adjacent_Disallowed_ProhibitDistance)
 		.Process(this->BarracksExitCell)
