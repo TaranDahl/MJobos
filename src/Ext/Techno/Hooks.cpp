@@ -2066,17 +2066,14 @@ static int GetGuardRange(TechnoClass* pThis, int control)
 	if (pThis->IsEngineer() && !pTypeExt->Engineer_CanAutoFire)
 		return 0;
 
-	// Set range from weapon range if GuardRange is not set.
-	if (!range)
+	if (pType->HasMultipleTurrets() && !pType->IsGattling)
 	{
-		// Handle special weapon configurations.
-		if (!pType->IsGattling && (pType->HasMultipleTurrets() || pTypeExt->MultiWeapon))
-		{
-			if (pType->HasMultipleTurrets())
-				range = pThis->GetWeaponRange(pThis->CurrentWeaponNumber);
-			else
-				range = GetMultiWeaponRange(pThis, pTypeExt);
-		}
+		range = pThis->GetWeaponRange(pThis->CurrentWeaponNumber);
+	}
+	else if (!range)
+	{
+		if (pTypeExt->MultiWeapon)
+			range = GetMultiWeaponRange(pThis, pTypeExt);
 		else
 		{
 			const int weaponRange0 = pThis->GetWeaponRange(0);
