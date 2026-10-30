@@ -1285,6 +1285,25 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Turret_BodyOrientation.Read(exINI, pSection, "Turret.BodyOrientation");
 	this->Turret_BodyOrientationAngle.Read(exINI, pSection, "Turret.BodyOrientationAngle");
 	this->Turret_BodyOrientationSymmetric.Read(exINI, pSection, "Turret.BodyOrientationSymmetric");
+	this->TargetExtraThreat.Read(exINI, pSection, "TargetExtraThreat");
+	{
+		ValueableVector<double> ReadAngles {};
+		ReadAngles.Read(exINI, pSection, "TargetExtraThreat.Angles");
+
+		if (const size_t count = ReadAngles.size())
+		{
+			this->TargetExtraThreat_Angles.clear();
+			this->TargetExtraThreat_Angles.resize(count);
+
+			for (size_t i = 0; i < count; ++i)
+			{
+				const int raw = static_cast<int>(ReadAngles[i] * (65536.0 / 360.0) + 0.5);
+				this->TargetExtraThreat_Angles[i] = DirStruct(std::clamp(raw, 0, 65535));
+			}
+		}
+	}
+	this->TargetExtraThreat_Multipliers.Read(exINI, pSection, "TargetExtraThreat.Multipliers");
+	this->TargetExtraThreat_Turret.Read(exINI, pSection, "TargetExtraThreat.Turret");
 
 	this->AmphibiousEnter.Read(exINI, pSection, "AmphibiousEnter");
 	this->AmphibiousUnload.Read(exINI, pSection, "AmphibiousUnload");
@@ -2073,6 +2092,10 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->SelectedInfo_CameoIndex)
 		.Process(this->SelectedInfo_Button)
 		.Process(this->UIDescription_HoveredInfo)
+		.Process(this->TargetExtraThreat)
+		.Process(this->TargetExtraThreat_Angles)
+		.Process(this->TargetExtraThreat_Multipliers)
+		.Process(this->TargetExtraThreat_Turret)
 
 		.Process(this->AmphibiousEnter)
 		.Process(this->AmphibiousUnload)

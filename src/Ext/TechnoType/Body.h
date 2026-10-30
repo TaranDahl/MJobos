@@ -320,6 +320,10 @@ public:
 	Valueable<int> SelectedInfo_CameoIndex;
 	Nullable<SHPStruct*> SelectedInfo_Button;
 	Nullable<CSFText> UIDescription_HoveredInfo;
+	Valueable<bool> TargetExtraThreat;
+	ValueableVector<DirStruct> TargetExtraThreat_Angles;
+	ValueableVector<double> TargetExtraThreat_Multipliers;
+	Valueable<bool> TargetExtraThreat_Turret;
 
 	Nullable<bool> AmphibiousEnter;
 	Nullable<bool> AmphibiousUnload;
@@ -872,6 +876,10 @@ public:
 		, SelectedInfo_CameoIndex { 0 }
 		, SelectedInfo_Button {}
 		, UIDescription_HoveredInfo {}
+		, TargetExtraThreat { false }
+		, TargetExtraThreat_Angles {}
+		, TargetExtraThreat_Multipliers {}
+		, TargetExtraThreat_Turret { true }
 
 		, AmphibiousEnter {}
 		, AmphibiousUnload {}
