@@ -609,17 +609,14 @@ namespace detail
 
 		if (parser.ReadInteger(pSection, pKey, &buffer))
 		{
-			unsigned int absValue = abs(buffer);
-			bool isNegative = buffer < 0;
-
-			if ((int)DirType::North <= absValue && absValue <= (int)DirType::Max)
+			if (buffer <= (int)DirType::NorthWest && buffer >= (int)DirType::North)
 			{
-				value = static_cast<DirType>(!isNegative ? absValue : (int)DirType::Max + 1 - absValue);
+				value = static_cast<DirType>(buffer);
 				return true;
 			}
 			else
 			{
-				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a valid DirType (0-255 abs. value).");
+				Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a valid DirType (0-255).");
 			}
 		}
 

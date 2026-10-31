@@ -105,10 +105,6 @@ public:
 		Valueable<bool> NoQueueUpToUnload;
 		Nullable<bool> NoQueueUpToEnter_Buildings;
 		Nullable<bool> NoQueueUpToUnload_Buildings;
-
-		Valueable<SHPStruct*> Cameo_OverlayShapes;
-		ValueableVector<int> Cameo_OverlayFrames;
-		CustomPalette Cameo_OverlayPalette;
 		Valueable<bool> ExtendedBuildingPlacing;
 
 		Valueable<bool> JumpjetTilt;
@@ -649,10 +645,6 @@ public:
 			, NoQueueUpToUnload { false }
 			, NoQueueUpToEnter_Buildings {}
 			, NoQueueUpToUnload_Buildings {}
-
-			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
-			, Cameo_OverlayFrames {}
-			, Cameo_OverlayPalette {}
 			, ExtendedBuildingPlacing { false }
 
 			, JumpjetTilt { false }

@@ -9,15 +9,6 @@
 
 BuildingTypeExt::ExtContainer BuildingTypeExt::ExtMap;
 
-std::vector<CellStruct> BuildingTypeExt::BaseNormalCells;
-static bool InitStaticBuildingTypeContainers()
-{
-	BuildingTypeExt::BaseNormalCells.reserve(100);
-	BuildingTypeExt::BaseNormalCells.clear();
-
-    return true;
-}
-bool BuildingTypeExt::ContainersInit = InitStaticBuildingTypeContainers();
 BuildingTypeExt::ExtContainer::ExtContainer() : Container("BuildingTypeClass") { }
 BuildingTypeExt::ExtContainer::~ExtContainer() = default;
 
@@ -287,28 +278,8 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Explodes_DuringBuildup.Read(exINI, pSection, "Explodes.DuringBuildup");
 
 
-	this->Cameo_ShouldCount.Read(exINI, pSection, "Cameo.ShouldCount");
 	this->LimboBuildID.Read(exINI, pSection, "LimboBuildID");
 	this->LaserFencePost_Fence.Read(exINI, pSection, "LaserFencePost.Fence");
-	this->PlaceBuilding_OnLand.Read(exINI, pSection, "PlaceBuilding.OnLand");
-	this->PlaceBuilding_OnWater.Read(exINI, pSection, "PlaceBuilding.OnWater");
-	if (this->PlaceBuilding_OnLand.size())
-	{
-		auto& vec = this->PlaceBuilding_OnLand_Unique;
-		vec = this->PlaceBuilding_OnLand;
-		std::sort(vec.begin(), vec.end());
-		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
-	}
-	if (this->PlaceBuilding_OnWater.size())
-	{
-		auto& vec = this->PlaceBuilding_OnWater_Unique;
-		vec = this->PlaceBuilding_OnWater;
-		std::sort(vec.begin(), vec.end());
-		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
-	}
-	this->PlaceBuilding_DirectionShape.Read(exINI, pSection, "PlaceBuilding.DirectionShape");
-	this->PlaceBuilding_DirectionPalette.LoadFromINI(pINI, pSection, "PlaceBuilding.DirectionPalette");
-	this->PlaceBuilding_Extra.Read(exINI, pSection, "PlaceBuilding.Extra");
 	this->CanBuildUnderUnits.Read(exINI, pSection, "CanBuildUnderUnits");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
@@ -528,16 +499,8 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
-		.Process(this->Cameo_ShouldCount)
 		.Process(this->LimboBuildID)
 		.Process(this->LaserFencePost_Fence)
-		.Process(this->PlaceBuilding_OnLand)
-		.Process(this->PlaceBuilding_OnWater)
-		.Process(this->PlaceBuilding_OnLand_Unique)
-		.Process(this->PlaceBuilding_OnWater_Unique)
-		.Process(this->PlaceBuilding_DirectionShape)
-		.Process(this->PlaceBuilding_DirectionPalette)
-		.Process(this->PlaceBuilding_Extra)
 		.Process(this->CanBuildUnderUnits)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->AircraftDockingDir_DefaultToPoseDir)

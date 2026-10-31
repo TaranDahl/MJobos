@@ -1200,24 +1200,6 @@ bool HouseExt::ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass
 	return false;
 }
 
-int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade, bool deploy)
-{
-	auto count = pHouse->CountOwnedAndPresent(pBuildingType);
-
-	if (deploy && pBuildingType->UndeploysInto)
-		count += pHouse->CountOwnedAndPresent(pBuildingType->UndeploysInto);
-
-	if (!upgrade)
-		return count;
-
-	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse);
-
-	if (upgrades != -1)
-		count += upgrades;
-
-	return count;
-}
-
 int HouseExt::CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade, bool deploy)
 {
 	auto count = pHouse->CountOwnedNow(pBuildingType);

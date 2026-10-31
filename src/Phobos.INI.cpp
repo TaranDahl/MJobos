@@ -57,9 +57,6 @@ bool Phobos::Config::MessageDisplayInCenter = false;
 int Phobos::Config::MessageDisplayInCenter_BoardOpacity = 40;
 int Phobos::Config::MessageDisplayInCenter_LabelsCount = 6;
 int Phobos::Config::MessageDisplayInCenter_RecordsCount = 12;
-size_t Phobos::Config::DefaultPlacingDirection = 0;
-size_t Phobos::Config::CurrentPlacingDirection = 0;
-bool Phobos::Config::ShowBuildingStatistics = false;
 bool Phobos::Config::RealTimeTimers = false;
 bool Phobos::Config::RealTimeTimers_Adaptive = false;
 int Phobos::Config::CampaignDefaultGameSpeed = 2;
@@ -116,9 +113,6 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::HideShakeEffects = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "HideShakeEffects", false);
 	Phobos::Config::ShowFlashOnSelecting = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowFlashOnSelecting", false);
 	Phobos::Config::SuperWeaponSidebar_RequiredSignificance = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "SuperWeaponSidebar.RequiredSignificance", 0);
-	Phobos::Config::DefaultPlacingDirection = static_cast<size_t>(CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "DefaultPlacingDirection", 0)) & 0x1Fu;
-	Phobos::Config::CurrentPlacingDirection = Phobos::Config::DefaultPlacingDirection;
-	Phobos::Config::ShowBuildingStatistics = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowBuildingStatistics", false);
 	Phobos::Config::ShowGameTime = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowGameTime", false);
 	Phobos::Config::ShowGameTime_BoardOpacity = CCINIClass::INI_RA2MD.ReadInteger(phobosSection, "ShowGameTime.BoardOpacity", 40);
 

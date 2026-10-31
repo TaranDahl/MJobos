@@ -70,50 +70,10 @@ DEFINE_HOOK(0x6D528A, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 {
 	const auto pDisplay = &DisplayClass::Instance;
 	const auto pBuilding = abstract_cast<BuildingClass*>(pDisplay->CurrentBuilding);
-
-	if (!pBuilding)
-		return 0;
-
 	const auto pRulesExt = RulesExt::Global();
 	const auto pTactical = TacticalClass::Instance;
 
-	do
-	{
-		const auto pType = pBuilding->Type;
-		const auto pTypeExt = BuildingTypeExt::Fetch(pType);
-
-		if (!pTypeExt->PlaceBuilding_Extra)
-			break;
-
-		const auto pShape = pTypeExt->PlaceBuilding_DirectionShape.Get();
-
-		if (!pShape || pShape->Frames <= 0)
-			break;
-
-		const auto pCell = MapClass::Instance.GetCellAt(pDisplay->CurrentFoundation_CenterCell);
-		const auto& types = pCell->LandType == LandType::Water ? pTypeExt->PlaceBuilding_OnWater : pTypeExt->PlaceBuilding_OnLand;
-		const size_t size = types.size();
-
-		if (!size)
-			break;
-
-		constexpr BlitterFlags blit = BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero;
-		const auto pPalette = pTypeExt->PlaceBuilding_DirectionPalette.GetOrDefaultConvert(FileSystem::PALETTE_PAL);
-
-		const auto location = CoordStruct { (pCell->MapCoords.X << 8), (pCell->MapCoords.Y << 8), 0 };
-		const int height = pCell->Level * 15;
-		const int zAdjust = -height - (pCell->SlopeIndex ? 12 : 2);
-		const auto position = pTactical->CoordsToScreen(location) - pTactical->TacticalPos - Point2D { 0, (1 + height) };
-
-		const auto direction = (Phobos::Config::CurrentPlacingDirection + (16u / size)) & 0x1Fu;
-		const int frameIndex = Math::min(static_cast<int>(pShape->Frames - 1), static_cast<int>(direction * size / 32u));
-
-		DSurface::Temp->DrawSHP(pPalette, pShape, frameIndex, &position,
-			&DSurface::ViewBounds, blit, 0, zAdjust, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
-	}
-	while (false);
-
-	if (!pRulesExt->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
+	if (!RulesExt::Global()->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
 		return 0;
 
 	// DrawType

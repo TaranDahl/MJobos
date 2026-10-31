@@ -274,12 +274,7 @@ public:
 	ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 	Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
-	bool IsGreyCameoForCurrentPlayer; // Not read from ini
-
-	Valueable<CSFText> UIDescription_Unbuildable;
-
 	PhobosPCXFile CameoPCX;
-	PhobosPCXFile GreyCameoPCX;
 
 	Nullable<bool> AmphibiousEnter;
 	Nullable<bool> AmphibiousUnload;
@@ -707,12 +702,7 @@ public:
 		, BuildLimitGroup_ExtraLimit_MaxCount {}
 		, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
-		, IsGreyCameoForCurrentPlayer { false }
-
-		, UIDescription_Unbuildable {}
-
 		, CameoPCX {}
-		, GreyCameoPCX {}
 
 		, AmphibiousEnter {}
 		, AmphibiousUnload {}

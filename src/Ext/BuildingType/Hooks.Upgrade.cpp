@@ -67,22 +67,21 @@ DEFINE_HOOK(0x4408EB, BuildingClass_Unlimbo_UpgradeBuildings, 0xA)
 #pragma region UpgradesInteraction
 DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x3)
 {
-	GET(HouseClass* const, pThis, ECX);
-	GET_STACK(TechnoTypeClass* const, pItem, 0x4);
-	GET_STACK(const bool, buildLimitOnly, 0x8);
-	GET_STACK(const bool, includeInProduction, 0xC);
-	GET(CanBuildResult, canBuild, EAX); // resultOfAres
+	GET(HouseClass const* const, pThis, ECX);
+	GET_STACK(TechnoTypeClass const* const, pItem, 0x4);
+	GET_STACK(bool const, buildLimitOnly, 0x8);
+	GET_STACK(bool const, includeInProduction, 0xC);
+	GET(CanBuildResult const, resultOfAres, EAX);
 
-	if (canBuild == CanBuildResult::Buildable)
+	if (resultOfAres != CanBuildResult::Buildable)
+		return 0;
+
+	if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
 	{
-		if (auto const pBuildingType = abstract_cast<BuildingTypeClass*>(pItem))
-		{
-			if (BuildingTypeExt::Fetch(pBuildingType)->PowersUp_Buildings.size() > 0)
-				canBuild = HouseExt::BuildLimitGroupUpgradeCheck(pThis, pItem, buildLimitOnly, includeInProduction);
-		}
+		if (BuildingTypeExt::Fetch(pBuilding)->PowersUp_Buildings.size() > 0)
+			R->EAX(HouseExt::BuildLimitGroupUpgradeCheck(pThis, pItem, buildLimitOnly, includeInProduction));
 	}
 
-	R->EAX(canBuild);
 	return 0;
 }
 

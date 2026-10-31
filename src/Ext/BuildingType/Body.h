@@ -66,16 +66,8 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
-	Nullable<bool> Cameo_ShouldCount;
 	Valueable<int> LimboBuildID;
 	Valueable<BuildingTypeClass*> LaserFencePost_Fence;
-	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnLand;
-	ValueableVector<BuildingTypeClass*> PlaceBuilding_OnWater;
-	std::vector<BuildingTypeClass*> PlaceBuilding_OnLand_Unique;
-	std::vector<BuildingTypeClass*> PlaceBuilding_OnWater_Unique;
-	Valueable<SHPStruct*> PlaceBuilding_DirectionShape;
-	CustomPalette PlaceBuilding_DirectionPalette;
-	Valueable<bool> PlaceBuilding_Extra;
 	Valueable<bool> CanBuildUnderUnits;
 
 	Valueable<bool> IsAnimDelayedBurst;
@@ -208,16 +200,8 @@ public:
 		, ConsideredVehicle {}
 		, ZShapePointMove_OnBuildup { false }
 		, SellBuildupLength { 23 }
-		, Cameo_ShouldCount {}
 		, LimboBuildID { -1 }
 		, LaserFencePost_Fence {}
-		, PlaceBuilding_OnLand {}
-		, PlaceBuilding_OnWater {}
-		, PlaceBuilding_OnLand_Unique {}
-		, PlaceBuilding_OnWater_Unique {}
-		, PlaceBuilding_DirectionShape { nullptr }
-		, PlaceBuilding_DirectionPalette {}
-		, PlaceBuilding_Extra { false }
 		, CanBuildUnderUnits { false }
 		, AircraftDockingDirs {}
 		, FactoryPlant_AllowTypes {}
@@ -324,9 +308,6 @@ public:
 	};
 
 	static ExtContainer ExtMap;
-
-	static std::vector<CellStruct> BaseNormalCells;
-	static bool ContainersInit;
 
 	static BuildingTypeExt* Fetch(const BuildingTypeClass* pThis)
 	{

@@ -1040,8 +1040,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
-	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
-
 	this->AmphibiousEnter.Read(exINI, pSection, "AmphibiousEnter");
 	this->AmphibiousUnload.Read(exINI, pSection, "AmphibiousUnload");
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
@@ -1441,8 +1439,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	if (GeneralUtils::IsValidString(pThis->PaletteFile) && !pThis->Palette)
 		Debug::Log("[Developer warning] [%s] has Palette=%s set but no palette file was loaded (missing file or wrong filename). Missing palettes cause issues with lighting recalculations.\n", pArtSection, pThis->PaletteFile);
 
-	this->GreyCameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "GreyCameoPCX");
-
 	// Ares 0.2
 	this->CameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "CameoPCX");
 
@@ -1694,12 +1690,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
-		.Process(this->IsGreyCameoForCurrentPlayer)
-
-		.Process(this->UIDescription_Unbuildable)
-
 		.Process(this->CameoPCX)
-		.Process(this->GreyCameoPCX)
 
 		.Process(this->AmphibiousEnter)
 		.Process(this->AmphibiousUnload)

@@ -27,13 +27,6 @@ inline const wchar_t* PhobosToolTip::GetUIDescription(TechnoTypeExt* pData) cons
 		: nullptr;
 }
 
-inline const wchar_t* PhobosToolTip::GetUnbuildableUIDescription(TechnoTypeExt* pData) const
-{
-	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription_Unbuildable.Get().empty()
-		? pData->UIDescription_Unbuildable.Get().Text
-		: nullptr;
-}
-
 inline const wchar_t* PhobosToolTip::GetUIDescription(SWTypeExt* pData) const
 {
 	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription.Get().empty()
@@ -157,12 +150,6 @@ void PhobosToolTip::HelpText_Techno(TechnoTypeClass* pType)
 
 	if (auto const pDesc = this->GetUIDescription(pData))
 		oss << L"\n" << pDesc;
-
-	if (pData->IsGreyCameoForCurrentPlayer)
-	{
-		if (auto pExDesc = this->GetUnbuildableUIDescription(pData))
-			oss << L"\n" << pExDesc;
-	}
 
 	this->TextBuffer = oss.str();
 }

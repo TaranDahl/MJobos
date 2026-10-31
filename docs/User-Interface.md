@@ -548,20 +548,6 @@ In `RA2MD.INI`:
 ShowPowerPlantEnhancerRange=false  ; boolean
 ```
 
-### More display styles for placing grids
-
-- This feature is highly compatible with `ExtendedBuildingPlacing`. If set `PlacementGrid.Expand` to true, it will display the placing grids with `place.shp` and following corresponding frame number.
-  - `PlacementGrid.LandFrames` controls the placing grids frames on non-water cell. The three numbers respectively represent "Some technos that can command departure have occupied this area", "This cell is actually beyond the scope, but there is still at least one cell inside the entire region" and "Here is no problem, everything is OK".
-  - `PlacementGrid.WaterFrames` controls the placing grids frames on water cell. Each item corresponds to the same as above.
-
-In `rulesmd.ini`:
-```ini
-[AudioVisual]
-PlacementGrid.Expand=false       ; boolean
-PlacementGrid.LandFrames=1,0,0   ; integer, zero-based frame index - have technos, near boundary, is normal
-PlacementGrid.WaterFrames=1,0,0  ; integer, zero-based frame index - have technos, near boundary, is normal
-```
-
 ### Set sidebar tab by selecting factory
 
 - You can choose the corresponding type of factory to switch the sidebar tab by setting `SetTabBySelectingFactory=true`.
@@ -757,49 +743,6 @@ In `rulesmd.ini`:
 ```ini
 [AudioVisual]
 MissingCameo=XXICON.SHP  ; filename - including the .shp/.pcx extension
-```
-
-### Show cameo when unbuildable
-
-- A setting that allows you to preview information. This feature can be used as before, playing "new construction options" and clearing the specific production queue when prerequisites loss.
-  - `Cameo.AlwaysExist` controls whether you can see the cameo when the prerequisite have not satisfied (`TechnoLevel`, `Owner` & `Cameo.RequiredHouses`, `RequiredHouses`, `ForbiddenHouses`, `FactoryOwners`, `StolenTech`, `SecretLab` and `RequiredTheaters`, etc should be satisfied, if the `Cameo.OverrideTechnos` is met, it will override the `Owner` & `Cameo.RequiredHouses` conditions). Defaults to `[AudioVisual]` -> `Cameo.AlwaysExist`.
-    - `Cameo.RequiredHouses` determines whether to add a condition together with `Owner` for `Cameo.AlwaysExist` check when the value is not empty. Suitable for situations where cameo is no need to be modified in games.
-    - `Cameo.OverrideTechnos` determines whether the cameo can also be displayed when you own one of these technos when the value is not empty. Suitable for situations where cameo need to be dynamically modified in games.
-  - `ShowBuildingStatistics` controls whether the number of buildings of this type that you currently own needs to be displayed in the upper left corner of the building cameo (requires the cameo exist).
-    - `Cameo.ShouldCount` controls whether this type of building need to count if `ShowBuildingStatistics=true`. Default to check if building's own `BuildCat` is not `Combat` or `BuildLimit` is set.
-  - `Cameo.OverlayShapes` controls the drawn image file.
-    - `Cameo.OverlayFrames` controls which frame in `Cameo.OverlayShapes` to draw in different cameo states. When set to a negative number, it means that there is no need to draw under the corresponding condition.
-    - `Cameo.OverlayPalette` the color palette used when drawing `Cameo.OverlayShapes`.
-  - The `UIDescription.Unbuildable` is like `UIDescription`, but this only appearing when the techno is truly unbuildable.
-
-In `ra2md.ini`:
-```ini
-[Phobos]
-ShowBuildingStatistics=false     ; boolean
-```
-
-In `rulesmd.ini`:
-```ini
-[AudioVisual]
-Cameo.AlwaysExist=false          ; boolean
-Cameo.OverlayShapes=pips.shp     ; filename - including the .shp extension
-Cameo.OverlayFrames=             ; integer - cameo overlay frame indices
-Cameo.OverlayPalette=palette.pal ; filename - including the .pal extension
-
-[SOMETECHNO]                     ; TechnoType
-Cameo.AlwaysExist=               ; boolean
-Cameo.RequiredHouses=            ; list of house types
-Cameo.OverrideTechnos=           ; List of TechnoTypes
-UIDescription.Unbuildable=       ; CSF entry key
-
-[SOMEBUILDING]                   ; BuildingType
-Cameo.ShouldCount=               ; boolean
-```
-
-In `artmd.ini`:
-```ini
-[SOMETECHNO]                     ; TechnoType
-GreyCameoPCX=                    ; PCX filename - including the .pcx extension
 ```
 
 ### Harvester counter
