@@ -626,40 +626,6 @@ DEFINE_HOOK(0x6FDD7D, TechnoClass_FireAt_UpdateWeaponType, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK(0x6FE312, TechnoClass_FireAt_InitialDamage, 0x6)
-{
-	GET(TechnoClass* const, pThis, ESI);
-	GET(WeaponTypeClass* const, pWeapon, EBX);
-	GET(int, damage, EDI);
-
-	auto const pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
-
-	if (pWeaponExt->AddtionalDamage_GattlingValue)
-		damage += static_cast<int>(pThis->GattlingValue * pWeaponExt->AddtionalDamage_GattlingValue_Mult);
-
-	R->EDI(damage);
-	return 0;
-}
-
-DEFINE_HOOK(0x6FF8F1, TechnoClass_FireAt_AfterFire, 0x6)
-{
-	GET(TechnoClass* const, pThis, ESI);
-	GET(WeaponTypeClass* const, pWeapon, EBX);
-
-	if (pThis->GetTechnoType()->IsGattling)
-	{
-		auto const pWeaponExt = WeaponTypeExt::Fetch(pWeapon);
-
-		if (pWeaponExt->ResetGattlingValue)
-		{
-			pThis->CurrentGattlingStage = 0;
-			pThis->GattlingRateDown(0);
-		}
-	}
-
-	return 0;
-}
-
 DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_BeforeTruelyFire, 0x6)
 {
 	enum { SkipFiring = 0x6FDE03 };

@@ -17,9 +17,7 @@
 #include "DeselectObject5.h"
 
 #include <CCINIClass.h>
-#include <InputManagerClass.h>
 #include <MouseClass.h>
-#include <WWMouseClass.h>
 
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 #include <Misc/MessageColumn.h>
@@ -102,11 +100,7 @@ DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
 
 static inline bool CheckSkipScrollSidebar()
 {
-	return !Phobos::Config::ScrollSidebarStripWhenHoldAlt && InputManagerClass::Instance->IsForceMoveKeyPressed()
-		|| !Phobos::Config::ScrollSidebarStripWhenHoldCtrl && InputManagerClass::Instance->IsForceFireKeyPressed()
-		|| !Phobos::Config::ScrollSidebarStripWhenHoldShift && InputManagerClass::Instance->IsForceSelectKeyPressed()
-		|| !Phobos::Config::ScrollSidebarStripInTactical && WWMouseClass::Instance->XY1.X < Make_Global<int>(0xB0CE30) // TacticalClass::view_bound.Width
-		|| MessageColumnClass::Instance.IsHovering();
+	return MessageColumnClass::Instance.IsHovering();
 }
 
 DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)

@@ -89,9 +89,6 @@ public:
 	Nullable<bool> KeepRange_AllowAI;
 	Nullable<bool> KeepRange_AllowPlayer;
 	Nullable<int> KeepRange_EarlyStopFrame;
-	Valueable<bool> ResetGattlingValue;
-	Valueable<bool> AddtionalDamage_GattlingValue;
-	Valueable<double> AddtionalDamage_GattlingValue_Mult;
 	Nullable<bool> KickOutPassengers;
 	Nullable<ColorStruct> Beam_Color;
 	Valueable<int> Beam_Duration;
@@ -187,9 +184,6 @@ public:
 		, KeepRange_AllowAI {}
 		, KeepRange_AllowPlayer {}
 		, KeepRange_EarlyStopFrame {}
-		, ResetGattlingValue { false }
-		, AddtionalDamage_GattlingValue { false }
-		, AddtionalDamage_GattlingValue_Mult { 1.0 }
 		, KickOutPassengers {}
 		, Beam_Color {}
 		, Beam_Duration { 15 }

@@ -185,9 +185,6 @@ void WeaponTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->KeepRange_AllowAI.Read(exINI, pSection, "KeepRange.AllowAI");
 	this->KeepRange_AllowPlayer.Read(exINI, pSection, "KeepRange.AllowPlayer");
 	this->KeepRange_EarlyStopFrame.Read(exINI, pSection, "KeepRange.EarlyStopFrame");
-	this->ResetGattlingValue.Read(exINI, pSection, "ResetGattlingValue");
-	this->AddtionalDamage_GattlingValue.Read(exINI, pSection, "AddtionalDamage.GattlingValue");
-	this->AddtionalDamage_GattlingValue_Mult.Read(exINI, pSection, "AddtionalDamage.GattlingValue.Mult");
 	this->KickOutPassengers.Read(exINI, pSection, "KickOutPassengers");
 	this->Beam_Color.Read(exINI, pSection, "Beam.Color");
 	this->Beam_Duration.Read(exINI, pSection, "Beam.Duration");
@@ -299,9 +296,6 @@ void WeaponTypeExt::Serialize(T& Stm)
 		.Process(this->KeepRange_AllowAI)
 		.Process(this->KeepRange_AllowPlayer)
 		.Process(this->KeepRange_EarlyStopFrame)
-		.Process(this->ResetGattlingValue)
-		.Process(this->AddtionalDamage_GattlingValue)
-		.Process(this->AddtionalDamage_GattlingValue_Mult)
 		.Process(this->KickOutPassengers)
 		.Process(this->Beam_Color)
 		.Process(this->Beam_Duration)
