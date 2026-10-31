@@ -64,88 +64,15 @@ DEFINE_HOOK(0x46954C, BulletClass_Logics_IsLocomotor_Bunker, 0x6)
 	return pTarget->BunkerLinkedItem ? CannotImbue : 0;
 }
 
-DEFINE_HOOK(0x469A69, BulletClass_Logics_DamageHouse, 0x6)
+DEFINE_HOOK(0x469A75, BulletClass_Logics_DamageHouse, 0x7)
 {
-	enum { SkipDamageArea = 0x469A88 };
-
 	GET(BulletClass*, pThis, ESI);
-	GET(TechnoClass*, pTechno, EAX);
-	GET(int, damage, EDX);
-	GET_BASE(CoordStruct*, coord, 0x8);
+	GET(HouseClass*, pHouse, ECX);
 
-	const auto pExt = BulletExt::Fetch(pThis);
-	const auto pHouse = pTechno ? pTechno->Owner : pExt->FirerHouse;
-	const auto pWH = pThis->WH;
-	const auto pWHExt = WarheadTypeExt::Fetch(pWH);
+	if (!pHouse)
+		R->ECX(BulletExt::Fetch(pThis)->FirerHouse);
 
-	do
-	{
-		if (pWHExt->Directional)
-		{
-			if (pThis->Type->Inviso)
-			{
-				const auto delta = Point2D { pThis->SourceCoords.X - pThis->TargetCoords.X, pThis->SourceCoords.Y - pThis->TargetCoords.Y };
-
-				if (delta.X != 0 || delta.Y != 0)
-				{
-					WarheadTypeExt::HitDirection = DirStruct(Math::atan2(static_cast<double>(delta.Y), static_cast<double>(delta.X))).GetValue<16>();
-					break;
-				}
-			}
-			else if (pThis->Velocity.X != 0.0 || pThis->Velocity.Y != 0.0)
-			{
-				WarheadTypeExt::HitDirection = DirStruct((-1) * Math::atan2(pThis->Velocity.Y, pThis->Velocity.X)).GetValue<16>();
-				break;
-			}
-		}
-
-		WarheadTypeExt::HitDirection = -1;
-	}
-	while (false);
-
-	if (pWHExt->NoCellSpread && damage)
-	{
-		DamageAreaResult result = DamageAreaResult::Missed;
-
-		if (const auto pObject = abstract_cast<ObjectClass*>(pThis->Target))
-		{
-			auto dist = coord->DistanceFrom(pObject->GetCoords());
-			const auto isBuilding = pObject->WhatAmI() == AbstractType::Building;
-
-			if (isBuilding)
-			{
-				const auto pBuildingType = static_cast<BuildingClass*>(pObject)->Type;
-				dist -= ((pBuildingType->GetFoundationHeight(false) + pBuildingType->GetFoundationWidth()) << 6);
-			}
-
-			if (dist <= pWHExt->NoCellSpread_SnapDistance.Get())
-			{
-				if (!(pObject->AbstractFlags & AbstractFlags::Techno))
-				{
-					result = DamageAreaResult::Hit;
-					pObject->ReceiveDamage(&damage, 0, pWH, pThis->Owner, false, false, pHouse);
-				}
-				else if (pObject->IsAlive && pObject->Health > 0 && pObject->IsOnMap && !pObject->InLimbo
-					&& (!isBuilding || !static_cast<BuildingClass*>(pObject)->Type->InvisibleInGame)
-					&& !(pObject == pThis->Owner && pObject->GetTechnoType()->DamageSelf && pWH != RulesClass::Instance->CrushWarhead))
-				{
-					result = (pObject->IsIronCurtained() && !static_cast<TechnoClass*>(pObject)->ForceShielded)
-						? DamageAreaResult::Nullified : DamageAreaResult::Hit;
-					pObject->ReceiveDamage(&damage, 0, pWH, pThis->Owner, false, false, pHouse);
-				}
-			}
-		}
-
-		R->EAX(result);
-	}
-	else
-	{
-		R->EAX(MapClass::Instance.DamageArea(*coord, damage, pTechno, pWH, true, pHouse));
-	}
-
-	WarheadTypeExt::HitDirection = -1;
-
-	return SkipDamageArea;
+	return 0;
 }
 
 #pragma region DetonateOnAllMapObjects

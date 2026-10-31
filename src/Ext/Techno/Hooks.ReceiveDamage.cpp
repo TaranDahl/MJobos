@@ -35,7 +35,6 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	const auto pExt = TechnoExt::Fetch(pThis);
 	const auto pTypeExt = pExt->TypeExtData;
 	const auto pType = pTypeExt->OwnerObject();
-
 	const auto pSourceHouse = pAttacker ? pAttacker->Owner : args->SourceHouse;
 	const auto pTargetHouse = pThis->Owner;
 
@@ -77,22 +76,6 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		if (pWHExt->DamageTargetHealthMultiplier)
 			multiplier += pWHExt->DamageTargetHealthMultiplier * pThis->GetHealthPercentage();
 
-		if (pTypeExt->DirectionalArmor.Get(RulesExt::Global()->DirectionalArmor) && pThis->WhatAmI() == AbstractType::Unit
-			&& WarheadTypeExt::HitDirection >= 0 && args->DistanceToEpicenter <= 64)
-		{
-			const int tarFacing = pThis->PrimaryFacing.Current().GetValue<16>();
-			const int angle = std::abs(WarheadTypeExt::HitDirection - tarFacing);
-			const int frontField = static_cast<int>(16384 * pTypeExt->DirectionalArmor_FrontField.Get(RulesExt::Global()->DirectionalArmor_FrontField));
-			const int backField = static_cast<int>(16384 * pTypeExt->DirectionalArmor_BackField.Get(RulesExt::Global()->DirectionalArmor_BackField));
-
-			if (angle >= (32768 - frontField) && angle <= (32768 + frontField))
-				multiplier *= pTypeExt->DirectionalArmor_FrontMultiplier.Get(RulesExt::Global()->DirectionalArmor_FrontMultiplier) * pWHExt->Directional_Multiplier;
-			else if ((angle < backField && angle >= 0) || (angle > (49152 + backField) && angle <= 65536))
-				multiplier *= pTypeExt->DirectionalArmor_BackMultiplier.Get(RulesExt::Global()->DirectionalArmor_BackMultiplier) * pWHExt->Directional_Multiplier;
-			else
-				multiplier *= pTypeExt->DirectionalArmor_SideMultiplier.Get(RulesExt::Global()->DirectionalArmor_SideMultiplier) * pWHExt->Directional_Multiplier;
-		}
-
 		if (multiplier != 1.0)
 		{
 			const auto sgnDamage = damage > 0 ? 1 : -1;
@@ -113,7 +96,11 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 			if (pHouseExt->CombatAlertTimer.HasTimeLeft() || pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious || pWHExt->Nonprovocative))
 				return;
-			else if (!pTypeExt->CombatAlert.Get(RulesExt::Global()->CombatAlert_Default.Get(!pType->Insignificant && !pType->Spawned)) || !pThis->IsInPlayfield)
+
+			const auto pTypeExt = pExt->TypeExtData;
+			const auto pType = pTypeExt->OwnerObject();
+
+			if (!pTypeExt->CombatAlert.Get(RulesExt::Global()->CombatAlert_Default.Get(!pType->Insignificant && !pType->Spawned)) || !pThis->IsInPlayfield)
 				return;
 
 			if (RulesExt::Global()->CombatAlert_IgnoreBuilding)
