@@ -286,11 +286,10 @@ void SWTypeExt::ApplySWNext(HouseClass* pHouse, const CellStruct& cell)
 	}
 }
 
-
 void SWTypeExt::ApplyTypeConversion(HouseClass* pHouse)
 {
-	for (const auto pTarget : TechnoClass::Array)
-		TypeConvertGroup::Convert(pTarget, this->Convert_Pairs, pHouse);
+	for (const auto pTargetFoot : FootClass::Array)
+		TypeConvertGroup::Convert(pTargetFoot, this->Convert_Pairs, pHouse);
 }
 
 void SWTypeExt::HandleEMPulseLaunch(SuperClass* pSW, const CellStruct& cell) const

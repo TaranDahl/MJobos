@@ -1967,7 +1967,10 @@ void TechnoExt::AmmoAutoConvertActions()
 	const int ammo = pThis->Ammo;
 
 	if ((min < 0 || ammo >= min) && (max < 0 || ammo <= max))
-		TechnoExt::ConvertToType(pThis, pTypeExt->Ammo_AutoConvertType);
+	{
+		if (const auto pFoot = abstract_cast<FootClass*, true>(pThis))
+			TechnoExt::ConvertToType(pFoot, pTypeExt->Ammo_AutoConvertType);
+	}
 }
 
 void TechnoExt::HealthAutoConvertActions()
@@ -1986,7 +1989,10 @@ void TechnoExt::HealthAutoConvertActions()
 	const auto pThis = this->OwnerObject();
 
 	if (TechnoExt::IsHealthInThreshold(pThis, min, max))
-		TechnoExt::ConvertToType(pThis, pTypeExt->Convert_Health);
+	{
+		if (const auto pFoot = abstract_cast<FootClass*, true>(pThis))
+			TechnoExt::ConvertToType(pFoot, pTypeExt->Convert_Health);
+	}
 }
 
 void TechnoExt::UpdateLastTargetCrd()

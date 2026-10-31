@@ -352,7 +352,9 @@ bool TechnoExt::AllowedTargetByZone(TechnoClass* pThis, TechnoClass* pTarget, Ta
 	return true;
 }
 
-bool ConvertToType_Foot(FootClass* pThis, TechnoTypeClass* pToType)
+// Feature for common usage : TechnoType conversion -- Trsdy
+// BTW, who said it was merely a Type pointer replacement and he could make a better one than Ares?
+bool TechnoExt::ConvertToType(FootClass* pThis, TechnoTypeClass* pToType)
 {
 	if (AresFunctions::ConvertTypeTo)
 	{
@@ -462,107 +464,6 @@ bool ConvertToType_Foot(FootClass* pThis, TechnoTypeClass* pToType)
 		pThis->Locomotor->Move_To(pThis->Location);
 
 	TechnoExt::Fetch(pThis)->UpdateTypeData(pToType);
-	return true;
-}
-
-// Feature for common usage : TechnoType conversion -- Trsdy
-// BTW, who said it was merely a Type pointer replacement and he could make a better one than Ares?
-bool TechnoExt::ConvertToType(TechnoClass* pThis, TechnoTypeClass* pToType)
-{
-	const auto pPrevType = pThis->GetTechnoType();
-
-	// Different types prohibited
-	if (pPrevType->WhatAmI() != pToType->WhatAmI())
-	{
-		Debug::Log("Incompatible types between %s and %s\n", pPrevType->get_ID(), pToType->get_ID());
-		return false;
-	}
-
-	if (const auto pFoot = abstract_cast<FootClass*, true>(pThis))
-		return ConvertToType_Foot(pFoot, pToType);
-
-	if (pPrevType->GapGenerator)
-		pThis->DestroyGap();
-
-	if (pToType->GapGenerator)
-	{
-		const auto temp = pPrevType->GapRadiusInCells;
-		pThis->GapRadius = pToType->GapRadiusInCells;
-		pPrevType->GapRadiusInCells = pToType->GapRadiusInCells;
-		pThis->CreateGap();
-		pPrevType->GapRadiusInCells = temp;
-	}
-
-	const auto pBuilding = static_cast<BuildingClass*>(pThis);
-	const auto pToBuildingType = static_cast<BuildingTypeClass*>(pToType);
-	const auto pPrevBuildingType = static_cast<BuildingTypeClass*>(pPrevType);
-
-	// Maybe buggy
-	for (int i = 0; i < 21; ++i)
-	{
-		if (const auto pAnim = pBuilding->Anims[i])
-			GameDelete(pAnim);
-	}
-
-	// Skip audio related
-
-	// Maybe buggy
-	pBuilding->SetLinkCount(std::max(pToBuildingType->NumberOfDocks, 1));
-
-	if (pToBuildingType->LoadBuildup())
-		pBuilding->HasBuildUp = true;
-	else
-		pBuilding->AI_Sellable = false;
-
-	// Skip SecretLab related
-
-	// Same as foot
-
-	const auto tempUsing = pThis->TemporalImUsing;
-
-	if (tempUsing && tempUsing->Target)
-		tempUsing->LetGo();
-
-	const auto pOwner = pThis->Owner;
-	pOwner->RemoveTracking(pThis);
-
-	// Maybe buggy
-	const auto coord = pBuilding->Location;
-
-	pBuilding->Limbo();
-	pBuilding->ActuallyPlacedOnMap = false;
-
-	pBuilding->Type = pToBuildingType;
-	TechnoExt::Fetch(pThis)->UpdateTypeData(pToType);
-
-	pThis->SetHealthPercentage(static_cast<double>(pThis->Health) / pPrevBuildingType->Strength);
-	pThis->EstimatedHealth = pThis->Health;
-
-	pThis->Ammo = Math::min(pThis->Ammo, pToType->Ammo);
-
-	pThis->SecondaryFacing.SetROT(pToType->ROT);
-	pThis->PrimaryFacing.SetROT(pToType->ROT);
-
-	if (pPrevBuildingType->Turret != pToBuildingType->Turret)
-		pThis->PrimaryFacing.SetCurrent(DirStruct(0));
-
-	pBuilding->unknown_coord_64C = CoordStruct::Empty;
-	pOwner->RecheckTechTree = true;
-
-	// ++Unsorted::ScenarioInit;
-
-	if (!pBuilding->Unlimbo(coord, DirType::North))
-	{
-		pBuilding->UnInit();
-
-		Debug::Log("Failed to place %s with new building type %s, its place has already been occupied.\n", pPrevType->get_ID(), pToType->get_ID());
-		return false;
-	}
-
-	// --Unsorted::ScenarioInit;
-
-	pBuilding->Place(false);
-	pOwner->AddTracking(pThis);
 	return true;
 }
 

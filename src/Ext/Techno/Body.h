@@ -271,7 +271,7 @@ public:
 	static CoordStruct PassengerKickOutLocation(TechnoClass* pThis, FootClass* pPassenger, int maxAttempts);
 	static bool AllowedTargetByZone(TechnoClass* pThis, TechnoClass* pTarget, TargetZoneScanType zoneScanType, WeaponTypeClass* pWeapon = nullptr, bool useZone = false, int zone = -1);
 	static void UpdateAttachedAnimLayers(TechnoClass* pThis);
-	static bool ConvertToType(TechnoClass* pThis, TechnoTypeClass* toType);
+	static bool ConvertToType(FootClass* pThis, TechnoTypeClass* toType);
 	static bool IsTypeImmune(TechnoClass* pThis, TechnoTypeClass* pType, TechnoClass* pSource);
 	static int GetTintColor(TechnoClass* pThis, bool invulnerability, bool airstrike, bool berserk);
 	static int GetCustomTintColor(TechnoClass* pThis);
@@ -295,12 +295,6 @@ public:
 	static bool EjectRandomly(FootClass* pEjectee, const CoordStruct& coords, int distance, bool select);
 	static bool EjectSurvivor(FootClass* pSurvivor, CoordStruct coords, bool select);
 	static bool __fastcall ApplyKillDriver(TechnoClass** pData, void*, HouseClass* pToHouse, TechnoClass* pKiller, bool resetVeterancy);
-
-	static void DrawExtraImage(TechnoClass* pThis, CellClass* pCell, const CoordStruct& coords, DirStruct dir = DirStruct(0));
-	static void DrawExtraImage(TechnoClass* pThis, const Point2D& location, const RectangleStruct& bounds, DirStruct dir = DirStruct(0), bool transparent = false, Sequence action = Sequence::Nothing, int tilt = -1);
-	static void DrawExtraImage(UnitClass* pThis, Point2D* pLocation, RectangleStruct* pBounds, DirStruct dir = DirStruct(0), bool transparent = false, int tilt = -1);
-	static void DrawExtraImage(InfantryClass* pThis, Point2D* pLocation, RectangleStruct* pBounds, DirStruct dir = DirStruct(0), bool transparent = false, Sequence action = Sequence::Nothing);
-	static void DrawExtraImage(AircraftClass* pThis, Point2D* pLocation, RectangleStruct* pBounds, DirStruct dir = DirStruct(0), bool transparent = false);
 
 	// WeaponHelpers.cpp
 	static int PickWeaponIndex(TechnoClass* pThis, TechnoClass* pTargetTechno, AbstractClass* pTarget, int weaponIndexOne, int weaponIndexTwo, bool allowFallback = true, bool allowAAFallback = true);
