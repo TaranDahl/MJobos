@@ -251,10 +251,6 @@ public:
 		Valueable<bool> StopPlanningOnEnter;
 		Valueable<bool> PlayerAutoRepair;
 		Valueable<bool> PlayerReturnFire_Smarter;
-		Valueable<bool> UseGlobalDeathWeaponDamage;
-		Valueable<bool> NonVehExplodeOnDestroy;
-		Valueable<bool> FireDeathWeaponOnCrushed;
-		Valueable<bool> CrushBuildingOnAnyCell;
 		Valueable<bool> AIAngerOnAlly;
 
 		Valueable<bool> JumpjetClimbPredictHeight;
@@ -346,9 +342,6 @@ public:
 		Valueable<bool> BuildingTypeSelectable;
 
 		Valueable<bool> AllyShareControl;
-
-		Valueable<bool> InTransportInfantryAmmoFix;
-
 
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
@@ -801,10 +794,6 @@ public:
 			, StopPlanningOnEnter { true }
 			, PlayerAutoRepair { false }
 			, PlayerReturnFire_Smarter { false }
-			, UseGlobalDeathWeaponDamage { false }
-			, NonVehExplodeOnDestroy { false }
-			, FireDeathWeaponOnCrushed { false }
-			, CrushBuildingOnAnyCell { false }
 			, AIAngerOnAlly { true }
 
 			, JumpjetClimbPredictHeight { false }
@@ -880,7 +869,6 @@ public:
 			, BuildingTypeSelectable { false }
 
 			, AllyShareControl { false }
-			, InTransportInfantryAmmoFix { false }
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 

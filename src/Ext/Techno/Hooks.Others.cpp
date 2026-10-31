@@ -62,67 +62,6 @@ DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint, 0
 
 #pragma endregion
 
-#pragma region CrushBuildingOnAnyCell
-
-namespace CrushBuildingOnAnyCell
-{
-	CellClass* pCell;
-}
-
-DEFINE_HOOK(0x741733, UnitClass_CrushCell_SetContext, 0x6)
-{
-	GET(CellClass*, pCell, ESI);
-
-	CrushBuildingOnAnyCell::pCell = pCell;
-
-	return 0;
-}
-
-DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
-{
-	GET(UnitClass*, pThis, EDI);
-
-	if (RulesExt::Global()->CrushBuildingOnAnyCell)
-	{
-		if (auto const pBuilding = CrushBuildingOnAnyCell::pCell->GetBuilding())
-		{
-			if (pBuilding->IsCrushable(pThis))
-			{
-				VocClass::PlayAt(pBuilding->Type->CrushSound, pThis->Location, 0);
-				pBuilding->Destroy();
-				pBuilding->RegisterDestruction(pThis);
-				pBuilding->Mark(MarkType::Up);
-				// pBuilding->Limbo(); // Vanilla do this. May be not necessary?
-				pBuilding->UnInit();
-
-				R->AL(true);
-			}
-		}
-	}
-
-	return 0;
-}
-
-#pragma endregion
-
-#pragma region UpdateReload
-
-DEFINE_HOOK(0x51BDCF, InfantryClass_Update_Reload, 0x7)
-{
-	enum { SkipGameCode = 0x51BDD6 };
-
-	GET(InfantryClass*, pThis, ESI);
-
-	R->EAX(pThis->InWhichLayer());
-
-	if (RulesExt::Global()->InTransportInfantryAmmoFix && AresHelper::CanUseAres && pThis->InLimbo && !TechnoTypeExt::Fetch(pThis->Type)->ReloadInTransport)
-		pThis->Reload();
-
-	return SkipGameCode;
-}
-
-#pragma endregion
-
 #pragma region HealingWeaponFix
 
 // Skip the hardcode of healing weapon auto target range.

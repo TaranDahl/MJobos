@@ -10,7 +10,7 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, HouseClass* pKiller)
 	if (!pThis)
 		return;
 
-	auto const pType = pThis->GetTechnoType(); // Redirect I/A/BClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+	auto const pType = pThis->Type;
 
 	if (pType->DestroyAnim.Count > 0)
 	{

@@ -301,11 +301,6 @@ public:
 	Nullable<bool> NoReload_UnderEMP;
 	Nullable<bool> NoReload_Temporal;
 
-	Nullable<bool> ExplodeOnDestroy;
-	Nullable<bool> FireDeathWeaponOnCrushed;
-
-
-
 	std::bitset<AdditionalAbilityCount> AdditionalVeteranAbilities;
 	std::bitset<AdditionalAbilityCount> AdditionalEliteAbilities;
 	Nullable<double> VeteranReload;
@@ -747,11 +742,6 @@ public:
 		, NoRearm_Temporal {}
 		, NoReload_UnderEMP {}
 		, NoReload_Temporal {}
-
-		, ExplodeOnDestroy {}
-		, FireDeathWeaponOnCrushed {}
-
-
 
 		, AdditionalVeteranAbilities {}
 		, AdditionalEliteAbilities {}
