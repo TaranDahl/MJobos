@@ -119,9 +119,6 @@ public:
 
 	Valueable<bool> Refinery_UseNormalActiveAnim;
 
-	Nullable<bool> AIBaseNormal;
-
-
 	ValueableVector<bool> HasPowerUpAnim;
 
 	Valueable<bool> UndeploysInto_Sellable;
@@ -252,7 +249,6 @@ public:
 		, BunkerStateUpdateDelay {}
 		, BuildingRepairedSound {}
 		, Refinery_UseNormalActiveAnim { false }
-		, AIBaseNormal {}
 		, HasPowerUpAnim {}
 		, UndeploysInto_Sellable { false }
 		, BuildingRadioLink_SyncOwner {}
@@ -351,7 +347,6 @@ public:
 	static std::pair<int, int> GetEnhancedPower(BuildingTypeClass* pBuilding, int output, HouseClass* pHouse, BuildingClass* pPowerPlant = nullptr);
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int GetUpgradesAmount(BuildingTypeClass const* const pBuilding, HouseClass const* const pHouse);
-	static void DrawAdjacentLines();
 	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
 	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
 };

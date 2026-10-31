@@ -26,12 +26,6 @@ TechnoExt::~TechnoExt()
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 
-	if (RulesExt::Global()->CheckExtraBaseNormal && pTypeExt->ExtraBaseNormal)
-	{
-		auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
-		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
-	}
-
 	if (whatAmI != AbstractType::AircraftType && whatAmI != AbstractType::BuildingType
 		&& pType->Ammo > 0 && pTypeExt->ReloadInTransport.Get(RulesExt::Global()->ReloadInTransport))
 	{

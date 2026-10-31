@@ -2542,26 +2542,6 @@ HeightShadowScaling.MinScale=0.0  ; floating point value
 ShadowSizeCharacteristicHeight=   ; integer, height in leptons
 ```
 
-### Check building adjacent by all technos
-
-- You can now set `CheckExtraBaseNormal` to true to use every technos to expand the construction scope of the base.
-  - `ExtraBaseNormal` controls whether our own buildings can be place around it like vanilla `BaseNormal` do.
-  - `ExtraBaseForAllyBuilding` controls whether ally buildings can be place around it like vanilla `EligibileForAllyBuilding` do.
-
-In `rulesmd.ini`:
-```ini
-[General]
-CheckExtraBaseNormal=false      ; boolean
-
-[SOMETECHNO]                    ; TechnoType
-ExtraBaseNormal=false           ; boolean
-ExtraBaseForAllyBuilding=false  ; boolean
-```
-
-```{note}
-- Do not assign this to too many technos.
-```
-
 ### Buildable-upon TechnoTypes
 
 - Now technos have `CanBeBuiltOn=true` can simply removed when building is placed on them.

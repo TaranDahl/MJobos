@@ -275,8 +275,6 @@ public:
 	Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
 	Valueable<bool> CanBeBuiltOn;
-	Valueable<bool> ExtraBaseNormal;
-	Valueable<bool> ExtraBaseForAllyBuilding;
 
 	bool IsGreyCameoForCurrentPlayer; // Not read from ini
 
@@ -712,8 +710,6 @@ public:
 		, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
 		, CanBeBuiltOn { false }
-		, ExtraBaseNormal { false }
-		, ExtraBaseForAllyBuilding { false }
 
 		, IsGreyCameoForCurrentPlayer { false }
 

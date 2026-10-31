@@ -241,106 +241,6 @@ bool BuildingTypeExt::CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseCla
 	return false;
 }
 
-void BuildingTypeExt::DrawAdjacentLines()
-{
-	const auto pType = abstract_cast<BuildingTypeClass*>(DisplayClass::Instance.CurrentBuildingType);
-
-	if (!pType)
-		return;
-
-	const auto adjacent = static_cast<short>(pType->Adjacent + 1);
-
-	if (adjacent <= 0)
-		return;
-
-	const auto foundation = CellStruct { pType->GetFoundationWidth(), pType->GetFoundationHeight(false) };
-
-	if (foundation == CellStruct::Empty)
-		return;
-
-	const auto topLeft = DisplayClass::Instance.CurrentFoundation_CenterCell + DisplayClass::Instance.CurrentFoundation_TopLeftOffset;
-	const auto min = CellStruct { static_cast<short>(topLeft.X - adjacent), static_cast<short>(topLeft.Y - adjacent) };
-	const auto max = CellStruct { static_cast<short>(topLeft.X + foundation.X + adjacent - 1), static_cast<short>(topLeft.Y + foundation.Y + adjacent - 1) };
-
-	auto rect = DSurface::Temp->GetRect();
-	rect.Height -= 32;
-
-	const auto offset = Unsorted::CurrentFrame % 15;
-	bool pattern[16] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
-
-	if (const auto pCell = MapClass::Instance.TryGetCellAt(min)) // Top
-	{
-		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
-		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
-		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
-
-		if (pair.second)
-		{
-			auto point = pair.first + Point2D { 0, -15 };
-			auto nextPoint = pair.first + Point2D { 29, -1 };
-			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
-
-			point = pair.first + Point2D { -1, -15 };
-			nextPoint = pair.first + Point2D { -30, -1 };
-			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
-		}
-	}
-
-	if (const auto pCell = MapClass::Instance.TryGetCellAt(CellStruct{ min.X, max.Y })) // Left
-	{
-		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
-		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
-		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
-
-		if (pair.second)
-		{
-			auto point = pair.first + Point2D { -30, 0 };
-			auto nextPoint = pair.first + Point2D { -1, 14 };
-			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
-
-			point = pair.first + Point2D { -30, -1 };
-			nextPoint = pair.first + Point2D { -1, -15 };
-			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
-		}
-	}
-
-	if (const auto pCell = MapClass::Instance.TryGetCellAt(max)) // Bottom
-	{
-		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
-		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
-		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
-
-		if (pair.second)
-		{
-			auto point = pair.first + Point2D { 0, 14 };
-			auto nextPoint = pair.first + Point2D { 29, 0 };
-			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
-
-			point = pair.first + Point2D { -1, 14 };
-			nextPoint = pair.first + Point2D { -30, 0 };
-			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
-		}
-	}
-
-	if (const auto pCell = MapClass::Instance.TryGetCellAt(CellStruct{ max.X, min.Y })) // Right
-	{
-		const auto height = 1 + pCell->GetFloorHeight(Point2D::Empty);
-		const auto coords = CellClass::Cell2Coord(pCell->MapCoords, height);
-		const auto pair = TacticalClass::Instance->CoordsToClient(coords);
-
-		if (pair.second)
-		{
-			auto point = pair.first + Point2D { 29, 0 };
-			auto nextPoint = pair.first + Point2D { 0, 14 };
-			DSurface::Composite->DrawDashed(&point, &nextPoint, COLOR_WHITE, offset, pattern);
-
-			point = pair.first + Point2D { 29, -1 };
-			nextPoint = pair.first + Point2D { 0, -15 };
-			DSurface::Composite->DrawDashed(&nextPoint, &point, COLOR_WHITE, offset, pattern);
-		}
-	}
-}
-
 void BuildingTypeExt::Initialize()
 {
 	TechnoTypeExt::Initialize();
@@ -457,7 +357,6 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->BunkerStateUpdateDelay.Read(exINI, pSection, "BunkerStateUpdateDelay");
 	this->BuildingRepairedSound.Read(exINI, pSection, "BuildingRepairedSound");
 	this->Refinery_UseStorage.Read(exINI, pSection, "Refinery.UseStorage");
-	this->AIBaseNormal.Read(exINI, pSection, "AIBaseNormal");
 	this->UndeploysInto_Sellable.Read(exINI, pSection, "UndeploysInto.Sellable");
 	this->BuildingRadioLink_SyncOwner.Read(exINI, pSection, "BuildingRadioLink.SyncOwner");
 	this->GuardRetryDelay.Read(exINI, pSection, "GuardRetryDelay");
@@ -684,7 +583,6 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->BunkerStateUpdateDelay)
 		.Process(this->BuildingRepairedSound)
 		.Process(this->Refinery_UseNormalActiveAnim)
-		.Process(this->AIBaseNormal)
 		.Process(this->HasPowerUpAnim)
 		.Process(this->UndeploysInto_Sellable)
 		.Process(this->BuildingRadioLink_SyncOwner)

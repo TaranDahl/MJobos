@@ -1041,8 +1041,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
-	this->ExtraBaseNormal.Read(exINI, pSection, "ExtraBaseNormal");
-	this->ExtraBaseForAllyBuilding.Read(exINI, pSection, "ExtraBaseForAllyBuilding");
 
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 
@@ -1699,8 +1697,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
 		.Process(this->CanBeBuiltOn)
-		.Process(this->ExtraBaseNormal)
-		.Process(this->ExtraBaseForAllyBuilding)
 
 		.Process(this->IsGreyCameoForCurrentPlayer)
 

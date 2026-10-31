@@ -106,7 +106,6 @@ public:
 		Nullable<bool> NoQueueUpToEnter_Buildings;
 		Nullable<bool> NoQueueUpToUnload_Buildings;
 
-		Valueable<bool> CheckExtraBaseNormal;
 		Valueable<SHPStruct*> Cameo_OverlayShapes;
 		ValueableVector<int> Cameo_OverlayFrames;
 		CustomPalette Cameo_OverlayPalette;
@@ -360,9 +359,6 @@ public:
 		int TintColorIronCurtain;
 		int TintColorForceShield;
 		int TintColorBerserk;
-
-		Valueable<int> AIAdjacentMax;
-		Nullable<int> AIAdjacentMax_Campaign;
 
 		NullableIdx<AnimTypeClass> Parasite_GrappleAnim;
 		Nullable<bool> Parasite_AllowWaterExit;
@@ -657,7 +653,6 @@ public:
 			, NoQueueUpToEnter_Buildings {}
 			, NoQueueUpToUnload_Buildings {}
 
-			, CheckExtraBaseNormal { false }
 			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
 			, Cameo_OverlayFrames {}
 			, Cameo_OverlayPalette {}
@@ -881,9 +876,6 @@ public:
 			, TintColorBerserk { 0 }
 
 			, AttackMove_IgnoreWeaponCheck { false }
-
-			, AIAdjacentMax { -1 }
-			, AIAdjacentMax_Campaign {}
 
 			, Parasite_GrappleAnim {}
 			, Parasite_AllowWaterExit {}

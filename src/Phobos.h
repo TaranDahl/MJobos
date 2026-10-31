@@ -100,7 +100,6 @@ public:
 		static size_t DefaultPlacingDirection;
 		static size_t CurrentPlacingDirection;
 		static bool ShowBuildingStatistics;
-		static bool DrawAdjacentBoundary;
 		static bool RealTimeTimers;
 		static bool RealTimeTimers_Adaptive;
 		static int CampaignDefaultGameSpeed;
