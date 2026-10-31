@@ -1167,9 +1167,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->AIDefendBase_Ignore.Read(exINI, pSection, "AIDefendBase.Ignore");
 
-	this->NoAutoFire_AI.Read(exINI, pSection, "NoAutoFire.AI");
-
-
 	this->TeamMember_ConsideredAs.Read(exINI, pSection, "TeamMember.ConsideredAs");
 
 	this->DrainMoneyFrameDelay.Read(exINI, pSection, "DrainMoneyFrameDelay");
@@ -1835,8 +1832,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->TeamMember_ConsideredAs)
 
 		.Process(this->AIDefendBase_Ignore)
-
-		.Process(this->NoAutoFire_AI)
 
 		.Process(this->AttackFriendlies)
 

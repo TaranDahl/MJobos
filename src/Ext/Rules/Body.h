@@ -340,8 +340,6 @@ public:
 		Valueable<bool> BuildingWaypoints;
 		Valueable<bool> BuildingTypeSelectable;
 
-		Valueable<bool> AllyShareControl;
-
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
 
@@ -864,7 +862,6 @@ public:
 			, BuildingWaypoints { false }
 			, BuildingTypeSelectable { false }
 
-			, AllyShareControl { false }
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 

@@ -68,17 +68,6 @@ DEFINE_HOOK(0x707ED0, TechnoClass_GetGuardRange_FixForIFV, 0x6)
 
 #pragma endregion
 
-#pragma region SharedControl
-
-DEFINE_HOOK(0x50B716, HouseClass_IsCurrentPlayer_SharedControl, 0x6)
-{
-	GET(HouseClass*, pThis, ECX);
-	R->EAX(RulesExt::Global()->AllyShareControl ? pThis->IsAlliedWith(HouseClass::CurrentPlayer) : pThis == HouseClass::CurrentPlayer);
-	return 0x50B723;
-}
-
-#pragma endregion
-
 #pragma region AIAdjacentMax
 
 DEFINE_HOOK_AGAIN(0x42EB6A, BaseClass_GetBaseNodeIndex_AIAdjacentMax, 0x8);
@@ -132,126 +121,6 @@ DEFINE_HOOK(0x42EBA2, BaseClass_GetBaseNodeIndex_AIAdjacentMax, 0x8)
 
 #pragma endregion
 
-#pragma region LoadGameTips
-
-static inline void LoadTips(INI_EX exINI, const char* pSection, DynamicVectorClass<CSFText>& dest)
-{
-    char tempBuffer[32];
-    for (size_t i = 0; i < 1024; ++i)
-    {
-        Valueable<CSFText> tip;
-        _snprintf_s(tempBuffer, sizeof(tempBuffer), "Tip%d", i);
-        tip.Read(exINI, pSection, tempBuffer);
-
-        if (!tip.Get())
-            return;
-
-        dest.AddUnique(tip);
-    }
-}
-
-DEFINE_HOOK(0x68758D, INIClass_ReadScenario_AfterLoadProgressMgrDraw, 0x5)
-{
-	// Get the text to draw.
-	GET(CCINIClass*, pMapINI, EBP);
-
-	// The RulesExt has not been read yet. Thus we manually read the ini here.
-	const auto pRulesINI = CCINIClass::INI_Rules;
-	auto pText = L"";
-	DynamicVectorClass<CSFText> availableTexts;
-	const bool useMapTipsOnly = pMapINI->ReadBool(GameStrings::Basic, "UseMapTipsOnly", false);
-	INI_EX exMapINI(pMapINI);
-	LoadTips(exMapINI, GameStrings::Basic, availableTexts);
-
-	if (!useMapTipsOnly)
-	{
-		INI_EX exINI(pRulesINI);
-		LoadTips(exINI, GameStrings::General, availableTexts);
-
-		if (SessionClass::Instance.GameMode != GameMode::Campaign)
-		{
-			const int countryIdx = NodeNameType::Array[0]->Country;
-
-			if (countryIdx >= 0 && countryIdx < HouseTypeClass::Array.Count)
-			{
-				const auto pCountryName = HouseTypeClass::Array.GetItem(countryIdx)->ID;
-				LoadTips(exINI, pCountryName, availableTexts);
-			}
-		}
-	}
-
-	if (availableTexts.Count <= 0)
-		return 0;
-
-	srand(static_cast<unsigned int>(time(NULL)));
-	pText = availableTexts.GetItem(rand() % availableTexts.Count).Text;
-
-	// Calculate the rect.
-	constexpr int assumedTextHeight = 15;
-	constexpr int gapToBorder = 8;
-	constexpr int gapToAnotherLine = 5;
-	const int tipBarWidth = pRulesINI->ReadInteger(GameStrings::General, "TipBarWidth", 700);
-	const bool tipBarTwoLines = pRulesINI->ReadBool(GameStrings::General, "TipBarTwoLines", false);
-	const int width = tipBarWidth;
-	const int height = tipBarTwoLines ? (assumedTextHeight * 2 + gapToBorder * 2 + gapToAnotherLine) : (assumedTextHeight + gapToBorder * 2);
-	const auto barRect = LoadProgressManager::Instance->LoadBarSHPRect;
-	const int x = barRect.X + (barRect.Width - width) / 2;
-	const int y = barRect.Y + barRect.Height - height - 5;
-	auto rect = RectangleStruct { x, y, width, height };
-
-	// Draw background.
-	const auto pSurface = LoadProgressManager::Instance->ProgressSurface;
-	pSurface->FillRect(&rect, COLOR_BLACK);
-	pSurface->DrawRect(&rect, COLOR_WHITE);
-
-	// Draw the text.
-	constexpr TextPrintType printType = TextPrintType::Center | TextPrintType::Point8;
-
-	if (tipBarTwoLines)
-	{
-		// Split text at first newline.
-		// Only support one or two lines.
-		const wchar_t* pFirstPart = pText;
-		const wchar_t* pSecondPart = nullptr;
-		std::unique_ptr<wchar_t[]> pFirstBuffer;
-
-		if (const wchar_t* pNewline = wcschr(pText, L'\n'))
-		{
-			// Create temporary buffer for first part
-			size_t firstLen = pNewline - pText;
-			pFirstBuffer = std::make_unique<wchar_t[]>(firstLen + 1);
-			wcsncpy(pFirstBuffer.get(), pText, firstLen);
-			pFirstBuffer[firstLen] = L'\0';
-
-			pFirstPart = pFirstBuffer.get();
-			pSecondPart = pNewline + 1;
-		}
-
-		if (pSecondPart)
-		{
-			auto location = Point2D { rect.Width / 2, gapToBorder };
-			pSurface->DrawTextA(pFirstPart, &rect, &location, COLOR_WHITE, 0, printType);
-			location = Point2D { rect.Width / 2, gapToBorder + assumedTextHeight + gapToAnotherLine };
-			pSurface->DrawTextA(pSecondPart, &rect, &location, COLOR_WHITE, 0, printType);
-		}
-		else
-		{
-			const int gapToBorderOneLine = (height - assumedTextHeight) / 2;
-			auto location = Point2D { rect.Width / 2, gapToBorderOneLine };
-			pSurface->DrawTextA(pText, &rect, &location, COLOR_WHITE, 0, printType);
-		}
-	}
-	else
-	{
-		auto location = Point2D { rect.Width / 2, gapToBorder };
-		pSurface->DrawTextA(pText, &rect, &location, COLOR_WHITE, 0, printType);
-	}
-
-	return 0;
-}
-
-#pragma endregion
-
 #pragma region AIProtectBase
 
 DEFINE_HOOK(0x70821F, TechnoClass_BaseIsAttacked_Ignore1, 0x6)
@@ -284,16 +153,6 @@ DEFINE_HOOK(0x708455, TechnoClass_BaseIsAttacked_Ignore2, 0x6)
 		return SkipDefend;
 
 	return pTeam ? SkipDefend : CheckDefend;
-}
-
-#pragma endregion
-
-#pragma region NoAutoFire
-
-DEFINE_HOOK(0x6F8E44, TechnoClass_SelectAutoTarget_NoAutoFire, 0x7)
-{
-	GET(TechnoClass*, pThis, ESI);
-	return TechnoTypeExt::Fetch(pThis->GetTechnoType())->NoAutoFire_AI && !pThis->Owner->IsControlledByHuman() ? 0x6F8E38 : 0;
 }
 
 #pragma endregion

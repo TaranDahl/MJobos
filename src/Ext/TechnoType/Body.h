@@ -414,9 +414,6 @@ public:
 
 	Valueable<bool> AIDefendBase_Ignore;
 
-	Valueable<bool> NoAutoFire_AI;
-
-
 	Vector2D<bool> AttackFriendlies;
 
 	Nullable<int> DrainMoneyFrameDelay;
@@ -845,8 +842,6 @@ public:
 		, TeamMember_ConsideredAs {}
 
 		, AIDefendBase_Ignore { false }
-
-		, NoAutoFire_AI { false }
 
 		, AttackFriendlies { false,false }
 
