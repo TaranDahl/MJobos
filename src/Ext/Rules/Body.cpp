@@ -322,7 +322,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DefaultUnitSelectBox.Read(exINI, GameStrings::AudioVisual, "DefaultUnitSelectBox");
 
 	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
-	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 	this->PlayerAutoRepair.Read(exINI, GameStrings::General, "PlayerAutoRepair");
 	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
 	this->AIAngerOnAlly.Read(exINI, GameStrings::General, "AIAngerOnAlly");
@@ -446,9 +445,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->AdjacentWallDamage.Read(exINI, GameStrings::CombatDamage, "AdjacentWallDamage");
 
-
-
-	this->KeepAnimOnLimbo.Read(exINI, GameStrings::General, "KeepAnimOnLimbo");
 
 	this->WarheadAnimZAdjust.Read(exINI, GameStrings::AudioVisual, "WarheadAnimZAdjust");
 
@@ -944,7 +940,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->DropPodDefaultTrailer)
 		.Process(this->PodImage)
 		.Process(this->CylinderRangefinding)
-		.Process(this->StopPlanningOnEnter)
 		.Process(this->PlayerAutoRepair)
 		.Process(this->PlayerReturnFire_Smarter)
 		.Process(this->AIAngerOnAlly)
@@ -1036,7 +1031,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->Parasite_AllowWaterExit)
 		.Process(this->InfantryAutoDeploy)
 		.Process(this->AdjacentWallDamage)
-		.Process(this->KeepAnimOnLimbo)
 		.Process(this->WarheadAnimZAdjust)
 		.Process(this->IvanBombAttachToCenter)
 		.Process(this->IvanBomb_Visibility)

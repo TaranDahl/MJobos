@@ -248,7 +248,6 @@ public:
 		ValueableVector<AnimTypeClass*> Promote_VeteranAnimation;
 		ValueableVector<AnimTypeClass*> Promote_EliteAnimation;
 
-		Valueable<bool> StopPlanningOnEnter;
 		Valueable<bool> PlayerAutoRepair;
 		Valueable<bool> PlayerReturnFire_Smarter;
 		Valueable<bool> AIAngerOnAlly;
@@ -373,8 +372,6 @@ public:
 		Valueable<bool> InfantryAutoDeploy;
 
 		Valueable<int> AdjacentWallDamage;
-
-		Valueable<bool> KeepAnimOnLimbo;
 
 		Valueable<int> WarheadAnimZAdjust;
 
@@ -791,7 +788,6 @@ public:
 			, DropPodTrailer { }
 			, DropPodDefaultTrailer { }
 			, PodImage { }
-			, StopPlanningOnEnter { true }
 			, PlayerAutoRepair { false }
 			, PlayerReturnFire_Smarter { false }
 			, AIAngerOnAlly { true }
@@ -896,8 +892,6 @@ public:
 			, Parasite_AllowWaterExit {}
 			, InfantryAutoDeploy { false }
 			, AdjacentWallDamage { 200 }
-
-			, KeepAnimOnLimbo { false }
 
 			, WarheadAnimZAdjust { -15 }
 
