@@ -352,10 +352,6 @@ public:
 	ValueableVector<AircraftTypeClass*> Spawns_Queue;
 
 
-	Valueable<bool> Cloneable;
-	ValueableVector<BuildingTypeClass*> ClonedAt;
-	Valueable<TechnoTypeClass*> ClonedAs;
-
 	Nullable<Leptons> Spawner_RecycleRange;
 	ValueableVector<AnimTypeClass*> Spawner_RecycleAnim;
 	Valueable<CoordStruct> Spawner_RecycleCoord;
@@ -809,10 +805,6 @@ public:
 		, Spawner_RecycleCoord { {0,0,0} }
 		, Spawner_RecycleOnTurret {}
 
-
-		, Cloneable { true }
-		, ClonedAt { }
-		, ClonedAs { }
 
 		, DamagedSpeed { }
 

@@ -1222,9 +1222,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
-	this->Cloneable.Read(exINI, pSection, "Cloneable");
-	this->ClonedAt.Read(exINI, pSection, "ClonedAt");
-	this->ClonedAs.Read(exINI, pSection, "ClonedAs");
 
 	// Ares 0.9
 	this->InhibitorRange.Read(exINI, pSection, "InhibitorRange");
@@ -1790,10 +1787,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->Spawner_RecycleCoord)
 		.Process(this->Spawner_RecycleOnTurret)
 
-
-		.Process(this->Cloneable)
-		.Process(this->ClonedAt)
-		.Process(this->ClonedAs)
 
 		.Process(this->DamagedSpeed)
 

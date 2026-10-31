@@ -256,7 +256,6 @@ public:
 		Valueable<bool> FireDeathWeaponOnCrushed;
 		Valueable<bool> CrushBuildingOnAnyCell;
 		Valueable<bool> AIAngerOnAlly;
-		Valueable<bool> FollowTargetSelf;
 
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
@@ -351,8 +350,6 @@ public:
 		Valueable<bool> InTransportInfantryAmmoFix;
 
 
-		Valueable<bool> InvisoLatencyFix;
-
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
 
@@ -373,9 +370,6 @@ public:
 		int TintColorIronCurtain;
 		int TintColorForceShield;
 		int TintColorBerserk;
-
-		Valueable<bool> InvisoBlockageFix;
-
 
 		Valueable<int> AIAdjacentMax;
 		Nullable<int> AIAdjacentMax_Campaign;
@@ -812,7 +806,6 @@ public:
 			, FireDeathWeaponOnCrushed { false }
 			, CrushBuildingOnAnyCell { false }
 			, AIAngerOnAlly { true }
-			, FollowTargetSelf { false }
 
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
@@ -888,7 +881,6 @@ public:
 
 			, AllyShareControl { false }
 			, InTransportInfantryAmmoFix { false }
-			, InvisoLatencyFix { false }
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 
@@ -908,9 +900,6 @@ public:
 			, TintColorBerserk { 0 }
 
 			, AttackMove_IgnoreWeaponCheck { false }
-
-			, InvisoBlockageFix { false }
-
 
 			, AIAdjacentMax { -1 }
 			, AIAdjacentMax_Campaign {}
