@@ -2542,20 +2542,6 @@ HeightShadowScaling.MinScale=0.0  ; floating point value
 ShadowSizeCharacteristicHeight=   ; integer, height in leptons
 ```
 
-### Buildable-upon TechnoTypes
-
-- Now technos have `CanBeBuiltOn=true` can simply removed when building is placed on them.
-- Buildings like land mines can be placed in positions already occupied by infantry, vehicles, or aircraft after setting `CanBuildUnderUnits` to true.
-
-In `rulesmd.ini`:
-```ini
-[SOMETECHNO]         ; TechnoType
-CanBeBuiltOn=false   ; boolean
-
-[SOMEBUILDING]             ; BuildingType
-CanBuildUnderUnits=false   ; boolean
-```
-
 ## Terrains
 
 ### Animated TerrainTypes

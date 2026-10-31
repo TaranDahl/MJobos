@@ -274,8 +274,6 @@ public:
 	ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 	Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
-	Valueable<bool> CanBeBuiltOn;
-
 	bool IsGreyCameoForCurrentPlayer; // Not read from ini
 
 	Valueable<CSFText> UIDescription_Unbuildable;
@@ -708,8 +706,6 @@ public:
 		, BuildLimitGroup_ExtraLimit_Nums {}
 		, BuildLimitGroup_ExtraLimit_MaxCount {}
 		, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
-
-		, CanBeBuiltOn { false }
 
 		, IsGreyCameoForCurrentPlayer { false }
 

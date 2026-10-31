@@ -228,19 +228,6 @@ void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingType
 	}
 }
 
-// Check whether can call the occupiers leave
-bool BuildingTypeExt::CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse)
-{
-	if (!pOccupierHouse || !pBuildingHouse)
-		return false;
-	else if (pOccupierHouse->IsAlliedWith(pBuildingHouse))
-		return true;
-	else if (SessionClass::IsCampaign() && pBuildingHouse->IsControlledByHuman() && pOccupierHouse->IsControlledByHuman())
-		return true;
-
-	return false;
-}
-
 void BuildingTypeExt::Initialize()
 {
 	TechnoTypeExt::Initialize();

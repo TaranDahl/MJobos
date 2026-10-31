@@ -162,22 +162,6 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 	{
 		const auto pTypeExt = BuildingTypeExt::Fetch(pBuildingType);
 
-		if ((pBuildingType->BuildCat != BuildCat::Combat ? Phobos::Config::AutomaticPlacingBuilding : Phobos::Config::AutomaticPlacingCombatBuilding)
-			&& frameSize > 1 && frames[1] >= 0
-			&& !greyCameo)
-		{
-			DSurface::Sidebar->DrawSHP(
-				pRulesExt->Cameo_OverlayPalette.GetOrDefaultConvert(FileSystem::PALETTE_PAL),
-				pRulesExt->Cameo_OverlayShapes,
-				frames[1],
-				&position,
-				&boundingRect,
-				BlitterFlags(0x600),
-				0, 0,
-				ZGradient::Ground,
-				1000, 0, 0, 0, 0, 0);
-		}
-
 		const bool existShape = frameSize && frames[0] >= 0;
 		const bool statistics = Phobos::Config::ShowBuildingStatistics
 			&& pTypeExt->Cameo_ShouldCount.Get(pBuildingType->BuildCat != BuildCat::Combat || pBuildingType->BuildLimit != INT_MAX);

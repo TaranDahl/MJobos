@@ -66,7 +66,6 @@ public:
 	Valueable<bool> IsDestroyableObstacle;
 	Nullable<bool> Explodes_DuringBuildup;
 
-
 	Nullable<bool> Cameo_ShouldCount;
 	Valueable<int> LimboBuildID;
 	Valueable<BuildingTypeClass*> LaserFencePost_Fence;
@@ -347,7 +346,6 @@ public:
 	static std::pair<int, int> GetEnhancedPower(BuildingTypeClass* pBuilding, int output, HouseClass* pHouse, BuildingClass* pPowerPlant = nullptr);
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int GetUpgradesAmount(BuildingTypeClass const* const pBuilding, HouseClass const* const pHouse);
-	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
 	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
 };
 

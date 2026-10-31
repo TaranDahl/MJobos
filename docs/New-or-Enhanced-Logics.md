@@ -839,33 +839,6 @@ DefaultPlacingDirection=0       ; integer, 0-31
 - The replacement building and the original building must have the same `BuildCat`, and neither can have `LimboBuild` or `PlaceAnywhere`.
 ```
 
-### Automatic placing the building product
-
-- `AutomaticPlacingBuilding` controls the default enabled/disabled state that whether building can be automatically placed.
-- `AutoBuilding` controls whether this building can be automatically placed. Default to `[General]->AutoBuilding`
-  - `AutoBuilding.Gap` controls the gap of automatically placed buildings.
-  - For shortcut keys, see [User Interface -> Auto Building](User-Interface.md#Auto-Building).
-
-In `ra2md.ini`:
-```ini
-[Phobos]
-AutomaticPlacingBuilding=true    ; boolean
-```
-
-In `rulesmd.ini`:
-```ini
-[General]
-AutoBuilding=false              ; boolean
-
-[SOMEBUILDING]                  ; BuildingType
-AutoBuilding=                   ; boolean
-AutoBuilding.Gap=0              ; integer
-```
-
-```{note}
-- `AutoBuilding` not support buildings with `LaserFence=true` , `Gate=true` or `ToTile=true`.
-```
-
 ## Infantry
 
 ### Allow infantry to perform type conversion when deploying and undeploying

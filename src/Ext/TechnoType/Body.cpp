@@ -1040,8 +1040,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
-	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
-
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 
 	this->AmphibiousEnter.Read(exINI, pSection, "AmphibiousEnter");
@@ -1695,8 +1693,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_Nums)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
-
-		.Process(this->CanBeBuiltOn)
 
 		.Process(this->IsGreyCameoForCurrentPlayer)
 
