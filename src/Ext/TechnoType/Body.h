@@ -412,8 +412,6 @@ public:
 
 	ValueableVector<TechnoTypeClass*> TeamMember_ConsideredAs;
 
-	Valueable<bool> AIDefendBase_Ignore;
-
 	Vector2D<bool> AttackFriendlies;
 
 	Nullable<int> DrainMoneyFrameDelay;
@@ -840,8 +838,6 @@ public:
 		, VoiceEliteWeaponAttacks {}
 
 		, TeamMember_ConsideredAs {}
-
-		, AIDefendBase_Ignore { false }
 
 		, AttackFriendlies { false,false }
 
