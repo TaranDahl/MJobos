@@ -19,11 +19,9 @@ SWColumnClass::~SWColumnClass()
 
 bool SWColumnClass::Draw(bool forced)
 {
-	return false;
-}
+	if (!SWSidebarClass::IsEnabled())
+		return false;
 
-void SWColumnClass::DrawInfo() const
-{
 	const auto pSideExt = SideExt::Fetch(SideClass::Array.Items[ScenarioClass::Instance->PlayerSideIndex]);
 	const int cameoWidth = 60, cameoHeight = 48;
 	const int cameoBackgroundWidth = Phobos::UI::SuperWeaponSidebar_Interval + cameoWidth;
@@ -53,6 +51,11 @@ void SWColumnClass::DrawInfo() const
 		RectangleStruct drawRect { coordX, this->Y + this->Height - height, cameoBackgroundWidth, height };
 		PCX::Instance.BlitToSurface(&drawRect, DSurface::Composite, pBottomPCX);
 	}
+
+	for (const auto button : this->Buttons)
+		button->Draw(true);
+
+	return true;
 }
 
 void SWColumnClass::OnMouseEnter()

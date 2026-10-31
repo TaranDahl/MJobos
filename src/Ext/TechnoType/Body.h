@@ -301,9 +301,6 @@ public:
 	Nullable<bool> NoReload_UnderEMP;
 	Nullable<bool> NoReload_Temporal;
 
-	Valueable<bool> KeepWarping;
-	Nullable<int> KeepWarping_Distance;
-
 	Nullable<bool> ExplodeOnDestroy;
 	Nullable<bool> FireDeathWeaponOnCrushed;
 
@@ -766,9 +763,6 @@ public:
 		, NoRearm_Temporal {}
 		, NoReload_UnderEMP {}
 		, NoReload_Temporal {}
-
-		, KeepWarping { false }
-		, KeepWarping_Distance {}
 
 		, ExplodeOnDestroy {}
 		, FireDeathWeaponOnCrushed {}

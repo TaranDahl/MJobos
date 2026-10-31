@@ -1062,9 +1062,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
 	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
 
-	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
-	this->KeepWarping_Distance.Read(exINI, pSection, "KeepWarping.Distance");
-
 	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 
@@ -1756,9 +1753,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->VeteranEmptyReload)
 		.Process(this->VeteranRange)
 		.Process(this->VeteranCritChance)
-
-		.Process(this->KeepWarping)
-		.Process(this->KeepWarping_Distance)
 
 		.Process(this->ExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)

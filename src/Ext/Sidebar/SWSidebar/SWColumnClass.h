@@ -18,7 +18,6 @@ public:
 	virtual void OnMouseLeave() override;
 	virtual bool Clicked(DWORD* pKey, GadgetFlag flags, int x, int y, KeyModifier modifier) override;
 
-	void DrawInfo() const;
 	bool AddButton(int superIdx);
 	bool RemoveButton(int superIdx);
 	void ClearButtons(bool remove = true);
