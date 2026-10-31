@@ -269,8 +269,6 @@ public:
 		Valueable<bool> StopPlanningOnEnter;
 		Valueable<bool> PlayerAutoRepair;
 		Valueable<bool> PlayerReturnFire_Smarter;
-		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
-		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
 		Valueable<bool> UseGlobalDeathWeaponDamage;
 		Valueable<bool> NonVehExplodeOnDestroy;
 		Valueable<bool> FireDeathWeaponOnCrushed;
@@ -854,8 +852,6 @@ public:
 			, StopPlanningOnEnter { true }
 			, PlayerAutoRepair { false }
 			, PlayerReturnFire_Smarter { false }
-			, EVA_WeCaptureABuilding {}
-			, EVA_OurBuildingIsCaptured {}
 			, UseGlobalDeathWeaponDamage { false }
 			, NonVehExplodeOnDestroy { false }
 			, FireDeathWeaponOnCrushed { false }

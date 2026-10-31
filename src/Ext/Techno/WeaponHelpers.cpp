@@ -48,30 +48,13 @@ int TechnoExt::PickWeaponIndex(TechnoClass* pThis, TechnoClass* pTargetTechno, A
 		}
 	}
 
-	bool secondIsAA = false;
-	bool secondIsAU = false;
-
-	if (pTargetTechno)
-	{
-		if (pTargetTechno->IsInAir())
-		{
-			if (pWeaponTwo->Projectile->AA)
-				secondIsAA = true;
-		}
-		else if (pTargetTechno->InWhichLayer() == Layer::Underground)
-		{
-			if (BulletTypeExt::Fetch(pWeaponTwo->Projectile)->AU)
-				secondIsAU = true;
-		}
-	}
-
+	const bool secondIsAA = pTargetTechno && pTargetTechno->IsInAir() && pWeaponTwo->Projectile->AA;
 	auto const pFirstExt = WeaponTypeExt::Fetch(pWeaponStructOne->WeaponType);
 	const bool skipPrimaryPicking = pFirstExt->SkipWeaponPicking;
 	const bool firstAllowedAE = skipPrimaryPicking || pFirstExt->HasRequiredAttachedEffects(pTargetTechno, pThis);
 
 	if (!allowFallback
 		&& (!allowAAFallback || !secondIsAA)
-		&& !secondIsAU
 		&& firstAllowedAE
 		&& !TechnoExt::CanFireNoAmmoWeapon(pThis, 1))
 	{

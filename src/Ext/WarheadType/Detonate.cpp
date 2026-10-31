@@ -508,19 +508,10 @@ void WarheadTypeExt::ApplyRemoveDisguise(TechnoClass* pTarget)
 
 HouseClass* WarheadTypeExt::ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget)
 {
-	if (this->RemoveMindControl_OnVictim)
+	if (const auto pController = pTarget->MindControlledBy)
 	{
-		if (const auto pController = pTarget->MindControlledBy)
-		{
-			CaptureManagerExt::FreeUnit(pController->CaptureManager, pTarget, this->RemoveMindControl_Silent.Get(RulesExt::Global()->RemoveMindControl_Silent));
-			pHouse = pTarget->Owner;
-		}
-	}
-
-	if (this->RemoveMindControl_OnController)
-	{
-		if (const auto pManager = pTarget->CaptureManager)
-			pManager->FreeAll();
+		CaptureManagerExt::FreeUnit(pController->CaptureManager, pTarget, this->RemoveMindControl_Silent.Get(RulesExt::Global()->RemoveMindControl_Silent));
+		return pTarget->Owner;
 	}
 
 	return pHouse;

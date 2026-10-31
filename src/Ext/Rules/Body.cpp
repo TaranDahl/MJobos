@@ -343,8 +343,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 	this->PlayerAutoRepair.Read(exINI, GameStrings::General, "PlayerAutoRepair");
 	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
-	this->EVA_WeCaptureABuilding.Read(exINI, GameStrings::AudioVisual, "EVA.WeCaptureABuilding");
-	this->EVA_OurBuildingIsCaptured.Read(exINI, GameStrings::AudioVisual, "EVA.OurBuildingIsCaptured");
 	this->UseGlobalDeathWeaponDamage.Read(exINI, GameStrings::CombatDamage, "UseGlobalDeathWeaponDamage");
 	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
@@ -1005,8 +1003,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->StopPlanningOnEnter)
 		.Process(this->PlayerAutoRepair)
 		.Process(this->PlayerReturnFire_Smarter)
-		.Process(this->EVA_WeCaptureABuilding)
-		.Process(this->EVA_OurBuildingIsCaptured)
 		.Process(this->UseGlobalDeathWeaponDamage)
 		.Process(this->NonVehExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
