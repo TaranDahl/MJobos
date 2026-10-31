@@ -38,7 +38,6 @@ public:
 	Nullable<int> AnimationLength;
 	PhobosFixedString<32u> PaletteFile;
 	DynamicVectorClass<ColorScheme*>* Palette; // Intentionally not serialized - rebuilt from the palette file on load.
-	Valueable<bool> IgnoredByMouse;
 
 	TerrainTypeExt(TerrainTypeClass* OwnerObject) : ObjectTypeExt(OwnerObject)
 		, SpawnsTiberium_Type { 0 }
@@ -57,7 +56,6 @@ public:
 		, AnimationLength {}
 		, PaletteFile {}
 		, Palette {}
-		, IgnoredByMouse { false }
 	{ }
 
 	virtual ~TerrainTypeExt() = default;

@@ -360,8 +360,6 @@ public:
 
 		Valueable<bool> InvisoLatencyFix;
 
-		Valueable<bool> WalkFrameFirst;
-
 		Valueable<double> ProneSpeed_Crawls;
 		Valueable<double> ProneSpeed_NoCrawls;
 
@@ -906,7 +904,6 @@ public:
 			, AllyShareControl { false }
 			, InTransportInfantryAmmoFix { false }
 			, InvisoLatencyFix { false }
-			, WalkFrameFirst { true }
 			, ProneSpeed_Crawls { 0.67 }
 			, ProneSpeed_NoCrawls { 1.5 }
 

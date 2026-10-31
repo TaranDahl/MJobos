@@ -418,8 +418,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->InvisoLatencyFix.Read(exINI, GameStrings::General, "InvisoLatencyFix");
 
-	this->WalkFrameFirst.Read(exINI, GameStrings::AudioVisual, "WalkFrameFirst");
-
 	this->UseRetintFix.Read(exINI, GameStrings::AudioVisual, "UseRetintFix");
 
 	this->ProneSpeed_Crawls.Read(exINI, GameStrings::General, "ProneSpeed.Crawls");
@@ -1051,7 +1049,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AllyShareControl)
 		.Process(this->InTransportInfantryAmmoFix)
 		.Process(this->InvisoLatencyFix)
-		.Process(this->WalkFrameFirst)
 		.Process(this->ProneSpeed_Crawls)
 		.Process(this->ProneSpeed_NoCrawls)
 		.Process(this->DamagedSpeed)

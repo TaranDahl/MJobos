@@ -98,8 +98,6 @@ void UnitTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	if (!this->Harvester_Counted.isset() && pThis->Harvester)
 		this->Harvester_Counted = true;
 
-	this->WalkFrameFirst.Read(exArtINI, pArtSection, "WalkFrameFirst");
-
 	// Multi-turret / multi-barrel position offsets
 	this->BarrelOverTurret.Read(exArtINI, pArtSection, "BarrelOverTurret");
 	this->BarrelOffset.Read(exArtINI, pArtSection, "BarrelOffset");
@@ -195,7 +193,6 @@ void UnitTypeExt::Serialize(T& Stm)
 		.Process(this->Deploy_NoTiberium)
 		.Process(this->HoverDrownable)
 		.Process(this->TurretShape)
-		.Process(this->WalkFrameFirst)
 		.Process(this->BarrelOverTurret)
 		.Process(this->BarrelOffset)
 		.Process(this->ExtraBarrelCount)

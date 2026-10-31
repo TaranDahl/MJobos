@@ -386,11 +386,6 @@ public:
 
 	std::vector<LaserTrailDataEntry> LaserTrailData;
 
-	Valueable<bool> IgnoredByMouse;
-	Nullable<bool> IgnoredByMouse_ToSelf;
-	Nullable<bool> IgnoredByMouse_ToAlly;
-	Nullable<bool> IgnoredByMouse_ToEnemy;
-
 	Valueable<bool> SuppressKillWeapons;
 	ValueableVector<WeaponTypeClass*> SuppressKillWeapons_Types;
 
@@ -828,11 +823,6 @@ public:
 		, Spawner_RecycleCoord { {0,0,0} }
 		, Spawner_RecycleOnTurret {}
 
-
-		, IgnoredByMouse { false }
-		, IgnoredByMouse_ToSelf { }
-		, IgnoredByMouse_ToAlly { }
-		, IgnoredByMouse_ToEnemy { }
 
 		, Cloneable { true }
 		, ClonedAt { }

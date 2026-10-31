@@ -532,54 +532,13 @@ DEFINE_PATCH(0x40F271, 0x00, 0x00, 0x00, 0x08); // 128M voxel cache
 
 DEFINE_HOOK(0x73B748, UnitClass_DrawVXL_ResetKeyForTurretUse, 0x7)
 {
-	enum { SkipGameCode = 0x73B79F };
-
 	REF_STACK(PhobosVoxelIndexKey, key, STACK_OFFSET(0x1C4, -0x1B0));
 
-	if (key.Base.Is_Valid_Key())
-	{
-		if (key.IsJumpjetKey())
-		{
-			key.Base.Invalidate();
-		}
-		else
-		{
-			GET(const UnitClass* const, pThis, EBP);
-			GET(const UnitTypeClass* const, pDrawType, EBX);
-			REF_STACK(int, turretFrame, STACK_OFFSET(0x1C4, -0x18C));
+	// Main body drawing completed, then enable accurate drawing of turrets and barrels
+	if (key.Base.Is_Valid_Key() && key.IsJumpjetKey())
+		key.Base.Invalidate();
 
-			const auto pDrawTypeExt = UnitTypeExt::Fetch(pDrawType);
-			if (*pDrawTypeExt->TurretOffset.GetEx() == CoordStruct::Empty && pDrawTypeExt->ExtraTurretCount <= 0 && pDrawTypeExt->ExtraBarrelCount <= 0)
-				key.Base.Value &= ~0x3FFu;
-			else
-				key.Base.Value &= ~0x1Fu;
-
-			if ((pThis->Type->TurretCount <= 0 || pThis->Type->IsGattling) && !pThis->Type->DisableVoxelCache)
-			{
-				key.Base.MinorVoxel.TurretWeaponIndex = pThis->SecondaryFacing.Current().GetFacing<32>();
-				key.Base.MinorVoxel.TurretFacing = 0;
-			}
-			else
-			{
-				key.Base.MinorVoxel.TurretWeaponIndex = 0;
-				key.Base.MinorVoxel.TurretFacing = pThis->SecondaryFacing.Current().GetFacing<32>();
-			}
-
-			if (!pDrawTypeExt->WalkFrameFirst.Get(RulesExt::Global()->WalkFrameFirst))
-			{
-				const auto pHva = pDrawType->TurretVoxel.HVA;
-				if (!pHva || pHva->FrameCount <= 1)
-					turretFrame = 0;
-				else if (pDrawType->MainVoxel.HVA->FrameCount > 1)
-					turretFrame = (pThis->TurretAnimFrame % pHva->FrameCount);
-			}
-
-			key.Base.MinorVoxel.TurretFrameIndex = (turretFrame & 0xFFu);
-		}
-	}
-
-	R->ESI(key.Base.Value);
-	return SkipGameCode;
+	return 0;
 }
 
 // Visual bugfix : Teleport loco vxls could not tilt

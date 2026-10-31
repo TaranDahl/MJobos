@@ -1138,11 +1138,6 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->Spawner_RecycleCoord.Read(exINI, pSection, "Spawner.RecycleCoord");
 	this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
 
-	this->IgnoredByMouse.Read(exINI, pSection, "IgnoredByMouse");
-	this->IgnoredByMouse_ToSelf.Read(exINI, pSection, "IgnoredByMouse.ToSelf");
-	this->IgnoredByMouse_ToAlly.Read(exINI, pSection, "IgnoredByMouse.ToAlly");
-	this->IgnoredByMouse_ToEnemy.Read(exINI, pSection, "IgnoredByMouse.ToEnemy");
-
 	this->DamagedSpeed.Read(exINI, pSection, "DamagedSpeed");
 
 	this->SuppressKillWeapons.Read(exINI, pSection, "SuppressKillWeapons");
@@ -1809,11 +1804,6 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->Spawner_RecycleCoord)
 		.Process(this->Spawner_RecycleOnTurret)
 
-
-		.Process(this->IgnoredByMouse)
-		.Process(this->IgnoredByMouse_ToSelf)
-		.Process(this->IgnoredByMouse_ToAlly)
-		.Process(this->IgnoredByMouse_ToEnemy)
 
 		.Process(this->Cloneable)
 		.Process(this->ClonedAt)

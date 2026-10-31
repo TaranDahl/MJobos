@@ -11,7 +11,6 @@ void OverlayTypeExt::Serialize(T& Stm)
 	Stm
 		.Process(this->ZAdjust)
 		.Process(this->PaletteFile)
-		.Process(this->IgnoredByMouse)
 		;
 }
 
@@ -25,8 +24,6 @@ void OverlayTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		return;
 
 	INI_EX exINI(pINI);
-
-	this->IgnoredByMouse.Read(exINI, pSection, "IgnoredByMouse");
 
 	auto pArtSection = pThis->ImageFile;
 	INI_EX exArtINI(&CCINIClass::INI_Art);
