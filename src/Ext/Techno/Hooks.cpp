@@ -863,6 +863,8 @@ DEFINE_HOOK(0x738687, UnitClass_PlayDestroyAnim_SetContext, 0x6)
 	return SkipGameCode;
 }
 
+DEFINE_HOOK_AGAIN(0x738822, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
+DEFINE_HOOK_AGAIN(0x7387C4, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
 DEFINE_HOOK(0x7386AC, UnitClass_PlayDestroyAnim_Generalize1, 0x6)
 {
 	R->ECX(PlayDestroyAnimGeneralize::pType);
