@@ -55,6 +55,8 @@ void RulesExt::LoadFromINIFile(RulesClass* pThis, CCINIClass* pINI)
 
 void RulesExt::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 {
+	TechnoTypeExt::LoadArmorTypeData(pINI);
+
 	DigitalDisplayTypeClass::LoadFromINIList(pINI);
 	SelectBoxTypeClass::LoadFromINIList(pINI);
 	RadTypeClass::LoadFromINIList(pINI);

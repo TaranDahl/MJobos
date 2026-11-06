@@ -13,6 +13,14 @@
 
 #include <Utilities/AresHelper.h>
 
+#include <algorithm>
+#include <cctype>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 namespace
 {
 	constexpr std::pair<const char*, AdditionalAbility> AbilityTokens[] = {
@@ -49,6 +57,123 @@ namespace
 				}
 			}
 		}
+	}
+
+	enum class ArmorAttributeFamily
+	{
+		Unclassified,
+		Light,
+		Armored
+	};
+
+	// Keep this order aligned with Ares ArmorType::AddDefaults().
+	constexpr const char* BaseArmorNames[] = {
+		"none", "flak", "plate", "light", "medium", "heavy",
+		"wood", "steel", "concrete", "special_1", "special_2"
+	};
+
+	struct AutoArmorData
+	{
+		std::vector<std::string> Names;
+		std::unordered_map<std::string, std::string> Parents;
+		std::vector<std::optional<ArmorAttributeFamily>> Families;
+	};
+
+	AutoArmorData AutoArmorTypes;
+
+	std::string NormalizeArmorName(const char* name)
+	{
+		if (!name)
+			return {};
+
+		std::string result(name);
+		std::transform(result.begin(), result.end(), result.begin(),
+			[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+		return result;
+	}
+
+	std::optional<ArmorAttributeFamily> GetBaseArmorFamily(const std::string& name)
+	{
+		if (name == "none" || name == "light" || name == "wood"
+			|| name == "special_1" || name == "special_2")
+		{
+			return ArmorAttributeFamily::Light;
+		}
+
+		if (name == "plate" || name == "heavy" || name == "concrete")
+			return ArmorAttributeFamily::Armored;
+
+		return std::nullopt;
+	}
+
+	void AddArmorName(const std::string& name)
+	{
+		if (name.empty())
+			return;
+
+		if (std::find(AutoArmorTypes.Names.begin(), AutoArmorTypes.Names.end(), name)
+			== AutoArmorTypes.Names.end())
+		{
+			AutoArmorTypes.Names.push_back(name);
+		}
+	}
+
+	std::optional<ArmorAttributeFamily> ResolveArmorFamily(const std::string& name)
+	{
+		std::unordered_set<std::string> visited;
+		std::string current = name;
+
+		while (!current.empty() && visited.insert(current).second)
+		{
+			if (auto family = GetBaseArmorFamily(current))
+				return family;
+
+			auto const it = AutoArmorTypes.Parents.find(current);
+
+			if (it == AutoArmorTypes.Parents.end())
+				break;
+
+			current = it->second;
+		}
+
+		return std::nullopt;
+	}
+
+	void AddAttribute(std::vector<int>& attributes, const char* name)
+	{
+		const int index = AttributeClass::GetOrCreateIndex(name);
+
+		if (index >= 0 && std::find(attributes.begin(), attributes.end(), index) == attributes.end())
+			attributes.push_back(index);
+	}
+
+	void ApplyAutomaticAttributes(TechnoTypeExt& ext)
+	{
+		if (!ext.Attributes.empty())
+			return;
+
+		auto const pType = ext.OwnerObject();
+		const size_t armorIndex = static_cast<size_t>(pType->Armor);
+
+		if (armorIndex < AutoArmorTypes.Families.size())
+		{
+			switch (AutoArmorTypes.Families[armorIndex].value_or(ArmorAttributeFamily::Unclassified))
+			{
+			case ArmorAttributeFamily::Light:
+				AddAttribute(ext.Attributes, "Light");
+				break;
+			case ArmorAttributeFamily::Armored:
+				AddAttribute(ext.Attributes, "Armored");
+				break;
+			default:
+				break;
+			}
+		}
+
+		AddAttribute(ext.Attributes,
+			pType->WhatAmI() == AbstractType::InfantryType ? "Biological" : "Mechanical");
+
+		std::sort(ext.Attributes.begin(), ext.Attributes.end());
 	}
 }
 
@@ -1462,6 +1587,44 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	// VoiceIFVRepair from Ares 0.2
 	this->VoiceIFVRepair.Read(exINI, pSection, "VoiceIFVRepair");
 	this->ParseVoiceWeaponAttacks(exINI, pSection, this->VoiceWeaponAttacks, this->VoiceEliteWeaponAttacks);
+
+	ApplyAutomaticAttributes(*this);
+}
+
+void TechnoTypeExt::LoadArmorTypeData(CCINIClass* const pINI)
+{
+	// Mirror Ares' armor registry so custom armor can be traced back to a base family.
+	AutoArmorTypes = {};
+
+	for (auto const name : BaseArmorNames)
+		AddArmorName(name);
+
+	if (pINI)
+	{
+		constexpr const char* section = "ArmorTypes";
+		const int count = pINI->GetKeyCount(section);
+
+		for (int i = 0; i < count; ++i)
+		{
+			auto const key = pINI->GetKeyName(section, i);
+
+			if (!key)
+				continue;
+
+			const auto name = NormalizeArmorName(key);
+			AddArmorName(name);
+
+			char buffer[0x40] {};
+
+			if (pINI->ReadString(section, key, "", buffer) > 0)
+				AutoArmorTypes.Parents[name] = NormalizeArmorName(buffer);
+		}
+	}
+
+	AutoArmorTypes.Families.resize(AutoArmorTypes.Names.size());
+
+	for (size_t i = 0; i < AutoArmorTypes.Names.size(); ++i)
+		AutoArmorTypes.Families[i] = ResolveArmorFamily(AutoArmorTypes.Names[i]);
 }
 
 template <typename T>

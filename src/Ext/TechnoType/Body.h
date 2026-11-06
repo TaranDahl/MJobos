@@ -965,6 +965,7 @@ public:
 
 	static void ApplyTurretOffset(TechnoTypeClass* pType, Matrix3D* mtx, double factor = 1.0, int turIdx = -1);
 	static TechnoTypeClass* GetTechnoType(ObjectTypeClass* pType);
+	static void LoadArmorTypeData(CCINIClass* pINI);
 
 	static TechnoClass* CreateUnit(CreateUnitTypeClass* pCreateUnit, DirType facing, DirType* secondaryFacing,
 	CoordStruct location, HouseClass* pOwner, TechnoClass* pInvoker, HouseClass* pInvokerHouse);

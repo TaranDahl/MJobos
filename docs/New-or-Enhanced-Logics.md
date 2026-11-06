@@ -609,6 +609,13 @@ When using `Convert` or `(Un)DeploysInto` to change TechnoType, shield interacti
 - Types can be tagged with arbitrary named labels (**attributes**) using the numbered `AttributeList` tags. Attribute names are case-insensitive and are registered into a global registry shared by all types.
   - `AttributeListN` (where N is an integer starting from 0, without gaps) adds attributes to a type. Multiple numbered entries are combined, and each entry accepts a comma-separated list of attribute names.
   - Attributes can be queried from external code through the [Interoperability](Interoperability.md) APIs (available since Interop API 1.3.0).
+  - TechnoTypes without any manually assigned attributes receive automatic attributes:
+    - `None`, `Light`, `Wood`, `Special_1` and `Special_2` armor receives `Light`.
+    - `Plate`, `Heavy` and `Concrete` armor receives `Armored`.
+    - Other armor types receive no automatic armor attribute.
+    - `InfantryType` receives `Biological`; all other TechnoTypes receive `Mechanical`.
+    - Custom Ares armor types inherit automatic armor attributes from their `[ArmorTypes]` parent. This includes nested custom armor inheritance.
+    - Assigning any `AttributeListN` entry disables all automatic attributes for that TechnoType.
 
 In `rulesmd.ini`:
 ```ini
